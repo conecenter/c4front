@@ -10,8 +10,8 @@ export default {
     },
 */
 
-const host = process.env.C4HOST
-console.log("host ("+host+")")
+//const host = process.env.C4HOST
+//console.log("host ("+host+")")
 export default {
     jsx: 'react',
     alias: {
