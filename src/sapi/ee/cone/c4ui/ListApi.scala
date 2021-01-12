@@ -98,6 +98,12 @@ trait PivotGroupSlice extends PivotSlice {
     openedChildren: ChildPairList[OfDiv] = Nil,
     optButtons: ElList[FilterButton] = Nil,
   ): FilterButton
+  @c4el("InputLabel") def inputWrapper(
+    key: String,
+    caption: String,
+    wrapperNeeded: Boolean = true,
+    children: ChildPairList[OfDiv] = Nil,
+  ): ToChildPair
   @c4val("lt") def leftFilterButtonArea: FilterButtonArea
   @c4val("rt") def rightFilterButtonArea: FilterButtonArea
   @c4el("FilterItem") def filterItem(

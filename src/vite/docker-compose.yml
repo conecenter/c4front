@@ -4,16 +4,9 @@ services:
     image: node:14.3.0
     volumes:
     - ../../src:/app/src
-#    - ../../build:/app/build
     working_dir: /app
     ports:
     - "127.0.0.10:3000:3000"
-    restart: on-failure
-  haproxy:
-    image: haproxy:1.7
-    volumes:
-    - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
-    ports:
-    - "127.0.0.10:80:1080"
+    - "127.0.0.10:80:3000"
     restart: on-failure
 version: '2'

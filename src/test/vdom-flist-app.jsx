@@ -1,11 +1,13 @@
 
 import ReactDOM from "react-dom"
 import React from "react"
-const { createElement: $, useState, useMemo, cloneElement, useCallback, useEffect } = React
+const { createElement: $, useState, useMemo, cloneElement, useCallback, useEffect, useContext } = React
 
 import { FilterArea, FilterButtonExpander, FilterButtonPlace, PopupManager } from "../main/vdom-filter.js"
 import { GridRoot, GridCell, Highlighter } from "../main/vdom-list.js"
-import { createSyncProviders } from "../main/vdom-hooks.js"
+import { createSyncProviders, NoCaptionContext } from "../main/vdom-hooks.js"
+import "./style.scss"
+import {InputLabel} from "../extra/InputWrapper.jsx"
 
 const sumWidth = arr => arr.reduce((a,col)=>a+col.width.max,0)
 const getMaxTableWidthWithout = (cols=[], hidedColNames=[]) => {
@@ -81,27 +83,21 @@ function Text({ value, className }) {
     return <span className={`${className ? className : ''} text center`}>{value}</span>
 }
 
-function InputElement({ value }) {
-    return (
-        <div className="inputLike">
-            <label>{value}</label>
-            <div className="inputBox">
-                <div className="inputSubbox">
-                    <input type="text" />
-                </div>
-            </div>
-        </div>
-    )
-}
-
 function ButtonElement({ caption, BGcolor, onClick }) {
     return (
         <button className={`${BGcolor}Color`} onClick={onClick}>{caption}</button>
     )
 }
 
-function ExampleFilterItem({value}){
-    return $(InputElement, {value})
+function ExampleTextInput(inputKey){
+    return $("input", {type:"text", key: inputKey})
+}
+
+function ExampleFilterItem({value, id}){
+    const inputKey = value.toString().replaceAll(" ", "")+id
+    const noCaption = useContext(NoCaptionContext)
+    const input = ExampleTextInput(inputKey)
+    return $(InputLabel,{caption:value, labelNeeded: !noCaption, isExpanded: noCaption, children: input, wrapperNeeded: true})
 }
 
 function ImageElement({src,className}){
@@ -127,20 +123,21 @@ function VdomListElement({maxFilterAreaWidth, setMaxFilterAreaWidth, enableDrag,
             exCol("c1", 1, 5, 10, "Project"),
             exCol("c2", 2, 5, 10, "Stock"),
             exCol("c3", 2, 15, 15, "Cargo"),
-            exCol("input", 5, 7, 10, "From"),
             exCol("c5", 3, 5, 10, "Out"),
+            exCol("input", 2, 7, 10, "From"),
             exCol("c6", 2, 15, 30, "Remains"),
             exCol("c7", 2, 5, 10, "In"),
             exCol("c8", 1, 5, 10, "Container"),
-            exCol("c9", 1, 5, 30, "Marking"),
+            exCol("c9", 1, 7, 30, "Marking"),
             exCol("c10", 1, 7, 10, "Location"),
             enableDrag && exCol("drag", 0, 1.5, 3.5),
         ].filter(Boolean))
     }, [setCols, enableDrag])
 
     const exCell = rowKey => ({colKey, caption}) => {
-        return colKey==="drag" && rowKey === "drag" ? null : $(GridCell, {
-            key: ":" + rowKey + colKey, rowKey, colKey,
+        const key = ":" + rowKey + colKey
+        return colKey==="drag" && rowKey === "drag" ? $("div", {className: "emptyCell", key: "emptyCell"}) : $(GridCell, {
+            key, rowKey, colKey,
             ...(rowKey === "head" ? { className: "tableHeadContainer headerColor" } : {}),
             ...(rowKey === "drag" ? { dragHandle: "x", style: { userSelect: "none", cursor: "pointer" } } : {}),
             ...(colKey === "drag" ? { dragHandle: "y", style: { userSelect: "none", cursor: "pointer" } } : {}),
@@ -153,7 +150,7 @@ function VdomListElement({maxFilterAreaWidth, setMaxFilterAreaWidth, enableDrag,
                 rowKey === "drag" ? enableDrag && getColDragElement() :
                 colKey === "expand" ? getExpanderElement() :
                 colKey === "drag" ? enableDrag && getRowDragElement() :
-                colKey === "input" ? InputCell() :
+                colKey === "input" ? $(ExampleInputLabel,{caption, inputKey: key}) :
                 colKey === "icon" ? "I" :
                 colKey === "c0" ? ByCell() :
                 colKey === "c1" ? ProjectCell() :
@@ -161,7 +158,7 @@ function VdomListElement({maxFilterAreaWidth, setMaxFilterAreaWidth, enableDrag,
                 colKey === "c8" ? getCargoIconCell() :
                 colKey === "c9" ? NumMarkCell() :
                 colKey === "c10" ? LocationCell() :
-                $(Text, {value:colKey+rowKey, key:"defaultCell"})
+                /*$(Text, {value:colKey+rowKey, key:"defaultCell"})*/ null
             )
         })
     }
@@ -169,29 +166,23 @@ function VdomListElement({maxFilterAreaWidth, setMaxFilterAreaWidth, enableDrag,
     function getExpanderElement() {
         return $(
             "div",
-            { className: "textLineSize absolutelyCentered", key: "expanderElem" },
+            { className: "textLineSize absolutelyCentered expanderElementContainer", key: "expanderElem" },
             $(ImageElement, { color: "#90929F", className: "expanderElement", src: 'vdom-list-downarrowrow.svg' })
         )
     }
 
     function getColDragElement() {
-        return $(
-            "div",
-            { className: "textLineSize absolutelyCentered", key: "dragElem" },
-            $(ImageElement, { color: "adaptive", className: "dragElement", src: 'vdom-list-drag.svg' })
-        )
+        return $(ImageElement, { color: "adaptive", className: "dragElement", src: 'vdom-list-drag.svg' })
     }
 
     function getRowDragElement() {
-        return $(
-            "div",
-            { className: "textLineSize absolutelyCentered", key: "dragElem" },
-            $(ImageElement, { color: "adaptive", className: "dragElement", src: 'vdom-list-drag.svg' })
-        )
+        return $(ImageElement, { color: "adaptive", className: "dragElement", src: 'vdom-list-drag.svg' })
     }
 
-    function InputCell(){
-        return $(InputElement,{value:"", key:"tableInput"})
+    function ExampleInputLabel({caption, inputKey}){
+        const noCaption = useContext(NoCaptionContext)
+        const input = ExampleTextInput(inputKey)
+        return $(InputLabel,{caption, labelNeeded: !noCaption, isExpanded: !noCaption, children: input, wrapperNeeded: true})
     }
 
     function getCargoIconCell() {
@@ -205,12 +196,12 @@ function VdomListElement({maxFilterAreaWidth, setMaxFilterAreaWidth, enableDrag,
         setMaxFilterAreaWidth(getMaxTableWidthWithout(cols,["expand"]))
     }, [maxFilterAreaWidth, cols])
 
-    useEffect(() => {
+    /*useEffect(() => {
         const hidedColNames = []
         !enableDrag && hidedColNames.push("drag")
         /*!hasHiddenCols && hidedColNames.push("expand")*/
-        setMaxFilterAreaWidth(getMaxTableWidthWithout(cols, hidedColNames))
-    }, [enableDrag, maxFilterAreaWidth])
+        /*setMaxFilterAreaWidth(getMaxTableWidthWithout(cols, hidedColNames))
+    }, [enableDrag, maxFilterAreaWidth])*/
 
     const listEl = $(GridRoot, {
         key: "list",
@@ -222,9 +213,6 @@ function VdomListElement({maxFilterAreaWidth, setMaxFilterAreaWidth, enableDrag,
         ...rowKeys.flatMap(rowKey => cols.map(exCell(rowKey)).filter(Boolean)),
         ],
         rows: rowKeys.map(rowKey=>({rowKey})),
-        setMaxFilterAreaWidth,
-        maxFilterAreaWidth,
-        enableDrag
     })
     const children = [
         listEl,
@@ -280,16 +268,16 @@ function App() {
         setState(was => ({ ...was, enableDrag: !enableDrag }))
     }, [cols,setCols,enableDrag])
 
-    return $(PopupManager, {},
-        $(FilterArea, {
+    return  $(PopupManager, {}, $(NoCaptionContext.Provider,{value:false,key:"filterArea"},
+            $(FilterArea, {
             key: "app",
             maxFilterAreaWidth,
             filters: noFilters ? [] : [
-                $(ExampleFilterItem, { key: 1, value: "Number/Marking", children: "1 1", minWidth: 7, maxWidth: 10, canHide: !showSome1 }),
-                $(ExampleFilterItem, { key: 2, value: "Location", children: "2 0", minWidth: 10, maxWidth: 10, canHide: !showSome0 }),
-                $(ExampleFilterItem, { key: 3, value: "Location Feature", children: "3 0", minWidth: 7, maxWidth: 10, canHide: !showSome0 }),
-                $(ExampleFilterItem, { key: 4, value: "Mode", children: "4 0", minWidth: 5, maxWidth: 10, canHide: !showSome0 }),
-                $(ExampleFilterItem, { key: 5, value: "From", children: "5 1", minWidth: 5, maxWidth: 10, canHide: !showSome1 }),
+                $(ExampleFilterItem, { key: 1, id: 1, value: "Number/Marking", children: "1 1", minWidth: 7, maxWidth: 10, canHide: !showSome1 }),
+                $(ExampleFilterItem, { key: 2, id: 2, value: "Location", children: "2 0", minWidth: 10, maxWidth: 10, canHide: !showSome0 }),
+                $(ExampleFilterItem, { key: 3, id: 3, value: "Location Feature", children: "3 0", minWidth: 7, maxWidth: 10, canHide: !showSome0 }),
+                $(ExampleFilterItem, { key: 4, id: 4, value: "Mode", children: "4 0", minWidth: 5, maxWidth: 10, canHide: !showSome0 }),
+                $(ExampleFilterItem, { key: 5, id: 5, value: "From", children: "5 1", minWidth: 5, maxWidth: 10, canHide: !showSome1 }),
             ],
             buttons: [
                 $(FilterButtonExpander, {
@@ -309,7 +297,7 @@ function App() {
             className: "filterArea darkPrimaryColor",
         }),
         $(VdomListElement, {maxFilterAreaWidth, setMaxFilterAreaWidth, enableDrag, cols, setCols})
-    )
+    ))
 }
 
 const containerElement = document.createElement("div")
