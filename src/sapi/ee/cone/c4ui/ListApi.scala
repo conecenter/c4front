@@ -146,4 +146,12 @@ trait PivotGroupSlice extends PivotSlice {
   ): PivotTerminalSlice
   @c4val("bound") def boundPivotSliceWidth(min: Int, max: Int): PivotSliceWidth
   @c4val("unbound") def unboundPivotSliceWidth(): PivotSliceWidth
+
+  //
+  @c4el("InputLabel") def inputWrapper(
+    key: String,
+    caption: String,
+    wrapperNeeded: Boolean = true,
+    children: ChildPairList[OfDiv] = Nil,
+  ): ToChildPair
 }

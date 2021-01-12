@@ -7,6 +7,7 @@ services:
     working_dir: /app
     ports:
     - "127.0.0.10:3000:3000"
-    - "127.0.0.10:80:1080"
-    restart: unless-stopped
-version: '3.2'
+    - "127.0.0.10:80:3000"
+    restart: on-failure
+version: '2'
+
