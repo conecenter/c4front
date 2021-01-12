@@ -1,3 +1,6 @@
 
 .idea
 *.iml
+
+c4gen.*
+c4gen-*

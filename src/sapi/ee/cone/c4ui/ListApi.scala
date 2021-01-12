@@ -11,24 +11,24 @@ trait Cell extends ToChildPair {
 }
 
 trait GridCell extends Cell
-@c4tagSwitch("UICompApp") trait DragHandle extends ToJson
-@c4tagSwitch("UICompApp") trait GridRow extends ToJson {
+@c4tagSwitch trait DragHandle extends ToJson
+@c4tagSwitch trait GridRow extends ToJson {
   def rowKey: String
 }
-@c4tagSwitch("UICompApp") trait GridCol extends ToJson {
+@c4tagSwitch trait GridCol extends ToJson {
   def colKey: String
 }
-@c4tagSwitch("UICompApp") trait GridColWidth extends ToJson
-@c4tagSwitch("UICompApp") trait Expanding extends ToJson
+@c4tagSwitch trait GridColWidth extends ToJson
+@c4tagSwitch trait Expanding extends ToJson
 
 trait FilterItem extends ToChildPair
 trait FilterButton extends ToChildPair
-@c4tagSwitch("UICompApp") trait FilterButtonArea extends ToJson
+@c4tagSwitch trait FilterButtonArea extends ToJson
 
-@c4tagSwitch("UICompApp") trait HighlightByAttr extends ToJson
+@c4tagSwitch trait HighlightByAttr extends ToJson
 
 trait PivotCell extends Cell
-@c4tagSwitch("UICompApp") trait PivotSlice extends ToJson {
+@c4tagSwitch trait PivotSlice extends ToJson {
   def sliceKey: String
   def slices: List[PivotSlice]
 }
@@ -38,9 +38,9 @@ trait PivotTerminalSlice extends PivotSlice {
 trait PivotGroupSlice extends PivotSlice {
   def slices: List[PivotSlice]
 }
-@c4tagSwitch("UICompApp") trait PivotSliceWidth extends ToJson
+@c4tagSwitch trait PivotSliceWidth extends ToJson
 
-@c4tags("UICompApp") trait ListTags[C] {
+@c4tags trait ListTags[C] {
   @c4el("GridRoot") def gridRoot(
     key: String,
     dragCol: Receiver[C],
