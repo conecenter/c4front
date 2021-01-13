@@ -4,6 +4,8 @@ import ee.cone.c4di._
 import ee.cone.c4vdom.Types._
 import ee.cone.c4vdom._
 
+trait FrontAppBase
+
 trait Cell extends ToChildPair {
   def colKey: String
   def rowKey: String
@@ -11,24 +13,24 @@ trait Cell extends ToChildPair {
 }
 
 trait GridCell extends Cell
-@c4tagSwitch trait DragHandle extends ToJson
-@c4tagSwitch trait GridRow extends ToJson {
+@c4tagSwitch("FrontApp") trait DragHandle extends ToJson
+@c4tagSwitch("FrontApp") trait GridRow extends ToJson {
   def rowKey: String
 }
-@c4tagSwitch trait GridCol extends ToJson {
+@c4tagSwitch("FrontApp") trait GridCol extends ToJson {
   def colKey: String
 }
-@c4tagSwitch trait GridColWidth extends ToJson
-@c4tagSwitch trait Expanding extends ToJson
+@c4tagSwitch("FrontApp") trait GridColWidth extends ToJson
+@c4tagSwitch("FrontApp") trait Expanding extends ToJson
 
 trait FilterItem extends ToChildPair
 trait FilterButton extends ToChildPair
-@c4tagSwitch trait FilterButtonArea extends ToJson
+@c4tagSwitch("FrontApp") trait FilterButtonArea extends ToJson
 
-@c4tagSwitch trait HighlightByAttr extends ToJson
+@c4tagSwitch("FrontApp") trait HighlightByAttr extends ToJson
 
 trait PivotCell extends Cell
-@c4tagSwitch trait PivotSlice extends ToJson {
+@c4tagSwitch("FrontApp") trait PivotSlice extends ToJson {
   def sliceKey: String
   def slices: List[PivotSlice]
 }
@@ -38,9 +40,9 @@ trait PivotTerminalSlice extends PivotSlice {
 trait PivotGroupSlice extends PivotSlice {
   def slices: List[PivotSlice]
 }
-@c4tagSwitch trait PivotSliceWidth extends ToJson
+@c4tagSwitch("FrontApp") trait PivotSliceWidth extends ToJson
 
-@c4tags trait ListTags[C] {
+@c4tags("FrontApp") trait ListTags[C] {
   @c4el("GridRoot") def gridRoot(
     key: String,
     dragCol: Receiver[C],
