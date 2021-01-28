@@ -67,6 +67,7 @@ trait PivotGroupSlice extends PivotSlice {
     classNames: List[CSSClassName] = Nil,
     expanding: Expanding = expandableExpanding,
     dragHandle: DragHandle = noDragHandle,
+    noDefCellClass: Boolean = false
   ): GridCell
   @c4val("") def expandableExpanding: Expanding
   @c4val("none") def nonExpandableExpanding: Expanding
