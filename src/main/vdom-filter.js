@@ -126,7 +126,7 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
         ...rt.buttons.map((item,itemIndex,items)=>[   item.key,0       , outerWidth-rt.width+getButtonsWidth(items.slice(0,itemIndex))]),
         ...rt.optButtons.map((item,itemIndex,items)=>[item.key,emPerRow, outerWidth-rt.width+centerWidth+getButtonsWidth(items.slice(0,itemIndex))]),
     ].map((([key,top,left])=>[key,{top,left}])))
-    const btnElements = buttons.flatMap(c => [c,...(c.props.optButtons||[])]).map(c=>{
+    const btnElements = (buttons || []).flatMap(c => [c,...(c.props.optButtons||[])]).map(c=>{
         const pos = btnPosByKey[c.key]
         return cloneElement(c,{getButtonWidth,pos:{
             "data-btn-key": c.key,
