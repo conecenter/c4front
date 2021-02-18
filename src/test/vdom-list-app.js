@@ -105,7 +105,7 @@ function App() {
             ...cols.map(exCell("head")).filter(Boolean),
             ...rowKeys.flatMap(rowKey => cols.map(exCell(rowKey)).filter(Boolean)),
         ],
-        rows: rowKeys.map(rowKey=>({rowKey}))
+        rows: rowKeys.map(rowKey=>({rowKey,canDropInto:true,canDropBeside:true}))
     })
     const children = [
         $("button", { key: "dragOff", onClick: ev => setState(was => ({ ...was, enableDrag: false })) }, "no drag"),

@@ -1,6 +1,6 @@
 
 import {createElement as $,useState,useLayoutEffect,useContext,createContext,useCallback,useEffect,cloneElement} from "react"
-import {useWidth,useEventListener} from "../main/vdom-hooks.js"
+import {useWidth,useEventListener,useAnimationFrame} from "../main/vdom-hooks.js"
 
 //// move to shared
 
@@ -145,19 +145,6 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
 }
 
 ////
-
-const useAnimationFrame = (element,callback) => {
-    useEffect(() => {
-        if(!callback || !element) return
-        const {requestAnimationFrame,cancelAnimationFrame} = element.ownerDocument.defaultView
-        const animate = () => {
-            callback()
-            req = requestAnimationFrame(animate,element)
-        }
-        let req = requestAnimationFrame(animate,element)
-        return () => cancelAnimationFrame(req)
-    },[element,callback])
-}
 
 const prepCheckUpdPopupPos = element => {
     if(!element) return was=>was

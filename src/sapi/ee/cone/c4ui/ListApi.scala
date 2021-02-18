@@ -52,13 +52,16 @@ trait PivotGroupSlice extends PivotSlice {
     children: ElList[GridCell],
   ): ToChildPair
   @c4val def gridRow(
-    rowKey: String
+    rowKey: String,
+    canDropBeside: Boolean = false,
+    canDropInto: Boolean = false,
   ): GridRow
   @c4val def gridCol(
     colKey: String,
     width: GridColWidth,
     hideWill: Int,
     isExpander: Boolean = false,
+    canDropBeside: Boolean = false,
   ): GridCol
   @c4el("GridCell") def gridCell(
     rowKey: String,

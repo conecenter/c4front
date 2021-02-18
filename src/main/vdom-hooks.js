@@ -11,12 +11,16 @@ export const useSender = () => useContext(SenderContext)
 export const useSync = identity => {
     const [patches,setPatches] = useState([])
     const sender = useSender()
-    const enqueuePatch = useCallback(aPatch=>{
-        setPatches(aPatches=>[...aPatches,{...aPatch, sentIndex: sender.enqueue(identity,aPatch)}])
+    const enqueuePatch = useCallback(({onAck,...aPatch})=>{
+        setPatches(aPatches=>[...aPatches,{onAck, ...aPatch, sentIndex: sender.enqueue(identity,aPatch)}])
     },[sender,identity])
     const ack = useContext(patches.length>0 ? AckContext : NoContext)
     useEffect(()=>{
-        setPatches(aPatches => aPatches.every(nonMerged(ack)) ? aPatches : aPatches.filter(nonMerged(ack)))
+        setPatches(aPatches => {
+            if(aPatches.every(nonMerged(ack))) return aPatches
+            aPatches.forEach(p=>nonMerged(ack)(p) || p.onAck && p.onAck())
+            return aPatches.filter(nonMerged(ack))
+        })
     },[ack])
     return [patches,enqueuePatch]
 }
@@ -50,6 +54,19 @@ export const useEventListener = (el,evName,callback) => {
         el.addEventListener(evName,callback)
         return ()=>el.removeEventListener(evName,callback)
     },[el,evName,callback])
+}
+
+export const useAnimationFrame = (element,callback) => {
+    useEffect(() => {
+        if(!callback || !element) return
+        const {requestAnimationFrame,cancelAnimationFrame} = element.ownerDocument.defaultView
+        const animate = () => {
+            callback()
+            req = requestAnimationFrame(animate,element)
+        }
+        let req = requestAnimationFrame(animate,element)
+        return () => cancelAnimationFrame(req)
+    },[element,callback])
 }
 
 export const NoCaptionContext = createContext()
