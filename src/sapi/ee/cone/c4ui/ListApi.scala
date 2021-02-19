@@ -6,6 +6,11 @@ import ee.cone.c4vdom._
 
 trait FrontAppBase
 
+trait GridRoot extends ToChildPair {
+  def key: String = gridKey
+  def gridKey: String
+}
+
 trait Cell extends ToChildPair {
   def colKey: String
   def rowKey: String
@@ -44,13 +49,13 @@ trait PivotGroupSlice extends PivotSlice {
 
 @c4tags("FrontApp") trait ListTags[C] {
   @c4el("GridRoot") def gridRoot(
-    key: String,
+    gridKey: String,
     dragCol: Receiver[C],
     dragRow: Receiver[C],
     rows: List[GridRow],
     cols: List[GridCol],
-    children: ElList[GridCell],
-  ): ToChildPair
+    children: ElList[GridCell]
+  ): GridRoot
   @c4val def gridRow(
     rowKey: String,
     canDropBeside: Boolean = false,

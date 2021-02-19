@@ -123,14 +123,7 @@ const noChildren = []
 //todo: for multi grids with overlapping keys per page implement: rootSelector
 // see: x-r-sort-obj-key x-r-sort-order-*
 
-const dragStyles = {
-    rootSelector: ".grid",
-    bgSelector: ".gridBG",
-    dropRoot: "background-color: var(--grid-drop-color)",
-    dropItem: "background-color: var(--grid-drop-color)",
-    dragItem: "opacity: 50%",
-}
-const useSyncGridDrag = ({ identity, rows, cols }) => {
+const useSyncGridDrag = ({ identity, rows, cols, gridKey }) => {
     const [dragData, setDragData] = useState({})
     const [dragRowPatches, enqueueDragRowPatch] = useSync(dragRowIdOf(identity))
     const [dragColPatches, enqueueDragColPatch] = useSync(dragColIdOf(identity))
@@ -154,14 +147,21 @@ const useSyncGridDrag = ({ identity, rows, cols }) => {
         }
         return canDrop
     },[cols,rows,enqueueDragColPatch,enqueueDragRowPatch,setDragData])
+    const dragStyles = useMemo(()=>({
+        rootSelector: `div[data-grid-key="${gridKey}"]`,
+        bgSelector: ".gridBG",
+        dropRoot: "background-color: var(--grid-drop-color)",
+        dropItem: "background-color: var(--grid-drop-color)",
+        dragItem: "opacity: 50%; z-index:1000",
+    }),[gridKey])
     const [dragCSSContent,onMouseDown] = useGridDrag(dragData,setDragData,dragStyles,checkDrop)
     return [dragData,dragCSSContent,onMouseDown]
 }
 
-export function GridRoot({ identity, rows, cols, children: rawChildren }) {
+export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey }) {
     const children = rawChildren || noChildren//Children.toArray(rawChildren)
 
-    const [dragData,dragCSSContent,onMouseDown] = useSyncGridDrag({ identity, rows, cols })
+    const [dragData,dragCSSContent,onMouseDown] = useSyncGridDrag({ identity, rows, cols, gridKey })
 
     const [expanded, setExpandedItem] = useExpanded()
 
@@ -193,7 +193,7 @@ export function GridRoot({ identity, rows, cols, children: rawChildren }) {
 
     const dragBGEl = $("div", { key: "gridBG", className: "gridBG", style: { gridColumn: spanAll, gridRow: spanAll }})
     const style = { display: "grid", gridTemplateRows, gridTemplateColumns }
-    const res = $("div", { onMouseDown, style, className: "grid", ref: setGridElement }, dragBGEl, ...allChildren)
+    const res = $("div", { onMouseDown, style, className: "grid", "data-grid-key": gridKey, ref: setGridElement }, dragBGEl, ...allChildren)
     const dragCSSEl = $("style",{dangerouslySetInnerHTML: { __html: dragCSSContent}})
     return $(NoCaptionContext.Provider,{value:true},dragCSSEl,res)
 }
