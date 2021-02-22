@@ -1,5 +1,6 @@
-import React from "react"
-import {never} from "./vdom-util.js";
+import React, {useCallback} from "react"
+import {identityAt, never} from "./vdom-util.js";
+import {useSync} from "./vdom-hooks";
 
 const { createElement: $ } = React
 
@@ -34,10 +35,17 @@ export function PivotRoot({rows, cols, children, classNames: argClassNames}) {
     return $("div", {style, className, children})
 }
 
-export function PivotCell({colKey, rowKey, classNames, children}) {
+const clickActionIdOf = identityAt('clickAction')
+
+export function PivotCell({identity, colKey, rowKey, classNames, children, clickAction}) {
     const className = classNames ? classNames.join(" ") : ""
     const gridArea = `${fromKey(rowKey)} / ${fromKey(colKey)} / ${toKey(rowKey)} / ${toKey(colKey)}`
-    return $("div", {style: {gridArea}, className, children})
+    const [clickActionPatches, enqueueClickActionPatch] = useSync(clickActionIdOf(identity))
+    const onClick = useCallback(ev => {
+        enqueueClickActionPatch({})
+        ev.stopPropagation()
+    }, [clickAction, enqueueClickActionPatch])
+    return $("div", {style: {gridArea}, className, children, onClick: onClick})
 }
 
 export const components = {PivotRoot,PivotCell}

@@ -47,6 +47,15 @@ trait PivotGroupSlice extends PivotSlice {
 }
 @c4tagSwitch("FrontApp") trait PivotSliceWidth extends ToJson
 
+object NoReceiver extends NoReceiver[Unit](){
+  def apply[C]: Receiver[C] =
+    this.asInstanceOf[Receiver[C]]
+}
+
+case class NoReceiver[C]() extends Receiver[C] {
+  def receive: Handler = _ => identity
+}
+
 @c4tags("FrontApp") trait ListTags[C] {
   @c4el("GridRoot") def gridRoot(
     gridKey: String,
@@ -146,6 +155,7 @@ trait PivotGroupSlice extends PivotSlice {
     rowKey: String,
     classNames: List[CSSClassName] = Nil,
     children: ChildPairList[OfDiv] = Nil,
+    clickAction: Receiver[C] = NoReceiver[C]
   ): PivotCell
   @c4val("group") def pivotGroupSlice(
     sliceKey: String,
