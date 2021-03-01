@@ -155,7 +155,8 @@ case class NoReceiver[C]() extends Receiver[C] {
     rowKey: String,
     classNames: List[CSSClassName] = Nil,
     children: ChildPairList[OfDiv] = Nil,
-    clickAction: Receiver[C] = NoReceiver[C]
+    clickAction: Receiver[C] = NoReceiver[C],
+    doubleClickAction: Receiver[C] = NoReceiver[C]
   ): PivotCell
   @c4val("group") def pivotGroupSlice(
     sliceKey: String,
