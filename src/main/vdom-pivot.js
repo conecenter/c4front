@@ -34,16 +34,21 @@ export function PivotRoot({rows, cols, children, classNames: argClassNames}) {
 }
 
 const clickActionIdOf = identityAt('clickAction')
+const doubleClickActionOf = identityAt('doubleClickAction')
 
+//On handling double click https://medium.com/trabe/prevent-click-events-on-double-click-with-react-with-and-without-hooks-6bf3697abc40
 export function PivotCell({identity, colKey, rowKey, classNames, children}) {
     const className = classNames ? classNames.join(" ") : ""
     const gridArea = `${fromKey(rowKey)} / ${fromKey(colKey)} / ${toKey(rowKey)} / ${toKey(colKey)}`
     const [clickActionPatches, enqueueClickActionPatch] = useSync(clickActionIdOf(identity))
     const onClick = useCallback(ev => {
-        enqueueClickActionPatch({})
-        ev.stopPropagation()
+        enqueueClickActionPatch({});
     }, [enqueueClickActionPatch])
-    return $("div", {style: {gridArea}, className, children, onClick})
+    const [clickDoubleActionPatches, enqueueDoubleClickActionPatch] = useSync(doubleClickActionOf(identity))
+    const onDoubleClick = useCallback(ev => {
+        enqueueDoubleClickActionPatch({});
+    }, [enqueueDoubleClickActionPatch])
+    return $("div", {style: {gridArea}, className, children, onClick, onDoubleClick})
 }
 
 export const components = {PivotRoot,PivotCell}
