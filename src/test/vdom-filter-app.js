@@ -55,7 +55,20 @@ function App(){
             ],
             className: "filterArea",
         }),
-        "AFTER"
+        "AFTER",
+        $(FilterArea,{ key: "app0",
+            filters: [],
+            buttons: [
+                filterButton({ key: 0, area: "rt", className: "exampleButton", caption: "B" }),
+                $(FilterButtonExpander,{ key: 12, area: "rt", identity: identities.rt, ...expander, optButtons: [
+                    filterButton({ key: 13, className: "exampleButton", caption: "BigButton" }),
+                    filterButton({ key: 14, className: "exampleButton", caption: "BigButton" }),
+                    filterButton({ key: 15, className: "exampleButton", caption: "BigButton" }),
+                ] }),
+                filterButton({ key: 1, area: "rt", className: "exampleButton", caption: "B" }),
+            ],
+            className: "filterArea",
+        }),
     )
 }
 
