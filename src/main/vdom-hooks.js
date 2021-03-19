@@ -24,6 +24,27 @@ export const useSync = identity => {
     },[ack])
     return [patches,enqueuePatch]
 }
+
+export const useSyncWithState = (identity, defaultState) => {
+    const [state, setState] = useState({...defaultState, patches: []})
+    const sender = useSender()
+    const setStateAndEnqueue = useCallback((changeState, {onAck, ...aPatch}) => {
+        setState(prevState => ({
+            ...changeState(prevState),
+            patches: [...prevState.patches, {onAck, ...aPatch, sentIndex: sender.enqueue(identity, aPatch)}]
+        }))
+    }, [sender, identity])
+    const ack = useContext(state.patches.length > 0 ? AckContext : NoContext)
+    useEffect(() => {
+        setState(prevState => {
+            if (prevState.patches.every(nonMerged(ack))) return prevState.patches
+            prevState.patches.forEach(p => nonMerged(ack)(p) || p.onAck && p.onAck())
+            return prevState.patches.filter(nonMerged(ack))
+        })
+    }, [ack])
+    return [state, setState, setStateAndEnqueue]
+}
+
 export function createSyncProviders({sender,ack,children}){
     return createElement(SenderContext.Provider, {value:sender},
         createElement(AckContext.Provider, {value:ack}, children)
