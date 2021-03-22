@@ -176,7 +176,8 @@ export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey 
         hideExpander(hasHiddenCols)(hideElementsForHiddenCols(false,col=>col.colKey)(cols))
     ), [cols, hideElementsForHiddenCols, hasHiddenCols])
 
-    const dragRowKey = dragData.axis === "y" && dragData.dragKey
+    const dragRowKey = dragData.axis === "y" && dragData.drag && dragData.drag.key
+    //todo: fix expand+drag -- may be prepend with bg-cell with rowspan 2
 
     const allChildren = useMemo(()=>getAllChildren({
         children,rows,cols,hasHiddenCols,hideElementsForHiddenCols,dragRowKey
@@ -192,14 +193,14 @@ export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey 
 const getAllChildren = ({children,rows,cols,hasHiddenCols,hideElementsForHiddenCols,dragRowKey}) => {
     const expandedElements = getExpandedCells({
         cols: hideElementsForHiddenCols(true,col=>col.colKey)(cols),
-        rows: dragRowKey ? rows.filter(row=>row.rowKey!==dragRowKey) : rows,
+        rows, //: dragRowKey ? rows.filter(row=>row.rowKey!==dragRowKey) : rows,
         children,
     }).map(([rowKey, pairs]) => {
         const res = $(GridCell, {
             gridColumn: spanAll,
             rowKey,
             rowKeyMod: "-expanded",
-            style: { display: "flex", flexFlow: "row wrap" },
+            style: { display: "flex", flexFlow: "row wrap", visibility: dragRowKey?"hidden":null },
             children: pairs.map(([col, cell]) => $("div",{
                 key: cell.key,
                 style: { flexBasis: `${col.width.min}em` },
@@ -213,7 +214,7 @@ const getAllChildren = ({children,rows,cols,hasHiddenCols,hideElementsForHiddenC
     const allChildren = toExpanderElements(hideElementsForHiddenCols(false,cell=>cell.props.colKey)([
         ...children, ...expandedElements
     ]))
-    console.log("inner render")
+    console.log("inner render "+dragRowKey)
     return allChildren
 }
 

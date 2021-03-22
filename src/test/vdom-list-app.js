@@ -111,6 +111,7 @@ function App() {
     const byColumn = []
     const listEl = $(GridRoot, {
         key: "list",
+        gridKey: "list",
         identity: {},
         cols,
         children: [
