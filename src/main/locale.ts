@@ -1,55 +1,60 @@
 import {createContext, createElement, ReactNode, useContext} from "react";
 
 interface WeekDay {
-    shortName: String,
-    fullName: String
+    id: number,
+    shortName: string,
+    fullName: string
 }
 
 interface Month {
-    shortName: String,
-    fullName: String
+    id: number,
+    shortName: string,
+    fullName: string
 }
 
 interface Locale {
-    shortName: String,
+    timezoneId: string
+    shortName: string,
     weekDays: WeekDay[],
     months: Month[],
 }
 
 class DefaultLocale implements Locale {
-    shortName: String = "en";
+    timezoneId: string = "UTC"
+    shortName: string = "en";
     months: Month[] = [
-        {shortName: "Jan", fullName: "January"},
-        {shortName: "Feb", fullName: "February"},
-        {shortName: "Mar", fullName: "March"},
-        {shortName: "Apr", fullName: "April"},
-        {shortName: "May", fullName: "May"},
-        {shortName: "Jun", fullName: "June"},
-        {shortName: "Jul", fullName: "July"},
-        {shortName: "Aug", fullName: "August"},
-        {shortName: "Sep", fullName: "September"},
-        {shortName: "Oct", fullName: "October"},
-        {shortName: "Nov", fullName: "November"},
-        {shortName: "Dec", fullName: "December"},
+        {id: 0, shortName: "Jan", fullName: "January"},
+        {id: 1, shortName: "Feb", fullName: "February"},
+        {id: 2, shortName: "Mar", fullName: "March"},
+        {id: 3, shortName: "Apr", fullName: "April"},
+        {id: 4, shortName: "May", fullName: "May"},
+        {id: 5, shortName: "Jun", fullName: "June"},
+        {id: 6, shortName: "Jul", fullName: "July"},
+        {id: 7, shortName: "Aug", fullName: "August"},
+        {id: 8, shortName: "Sep", fullName: "September"},
+        {id: 9, shortName: "Oct", fullName: "October"},
+        {id: 10, shortName: "Nov", fullName: "November"},
+        {id: 11, shortName: "Dec", fullName: "December"},
     ];
     weekDays: WeekDay[] = [
-        {shortName: "Mon", fullName: "Monday"},
-        {shortName: "Tue", fullName: "Tuesday"},
-        {shortName: "Wed", fullName: "Wednesday"},
-        {shortName: "Thu", fullName: "Thursday"},
-        {shortName: "Fri", fullName: "Friday"},
-        {shortName: "Sat", fullName: "Saturday"},
-        {shortName: "Sun", fullName: "Funday"},
+        {id: 0, shortName: "Mon", fullName: "Monday"},
+        {id: 1, shortName: "Tue", fullName: "Tuesday"},
+        {id: 2, shortName: "Wed", fullName: "Wednesday"},
+        {id: 3, shortName: "Thu", fullName: "Thursday"},
+        {id: 4, shortName: "Fri", fullName: "Friday"},
+        {id: 5, shortName: "Sat", fullName: "Saturday"},
+        {id: 6, shortName: "Sun", fullName: "Funday"},
     ];
 
 }
 
-const UserLocaleContext = createContext(DefaultLocale)
+const UserLocaleContext = createContext<Locale>(new DefaultLocale)
 const getUserLocale = () => useContext(UserLocaleContext)
-function createUserLocaleProvider(locale: Locale, children: ReactNode[]) {
+
+function UserLocaleProvider(locale: Locale, children: ReactNode[]) {
     // @ts-ignore
     return createElement(UserLocaleContext.Provider, {value: locale}, children)
 }
 
 export type {WeekDay, Month, Locale}
-export {getUserLocale, createUserLocaleProvider}
+export {getUserLocale, UserLocaleProvider}

@@ -1,51 +1,78 @@
-import React, {createElement as el, useCallback} from 'react'
+import {
+    addDays,
+    addHours,
+    addMinutes,
+    addMonths,
+    addYears,
+    format,
+    getDate as getDayOfMonth,
+    getDaysInMonth,
+    getHours,
+    getMinutes,
+    getMonth,
+    getTime,
+    getYear,
+    isValid,
+    parse as parseDate,
+    setDate,
+    setHours,
+    setMinutes,
+    setMonth,
+    setYear
+} from "date-fns";
 import {useSync} from "./vdom-hooks";
-import {format, getTime, isValid, parse as parseDate} from 'date-fns';
-import {addMinutes, addHours, addDays, addMonths, addYears} from 'date-fns';
-import {setMinutes, setHours, setDate, setMonth, setYear} from 'date-fns';
-import {getMinutes, getHours, getDate as getDayOfMonth, getMonth, getYear, getDaysInMonth} from 'date-fns';
+import React, {createElement as el, useCallback} from "react";
+import {DOWN_ARROW_KEY, UP_ARROW_KEY} from "./keys";
+import {getUserLocale, Locale} from "./locale";
+import {mapOption, None, numToOption, Option, toOption} from "./option";
+import {utcToZonedTime} from 'date-fns-tz';
 
-function getDate(timestamp) {
-    const date = new Date(timestamp);
-    return isValid(date) ? date : undefined
+function getDate(timestamp: number, timezoneId: string): Option<Date> {
+    const date: Date = utcToZonedTime(new Date(timestamp), timezoneId);
+    return isValid(date) ? date : None
 }
 
-function getTimestamp(date) {
+function getTimestamp(date: Date): number {
     return getTime(date)
 }
 
-function formatDate(date, dateFormat, locale) {
-    return format(date, dateFormat, locale)
+function formatDate(date: Date, timestampFormat: string, locale: Locale): string {
+    return format(date, timestampFormat) // TODO custom formatter
 }
 
-const nullDate = new Date(0)
+const nullDate: Date = new Date(0)
 
-function parseStringToDate(string, timestampFormat) {
+function parseStringToDate(value: string, timestampFormat: string): Option<Date> {
     try {
-        const parsedDate = parseDate(string, timestampFormat, nullDate);
+        const parsedDate = parseDate(value, timestampFormat, nullDate);
         if (isValid(parsedDate)) return parsedDate
-        else return undefined
+        else return None
     } catch (e) {
-        return undefined
+        return None
     }
 }
 
-function patchToState(patch) {
-    return [getDate(patch.timestamp), patch.inputStr]
+function patchToState(patch: Patch, timezoneId: string): (Option<Date> | Option<string>)[] {
+    return [mapOption(numToOption(parseInt(patch.value)), opt => getDate(opt, timezoneId)), toOption(patch.headers.get(currentInputKey))]
 }
 
-function timestampToState(timestamp, timestampFormat, locale) {
-    const date = getDate(timestamp);
-    return [date, formatDate(date, timestampFormat, locale)]
+function timestampToState(timestamp: number, timestampFormat: string, timezoneId: string, locale: Locale): (Option<Date> | Option<string>)[] {
+    const date = getDate(timestamp, timezoneId);
+    return [date, mapOption(date, date => formatDate(date, timestampFormat, locale))]
 }
 
-function useInputValueSync(handlerName, serverTimestamp, timestampFormat, locale) {
-    const [patches, enqueuePatch] = useSync(handlerName)
+interface Patch {
+    headers: Headers,
+    value: string
+}
+
+function useInputValueSync(handlerName: string, timestamp: number, timestampFormat: string, timezoneId: string, localState: DatePickerLocalState, locale: Locale,) {
+    const [patches, enqueuePatch] = <[Patch[], (patch: Patch) => void]>useSync(handlerName)
     const patch = patches.slice(-1)[0]
-    const [currentDate, currentInputStr] = patch ? patchToState(patch) : timestampToState(serverTimestamp, timestampFormat, locale)
+    const [currentDateOpt, currentInputOpt] = patch ? patchToState(patch, timezoneId) : timestampToState(timestamp, timestampFormat, timezoneId, locale)
     const onChange = useCallback(event => {
         const stringInput = event.target.value
-        const headers = {...event.target.headers}
+        const headers = localStateToHeaders()
         const newDate = parseStringToDate(stringInput, timestampFormat)
         if (newDate === undefined) {
             enqueuePatch({headers: headers, inputStr: stringInput})
@@ -55,15 +82,23 @@ function useInputValueSync(handlerName, serverTimestamp, timestampFormat, locale
         }
     }, [enqueuePatch])
     const onTimestampChange = useCallback(newTimestamp => {
-        const newDate = getDate(newTimestamp)
+        const newDate = getDate(newTimestamp, timezoneId)
         console.log(newDate)
         enqueuePatch({headers: {}, timestamp: newTimestamp, inputStr: formatDate(newDate, timestampFormat, locale)})
     }, [enqueuePatch])
     return ({currentDate, currentInputStr, onChange, onTimestampChange})
 }
 
-function adjustDate(date, symbol, increment, cycleThroughout) {
-    function getAdjusters(symbol) {
+function adjustDate(date: Date, symbol: string, increment: number, cycleThroughout: boolean) {
+    interface Adjusters {
+        add: (date: Date, value: number) => Date;
+        get: (date: Date) => number;
+        set: (date: Date, value: number) => Date;
+        min: number;
+        max: number;
+    }
+
+    function getAdjusters(symbol: string): Adjusters {
         switch (symbol) {
             case 'y':
                 return {add: addYears, get: getYear, set: setYear, min: 0, max: 10000}
@@ -75,28 +110,30 @@ function adjustDate(date, symbol, increment, cycleThroughout) {
                 return {add: addHours, get: getHours, set: setHours, min: 0, max: 24}
             case 'm':
                 return {add: addMinutes, get: getMinutes, set: setMinutes, min: 0, max: 60}
+            default:
+                throw new Error("Unsupported temporal unit")
         }
     }
 
-    const {add, get, set, min, max} = getAdjusters(symbol)
+    const {add: add, get: get, set: set, min: min, max: max}: Adjusters = getAdjusters(symbol)
     if (!cycleThroughout) return add(date, increment)
     else return set(date, Math.max((get(date) + increment + max - min) % max + min, min))
 }
 
-function incrementDate(currentDate, cursorPosition, up, timestampFormat, onTimestampChange, input, cycleThroughout) {
+function incrementDate(currentDate: Date, cursorPosition: number, up: boolean, timestampFormat: string, onTimestampChange, input, cycleThroughout: boolean) {
     const supportedCharacters = 'yMdHm'
 
-    function supportedChar(position) {
+    function supportedChar(position: number) {
         return supportedCharacters.includes(timestampFormat[position])
     }
 
     const increment = up ? 1 : -1
-    const position =
+    const position: number =
         supportedChar(cursorPosition) ?
             cursorPosition :
             supportedChar(cursorPosition - 1) ?
                 cursorPosition - 1 :
-                timestampFormat[cursorPosition + 1]
+                cursorPosition + 1
     const currentFMTChar = timestampFormat[position]
     const startPosition = timestampFormat.indexOf(currentFMTChar)
     const endPosition = timestampFormat.lastIndexOf(currentFMTChar) + 1
@@ -104,25 +141,42 @@ function incrementDate(currentDate, cursorPosition, up, timestampFormat, onTimes
     onTimestampChange(getTimestamp(adjustDate(currentDate, currentFMTChar, increment, cycleThroughout)))
 }
 
-const UP_KEY_CODE = 38
-const DOWN_KEY_CODE = 40
+interface DatePickerLocalState {
+    currentInput: string
+}
 
-export function DatePickerInputElement({timestamp, timestampFormat, locale}) {
+const currentInputKey = "x-r-currentInput"
+
+function localStateToHeaders(localState: DatePickerLocalState): Headers {
+    return new Headers([[currentInputKey, localState.currentInput]])
+}
+
+interface DatePickerProps {
+    key: string,
+    timestamp: number,
+    timestampFormat: string
+    userTimezoneId?: string,
+    localState: DatePickerLocalState
+}
+
+export function DatePickerInputElement({timestamp, timestampFormat, userTimezoneId, localState}: DatePickerProps) {
+    const locale = getUserLocale()
+    const timezoneId = userTimezoneId ? userTimezoneId : locale.timezoneId
     const {
         currentDate,
         currentInputStr,
         onChange,
         onTimestampChange
-    } = useInputValueSync("datepicker", timestamp, timestampFormat, locale)
+    } = useInputValueSync("datepicker", timestamp, timestampFormat, timezoneId, localState, locale)
     const keyPressHandler = (event, input) => {
         if (currentDate !== undefined) {
             const cycleThroughout = !event.ctrlKey
             switch (event.keyCode) {
-                case UP_KEY_CODE:
+                case UP_ARROW_KEY.keyCode:
                     incrementDate(currentDate, event.target.selectionStart, true, timestampFormat, onTimestampChange, input, cycleThroughout)
                     event.preventDefault()
                     break
-                case DOWN_KEY_CODE:
+                case DOWN_ARROW_KEY.keyCode:
                     incrementDate(currentDate, event.target.selectionStart, false, timestampFormat, onTimestampChange, input, cycleThroughout)
                     event.preventDefault()
                     break

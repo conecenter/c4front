@@ -1,17 +1,27 @@
 import ReactDOM from "react-dom"
 import React from "react"
-import {DatePickerInputElement} from "../main/vdom-datepicker";
 import {createSyncProviders} from "../main/vdom-hooks";
-import {Month, WeekDay, Locale, DefaultLocale} from "../main/locale";
+import {DatePickerInputElement} from "../main/datepicker";
 
 const {createElement: $} = React
 
 function App() {
+    const testTS = 1609459200000
+    console.log(testTS)
     const children = $(DatePickerInputElement, {
         key: "TEST",
-        timestamp: 1615990956 * 1000,
-        timestampFormat: "dd/MM/yyyy HH:mm",
-        locale: DefaultLocale
+        serverState: {
+            timestamp:  testTS,
+            timestampFormat: "dd/MM/yyyy HH:mm",
+            timezoneId: "Europe/Moscow"
+        },
+        localState: {
+            currentTimestamp: testTS,
+            currentInput: "ololo",
+            open: false
+        }
+
+
     })
     const sender = {
         enqueue: (handlerName: any, patch: any) => console.log(patch)
