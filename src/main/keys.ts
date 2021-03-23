@@ -1,8 +1,8 @@
 export {}
 
 interface Key {
-    keyCode: Number
+    code: string
 }
 
-export const UP_ARROW_KEY: Key = {keyCode: 38}
-export const DOWN_ARROW_KEY: Key = {keyCode: 40}
+export const UP_ARROW_KEY: Key = {code: "ArrowUp"}
+export const DOWN_ARROW_KEY: Key = {code: "ArrowDown"}
