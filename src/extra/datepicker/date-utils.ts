@@ -37,10 +37,66 @@ function getTimestamp(date: Date, dateSettings: DateSettings): number {
     return getTime(zonedTimeToUtc(date, dateSettings.timezoneId))
 }
 
-function formatDate(date: Date, dateSettings: DateSettings): string {
-    function paddWithZeros()
+function formatDate(date: Date, dateSettings: DateSettings): string { // TODO rewrite
+    const locale = dateSettings.locale
+    const result: string[] = []
+    let {dateSeparator, d, M, Y, h, m, s, S} = dateSettings.timestampFormat
 
-    return ""// TODO custom formatter
+    function pad(num: number, size: number): string {
+        let value = String(num).slice(-size)
+        while (value.length < size) value = "0" + num
+        return value;
+    }
+
+    switch (d) {
+        case 2:
+            result.push(pad(date.getDate(), 2))
+    }
+    if (d !== 0 && M !== 0) result.push(dateSeparator)
+    switch (M) {
+        case 2:
+            result.push(pad(date.getMonth() + 1, 2))
+            break
+        case 3:
+            result.push(locale.months.find(month => month.id === date.getMonth()).shortName)
+            break
+        case 4:
+            result.push(locale.months.find(month => month.id === date.getMonth()).fullName)
+            break
+    }
+    if (M !== 0 && Y !== 0) result.push(dateSeparator)
+    switch (Y) {
+        case 2:
+            result.push(pad(date.getFullYear(), 2))
+            break
+        case 4:
+            result.push(pad(date.getFullYear(), 4))
+            break
+    }
+    if (h !== 0) result.push(" ")
+    switch (h) {
+        case 2:
+            result.push(pad(date.getHours(), 2))
+            break
+    }
+    if (h !== 0 && m !== 0) result.push(":")
+    switch (m) {
+        case 2:
+            result.push(pad(date.getMinutes(), 2))
+            break
+    }
+    if (m !== 0 && s !== 0) result.push(":")
+    switch (s) {
+        case 2:
+            result.push(pad(date.getSeconds(), 2))
+            break
+    }
+    if (s !== 0 && S !== 0) result.push(".")
+    switch (S) {
+        case 3:
+            result.push(pad(date.getMilliseconds(), 3))
+    }
+    return result.join("")
 }
 
 const nullDate: Date = new Date(0)
