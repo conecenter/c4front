@@ -1,4 +1,4 @@
-import {useSync} from "../vdom-hooks";
+import {useSync} from "../../main/vdom-hooks";
 import {useCallback} from "react";
 
 type DatePickerState = TimestampState | InputState
@@ -75,5 +75,5 @@ function useDatePickerStateSync(
     return {state: currentState, setState: onChange}
 }
 
-export {useDatePickerStateSync, isInputState, isTimestampState, createTimestampState};
+export {useDatePickerStateSync, isInputState, isTimestampState, createTimestampState, createInputState};
 export type {DatePickerState};

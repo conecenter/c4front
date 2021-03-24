@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom"
 import React from "react"
 import {createSyncProviders} from "../main/vdom-hooks";
-import {DatePickerInputElement, DatePickerTest} from "../main/datepicker/datepicker";
+import {DatePickerInputElement} from "../extra/datepicker/datepicker";
 
 const {createElement: $} = React
 
@@ -10,20 +10,19 @@ function App() {
     console.log(testTS)
     const children = $(DatePickerInputElement, {
         key: "TEST",
-        timestampFormat: "dd/MM/yyyy HH:mm",
+        timestampFormatId: 0,
         userTimezoneId: "Europe/Moscow",
         state: {
             type: "timestamp-state",
             timestamp: testTS
         }
     })
-    const testChild = $(DatePickerTest, {key: "test2", fromServerTimeStamp: testTS})
     const sender = {
         enqueue: (handlerName: any, patch: any) => console.log(patch)
     }
     const ack = null
 
-    return createSyncProviders({sender, ack, children: [children, testChild]})
+    return createSyncProviders({sender, ack, children: [children]})
 }
 
 const containerElement = document.createElement("div")

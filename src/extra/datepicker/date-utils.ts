@@ -1,23 +1,30 @@
-import {None, Option} from "../option";
+import {None, Option} from "../../main/option";
 import {utcToZonedTime, zonedTimeToUtc} from "date-fns-tz";
 import {
-    addDays, addHours, addMinutes,
+    addDays,
+    addHours,
+    addMinutes,
     addMonths,
     addYears,
-    format, getDate as getDayOfMonth, getDaysInMonth, getHours, getMinutes,
+    getDate as getDayOfMonth,
+    getDaysInMonth,
+    getHours,
+    getMinutes,
     getMonth,
     getTime,
     getYear,
     isValid,
-    parse as parseDate, setDate, setHours, setMinutes,
+    setDate,
+    setHours,
+    setMinutes,
     setMonth,
     setYear
 } from "date-fns";
-import {Locale} from "../locale";
+import {DateTimeFormat, Locale} from "../../main/locale";
 
 interface DateSettings {
     timezoneId: string,
-    timestampFormat: string,
+    timestampFormat: DateTimeFormat,
     locale: Locale
 }
 
@@ -31,16 +38,16 @@ function getTimestamp(date: Date, dateSettings: DateSettings): number {
 }
 
 function formatDate(date: Date, dateSettings: DateSettings): string {
-    return format(date, dateSettings.timestampFormat) // TODO custom formatter
+    function paddWithZeros()
+
+    return ""// TODO custom formatter
 }
 
 const nullDate: Date = new Date(0)
 
 function parseStringToDate(value: string, dateSettings: DateSettings): Option<Date> {
     try {
-        const parsedDate = parseDate(value, dateSettings.timestampFormat, nullDate);
-        if (isValid(parsedDate)) return parsedDate
-        else return None
+        return new Date() // todo rewrite
     } catch (e) {
         return None
     }
