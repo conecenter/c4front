@@ -1,5 +1,7 @@
 import {Context, createContext, createElement, ReactNode, useContext} from "react";
-import {getOrElse, toOption} from "./option";
+import {getOrElse, None, Option, toOption} from "./option";
+// @ts-ignore
+import TrieSearch from "trie-search";
 
 interface WeekDay {
     id: number
@@ -18,9 +20,9 @@ interface DateTimeFormat {
     dateSeparator: string
     d: 0 | 2 // no, 2-digit
     M: 0 | 2 | 3 | 4 // no, 2-digit, short name, full name
-    Y: 0 | 2 | 4 // no, 2-digit, 4-digit
+    y: 0 | 2 | 4 // no, 2-digit, 4-digit
 
-    h: 0 | 2 // no, 2-digit
+    H: 0 | 2 // no, 2-digit
     m: 0 | 2 // no, 2-digit
     s: 0 | 2 // no, 2-digit
     S: 0 | 3 // no, 3-digit
@@ -33,6 +35,47 @@ interface Locale {
     months: Month[]
     dateFormats: DateTimeFormat[]
     defaultDateFormat: DateTimeFormat
+}
+
+class ExtendedLocale implements Locale {
+    private innerLocale!: Locale
+    private monthMap: Map<number, Month>
+    // @ts-ignore
+    private monthFullNameTree: TrieSearch
+    dateFormats: DateTimeFormat[];
+    defaultDateFormat: DateTimeFormat;
+    months: Month[];
+    shortName: string;
+    timezoneId: string;
+    weekDays: WeekDay[];
+
+    constructor(innerLocale: Locale) {
+        this.innerLocale = innerLocale
+        this.timezoneId = this.innerLocale.timezoneId
+        this.shortName = this.innerLocale.shortName
+        this.weekDays = this.innerLocale.weekDays
+        this.months = this.innerLocale.months
+        this.dateFormats = this.innerLocale.dateFormats
+        this.defaultDateFormat = this.innerLocale.defaultDateFormat
+
+        this.monthMap = new Map(innerLocale.months.map(month => [month.id, month]))
+        this.monthFullNameTree = new TrieSearch('fullName')
+        this.monthFullNameTree.addAll(innerLocale.months)
+    }
+
+
+    getMonthShort(id: number): string {
+        return this.monthMap.get(id)?.shortName || ""
+    }
+
+    getMonthFull(id: number): string {
+        return this.monthMap.get(id)?.fullName || ""
+    }
+
+    getMonthByPrefix(prefix: string): Option<Month> {
+        const months = <Month[]>this.monthFullNameTree.get(prefix)
+        return months.length === 1 ? months[0] : None
+    }
 }
 
 function getDateTimeFormat(formatId: number, locale: Locale): DateTimeFormat {
@@ -70,23 +113,23 @@ class DefaultLocale implements Locale {
         id: 0,
         dateSeparator: '/',
         d: 2,
-        M: 2,
-        Y: 2,
+        M: 4,
+        y: 4,
 
-        h: 2,
+        H: 2,
         m: 2,
-        s: 0,
-        S: 0
+        s: 2,
+        S: 3
     }
 
 }
 
-const UserLocaleContext: Context<Locale> = createContext<Locale>(new DefaultLocale)
-const getUserLocale: () => Locale = () => useContext(UserLocaleContext)
+const UserLocaleContext: Context<ExtendedLocale> = createContext<ExtendedLocale>(new ExtendedLocale(new DefaultLocale()))
+const useUserLocale: () => ExtendedLocale = () => useContext(UserLocaleContext)
 
 function UserLocaleProvider(locale: Locale, children: ReactNode[]) {
-    return createElement(UserLocaleContext.Provider, {value: locale}, children)
+    return createElement(UserLocaleContext.Provider, {value: new ExtendedLocale(locale)}, children)
 }
 
-export type {WeekDay, Month, DateTimeFormat, Locale}
-export {getUserLocale, UserLocaleProvider, getDateTimeFormat}
+export type {WeekDay, Month, DateTimeFormat, Locale, ExtendedLocale}
+export {useUserLocale, UserLocaleProvider, getDateTimeFormat}

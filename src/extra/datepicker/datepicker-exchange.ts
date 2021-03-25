@@ -4,8 +4,8 @@ import {useCallback} from "react";
 type DatePickerState = TimestampState | InputState
 
 interface TimestampState {
-    type: 'timestamp-state';
-    timestamp: number;
+    type: 'timestamp-state'
+    timestamp: number
 }
 
 const isTimestampStateType = (type: string): type is 'timestamp-state' => type === 'timestamp-state'
@@ -13,19 +13,25 @@ const isTimestampState = (mode: DatePickerState): mode is TimestampState => isTi
 const createTimestampState = (timestamp: number): TimestampState => ({type: 'timestamp-state', timestamp: timestamp})
 
 interface InputState {
-    type: 'input-state';
-    inputValue: string;
-    tempTimestamp?: number;
+    type: 'input-state'
+    inputValue: string
+    tempTimestamp?: number
 }
 
 const isInputStateType = (type: string): type is 'input-state' => type === 'input-state'
 const isInputState = (mode: DatePickerState): mode is InputState => isInputStateType(mode.type)
-const createInputState = (inputValue: string, tempTimestamp?: number): InputState => ({type: 'input-state', inputValue: inputValue, tempTimestamp: tempTimestamp})
+const createInputState = (inputValue: string, tempTimestamp?: number): InputState => ({
+    type: 'input-state',
+    inputValue: inputValue,
+    tempTimestamp: tempTimestamp
+})
 
-function stateToPatch(mode: DatePickerState): Patch {
+function stateToPatch(mode: DatePickerState, changing: boolean): Patch {
+    const changingHeaders = changing ? {'x-r-changing': "1"} : {}
     const extraHeaders = isInputState(mode) && mode.tempTimestamp ? {'x-r-temp-timestamp': String(mode.tempTimestamp)} : {}
     return {
         headers: {
+            ...changingHeaders,
             ...extraHeaders,
             "x-r-type": mode.type
         },
@@ -50,18 +56,20 @@ function patchToState(patch: Patch): DatePickerState {
 }
 
 interface PatchHeaders {
-    'x-r-type': string;
-    'x-r-temp-timestamp'?: string;
+    'x-r-changing'?: string
+    'x-r-type': string
+    'x-r-temp-timestamp'?: string
 }
 
 interface Patch {
-    headers: PatchHeaders;
-    value: string;
+    headers: PatchHeaders
+    value: string
 }
 
 interface DatePickerSyncState {
-    state: DatePickerState;
-    setState: (state: DatePickerState) => void;
+    currentState: DatePickerState
+    setTempState: (state: DatePickerState) => void
+    setFinalState: (state: DatePickerState) => void
 }
 
 function useDatePickerStateSync(
@@ -71,8 +79,9 @@ function useDatePickerStateSync(
     const [patches, enqueuePatch] = <[Patch[], (patch: Patch) => void]>useSync(handlerName)
     const patch: Patch = patches.slice(-1)[0]
     const currentState: DatePickerState = patch ? patchToState(patch) : state
-    const onChange = useCallback((state: DatePickerState) => enqueuePatch(stateToPatch(state)), [enqueuePatch])
-    return {state: currentState, setState: onChange}
+    const onChange = useCallback((state: DatePickerState) => enqueuePatch(stateToPatch(state, true)), [enqueuePatch])
+    const onBlur = useCallback((state: DatePickerState) => enqueuePatch(stateToPatch(state, false)), [enqueuePatch])
+    return {currentState: currentState, setTempState: onChange, setFinalState: onBlur}
 }
 
 export {useDatePickerStateSync, isInputState, isTimestampState, createTimestampState, createInputState};

@@ -1,10 +1,10 @@
 import React, {createElement as el} from "react";
-import {getDateTimeFormat, getUserLocale} from "../../main/locale";
+import {getDateTimeFormat, useUserLocale} from "../../main/locale";
 import {DatePickerState, useDatePickerStateSync} from "./datepicker-exchange";
 import {DateSettings, formatDate, getDate} from "./date-utils";
-import {getOrElse, mapOption, None, Option} from "../../main/option";
+import {mapOption, None, nonEmpty, Option} from "../../main/option";
 import {useSelectionEditableInput} from "./selection-control";
-import {getOnChange, getOnKeyDown, onTimestampChangeAction} from "./datepicker-actions";
+import {getOnBlur, getOnChange, getOnKeyDown, onTimestampChangeAction} from "./datepicker-actions";
 
 
 interface DatePickerProps {
@@ -15,35 +15,45 @@ interface DatePickerProps {
 }
 
 export function DatePickerInputElement({state, timestampFormatId, userTimezoneId}: DatePickerProps) {
-    const locale = getUserLocale()
+    const locale = useUserLocale()
     const timezoneId = userTimezoneId ? userTimezoneId : locale.timezoneId
     const timestampFormat = getDateTimeFormat(timestampFormatId, locale)
     const dateSettings: DateSettings = {timestampFormat: timestampFormat, locale: locale, timezoneId: timezoneId}
-    const {state: currentState, setState: onStateChange} = useDatePickerStateSync("datepicker", state)
-    const [currentDateOpt, currentInputStr] = getCurrentProps(currentState, dateSettings)
+    const {currentState: currentState, setTempState: setTempState, setFinalState: setFinalState} = useDatePickerStateSync("datepicker", state)
+    const {date: currentDateOpt, dateFormat, inputValue} = getCurrentProps(currentState, dateSettings)
     const inputRef = React.createRef<HTMLInputElement>()
     const setSelection: (from: number, to: number) => void = useSelectionEditableInput(inputRef)
-    const onTimestampChange: (timestamp: number) => void = onTimestampChangeAction(onStateChange)
-    const onKeyDown = getOnKeyDown(currentDateOpt, dateSettings, onTimestampChange, setSelection)
-    const onChange = getOnChange(onStateChange)
+    const onTimestampChange: (timestamp: number) => void = onTimestampChangeAction(setTempState)
+    const onKeyDown = getOnKeyDown(currentDateOpt, dateFormat, dateSettings, onTimestampChange, setSelection)
+    const onChange = getOnChange(dateSettings, setTempState)
+    const onBlur = getOnBlur(currentState, setFinalState)
     return el("div", {className: "inputBox"},
         el("div", {className: "inputSubBox"},
             el("input", {
                 ref: inputRef,
-                value: currentInputStr,
+                value: inputValue,
                 onChange: onChange,
-                onKeyDown: onKeyDown
+                onKeyDown: onKeyDown,
+                onBlur: onBlur,
             })
         )
     )
 }
 
-function getCurrentProps(currentState: DatePickerState, dateSettings: DateSettings): [Option<Date>, string] {
+interface CurrentProps {
+    date: Option<Date>
+    dateFormat: Option<string>
+    inputValue: string
+}
+
+function getCurrentProps(currentState: DatePickerState, dateSettings: DateSettings): CurrentProps {
     switch (currentState.type) {
         case "input-state":
-            return [None, currentState.inputValue]
+            return {date: None, dateFormat: None, inputValue: currentState.inputValue,}
         case "timestamp-state":
             const date = getDate(currentState.timestamp, dateSettings)
-            return [date, getOrElse(mapOption(date, date => formatDate(date, dateSettings)), "")]
+            const formatInfo = mapOption(date, date => formatDate(date, dateSettings))
+            const [formattedDate, dateFormat] = nonEmpty(formatInfo) ? formatInfo : ["", None]
+            return {date: date, dateFormat: dateFormat, inputValue: formattedDate,}
     }
 }
