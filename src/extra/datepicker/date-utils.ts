@@ -26,7 +26,7 @@ import {
     setSeconds,
     setYear
 } from "date-fns";
-import {ExtendedDateTimeFormat, ExtendedLocale} from "../../main/locale";
+import {ExtendedDateTimeFormat, ExtendedLocale} from "../locale";
 
 interface DateSettings {
     timezoneId: string,

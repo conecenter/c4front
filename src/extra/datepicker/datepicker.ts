@@ -1,5 +1,5 @@
 import React, {createElement as el} from "react";
-import {getDateTimeFormat, useUserLocale} from "../../main/locale";
+import {getDateTimeFormat, useUserLocale} from "../locale";
 import {DatePickerState, useDatePickerStateSync} from "./datepicker-exchange";
 import {DateSettings, formatDate, getDate} from "./date-utils";
 import {mapOption, None, nonEmpty, Option} from "../../main/option";
@@ -19,7 +19,11 @@ export function DatePickerInputElement({state, timestampFormatId, userTimezoneId
     const timezoneId = userTimezoneId ? userTimezoneId : locale.timezoneId
     const timestampFormat = getDateTimeFormat(timestampFormatId, locale)
     const dateSettings: DateSettings = {timestampFormat: timestampFormat, locale: locale, timezoneId: timezoneId}
-    const {currentState: currentState, setTempState: setTempState, setFinalState: setFinalState} = useDatePickerStateSync("datepicker", state)
+    const {
+        currentState: currentState,
+        setTempState: setTempState,
+        setFinalState: setFinalState
+    } = useDatePickerStateSync("datepicker", state)
     const {date: currentDateOpt, dateFormat, inputValue} = getCurrentProps(currentState, dateSettings)
     const inputRef = React.createRef<HTMLInputElement>()
     const setSelection: (from: number, to: number) => void = useSelectionEditableInput(inputRef)

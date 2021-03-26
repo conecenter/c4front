@@ -2,7 +2,7 @@ import {DateSettings, incrementDate, parseStringToDate} from "./date-utils";
 import {createInputState, createTimestampState, DatePickerState, isTimestampState} from "./datepicker-exchange";
 import {getOrElse, mapOption, nonEmpty, Option} from "../../main/option";
 import React, {ChangeEvent, FocusEvent, KeyboardEvent} from "react";
-import {DOWN_ARROW_KEY, UP_ARROW_KEY} from "../../main/keys";
+import {DOWN_ARROW_KEY, UP_ARROW_KEY} from "../../main/keyborad-keys";
 
 function updateAndSendDate(
     currentDate: Date,

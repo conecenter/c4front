@@ -11,6 +11,6 @@ const numToOption = (value: number): Option<number> => isNaN(value) ? None : val
 const mapOption = <T, B>(value: Option<T>, func: (value: T) => B): Option<B> => nonEmpty(value) ? func(value) : None
 const getOrElse = <T>(value: Option<T>, defaultValue: T): T => nonEmpty(value) ? value : defaultValue
 
-export {isEmpty, nonEmpty, toOption,numToOption, mapOption, getOrElse, None};
+export {isEmpty, nonEmpty, toOption, numToOption, mapOption, getOrElse, None};
 export type {Option};
 
