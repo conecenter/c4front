@@ -35,7 +35,8 @@ function stateToPatch(mode: DatePickerState, changing: boolean): Patch {
             ...extraHeaders,
             "x-r-type": mode.type
         },
-        value: isTimestampState(mode) ? String(mode.timestamp) : mode.inputValue
+        value: isTimestampState(mode) ? String(mode.timestamp) : mode.inputValue,
+        skipByPath: true, retry: true, defer: true
     }
 }
 
@@ -63,7 +64,10 @@ interface PatchHeaders {
 
 interface Patch {
     headers: PatchHeaders
-    value: string
+    value: string,
+    skipByPath: boolean
+    retry: boolean
+    defer: boolean
 }
 
 interface DatePickerSyncState {
@@ -73,10 +77,10 @@ interface DatePickerSyncState {
 }
 
 function useDatePickerStateSync(
-    handlerName: string,
+    identity: Object,
     state: DatePickerState,
 ): DatePickerSyncState {
-    const [patches, enqueuePatch] = <[Patch[], (patch: Patch) => void]>useSync(handlerName)
+    const [patches, enqueuePatch] = <[Patch[], (patch: Patch) => void]>useSync(identity)
     const patch: Patch = patches.slice(-1)[0]
     const currentState: DatePickerState = patch ? patchToState(patch) : state
     const onChange = useCallback((state: DatePickerState) => enqueuePatch(stateToPatch(state, true)), [enqueuePatch])

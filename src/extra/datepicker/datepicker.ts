@@ -1,4 +1,4 @@
-import React, {createElement as el} from "react";
+import {createElement as el, useMemo, useRef} from "react";
 import {getDateTimeFormat, useUserLocale} from "../locale";
 import {DatePickerState, useDatePickerStateSync} from "./datepicker-exchange";
 import {DateSettings, formatDate, getDate} from "./date-utils";
@@ -8,13 +8,14 @@ import {getOnBlur, getOnChange, getOnKeyDown, onTimestampChangeAction} from "./d
 
 
 interface DatePickerProps {
-    key: string;
-    state: DatePickerState;
-    timestampFormatId: number;
-    userTimezoneId?: string;
+    key: string
+    identity: Object
+    state: DatePickerState
+    timestampFormatId: number
+    userTimezoneId?: string
 }
 
-export function DatePickerInputElement({state, timestampFormatId, userTimezoneId}: DatePickerProps) {
+export function DatePickerInputElement({identity, state, timestampFormatId, userTimezoneId}: DatePickerProps) {
     const locale = useUserLocale()
     const timezoneId = userTimezoneId ? userTimezoneId : locale.timezoneId
     const timestampFormat = getDateTimeFormat(timestampFormatId, locale)
@@ -23,9 +24,9 @@ export function DatePickerInputElement({state, timestampFormatId, userTimezoneId
         currentState: currentState,
         setTempState: setTempState,
         setFinalState: setFinalState
-    } = useDatePickerStateSync("datepicker", state)
-    const {date: currentDateOpt, dateFormat, inputValue} = getCurrentProps(currentState, dateSettings)
-    const inputRef = React.createRef<HTMLInputElement>()
+    } = useDatePickerStateSync(identity, state)
+    const {date: currentDateOpt, dateFormat, inputValue} = useMemo(() => getCurrentProps(currentState, dateSettings), [currentState, dateSettings])
+    const inputRef = useRef<HTMLInputElement>()
     const setSelection: (from: number, to: number) => void = useSelectionEditableInput(inputRef)
     const onTimestampChange: (timestamp: number) => void = onTimestampChangeAction(setTempState)
     const onKeyDown = getOnKeyDown(currentDateOpt, dateFormat, dateSettings, onTimestampChange, setSelection)
