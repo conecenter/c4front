@@ -14,7 +14,7 @@ function App() {
         timestampFormatId: 0,
         userTimezoneId: "Europe/Moscow",
         state: {
-            type: "timestamp-state",
+            tp: "timestamp-state",
             timestamp: testTS
         }
     })

@@ -4,24 +4,24 @@ import {useCallback} from "react";
 type DatePickerState = TimestampState | InputState
 
 interface TimestampState {
-    type: 'timestamp-state'
+    tp: 'timestamp-state'
     timestamp: number
 }
 
-const isTimestampStateType = (type: string): type is 'timestamp-state' => type === 'timestamp-state'
-const isTimestampState = (mode: DatePickerState): mode is TimestampState => isTimestampStateType(mode.type)
-const createTimestampState = (timestamp: number): TimestampState => ({type: 'timestamp-state', timestamp: timestamp})
+const isTimestampStateType = (tp: string): tp is 'timestamp-state' => tp === 'timestamp-state'
+const isTimestampState = (mode: DatePickerState): mode is TimestampState => isTimestampStateType(mode.tp)
+const createTimestampState = (timestamp: number): TimestampState => ({tp: 'timestamp-state', timestamp: timestamp})
 
 interface InputState {
-    type: 'input-state'
+    tp: 'input-state'
     inputValue: string
     tempTimestamp?: number
 }
 
-const isInputStateType = (type: string): type is 'input-state' => type === 'input-state'
-const isInputState = (mode: DatePickerState): mode is InputState => isInputStateType(mode.type)
+const isInputStateType = (tp: string): tp is 'input-state' => tp === 'input-state'
+const isInputState = (mode: DatePickerState): mode is InputState => isInputStateType(mode.tp)
 const createInputState = (inputValue: string, tempTimestamp?: number): InputState => ({
-    type: 'input-state',
+    tp: 'input-state',
     inputValue: inputValue,
     tempTimestamp: tempTimestamp
 })
@@ -33,7 +33,7 @@ function stateToPatch(mode: DatePickerState, changing: boolean): Patch {
         headers: {
             ...changingHeaders,
             ...extraHeaders,
-            "x-r-type": mode.type
+            "x-r-type": mode.tp
         },
         value: isTimestampState(mode) ? String(mode.timestamp) : mode.inputValue,
         skipByPath: true, retry: true, defer: true
@@ -45,11 +45,11 @@ function patchToState(patch: Patch): DatePickerState {
     const tempTimestamp = patch.headers['x-r-temp-timestamp'] ? parseInt(patch.headers['x-r-temp-timestamp']) : undefined
     if (isTimestampStateType(mode))
         return {
-            type: "timestamp-state",
+            tp: "timestamp-state",
             timestamp: parseInt(patch.value)
         }
     else if (isInputStateType(mode)) return {
-        type: "input-state",
+        tp: "input-state",
         inputValue: patch.value,
         tempTimestamp: tempTimestamp
     }

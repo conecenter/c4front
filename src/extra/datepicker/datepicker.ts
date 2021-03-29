@@ -52,7 +52,7 @@ interface CurrentProps {
 }
 
 function getCurrentProps(currentState: DatePickerState, dateSettings: DateSettings): CurrentProps {
-    switch (currentState.type) {
+    switch (currentState.tp) {
         case "input-state":
             return {date: None, dateFormat: None, inputValue: currentState.inputValue,}
         case "timestamp-state":
