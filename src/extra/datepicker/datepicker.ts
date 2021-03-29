@@ -12,10 +12,11 @@ interface DatePickerProps {
     identity: Object
     state: DatePickerState
     timestampFormatId: number
-    userTimezoneId?: string
+    userTimezoneId?: string,
+    deferredSend?: boolean
 }
 
-export function DatePickerInputElement({identity, state, timestampFormatId, userTimezoneId}: DatePickerProps) {
+export function DatePickerInputElement({identity, state, timestampFormatId, userTimezoneId, deferredSend}: DatePickerProps) {
     const locale = useUserLocale()
     const timezoneId = userTimezoneId ? userTimezoneId : locale.timezoneId
     const timestampFormat = getDateTimeFormat(timestampFormatId, locale)
@@ -24,7 +25,7 @@ export function DatePickerInputElement({identity, state, timestampFormatId, user
         currentState: currentState,
         setTempState: setTempState,
         setFinalState: setFinalState
-    } = useDatePickerStateSync(identity, state)
+    } = useDatePickerStateSync(identity, state, deferredSend || false)
     const {date: currentDateOpt, dateFormat, inputValue} = useMemo(() => getCurrentProps(currentState, dateSettings), [currentState, dateSettings])
     const inputRef = useRef<HTMLInputElement>()
     const setSelection: (from: number, to: number) => void = useSelectionEditableInput(inputRef)

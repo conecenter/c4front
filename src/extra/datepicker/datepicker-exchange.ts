@@ -27,7 +27,7 @@ const createInputState = (inputValue: string, tempTimestamp?: number): InputStat
     tempTimestamp: tempTimestamp
 })
 
-function stateToPatch(mode: DatePickerState, changing: boolean): Patch {
+function stateToPatch(mode: DatePickerState, changing: boolean, deferredSend: boolean): Patch {
     const changingHeaders = changing ? {'x-r-changing': "1"} : {}
     const extraHeaders = isInputState(mode) && mode.tempTimestamp ? {'x-r-temp-timestamp': String(mode.tempTimestamp)} : {}
     return {
@@ -37,7 +37,7 @@ function stateToPatch(mode: DatePickerState, changing: boolean): Patch {
             "x-r-type": mode.tp
         },
         value: isTimestampState(mode) ? String(mode.timestamp) : mode.inputValue,
-        skipByPath: true, retry: true, defer: true
+        skipByPath: true, retry: true, defer: deferredSend
     }
 }
 
@@ -82,12 +82,13 @@ const receiverIdOf = identityAt('receiver')
 function useDatePickerStateSync(
     identity: Object,
     state: DatePickerState,
+    deferredSend: boolean
 ): DatePickerSyncState {
     const [patches, enqueuePatch] = <[Patch[], (patch: Patch) => void]>useSync(receiverIdOf(identity))
     const patch: Patch = patches.slice(-1)[0]
     const currentState: DatePickerState = patch ? patchToState(patch) : state
-    const onChange = useCallback((state: DatePickerState) => enqueuePatch(stateToPatch(state, true)), [enqueuePatch])
-    const onBlur = useCallback((state: DatePickerState) => enqueuePatch(stateToPatch(state, false)), [enqueuePatch])
+    const onChange = useCallback((state: DatePickerState) => enqueuePatch(stateToPatch(state, true, deferredSend)), [enqueuePatch])
+    const onBlur = useCallback((state: DatePickerState) => enqueuePatch(stateToPatch(state, false, false)), [enqueuePatch])
     return {currentState: currentState, setTempState: onChange, setFinalState: onBlur}
 }
 

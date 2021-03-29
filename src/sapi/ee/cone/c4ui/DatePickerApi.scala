@@ -13,7 +13,8 @@ trait DatePicker extends ToChildPair
     state: DatePickerState,
     timestampFormatId: Int,
     userTimezoneId: String,
-    receiver: Receiver[C]
+    receiver: Receiver[C],
+    deferredSend: Boolean = false
   ): DatePicker
 
   @c4val("timestamp-state") def timeStampState(
