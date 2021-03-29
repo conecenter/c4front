@@ -1,5 +1,5 @@
 import ReactDOM from "react-dom"
-import * as React from "react"
+import React from "react"
 import {createSyncProviders} from "../main/vdom-hooks";
 import {DatePickerInputElement} from "../extra/datepicker/datepicker";
 
@@ -20,7 +20,7 @@ function App() {
     const sender = {
         enqueue: (handlerName: any, patch: any) => console.log(patch)
     }
-    const ack: boolean = null
+    const ack: boolean | null = null
 
     return createSyncProviders({sender, ack, children: [children]})
 }
