@@ -10,6 +10,7 @@ function App() {
     console.log(testTS)
     const children = $(DatePickerInputElement, {
         key: "TEST",
+        identity: String("me"),
         timestampFormatId: 0,
         userTimezoneId: "Europe/Moscow",
         state: {

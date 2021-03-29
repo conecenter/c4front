@@ -1,7 +1,7 @@
 import {Context, createContext, createElement, ReactNode, useContext} from "react";
 import {getOrElse, None, Option, toOption} from "../main/option";
 // @ts-ignore
-import {TrieSearch} from "trie-search";
+import TrieSearch from "trie-search";
 
 interface WeekDay {
     id: number
