@@ -319,8 +319,6 @@ function parseStringToDate(value: string, dateSettings: DateSettings): Option<nu
         if (monthResult === "error") return None
         const [dateDate, dateResult] = changeDate(monthDate, tokens, timeResult === "changed", monthResult === "changed", dateSettings.timestampFormat)
         if (dateResult === "error") return None
-        console.log(dateDate)
-        console.log(zonedTimeToUtc(dateDate, dateSettings.timezoneId))
         return zonedTimeToUtc(dateDate, dateSettings.timezoneId).getTime()
     } else return None
 }

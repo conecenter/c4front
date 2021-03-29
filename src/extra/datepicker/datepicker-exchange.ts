@@ -1,5 +1,6 @@
 import {useSync} from "../../main/vdom-hooks";
 import {useCallback} from "react";
+import {identityAt} from "../../main/vdom-util";
 
 type DatePickerState = TimestampState | InputState
 
@@ -76,11 +77,13 @@ interface DatePickerSyncState {
     setFinalState: (state: DatePickerState) => void
 }
 
+const receiverIdOf = identityAt('receiver')
+
 function useDatePickerStateSync(
     identity: Object,
     state: DatePickerState,
 ): DatePickerSyncState {
-    const [patches, enqueuePatch] = <[Patch[], (patch: Patch) => void]>useSync(identity)
+    const [patches, enqueuePatch] = <[Patch[], (patch: Patch) => void]>useSync(receiverIdOf(identity))
     const patch: Patch = patches.slice(-1)[0]
     const currentState: DatePickerState = patch ? patchToState(patch) : state
     const onChange = useCallback((state: DatePickerState) => enqueuePatch(stateToPatch(state, true)), [enqueuePatch])
