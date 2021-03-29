@@ -149,3 +149,5 @@ function UserLocaleProvider(locale: Locale, children: ReactNode[]) {
 
 export type {WeekDay, Month, DateTimeFormat, Locale, ExtendedLocale, ExtendedDateTimeFormat}
 export {useUserLocale, UserLocaleProvider, getDateTimeFormat}
+
+export const components = {UserLocaleProvider}

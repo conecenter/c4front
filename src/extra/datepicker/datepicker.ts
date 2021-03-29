@@ -1,5 +1,5 @@
 import {createElement as el, useMemo, useRef} from "react";
-import {getDateTimeFormat, useUserLocale} from "../locale";
+import {getDateTimeFormat, UserLocaleProvider, useUserLocale} from "../locale";
 import {DatePickerState, useDatePickerStateSync} from "./datepicker-exchange";
 import {DateSettings, formatDate, getDate} from "./date-utils";
 import {mapOption, None, nonEmpty, Option} from "../../main/option";
@@ -62,3 +62,5 @@ function getCurrentProps(currentState: DatePickerState, dateSettings: DateSettin
             return {date: date, dateFormat: dateFormat, inputValue: formattedDate,}
     }
 }
+
+export const components = {DatePickerInputElement}
