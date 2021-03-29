@@ -245,81 +245,97 @@ function getPrototypeDate() {
 
 type SetResult = "unchanged" | "changed" | "error"
 
-function changeTime(date: Date, tokens: Token[], dateFormat: ExtendedDateTimeFormat): [Date, SetResult] {
+interface TimeValue {
+    H?: number
+    m?: number
+    s?: number
+    S?: number
+}
+
+function getTimeValue(tokens: Token[], dateFormat: ExtendedDateTimeFormat): TimeValue {
+    const empty: TimeValue = {}
     if (dateFormat.hasTime) {
         const timeToken = <TimeToken | undefined>tokens.find((value: Token) => value.type === 'time')
         if (timeToken) {
-            if (dateFormat.hasHours) date.setHours(timeToken.H)
-            if (dateFormat.hasMinutes) date.setMinutes(timeToken.m)
-            if (dateFormat.hasSeconds && timeToken.s) date.setSeconds(timeToken.s)
-            if (dateFormat.hasMilliseconds && timeToken.S) date.setMilliseconds(timeToken.S)
-            return [date, "changed"]
-        } else return [date, "unchanged"]
-    } else return [date, "unchanged"]
+            return {
+                ...empty,
+                H: dateFormat.hasHours ? timeToken.H : undefined,
+                m: dateFormat.hasMinutes ? timeToken.m : undefined,
+                s: dateFormat.hasSeconds ? timeToken.s : undefined,
+                S: dateFormat.hasSeconds ? timeToken.S : undefined,
+            }
+        } else return empty
+    } else return empty
 }
 
-function changeMonth(date: Date, tokens: Token[], dateSettings: DateSettings): [Date, SetResult] {
+interface MonthValue {
+    M?: number
+}
+
+function getMonthValue(tokens: Token[], dateSettings: DateSettings): MonthValue | undefined {
+    const empty: MonthValue = {}
     if (dateSettings.timestampFormat.hasMonth) {
         const monthIndex = tokens.findIndex((value: Token) => value.type === 'month')
         if (monthIndex >= 0) {
             const monthToken = <MonthToken>tokens[monthIndex]
             const monthIdOpt: Option<number> = mapOption(dateSettings.locale.getMonthByPrefix(monthToken.value), month => month.id)
-            if (nonEmpty(monthIdOpt) && monthIndex <= 1) {
-                date.setMonth(monthIdOpt)
-                return [date, "changed"]
-            } else return [date, "error"]
-        } else return [date, "unchanged"]
-    } else return [date, "unchanged"]
+            if (nonEmpty(monthIdOpt) && monthIndex <= 1)
+                return {
+                    ...empty,
+                    M: monthIdOpt
+                }
+            else return undefined
+        } else return empty
+    } else return empty
 }
 
-function changeDate(date: Date, tokens: Token[], changedTime: boolean, changedMonth: boolean, format: ExtendedDateTimeFormat): [Date, SetResult] {
-    const dateTokens: number[] = tokens.reduce((acc: number[], token: Token) => acc.concat(token.type === 'number' ? [token.value] : []), [])
-    const days = format.hasDay ? dateTokens.shift() : undefined
-    const months = format.hasMonth && !changedMonth ? dateTokens.shift() : undefined
-    const years = format.hasYear ? dateTokens.shift() : undefined
-    if (years !== undefined) {
-        const year = years < 100 ? Math.floor(date.getFullYear() / 100) * 100 + years : years
-        if (months !== undefined)
-            if (days !== undefined) date.setFullYear(year, months - 1, days)
-            else date.setFullYear(year, months - 1)
-        else date.setFullYear(year)
-    } else if (months !== undefined)
-        if (days !== undefined) date.setMonth(months - 1, days)
-        else date.setMonth(months - 1)
-    else if (days !== undefined)
-        date.setDate(days)
-    if (!changedTime) {
-        if (format.hasHours && dateTokens.length > 0) {
-            const value = dateTokens.shift()
-            if (value !== undefined) date.setHours(value)
-        }
-        if (format.hasMinutes && dateTokens.length > 0) {
-            const value = dateTokens.shift()
-            if (value !== undefined) date.setMinutes(value)
-        }
-        if (format.hasSeconds && dateTokens.length > 0) {
-            const value = dateTokens.shift()
-            if (value !== undefined) date.setSeconds(value)
-        }
-        if (format.hasMilliseconds && dateTokens.length > 0) {
-            const value = dateTokens.shift()
-            if (value !== undefined) date.setMilliseconds(value)
-        }
+function changeDate(date: Date, tokens: Token[], time: TimeValue, month: MonthValue, format: ExtendedDateTimeFormat): Date {
+    const yearsToThisEpoch = (year: number | undefined): number | undefined =>
+        year !== undefined ? year < 100 ? Math.floor(date.getFullYear() / 100) * 100 + year : year : undefined
+    const correctMonths = (month: number | undefined): number | undefined =>
+        month !== undefined ? month - 1 : undefined
+
+    function reduce(...args: (number | undefined)[]): number {
+        return args
+            .filter(num => num !== undefined)
+            .shift() || 0
     }
-    return [date, "changed"]
+
+    function reduceOpt(...args: (number | undefined)[]): number | undefined {
+        return args
+            .filter(num => num !== undefined)
+            .shift()
+    }
+
+    const dateTokens: number[] = tokens.reduce((acc: number[], token: Token) => acc.concat(token.type === 'number' ? [token.value] : []), [])
+    const days = reduce(format.hasDay ? dateTokens.shift() : undefined, date.getDate())
+    const months = reduce(format.hasMonth ? reduceOpt(month.M, correctMonths(dateTokens.shift())) : undefined, date.getMonth())
+    const years = reduce(yearsToThisEpoch(format.hasYear ? dateTokens.shift() : undefined), date.getFullYear())
+
+    const hours = reduce((format.hasHours ? time.H || dateTokens.shift() : undefined), date.getHours())
+    const minutes = reduce((format.hasMinutes ? time.m || dateTokens.shift() : undefined), date.getMinutes())
+    const seconds = reduce((format.hasSeconds ? time.s || dateTokens.shift() : undefined), date.getSeconds())
+    const milliseconds = reduce((format.hasMilliseconds ? time.S || dateTokens.shift() : undefined), date.getMilliseconds())
+    return new Date(
+        years,
+        months,
+        days,
+        hours,
+        minutes,
+        seconds,
+        milliseconds
+    )
 }
 
 function parseStringToDate(value: string, dateSettings: DateSettings): Option<number> {
     const tokens = tokenizeString(value)
     if (tokens.length > 0) {
+        const time = getTimeValue(tokens, dateSettings.timestampFormat)
+        const month = getMonthValue(tokens, dateSettings)
+        if (month === undefined) return None
         const prototypeDate = getPrototypeDate()
-        const [timeDate, timeResult] = changeTime(prototypeDate, tokens, dateSettings.timestampFormat)
-        if (timeResult === "error") return None
-        const [monthDate, monthResult] = changeMonth(timeDate, tokens, dateSettings)
-        if (monthResult === "error") return None
-        const [dateDate, dateResult] = changeDate(monthDate, tokens, timeResult === "changed", monthResult === "changed", dateSettings.timestampFormat)
-        if (dateResult === "error") return None
-        return zonedTimeToUtc(dateDate, dateSettings.timezoneId).getTime()
+        const newDate = changeDate(prototypeDate, tokens, time, month, dateSettings.timestampFormat)
+        return zonedTimeToUtc(newDate, dateSettings.timezoneId).getTime()
     } else return None
 }
 
