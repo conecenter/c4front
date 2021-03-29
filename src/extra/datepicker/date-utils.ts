@@ -273,7 +273,7 @@ function changeMonth(date: Date, tokens: Token[], dateSettings: DateSettings): [
 }
 
 function changeDate(date: Date, tokens: Token[], changedTime: boolean, changedMonth: boolean, format: ExtendedDateTimeFormat): [Date, SetResult] {
-    const dateTokens: number[] = tokens.flatMap(token => token.type === 'number' ? [token.value] : [])
+    const dateTokens: number[] = tokens.reduce((acc: number[], token: Token) => acc.concat(token.type === 'number' ? [token.value] : []), [])
     const days = format.hasDay ? dateTokens.shift() : undefined
     const months = format.hasMonth && !changedMonth ? dateTokens.shift() : undefined
     const years = format.hasYear ? dateTokens.shift() : undefined
