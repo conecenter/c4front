@@ -58,13 +58,13 @@ interface Locale {
     shortName: string
     weekDays: WeekDay[]
     months: Month[]
-    dateFormats: DateTimeFormat[]
-    defaultDateFormat: DateTimeFormat
+    dateTimeFormats: DateTimeFormat[]
+    defaultDateTimeFormatId: number
 }
 
 interface ExtendedLocale extends Locale {
-    dateFormats: ExtendedDateTimeFormat[]
-    defaultDateFormat: ExtendedDateTimeFormat
+    dateTimeFormats: ExtendedDateTimeFormat[]
+    defaultDateTimeFormat: ExtendedDateTimeFormat
 
     getMonthNameShort(id: number): string
 
@@ -79,8 +79,8 @@ function getExtendedLocale(locale: Locale): ExtendedLocale {
     monthFullNameTree.addAll(locale.months)
     return ({
         ...locale,
-        dateFormats: locale.dateFormats.map(getExtendedDateTimeFormat),
-        defaultDateFormat: getExtendedDateTimeFormat(locale.defaultDateFormat),
+        dateTimeFormats: locale.dateTimeFormats.map(getExtendedDateTimeFormat),
+        defaultDateTimeFormat: getExtendedDateTimeFormat(<DateTimeFormat> locale.dateTimeFormats.find(value => value.id === locale.defaultDateTimeFormatId)),
         getMonthNameShort(id: number): string {
             return monthMap.get(id)?.shortName || ""
         },
@@ -96,7 +96,7 @@ function getExtendedLocale(locale: Locale): ExtendedLocale {
 
 
 function getDateTimeFormat(formatId: number, locale: ExtendedLocale): ExtendedDateTimeFormat {
-    return getOrElse(toOption(locale.dateFormats.find(format => format.id === formatId)), locale.defaultDateFormat)
+    return getOrElse(toOption(locale.dateTimeFormats.find(format => format.id === formatId)), locale.defaultDateTimeFormat)
 }
 
 class DefaultLocale implements Locale {
@@ -125,8 +125,7 @@ class DefaultLocale implements Locale {
         {id: 5, shortName: "Sat", fullName: "Saturday"},
         {id: 6, shortName: "Sun", fullName: "Sunday"},
     ]
-    dateFormats: DateTimeFormat[] = []
-    defaultDateFormat: DateTimeFormat = {
+    dateTimeFormats: DateTimeFormat[] = [{
         id: 0,
         dateSeparator: '/',
         d: 2,
@@ -137,14 +136,21 @@ class DefaultLocale implements Locale {
         m: 2,
         s: 2,
         S: 3
-    }
+    }]
+    defaultDateTimeFormatId: number = 0
 }
 
 const UserLocaleContext: Context<ExtendedLocale> = createContext<ExtendedLocale>(getExtendedLocale(new DefaultLocale()))
 const useUserLocale: () => ExtendedLocale = () => useContext(UserLocaleContext)
 
-function UserLocaleProvider(locale: Locale, children: ReactNode[]) {
-    return createElement(UserLocaleContext.Provider, {value: getExtendedLocale(locale)}, children)
+interface UserLocaleProviderProps {
+    key: string,
+    locale: Locale,
+    children: ReactNode[]
+}
+
+function UserLocaleProvider({key, children,  locale}: UserLocaleProviderProps) {
+    return createElement(UserLocaleContext.Provider, {key: key, value: getExtendedLocale(locale)}, children)
 }
 
 export type {WeekDay, Month, DateTimeFormat, Locale, ExtendedLocale, ExtendedDateTimeFormat}
