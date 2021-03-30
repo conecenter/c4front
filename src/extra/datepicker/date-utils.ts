@@ -26,7 +26,7 @@ import {
     setSeconds,
     setYear
 } from "date-fns";
-import {ExtendedDateTimeFormat, ExtendedLocale} from "../locale";
+import {DateFormatToken, ExtendedDateTimeFormat, ExtendedLocale, FormatToken, isDateFormatToken} from "../locale";
 
 interface DateSettings {
     timezoneId: string,
@@ -47,92 +47,55 @@ function formatDate(date: Date, dateSettings: DateSettings): [string, string] {
     const locale: ExtendedLocale = dateSettings.locale
     const formattedDate: string[] = []
     const formatString: string[] = []
-    let {dateSeparator, d, M, y, H, m, s, S} = dateSettings.timestampFormat
+    const {formatTokens} = dateSettings.timestampFormat
 
     function pad(num: number, size: number): string {
         let value = String(num).slice(-size)
         return "0".repeat(size - value.length) + value;
     }
 
-    switch (d) {
-        case 2:
-            formattedDate.push(pad(date.getDate(), 2))
-            formatString.push("dd")
+    function formatDateToken(token: DateFormatToken): string {
+        switch (token.dateSymbol) {
+            case "d":
+                return pad(date.getDate(), 2)
+            case "M":
+                switch (token.format) {
+                    case 2:
+                        return pad(date.getMonth() + 1, 2)
+                    case 3:
+                        return locale.getMonthNameShort(date.getMonth())
+                    case 4:
+                        return locale.getMonthNameFull(date.getMonth())
+                    default:
+                        return ""
+                }
+            case "y":
+                if (token.format <= 2) return pad(date.getFullYear(), 2)
+                else return pad(date.getFullYear(), 4)
+            case "H":
+                return pad(date.getHours(), 2)
+            case "m":
+                return pad(date.getMinutes(), 2)
+            case "s":
+                return pad(date.getSeconds(), 2)
+            case "S":
+                return pad(date.getMilliseconds(), 3)
+            default:
+                return ""
+        }
     }
-    if (d !== 0 && M !== 0) {
-        formattedDate.push(dateSeparator)
-        formatString.push("d")
-    }
-    switch (M) {
-        case 2:
-            formattedDate.push(pad(date.getMonth() + 1, 2))
-            formatString.push("MM")
-            break
-        case 3:
-            const shortName = locale.getMonthNameShort(date.getMonth())
-            formattedDate.push(shortName)
-            formatString.push("M".repeat(shortName.length))
-            break
-        case 4:
-            const fullName = locale.getMonthNameFull(date.getMonth())
-            formattedDate.push(fullName)
-            formatString.push("M".repeat(fullName.length))
-            break
-    }
-    if (M !== 0 && y !== 0) {
-        formattedDate.push(dateSeparator)
-        formatString.push("M")
-    }
-    switch (y) {
-        case 2:
-            formattedDate.push(pad(date.getFullYear(), 2))
-            formatString.push("yy")
-            break
-        case 4:
-            formattedDate.push(pad(date.getFullYear(), 4))
-            formatString.push("yyyy")
-            break
-    }
-    if (H !== 0) {
-        formattedDate.push(" ")
-        formatString.push("y")
-    }
-    switch (H) {
-        case 2:
-            formattedDate.push(pad(date.getHours(), 2))
-            formatString.push("HH")
-            break
-    }
-    if (H !== 0 && m !== 0) {
-        formattedDate.push(":")
-        formatString.push("H")
-    }
-    switch (m) {
-        case 2:
-            formattedDate.push(pad(date.getMinutes(), 2))
-            formatString.push("mm")
-            break
-    }
-    if (m !== 0 && s !== 0) {
-        formattedDate.push(":")
-        formatString.push("m")
-    }
-    switch (s) {
-        case 2:
-            formattedDate.push(pad(date.getSeconds(), 2))
-            formatString.push("ss")
-            break
-    }
-    if (s !== 0 && S !== 0) {
-        formattedDate.push(".")
-        formatString.push("s")
-    }
-    switch (S) {
-        case 3:
-            formattedDate.push(pad(date.getMilliseconds(), 3))
-            formatString.push("SSS")
-            break
-    }
+
+    formatTokens.forEach(((value: FormatToken, index: number, array: FormatToken[]) => {
+        if (isDateFormatToken(value)) {
+            const formatted = formatDateToken(value)
+            formattedDate.push(formatted)
+            formatString.push(value.dateSymbol.repeat(formatted.length + 1))
+        } else {
+            formattedDate.push(value.text)
+            const pushSpaces = isDateFormatToken(array[index - 1]) ? -1 : 0
+            formatString.push(" ".repeat(value.text.length + pushSpaces))
+        }
+    }))
     return [formattedDate.join(""), formatString.join("")]
 }
 
@@ -259,10 +222,10 @@ function getTimeValue(tokens: Token[], dateFormat: ExtendedDateTimeFormat): Time
         if (timeToken) {
             return {
                 ...empty,
-                H: dateFormat.hasHours ? timeToken.H : undefined,
-                m: dateFormat.hasMinutes ? timeToken.m : undefined,
-                s: dateFormat.hasSeconds ? timeToken.s : undefined,
-                S: dateFormat.hasSeconds ? timeToken.S : undefined,
+                H: dateFormat.has("H") ? timeToken.H : undefined,
+                m: dateFormat.has("m") ? timeToken.m : undefined,
+                s: dateFormat.has("s") ? timeToken.s : undefined,
+                S: dateFormat.has("S") ? timeToken.S : undefined,
             }
         } else return empty
     } else return empty
@@ -274,7 +237,7 @@ interface MonthValue {
 
 function getMonthValue(tokens: Token[], dateSettings: DateSettings): MonthValue | undefined {
     const empty: MonthValue = {}
-    if (dateSettings.timestampFormat.hasMonth) {
+    if (dateSettings.timestampFormat.has("M")) {
         const monthIndex = tokens.findIndex((value: Token) => value.type === 'month')
         if (monthIndex >= 0) {
             const monthToken = <MonthToken>tokens[monthIndex]
@@ -308,14 +271,14 @@ function changeDate(date: Date, tokens: Token[], time: TimeValue, month: MonthVa
     }
 
     const dateTokens: number[] = tokens.reduce((acc: number[], token: Token) => acc.concat(token.type === 'number' ? [token.value] : []), [])
-    const days = reduce(format.hasDay ? dateTokens.shift() : undefined, date.getDate())
-    const months = reduce(format.hasMonth ? reduceOpt(month.M, correctMonths(dateTokens.shift())) : undefined, date.getMonth())
-    const years = reduce(yearsToThisEpoch(format.hasYear ? dateTokens.shift() : undefined), date.getFullYear())
+    const days = reduce(format.has("d") ? dateTokens.shift() : undefined, date.getDate())
+    const months = reduce(format.has("M") ? reduceOpt(month.M, correctMonths(dateTokens.shift())) : undefined, date.getMonth())
+    const years = reduce(yearsToThisEpoch(format.has("y") ? dateTokens.shift() : undefined), date.getFullYear())
 
-    const hours = reduce((format.hasHours ? time.H || dateTokens.shift() : undefined), date.getHours())
-    const minutes = reduce((format.hasMinutes ? time.m || dateTokens.shift() : undefined), date.getMinutes())
-    const seconds = reduce((format.hasSeconds ? time.s || dateTokens.shift() : undefined), date.getSeconds())
-    const milliseconds = reduce((format.hasMilliseconds ? time.S || dateTokens.shift() : undefined), date.getMilliseconds())
+    const hours = reduce((format.has("H") ? time.H || dateTokens.shift() : undefined), date.getHours())
+    const minutes = reduce((format.has("m") ? time.m || dateTokens.shift() : undefined), date.getMinutes())
+    const seconds = reduce((format.has("s") ? time.s || dateTokens.shift() : undefined), date.getSeconds())
+    const milliseconds = reduce((format.has("S") ? time.S || dateTokens.shift() : undefined), date.getMilliseconds())
     return new Date(
         years,
         months,

@@ -17,39 +17,82 @@ interface Month {
 
 interface DateTimeFormat {
     id: number
-    dateSeparator: string
-    d: 0 | 2 // no, 2-digit
-    M: 0 | 2 | 3 | 4 // no, 2-digit, short name, full name
-    y: 0 | 2 | 4 // no, 2-digit, 4-digit
-
-    H: 0 | 2 // no, 2-digit
-    m: 0 | 2 // no, 2-digit
-    s: 0 | 2 // no, 2-digit
-    S: 0 | 3 // no, 3-digit
+    pattern: string
 }
+
+interface TextFormatToken {
+    type: "text"
+    text: string
+}
+
+interface DateFormatToken {
+    type: "date"
+    dateSymbol: string
+    format: number
+}
+
+type FormatToken = TextFormatToken | DateFormatToken
+const isDateFormatToken = (token: FormatToken | undefined): token is DateFormatToken => token !== undefined && token.type === "date"
 
 interface ExtendedDateTimeFormat extends DateTimeFormat {
-    hasYear: boolean
-    hasMonth: boolean
-    hasDay: boolean
+    formatTokens: FormatToken[]
+
+    has(type: string): boolean
+
     hasTime: boolean
-    hasHours: boolean
-    hasMinutes: boolean
-    hasSeconds: boolean
-    hasMilliseconds: boolean
+
+    get(type: string): DateFormatToken | undefined
 }
 
+const supportedTokens = new Set(["d", "M", "y", "H", "m", "s", "S"])
+const supportedTimeTokens = new Set(["H", "m", "s", "S"])
+
 function getExtendedDateTimeFormat(dateTimeFormat: DateTimeFormat): ExtendedDateTimeFormat {
+    const pattern = dateTimeFormat.pattern.replace(/'(([^']|'')*)'/, (match, match2: string) => match2).replace(/''/, "'")
+    const tokens: FormatToken[] = []
+    let counter: number = 0
+
+    function dateLookAhead(target: string): number {
+        const start = counter
+        while (pattern[counter] === target) {
+            counter++
+        }
+        return counter - start
+    }
+
+    function textLookAhead(): string {
+        const result = []
+        while (!supportedTokens.has(pattern[counter])) {
+            result.push(pattern[counter])
+            counter++
+        }
+        return result.join("")
+    }
+
+    while (counter < pattern.length) {
+        if (supportedTokens.has(pattern[counter]))
+            tokens.push({
+                type: "date",
+                dateSymbol: pattern[counter],
+                format: dateLookAhead(pattern[counter])
+            })
+        else tokens.push({
+            type: "text",
+            text: textLookAhead()
+        })
+    }
+    const dateTokens = tokens.filter(isDateFormatToken)
+    const tokensMap: Map<string, DateFormatToken> = new Map(dateTokens.map(token => [token.dateSymbol, token]))
     return {
         ...dateTimeFormat,
-        hasYear: dateTimeFormat.y !== 0,
-        hasMonth: dateTimeFormat.M !== 0,
-        hasDay: dateTimeFormat.d !== 0,
-        hasMilliseconds: dateTimeFormat.S !== 0,
-        hasSeconds: dateTimeFormat.s !== 0,
-        hasMinutes: dateTimeFormat.m !== 0,
-        hasHours: dateTimeFormat.H !== 0,
-        hasTime: dateTimeFormat.H !== 0,
+        formatTokens: tokens,
+        has(type: string): boolean {
+            return tokensMap.has(type)
+        },
+        hasTime: dateTokens.filter(token => supportedTimeTokens.has(token.dateSymbol)).length > 0,
+        get(type: string) {
+            return tokensMap.get(type)
+        },
     }
 }
 
@@ -80,7 +123,7 @@ function getExtendedLocale(locale: Locale): ExtendedLocale {
     return ({
         ...locale,
         dateTimeFormats: locale.dateTimeFormats.map(getExtendedDateTimeFormat),
-        defaultDateTimeFormat: getExtendedDateTimeFormat(<DateTimeFormat> locale.dateTimeFormats.find(value => value.id === locale.defaultDateTimeFormatId)),
+        defaultDateTimeFormat: getExtendedDateTimeFormat(<DateTimeFormat>locale.dateTimeFormats.find(value => value.id === locale.defaultDateTimeFormatId)),
         getMonthNameShort(id: number): string {
             return monthMap.get(id)?.shortName || ""
         },
@@ -127,15 +170,7 @@ class DefaultLocale implements Locale {
     ]
     dateTimeFormats: DateTimeFormat[] = [{
         id: 0,
-        dateSeparator: '/',
-        d: 2,
-        M: 4,
-        y: 4,
-
-        H: 2,
-        m: 2,
-        s: 2,
-        S: 3
+        pattern: "dd/MMMM/yyyy HH:mm:ss.SSS"
     }]
     defaultDateTimeFormatId: number = 0
 }
@@ -149,11 +184,21 @@ interface UserLocaleProviderProps {
     children: ReactNode[]
 }
 
-function UserLocaleProvider({key, children,  locale}: UserLocaleProviderProps) {
+function UserLocaleProvider({key, children, locale}: UserLocaleProviderProps) {
     return createElement(UserLocaleContext.Provider, {key: key, value: getExtendedLocale(locale)}, children)
 }
 
-export type {WeekDay, Month, DateTimeFormat, Locale, ExtendedLocale, ExtendedDateTimeFormat}
-export {useUserLocale, UserLocaleProvider, getDateTimeFormat}
+export type {
+    WeekDay,
+    Month,
+    DateTimeFormat,
+    Locale,
+    ExtendedLocale,
+    ExtendedDateTimeFormat,
+    FormatToken,
+    TextFormatToken,
+    DateFormatToken
+}
+export {useUserLocale, UserLocaleProvider, getDateTimeFormat, isDateFormatToken}
 
 export const components = {UserLocaleProvider}
