@@ -20,6 +20,15 @@ interface DateTimeFormat {
     pattern: string
 }
 
+interface Locale {
+    timezoneId: string
+    shortName: string
+    weekDays: WeekDay[]
+    months: Month[]
+    dateTimeFormats: DateTimeFormat[]
+    defaultDateTimeFormatId: number
+}
+
 interface TextFormatToken {
     type: "text"
     text: string
@@ -94,15 +103,6 @@ function getExtendedDateTimeFormat(dateTimeFormat: DateTimeFormat): ExtendedDate
             return tokensMap.get(type)
         },
     }
-}
-
-interface Locale {
-    timezoneId: string
-    shortName: string
-    weekDays: WeekDay[]
-    months: Month[]
-    dateTimeFormats: DateTimeFormat[]
-    defaultDateTimeFormatId: number
 }
 
 interface ExtendedLocale extends Locale {
