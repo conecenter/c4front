@@ -272,7 +272,13 @@ function changeDate(date: Date, tokens: Token[], time: TimeValue, month: MonthVa
 
     const dateTokens: number[] = tokens.reduce((acc: number[], token: Token) => acc.concat(token.type === 'number' ? [token.value] : []), [])
     const days = reduce(format.has("d") ? dateTokens.shift() : undefined, date.getDate())
-    const months = reduce(format.has("M") ? reduceOpt(month.M, correctMonths(dateTokens.shift())) : undefined, date.getMonth())
+    const months = reduce(
+        format.has("M") ?
+            month.M !== undefined ?
+                month.M :
+                correctMonths(dateTokens.shift()) :
+            undefined,
+        date.getMonth())
     const years = reduce(yearsToThisEpoch(format.has("y") ? dateTokens.shift() : undefined), date.getFullYear())
 
     const hours = reduce((format.has("H") ? time.H || dateTokens.shift() : undefined), date.getHours())
