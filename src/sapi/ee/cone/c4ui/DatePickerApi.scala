@@ -7,18 +7,9 @@ import ee.cone.c4vdom._
 trait DatePicker extends ToChildPair
 
 @c4tagSwitch("FrontApp") trait Locale extends ToJson
-
-@c4tagSwitch("FrontApp") trait WeekDay extends ToJson {
-  def id: Int
-}
-
-@c4tagSwitch("FrontApp") trait Month extends ToJson {
-  def id: Int
-}
-
-@c4tagSwitch("FrontApp") trait DateTimeFormat extends ToJson {
-  def id: Int
-}
+@c4tagSwitch("FrontApp") trait WeekDay extends ToJson
+@c4tagSwitch("FrontApp") trait Month extends ToJson
+@c4tagSwitch("FrontApp") trait DateTimeFormat extends ToJson
 
 @c4tagSwitch("FrontApp") trait DatePickerState extends ToJson
 
@@ -27,35 +18,35 @@ trait DatePicker extends ToChildPair
     key: String,
     state: DatePickerState,
     timestampFormatId: Int,
-    userTimezoneId: String,
     receiver: Receiver[C],
+    userTimezoneId: String = "",
     deferredSend: Boolean = false
   ): DatePicker
 
   @c4val("timestamp-state") def timeStampState(
-    timestamp: Long
+    timestamp: String
   ): DatePickerState
 
   @c4val("input-state") def inputState(
     inputValue: String,
-    tempTimestamp: Long = 0L
+    tempTimestamp: String = ""
   ): DatePickerState
+}
 
+@c4tags("FrontApp") trait LocaleTags {
   @c4el("UserLocaleProvider") def localeProvider(
     key: String,
     locale: Locale,
     children: ChildPairList[OfDiv] = Nil,
   ): ToChildPair
-}
 
-@c4tags("FrontApp") trait LocaleTags {
   @c4val def locale(
     timezoneId: String,
     shortName: String,
     weekDays: List[WeekDay],
     months: List[Month],
     dateTimeFormats: List[DateTimeFormat],
-    defaultDateFormatId: Int
+    defaultDateTimeFormatId: Int
   ): Locale
 
   @c4val def weekDay(
@@ -72,13 +63,6 @@ trait DatePicker extends ToChildPair
 
   @c4val def dateTimeFormat(
     id: Int,
-    dateSeparator: String,
-    d: Int,
-    M: Int,
-    y: Int,
-    H: Int,
-    m: Int,
-    s: Int,
-    S: Int
+    pattern: String
   ): DateTimeFormat
 }

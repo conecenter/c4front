@@ -1,4 +1,4 @@
-import {Context, createContext, createElement, ReactNode, useContext} from "react";
+import {Context, createContext, createElement, ReactNode, useContext, useMemo} from "react";
 import {getOrElse, None, Option, toOption} from "../main/option";
 // @ts-ignore
 import TrieSearch from "trie-search";
@@ -71,7 +71,7 @@ function getExtendedDateTimeFormat(dateTimeFormat: DateTimeFormat): ExtendedDate
 
     function textLookAhead(): string {
         const result = []
-        while (!supportedTokens.has(pattern[counter])) {
+        while (pattern[counter] !== undefined && !supportedTokens.has(pattern[counter])) {
             result.push(pattern[counter])
             counter++
         }
@@ -185,6 +185,7 @@ interface UserLocaleProviderProps {
 }
 
 function UserLocaleProvider({key, children, locale}: UserLocaleProviderProps) {
+    const extendedLocale = useMemo(()=>getExtendedLocale(locale),[locale])
     return createElement(UserLocaleContext.Provider, {key: key, value: getExtendedLocale(locale)}, children)
 }
 
