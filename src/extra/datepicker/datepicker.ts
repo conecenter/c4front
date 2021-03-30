@@ -1,5 +1,5 @@
 import {createElement as el, useMemo, useRef} from "react";
-import {getDateTimeFormat, UserLocaleProvider, useUserLocale} from "../locale";
+import {getDateTimeFormat, useUserLocale} from "../locale";
 import {DatePickerState, useDatePickerStateSync} from "./datepicker-exchange";
 import {DateSettings, formatDate, getDate} from "./date-utils";
 import {mapOption, None, nonEmpty, Option} from "../../main/option";
@@ -7,16 +7,36 @@ import {useSelectionEditableInput} from "./selection-control";
 import {getOnBlur, getOnChange, getOnKeyDown, onTimestampChangeAction} from "./datepicker-actions";
 
 
+type DatePickerServerState = TimestampServerState | InputServerState
+
+interface InputServerState {
+    tp: 'input-state'
+    inputValue: string
+    tempTimestamp?: string
+}
+
+interface TimestampServerState {
+    tp: 'timestamp-state'
+    timestamp: string
+}
+
+
 interface DatePickerProps {
     key: string
     identity: Object
-    state: DatePickerState
+    state: DatePickerServerState
     timestampFormatId: number
     userTimezoneId?: string,
     deferredSend?: boolean
 }
 
-export function DatePickerInputElement({identity, state, timestampFormatId, userTimezoneId, deferredSend}: DatePickerProps) {
+export function DatePickerInputElement({
+                                           identity,
+                                           state,
+                                           timestampFormatId,
+                                           userTimezoneId,
+                                           deferredSend
+                                       }: DatePickerProps) {
     const locale = useUserLocale()
     const timezoneId = userTimezoneId ? userTimezoneId : locale.timezoneId
     const timestampFormat = getDateTimeFormat(timestampFormatId, locale)
@@ -26,7 +46,11 @@ export function DatePickerInputElement({identity, state, timestampFormatId, user
         setTempState: setTempState,
         setFinalState: setFinalState
     } = useDatePickerStateSync(identity, state, deferredSend || false)
-    const {date: currentDateOpt, dateFormat, inputValue} = useMemo(() => getCurrentProps(currentState, dateSettings), [currentState, dateSettings])
+    const {
+        date: currentDateOpt,
+        dateFormat,
+        inputValue
+    } = useMemo(() => getCurrentProps(currentState, dateSettings), [currentState, dateSettings])
     const inputRef = useRef<HTMLInputElement>()
     const setSelection: (from: number, to: number) => void = useSelectionEditableInput(inputRef)
     const onTimestampChange: (timestamp: number) => void = onTimestampChangeAction(setTempState)
@@ -65,3 +89,4 @@ function getCurrentProps(currentState: DatePickerState, dateSettings: DateSettin
 }
 
 export const components = {DatePickerInputElement}
+export type {DatePickerServerState}

@@ -15,7 +15,7 @@ function App() {
         userTimezoneId: "Europe/Moscow",
         state: {
             tp: "timestamp-state",
-            timestamp: testTS
+            timestamp: String(testTS)
         }
     })
     const sender = {

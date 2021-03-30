@@ -1,6 +1,7 @@
 import {useSync} from "../../main/vdom-hooks";
 import {useCallback} from "react";
 import {identityAt} from "../../main/vdom-util";
+import {DatePickerServerState} from "./datepicker";
 
 type DatePickerState = TimestampState | InputState
 
@@ -26,6 +27,12 @@ const createInputState = (inputValue: string, tempTimestamp?: number): InputStat
     inputValue: inputValue,
     tempTimestamp: tempTimestamp
 })
+
+function serverStateToState(serverState: DatePickerServerState): DatePickerState {
+    if (serverState.tp === 'timestamp-state')
+        return createTimestampState(parseInt(serverState.timestamp))
+    else return createInputState(serverState.inputValue, serverState.tempTimestamp !== undefined ? parseInt(serverState.tempTimestamp) : undefined)
+}
 
 function stateToPatch(mode: DatePickerState, changing: boolean, deferredSend: boolean): Patch {
     const changingHeaders = changing ? {'x-r-changing': "1"} : {}
@@ -81,12 +88,12 @@ const receiverIdOf = identityAt('receiver')
 
 function useDatePickerStateSync(
     identity: Object,
-    state: DatePickerState,
+    state: DatePickerServerState,
     deferredSend: boolean
 ): DatePickerSyncState {
     const [patches, enqueuePatch] = <[Patch[], (patch: Patch) => void]>useSync(receiverIdOf(identity))
     const patch: Patch = patches.slice(-1)[0]
-    const currentState: DatePickerState = patch ? patchToState(patch) : state
+    const currentState: DatePickerState = patch ? patchToState(patch) : serverStateToState(state)
     const onChange = useCallback((state: DatePickerState) => enqueuePatch(stateToPatch(state, true, deferredSend)), [enqueuePatch])
     const onBlur = useCallback((state: DatePickerState) => enqueuePatch(stateToPatch(state, false, false)), [enqueuePatch])
     return {currentState: currentState, setTempState: onChange, setFinalState: onBlur}
