@@ -2,7 +2,7 @@ import {DateSettings, incrementDate, parseStringToDate} from "./date-utils";
 import {createInputState, createTimestampState, DatePickerState, isTimestampState} from "./datepicker-exchange";
 import {getOrElse, mapOption, nonEmpty, Option} from "../../main/option";
 import React, {ChangeEvent, FocusEvent, KeyboardEvent} from "react";
-import {DOWN_ARROW_KEY, UP_ARROW_KEY} from "../../main/keyborad-keys";
+import {ARROW_DOWN_KEY, ARROW_UP_KEY} from "../../main/keyboard-keys";
 
 function updateAndSendDate(
     currentDate: Date,
@@ -38,11 +38,11 @@ export function getOnKeyDown(
             const target = <HTMLInputElement>event.target
             const selectionStart = target.selectionStart ? target.selectionStart : 0
             switch (event.code) {
-                case UP_ARROW_KEY.code:
+                case ARROW_UP_KEY.code:
                     updateAndSendDate(currentDateOpt, dateFormat, dateSettings, selectionStart, true, cycleThroughout, onTimestampChange, setSelection)
                     event.preventDefault()
                     break
-                case DOWN_ARROW_KEY.code:
+                case ARROW_DOWN_KEY.code:
                     updateAndSendDate(currentDateOpt, dateFormat, dateSettings, selectionStart, false, cycleThroughout, onTimestampChange, setSelection)
                     event.preventDefault()
                     break
