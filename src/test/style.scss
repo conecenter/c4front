@@ -1,242 +1,242 @@
 @import "reset";
 
 :root {
-    --color-secondaryColor: rgb(225, 225, 225);
-    --light-secondaryColor: hsl(0, 0%, 63.3333%);
-    --color-body: hsl(0, 0%, 100%);
-    --textColor-body: hsl(0, 0%, 12.9412%);
-    --color-darkPrimaryColor: rgb(176, 162, 116);
+  --color-secondaryColor: rgb(225, 225, 225);
+  --light-secondaryColor: hsl(0, 0%, 63.3333%);
+  --color-body: hsl(0, 0%, 100%);
+  --textColor-body: hsl(0, 0%, 12.9412%);
+  --color-darkPrimaryColor: rgb(176, 162, 116);
 }
 
 body {
-    font-family: helvetica;
-    background: var(--color-body);
-    color: var(--textColor-body);
-    overflow-x: hidden;
+  font-family: helvetica;
+  background: var(--color-body);
+  color: var(--textColor-body);
+  overflow-x: hidden;
 }
 
 button {
-    min-height: 1.6em;
-    min-width: 1.6em;
-    color: var(--textColor-body);
-    background-color: transparent;
-    cursor: pointer;
-    margin: 0.2em;
-    border: medium none;
-    font-size: 1em;
-    font-family: inherit;
-    line-height: 1;
-    align-self: center;
-    padding: 0 0.2em;
-    white-space: nowrap;
-    outline: currentcolor none medium;
-    outline-offset: -0.1em;
+  min-height: 1.6em;
+  min-width: 1.6em;
+  color: var(--textColor-body);
+  background-color: transparent;
+  cursor: pointer;
+  margin: 0.2em;
+  border: medium none;
+  font-size: 1em;
+  font-family: inherit;
+  line-height: 1;
+  align-self: center;
+  padding: 0 0.2em;
+  white-space: nowrap;
+  outline: currentcolor none medium;
+  outline-offset: -0.1em;
 
-    &:hover {
-        opacity: 0.8;
-    }
+  &:hover {
+    opacity: 0.8;
+  }
 
-    >.text {
-        padding: 0 1em;
-    }
+  > .text {
+    padding: 0 1em;
+  }
 }
 
 
 //HEADER
 .filterArea {
-    background-color: var(--color-darkPrimaryColor);
-    color: var(--textColor-body);
+  background-color: var(--color-darkPrimaryColor);
+  color: var(--textColor-body);
 
-    >button {
-        border: medium none;
-        cursor: pointer;
-        font-size: 1em;
-        align-self: center;
-        font-family: inherit;
-        outline: currentcolor none medium;
-        outline-offset: -0.1em;
-        line-height: 1;
-    }
+  > button {
+    border: medium none;
+    cursor: pointer;
+    font-size: 1em;
+    align-self: center;
+    font-family: inherit;
+    outline: currentcolor none medium;
+    outline-offset: -0.1em;
+    line-height: 1;
+  }
 }
 
 //POPUP
 .popupItem button {
-    padding: 0;
-    margin: 0;
-    width: 100%;
+  padding: 0;
+  margin: 0;
+  width: 100%;
 }
 
 .gridPopup {
-    border-style: solid;
-    border-width: 1px;
-    border-color: black;
-    background-color: white;
-    z-index: 1;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+  background-color: white;
+  z-index: 1;
 }
 
 
 //GRID
 div.grid {
-    border-collapse: collapse;
-    --secondary-color: rgb(238, 238, 238);
-    border-spacing: 0;
-    --highlight-color: #f8f8cb;
+  border-collapse: collapse;
+  --secondary-color: rgb(238, 238, 238);
+  border-spacing: 0;
+  --highlight-color: #f8f8cb;
 
 
-    //TABLE
-    >.tableHeadContainer {
-        font-weight: bold;
-        vertical-align: middle;
-        overflow: visible;
-        background-color: var(--color-secondaryColor);
-    
-        .clickableDiv:hover {
-            opacity: 0.8;
-            cursor: pointer;
-        }
+  //TABLE
+  > .tableHeadContainer {
+    font-weight: bold;
+    vertical-align: middle;
+    overflow: visible;
+    background-color: var(--color-secondaryColor);
+
+    .clickableDiv:hover {
+      opacity: 0.8;
+      cursor: pointer;
     }
-    
-    >.tableCellContainer {
-        border-width: 0.5px;
-        border-style: solid;
-        padding: 0.1em 0.2em;
-        vertical-align: middle;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        text-align: center;
-        outline: red none 1px;
-        outline-offset: -1px;
-        vertical-align: middle;
-        display: flex;
-        align-items: center;
-    }
+  }
+
+  > .tableCellContainer {
+    border-width: 0.5px;
+    border-style: solid;
+    padding: 0.1em 0.2em;
+    vertical-align: middle;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    outline: red none 1px;
+    outline-offset: -1px;
+    vertical-align: middle;
+    display: flex;
+    align-items: center;
+  }
 
 
-    //EXPANDER
-    >.closedExpander {
-        background-color: silver;
-    }
+  //EXPANDER
+  > .closedExpander {
+    background-color: silver;
+  }
 
-    >.openedExpander {
-        background-color: grey;
-    }
+  > .openedExpander {
+    background-color: grey;
+  }
 
-    >div[data-expander='expanded'] {
-        >img {
-            transform: rotate(-180deg);
-            transition: transform 0.25s linear;
-        }
-
-        >div>.expanderElement {
-            transform: rotate(180deg);
-        }
+  > div[data-expander='expanded'] {
+    > img {
+      transform: rotate(-180deg);
+      transition: transform 0.25s linear;
     }
 
-    .expanderElementContainer {
-        margin: 0.2em;
-        align-self: center;
+    > div > .expanderElement {
+      transform: rotate(180deg);
     }
+  }
 
-    .expanderElement {
-        display: block;
-        height: 1em;
-        cursor: pointer;
-        align-self: center;
-    }
+  .expanderElementContainer {
+    margin: 0.2em;
+    align-self: center;
+  }
 
-    div[data-expander="collapsed"] {
-        >img {
-            transform: rotate(0deg);
-            transition: transform 0.25s linear;
-        }
-    }
+  .expanderElement {
+    display: block;
+    height: 1em;
+    cursor: pointer;
+    align-self: center;
+  }
 
-    >div[data-expander='passive'] {
-        visibility: hidden;
-        position: fixed;
+  div[data-expander="collapsed"] {
+    > img {
+      transform: rotate(0deg);
+      transition: transform 0.25s linear;
     }
-    
+  }
 
-    .dragElement {
-        height: 1.3em;
-        width: 1.3em;
-        display: block;
-        margin: auto;
-    }
-    
-    >.emptyCell {
-        border: 0.5px solid var(--color-secondaryColor);
-    }
+  > div[data-expander='passive'] {
+    visibility: hidden;
+    position: fixed;
+  }
+
+
+  .dragElement {
+    height: 1.3em;
+    width: 1.3em;
+    display: block;
+    margin: auto;
+  }
+
+  > .emptyCell {
+    border: 0.5px solid var(--color-secondaryColor);
+  }
 }
 
 .chipItem {
-    font-size: 1em;
-    text-align: center;
-    border-radius: 0.28em;
-    cursor: pointer;
-    display: inline-block;
-    vertical-align: middle;
-    padding: 0.25em 0.55em;
-    white-space: nowrap;
-    align-self: center;
-    user-select: none;
-    line-height: 1em;
-    margin: 0.2em;
-    min-width: 0.5em;
-    min-height: 1em;
-    font-weight: normal !important;
+  font-size: 1em;
+  text-align: center;
+  border-radius: 0.28em;
+  cursor: pointer;
+  display: inline-block;
+  vertical-align: middle;
+  padding: 0.25em 0.55em;
+  white-space: nowrap;
+  align-self: center;
+  user-select: none;
+  line-height: 1em;
+  margin: 0.2em;
+  min-width: 0.5em;
+  min-height: 1em;
+  font-weight: normal !important;
 }
 
 
 //ICONS
 .rowIconSize {
-    height: 2em;
-    width: 2em;
+  height: 2em;
+  width: 2em;
 }
 
 .filterButtonIcon {
-    height: 1.3em;
-    width: 1.3em;
+  height: 1.3em;
+  width: 1.3em;
 }
 
 .hideFilterIcon {
-    height: 1.2em;
-    width: 1.2em;
+  height: 1.2em;
+  width: 1.2em;
 }
 
 
 //COLORS
 .headerColor-border {
-    border-color: var(--color-secondaryColor);
+  border-color: var(--color-secondaryColor);
 }
 
 .primaryColor {
-    background-color: #e5d089;
-    color: white;
+  background-color: #e5d089;
+  color: white;
 }
 
 .darkPrimaryColor {
-    background-color: rgb(176, 162, 116);
-    color: rgb(255, 255, 255);
+  background-color: rgb(176, 162, 116);
+  color: rgb(255, 255, 255);
 }
 
 .lightPrimaryColor {
-    background-color: #af8f26;
+  background-color: #af8f26;
 }
 
 .greenColor {
-    background-color: rgb(5, 119, 49);
-    color: rgb(255, 255, 255);
+  background-color: rgb(5, 119, 49);
+  color: rgb(255, 255, 255);
 }
 
 .greenColor-light {
-    background-color: rgb(31, 246, 114);
-    color: rgb(255, 255, 255);
+  background-color: rgb(31, 246, 114);
+  color: rgb(255, 255, 255);
 }
 
 .redColor {
-    background-color: rgb(255, 0, 0);
-    color: rgb(255, 255, 255);
+  background-color: rgb(255, 0, 0);
+  color: rgb(255, 255, 255);
 }
 
 // body {
@@ -245,3 +245,49 @@ div.grid {
 // body *:hover {
 //     transform: skewY(-15deg);
 // }
+
+.inputBox {
+  display: flex;
+  height: auto;
+  line-height: 1;
+  vertical-align: middle;
+  width: 100%;
+  background: var(--color-body);
+  color: var(--textColor-body);
+  box-sizing: border-box;
+  position: relative;
+  border: 0.05em solid var(--color-secondaryColor);
+
+  &:hover {
+    border-color: var(--light-secondaryColor);
+  }
+
+  > .inputSubBox {
+    flex: 1 1 0%;
+    height: auto;
+    min-height: 100%;
+    display: flex;
+    position: relative;
+    text-align: left;
+
+    > input {
+      margin: 0rem;
+      vertical-align: top;
+      border: medium none;
+      height: 100%;
+      padding: 0.2172em 0.3125em;
+      width: 100%;
+      z-index: 0;
+      box-sizing: border-box;
+      font-size: inherit;
+      outline: currentcolor none medium;
+      text-align: inherit;
+      font-family: inherit;
+      color: inherit;
+      line-height: normal;
+      background-color: inherit;
+      flex: 1 1 20%;
+      min-width: 0;
+    }
+  }
+}

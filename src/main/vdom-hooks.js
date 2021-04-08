@@ -24,6 +24,7 @@ export const useSync = identity => {
     },[ack])
     return [patches,enqueuePatch]
 }
+
 export function createSyncProviders({sender,ack,children}){
     return createElement(SenderContext.Provider, {value:sender},
         createElement(AckContext.Provider, {value:ack}, children)
