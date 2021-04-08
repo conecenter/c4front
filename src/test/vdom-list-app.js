@@ -1,10 +1,11 @@
 
 import { GridRoot, GridCell, Highlighter } from "../main/vdom-list.js"
 import { createSyncProviders, NoCaptionContext } from "../main/vdom-hooks.js"
+import { deleted } from "../main/vdom-util.js"
 import ReactDOM from "react-dom"
 import React from "react"
 
-const { createElement: $, useState, useContext } = React
+const { createElement: $, useState, useContext, useCallback } = React
 
 function ImageElement({src,className}){
     return $("img",{src,className,draggable:"false"})
@@ -22,10 +23,22 @@ function Text({ value }) {
     return value+(noCaption?"":"*")
 }
 
+const useExpanded = () => {
+    const [expanded, setExpanded] = useState({})
+    const setExpandedItem = useCallback((key, f) => setExpanded(was => {
+        const wasValue = !!was[key]
+        const willValue = !!f(wasValue)
+        return wasValue === willValue ? was : willValue ? { ...was, [key]: 1 } : deleted({ [key]: 1 })(was)
+    }), [setExpanded])
+    return [expanded, setExpandedItem]
+}
+
 function App() {
     const [state, setState] = useState({ enableDrag: true })
 
     const { enableDrag } = state
+
+    const [expanded, setExpandedItem] = useExpanded()
 
     const exCol = (colKey, hideWill, min, max) => ({
         colKey, hideWill,
@@ -62,7 +75,7 @@ function App() {
                     colKey === "drag" || colKey === "expand" ? null : $(Text,{ key: "text", value: "H" + colKey })
                 ):
                 rowKey === "drag" ? enableDrag && getColDragElement() :
-                colKey === "expand" ? getExpanderElement() :
+                colKey === "expand" ? getExpanderElement(rowKey) :
                 colKey === "drag" ? enableDrag && getRowDragElement() :
                 colKey === "icon" ? "I" :
                 mockData()
@@ -70,10 +83,10 @@ function App() {
         })
     }
 
-    function getExpanderElement() {
+    function getExpanderElement(rowKey) {
         return $(
             "div",
-            { className: "textLineSize absolutelyCentered", key: "expanderElem" },
+            { className: "textLineSize absolutelyCentered", key: "expanderElem", onClick: ev => setExpandedItem(rowKey, v => !v) },
             $(ImageElement, { color: "#90929F", className: "expanderElement", src: './vdom-list-downarrowrow.svg' })
         )
     }
@@ -98,6 +111,7 @@ function App() {
     const byColumn = []
     const listEl = $(GridRoot, {
         key: "list",
+        gridKey: "list",
         identity: {},
         cols,
         children: [
@@ -105,7 +119,7 @@ function App() {
             ...cols.map(exCell("head")).filter(Boolean),
             ...rowKeys.flatMap(rowKey => cols.map(exCell(rowKey)).filter(Boolean)),
         ],
-        rows: rowKeys.map(rowKey=>({rowKey,canDropInto:true,canDropBeside:true}))
+        rows: rowKeys.map(rowKey=>({rowKey,canDropInto:true,canDropBeside:true,isExpanded:!!expanded[rowKey]}))
     })
     const children = [
         $("button", { key: "dragOff", onClick: ev => setState(was => ({ ...was, enableDrag: false })) }, "no drag"),
