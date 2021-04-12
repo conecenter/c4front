@@ -14,9 +14,12 @@ export default {
 //console.log("host ("+host+")")
 export default {
     /*jsx: 'react',*/
-    alias: {
-        'react': "/node_modules/@pika/react/source.development.js",
-        'react-dom': "/node_modules/@pika/react-dom/source.development.js",
+//    alias: {
+//        'react': "/node_modules/@pika/react/source.development.js",
+//        'react-dom': "/node_modules/@pika/react-dom/source.development.js",
+//    },
+    optimizeDeps: {
+        entries: []
     },
     hmr: false,
 }

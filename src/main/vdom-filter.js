@@ -1,5 +1,6 @@
 
 import {createElement as $,useState,useLayoutEffect,useContext,createContext,useCallback,useEffect,cloneElement} from "react"
+import {findFirstParent} from "./vdom-util.js"
 import {useWidth,useEventListener} from "../main/vdom-hooks.js"
 import {usePopupPos} from "../main/popup.js"
 
@@ -148,22 +149,26 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
 ////
 
 
-
+const popupAttrName = "data-is-popup"
 const PopupContext = createContext()
-const usePopupState = (identity,popupElement) => {
+const usePopupState = identity => {
     const [popup,setPopup] = useContext(PopupContext)
     const isOpened = useCallback(p => p===identity, [identity])
-    const setOpened = useCallback(() => setPopup(identity), [setPopup,identity])
-    const doc = popupElement && popupElement.ownerDocument
-    const checkClose = useCallback(ev=>{
-        setPopup(was=>isOpened(was)?null:was)
-    },[setPopup,isOpened])
-    useEventListener(doc,"click",checkClose)
+    const setOpened = useCallback(on => setPopup(on?identity:null), [setPopup,identity])
     return [isOpened(popup),setOpened]
 }
 export function PopupManager({children}){
     const [popup,setPopup] = useState(null) // todo useSync
-    return $(PopupContext.Provider,{value:[popup,setPopup]},children)
+    const [element,setElement] = useState(null)
+    const doc = element && element.ownerDocument
+    const checkClose = useCallback(ev=>{
+        if(!findFirstParent(el=>el.getAttribute(popupAttrName))(ev.target)){
+            setPopup(was=>null)
+        }
+    },[setPopup])
+    useEventListener(doc,"mousedown",checkClose) // bubbling "click" will come too late, with dead toggle-element (ev.target)
+    const el = $("span", { key: "popup-manager", ref: setElement })
+    return $(PopupContext.Provider,{value:[popup,setPopup]},[...children,el])
 }
 
 export function FilterButtonExpander({identity,optButtons:rawOptButtons,pos,className,popupClassName,popupItemClassName,children,openedChildren,getButtonWidth}){
@@ -171,12 +176,16 @@ export function FilterButtonExpander({identity,optButtons:rawOptButtons,pos,clas
     const [popupElement,setPopupElement] = useState(null)
     const [popupStyle,popupParentStyle] = usePopupPos(popupElement)
     const width = em(Math.max(...optButtons.map(getButtonWidth)))
-    const [isOpened,open] = usePopupState(identity,popupElement)
+    const [isOpened,toggle] = usePopupState(identity)
     const {style:posStyle,...posData} = pos
     const parentStyle = {...popupParentStyle,...posStyle}
 
-    console.log("p-render-")
-    return $("div",{className,style:parentStyle,onClick:ev=>open(),...posData},
+    //console.log("p-render-")
+    return $("div",
+        {
+            className, style:parentStyle, [popupAttrName]:1, ...posData,
+            onClick: ev => toggle(!isOpened),
+        },
         isOpened ? [
             openedChildren,
             $("div",{key:"popup",className:popupClassName,style:{...popupStyle,width},ref:setPopupElement},optButtons.map(btn=>{
