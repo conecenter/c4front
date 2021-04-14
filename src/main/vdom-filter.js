@@ -142,7 +142,7 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
 
     const children = [...filterGroupElements,...btnElements]
     /* maxWidth: maxFilterAreaWidth ? em(maxFilterAreaWidth) : "100vw"*/
-    const style = { position: "relative", height: yRowToEm(groupedFilters.length) }
+    const style = { position: "relative", height: yRowToEm(groupedFilters.length), overflowX: "hidden" }
     return $("div",{ style, className, ref: setGridElement, children })
 }
 

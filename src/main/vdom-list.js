@@ -1,6 +1,6 @@
 
 
-import { createElement as $, useMemo, useState, cloneElement, useCallback, useEffect } from "react"
+import { createElement as $, useMemo, useState, cloneElement, useCallback, useEffect, useLayoutEffect } from "react"
 
 import { identityAt, never, sortedWith, findFirstParent, weakCache } from "./vdom-util.js"
 import { useWidth, useEventListener, useSync, NoCaptionContext } from "./vdom-hooks.js"
@@ -156,6 +156,16 @@ const useSyncGridDrag = ({ identity, rows, cols, gridKey }) => {
     return [dragData,dragCSSContent,onMouseDown]
 }
 
+const useColumnGap = gridElement => { // will not react to element style changes
+    const [columnGap,setColumnGap] = useState(0)
+    useLayoutEffect(()=>{
+        if(!gridElement) return;
+        const {columnGap,fontSize} = getComputedStyle(gridElement)
+        setColumnGap(parseFloat(columnGap)/parseFloat(fontSize))
+    },[gridElement])
+    return columnGap
+}
+
 export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey }) {
     const children = rawChildren || noChildren//Children.toArray(rawChildren)
 
@@ -170,8 +180,10 @@ export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey 
 
     const [gridElement, setGridElement] = useState(null)
     const outerWidth = useWidth(gridElement)
+    const columnGap = useColumnGap(gridElement)
+    const contentWidth = outerWidth - columnGap * cols.length
     const { hasHiddenCols, hideElementsForHiddenCols } =
-        useMemo(() => calcHiddenCols(cols, outerWidth), [cols, outerWidth])
+        useMemo(() => calcHiddenCols(cols, contentWidth), [cols, contentWidth])
     const gridTemplateColumns = useMemo(() => getGridTemplateColumns(
         hideExpander(hasHiddenCols)(hideElementsForHiddenCols(false,col=>col.colKey)(cols))
     ), [cols, hideElementsForHiddenCols, hasHiddenCols])
@@ -184,7 +196,7 @@ export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey 
     }),[children,rows,cols,hasHiddenCols,hideElementsForHiddenCols,dragRowKey])
 
     const dragBGEl = $("div", { key: "gridBG", className: "gridBG", style: { gridColumn: spanAll, gridRow: spanAll }})
-    const style = { display: "grid", gridTemplateRows, gridTemplateColumns }
+    const style = { display: "grid", gridTemplateRows, gridTemplateColumns, overflowX: "hidden" }
     const res = $("div", { onMouseDown, style, className: "grid", "data-grid-key": gridKey, ref: setGridElement }, dragBGEl, ...allChildren)
     const dragCSSEl = $("style",{dangerouslySetInnerHTML: { __html: dragCSSContent}})
     return $(NoCaptionContext.Provider,{value:true},dragCSSEl,res)
