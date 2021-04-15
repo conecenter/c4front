@@ -120,7 +120,7 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
             widths.every(([key,width]) => width - (key in was ? was[key] : 0) <= 0) ?
                 was : Object.fromEntries(widths)
         ))
-    },[gridElement,buttons]) // ? are all child elements ready ; do we miss some due to these deps ?
+    },[gridElement,buttons,outerWidth]) // ? are all child elements ready ; do we miss some due to these deps ?
     const centerWidth = getButtonsWidth(rt.buttons.slice(0,1))
     const btnPosByKey = Object.fromEntries([
         ...lt.buttons.map((item,itemIndex,items)=>[   item.key,0       , outerWidth-rt.width-getButtonsWidth(items.slice(itemIndex))]),
@@ -142,7 +142,7 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
 
     const children = [...filterGroupElements,...btnElements]
     /* maxWidth: maxFilterAreaWidth ? em(maxFilterAreaWidth) : "100vw"*/
-    const style = { position: "relative", height: yRowToEm(groupedFilters.length), overflowX: "hidden" }
+    const style = { position: "relative", height: yRowToEm(groupedFilters.length) }
     return $("div",{ style, className, ref: setGridElement, children })
 }
 

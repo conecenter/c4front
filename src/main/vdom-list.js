@@ -196,7 +196,7 @@ export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey 
     }),[children,rows,cols,hasHiddenCols,hideElementsForHiddenCols,dragRowKey])
 
     const dragBGEl = $("div", { key: "gridBG", className: "gridBG", style: { gridColumn: spanAll, gridRow: spanAll }})
-    const style = { display: "grid", gridTemplateRows, gridTemplateColumns, overflowX: "hidden" }
+    const style = { display: "grid", gridTemplateRows, gridTemplateColumns }
     const res = $("div", { onMouseDown, style, className: "grid", "data-grid-key": gridKey, ref: setGridElement }, dragBGEl, ...allChildren)
     const dragCSSEl = $("style",{dangerouslySetInnerHTML: { __html: dragCSSContent}})
     return $(NoCaptionContext.Provider,{value:true},dragCSSEl,res)
