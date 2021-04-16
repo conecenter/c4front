@@ -1,6 +1,7 @@
 package ee.cone.c4ui
 
 import ee.cone.c4di._
+import ee.cone.c4ui.FrontTypes.Em
 import ee.cone.c4vdom.Types._
 import ee.cone.c4vdom._
 
@@ -93,8 +94,8 @@ case class NoReceiver[C]() extends Receiver[C] {
   @c4val("") def noDragHandle: DragHandle
   @c4val("x") def colDragHandle: DragHandle
   @c4val("y") def rowDragHandle: DragHandle
-  @c4val("bound") def boundGridColWidth(min: Int, max: Int): GridColWidth
-  @c4val("unbound") def unboundGridColWidth(min: Int): GridColWidth
+  @c4val("bound") def boundGridColWidth(min: Em, max: Em): GridColWidth
+  @c4val("unbound") def unboundGridColWidth(min: Em): GridColWidth
 
   //
   @c4el("FilterArea") def filterArea(
@@ -123,8 +124,8 @@ case class NoReceiver[C]() extends Receiver[C] {
   @c4val("rt") def rightFilterButtonArea: FilterButtonArea
   @c4el("FilterItem") def filterItem(
     key: String,
-    minWidth: Int,
-    maxWidth: Int,
+    minWidth: Em,
+    maxWidth: Em,
     canHide: Boolean = false,
     className: CSSClassName = NoCSSClassName,
     children: ChildPairList[OfDiv] = Nil,
@@ -167,7 +168,7 @@ case class NoReceiver[C]() extends Receiver[C] {
     sliceKey: String,
     width: PivotSliceWidth,
   ): PivotTerminalSlice
-  @c4val("bound") def boundPivotSliceWidth(min: Int, max: Int): PivotSliceWidth
+  @c4val("bound") def boundPivotSliceWidth(min: Em, max: Em): PivotSliceWidth
   @c4val("unbound") def unboundPivotSliceWidth(): PivotSliceWidth
 
   //
