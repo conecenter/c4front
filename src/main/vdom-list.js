@@ -165,21 +165,16 @@ const useColumnGap = gridElement => { // will not react to element style changes
     return columnGap
 }
 
-const findParentCell = (el) => {
-    if (!el) return ["", ""]
-    else {
-        const rowKey = el.getAttribute("data-row-key")
-        const colKey = el.getAttribute("data-col-key")
-        if (!rowKey || !colKey) return findParentCell(el.parentElement)
-        else return [rowKey, colKey]
-    }
-}
-
 const useGridClickAction = identity => {
     const [clickActionPatches, enqueueClickActionPatch] = useSync(clickActionIdOf(identity))
+    const getCellAttrs = element => {
+        const rowKey = element.getAttribute("data-row-key")
+        const colKey = element.getAttribute("data-col-key")
+        return rowKey && colKey ? {rowKey, colKey} : null
+    }
     return useCallback(ev => {
-        const [rowKey, colKey] = findParentCell(ev.target)
-        if (rowKey !== "" && colKey !== "") {
+        const {rowKey, colKey} = findFirstParent(getCellAttrs)(ev.target)
+        if (rowKey && colKey) {
             const headers = {
                 "x-r-row-key": rowKey,
                 "x-r-col-key": colKey,
