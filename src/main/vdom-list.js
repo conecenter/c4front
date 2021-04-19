@@ -165,21 +165,22 @@ const useColumnGap = gridElement => { // will not react to element style changes
     return columnGap
 }
 
+const getCellDataAttrs = element => {
+    const rowKey = element.getAttribute("data-row-key")
+    const colKey = element.getAttribute("data-col-key")
+    return rowKey && colKey ? {rowKey, colKey} : null
+}
+
 const useGridClickAction = identity => {
     const [clickActionPatches, enqueueClickActionPatch] = useSync(clickActionIdOf(identity))
-    const getCellAttrs = element => {
-        const rowKey = element.getAttribute("data-row-key")
-        const colKey = element.getAttribute("data-col-key")
-        return rowKey && colKey ? {rowKey, colKey} : null
-    }
     return useCallback(ev => {
-        const {rowKey, colKey} = findFirstParent(getCellAttrs)(ev.target)
-        if (rowKey && colKey) {
+        const cellDataKeys = findFirstParent(getCellDataAttrs)(ev.target)
+        if (cellDataKeys && cellDataKeys.rowKey && cellDataKeys.colKey) {
             const headers = {
-                "x-r-row-key": rowKey,
-                "x-r-col-key": colKey,
+                "x-r-row-key": cellDataKeys.rowKey,
+                "x-r-col-key": cellDataKeys.colKey,
             }
-            enqueueClickActionPatch({headers, retry: true})
+            enqueueClickActionPatch({headers})
         }
     }, [enqueueClickActionPatch])
 }

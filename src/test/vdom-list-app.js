@@ -130,7 +130,7 @@ function App() {
     ]
 
     const sender = {
-        enqueue: (handlerName, patch) => console.log(patch)
+        enqueue: (identity, patch) => console.log(patch)
     }
     const ack = null
 

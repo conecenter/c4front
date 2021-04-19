@@ -19,7 +19,7 @@ function App() {
         }
     })
     const sender = {
-        enqueue: (handlerName: any, patch: any) => console.log(patch)
+        enqueue: (identity: any, patch: any) => console.log(patch)
     }
     const ack: boolean | null = null
 
