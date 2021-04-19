@@ -64,7 +64,8 @@ case class NoReceiver[C]() extends Receiver[C] {
     dragRow: Receiver[C],
     rows: List[GridRow],
     cols: List[GridCol],
-    children: ElList[GridCell]
+    children: ElList[GridCell],
+    clickAction: Receiver[C] = NoReceiver[C],
   ): GridRoot
   @c4val def gridRow(
     rowKey: String,

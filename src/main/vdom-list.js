@@ -1,13 +1,12 @@
+import {cloneElement, createElement as $, useCallback, useLayoutEffect, useMemo, useState} from "react"
 
-
-import { createElement as $, useMemo, useState, cloneElement, useCallback, useEffect, useLayoutEffect } from "react"
-
-import { identityAt, never, sortedWith, findFirstParent, weakCache } from "./vdom-util.js"
-import { useWidth, useEventListener, useSync, NoCaptionContext } from "./vdom-hooks.js"
-import { useGridDrag } from "./grid-drag.js"
+import {findFirstParent, identityAt, never, sortedWith} from "./vdom-util.js"
+import {NoCaptionContext, useEventListener, useSync, useWidth} from "./vdom-hooks.js"
+import {useGridDrag} from "./grid-drag.js"
 
 const dragRowIdOf = identityAt('dragRow')
 const dragColIdOf = identityAt('dragCol')
+const clickActionIdOf = identityAt('clickAction')
 
 const ROW_KEYS = {
     HEAD: "head",
@@ -166,10 +165,35 @@ const useColumnGap = gridElement => { // will not react to element style changes
     return columnGap
 }
 
+const findParentCell = (el) => {
+    if (!el) return ["", ""]
+    else {
+        const rowKey = el.getAttribute("data-row-key")
+        const colKey = el.getAttribute("data-col-key")
+        if (!rowKey || !colKey) return findParentCell(el.parentElement)
+        else return [rowKey, colKey]
+    }
+}
+
+const useGridClickAction = identity => {
+    const [clickActionPatches, enqueueClickActionPatch] = useSync(clickActionIdOf(identity))
+    return useCallback(ev => {
+        const [rowKey, colKey] = findParentCell(ev.target)
+        if (rowKey !== "" && colKey !== "") {
+            const headers = {
+                "x-r-row-key": rowKey,
+                "x-r-col-key": colKey,
+            }
+            enqueueClickActionPatch({headers, retry: true})
+        }
+    }, [enqueueClickActionPatch])
+}
+
 export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey }) {
     const children = rawChildren || noChildren//Children.toArray(rawChildren)
 
     const [dragData,dragCSSContent,onMouseDown] = useSyncGridDrag({ identity, rows, cols, gridKey })
+    const clickAction = useGridClickAction(identity)
 
     const hasDragRow = useMemo(()=>children.some(c=>c.props.dragHandle==="x"),[children])
     const gridTemplateRows = useMemo(() => getGidTemplateRows([
@@ -197,7 +221,7 @@ export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey 
 
     const dragBGEl = $("div", { key: "gridBG", className: "gridBG", style: { gridColumn: spanAll, gridRow: spanAll }})
     const style = { display: "grid", gridTemplateRows, gridTemplateColumns }
-    const res = $("div", { onMouseDown, style, className: "grid", "data-grid-key": gridKey, ref: setGridElement }, dragBGEl, ...allChildren)
+    const res = $("div", { onMouseDown, onClick: clickAction, style, className: "grid", "data-grid-key": gridKey, ref: setGridElement }, dragBGEl, ...allChildren)
     const dragCSSEl = $("style",{dangerouslySetInnerHTML: { __html: dragCSSContent}})
     return $(NoCaptionContext.Provider,{value:true},dragCSSEl,res)
 }

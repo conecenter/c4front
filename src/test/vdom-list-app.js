@@ -129,7 +129,9 @@ function App() {
         // <div className="test">test </div>
     ]
 
-    const sender = { enqueue: () => { } }
+    const sender = {
+        enqueue: (handlerName, patch) => console.log(patch)
+    }
     const ack = null
 
     return createSyncProviders({ sender, ack, children })
