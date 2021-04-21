@@ -2,39 +2,52 @@
 import {useState,useLayoutEffect,useCallback} from "react"
 import {useAnimationFrame} from "../main/vdom-hooks.js"
 
+const hiddenPosition = {position:"fixed",top:0,left:0,visibility:"hidden"}
+
 const prepCheckUpdPopupPos = element => {
-    if(!element) return was=>was
+    if(!element) return was=>hiddenPosition
     const {width:popupWidth,height:popupHeight} =
         element.getBoundingClientRect()
     const {width:parentWidth,height:parentHeight,top:parentTop,left:parentLeft} =
         element.parentElement.getBoundingClientRect()
     const {clientWidth,clientHeight} = element.ownerDocument.documentElement
-    const check = (left,top) => (
+    const check = (isRight,top) => {
+      const left = isRight ? parentWidth-popupWidth : 0
+      const position = "absolute"
+      const width = "max-content"
+      const lr = isRight ? {right:0} : {left:0}
+      return (
         parentLeft + left > 0 &&
         parentLeft + left + popupWidth < clientWidth &&
         parentTop + top > 0 &&
         parentTop + top + popupHeight < clientHeight ?
-        {position:"absolute",left,top} : null
-    )
+        {position,...lr,top,width} : null
+      )
+    }
     const pos =
-        check(0,parentHeight) || check(parentWidth-popupWidth,parentHeight) ||
-        check(0,-popupHeight) || check(parentWidth-popupWidth,-popupHeight) ||
+        check(false,parentHeight) || check(true,parentHeight) ||
+        check(false,-popupHeight) || check(true,-popupHeight) ||
         {
-            position:"absolute",
-            left: (clientWidth-popupWidth)/2-parentLeft,
-            top: (clientHeight-popupHeight)/2-parentTop,
+            position:"fixed",
+            left: (clientWidth-popupWidth)/2,
+            top: (clientHeight-popupHeight)/2,
+            width: "fit-content"
         }
-    return was=>(
-        Math.abs(was.top-pos.top) < 0.5 &&
-        Math.abs(was.left-pos.left) < 0.5 ?
-        was : pos
-    )
+    return was => {
+        const isSame =
+            was.position === pos.position &&
+            (was.left === pos.left || Math.abs(was.left-pos.left) < 0.5) &&
+            was.right === pos.right &&
+            (was.top === pos.top || Math.abs(was.top-pos.top) < 0.5)
+        //const inUnCentering = was.position === "fixed" && pos.position === "absolute"
+        return isSame ? was : pos
+    }
 }
 
 const popupParentStyle = {position:"relative"}
 
 export const usePopupPos = element => {
-    const [position,setPosition] = useState({})
+    const [position,setPosition] = useState(hiddenPosition)
     const checkUpdPos = useCallback(()=>{
         setPosition(prepCheckUpdPopupPos(element))
     },[element,setPosition])
