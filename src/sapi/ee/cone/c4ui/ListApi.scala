@@ -12,13 +12,19 @@ trait GridRoot extends ToChildPair {
   def gridKey: String
 }
 
-trait Cell extends ToChildPair {
+trait Cell {
+  def colKey: String
+  def rowKey: String
+}
+
+trait ViewCell extends ToChildPair with Cell{
   def colKey: String
   def rowKey: String
   def key: String = s"cell-$colKey-$rowKey"
 }
 
-trait GridCell extends Cell
+
+trait GridCell extends ViewCell
 @c4tagSwitch("FrontApp") trait DragHandle extends ToJson
 @c4tagSwitch("FrontApp") trait GridRow extends ToJson {
   def rowKey: String
@@ -35,7 +41,7 @@ trait FilterButton extends ToChildPair
 
 @c4tagSwitch("FrontApp") trait HighlightByAttr extends ToJson
 
-trait PivotCell extends Cell
+trait PivotCell extends ViewCell
 @c4tagSwitch("FrontApp") trait PivotSlice extends ToJson {
   def sliceKey: String
   def slices: List[PivotSlice]
