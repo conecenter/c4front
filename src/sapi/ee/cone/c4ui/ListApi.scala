@@ -104,6 +104,12 @@ case class NoReceiver[C]() extends Receiver[C] {
   @c4val("bound") def boundGridColWidth(min: Em, max: Em): GridColWidth
   @c4val("unbound") def unboundGridColWidth(min: Em): GridColWidth
 
+  @c4el("HoverExpander") def hoverExpander(
+    key: String,
+    classNames: List[CSSClassName] = Nil,
+    children: ChildPairList[OfDiv] = Nil,
+  ): ToChildPair
+
   //
   @c4el("FilterArea") def filterArea(
     key: String,
