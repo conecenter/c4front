@@ -14,7 +14,7 @@ export function HoverExpander({classNames, children}: HoverExpanderProps) {
             const parentRect = hovered.parentElement.getBoundingClientRect()
             const childRect = hovered.children[0].getBoundingClientRect()
             if (childRect.width < parentRect.width)
-                return [{height: "100%", width: "100%"}, false]
+                return [{}, false]
             else {
                 const height = Math.max(parentRect.height, childRect.height)
                 const width = Math.max(parentRect.width, childRect.width)
@@ -39,7 +39,7 @@ export function HoverExpander({classNames, children}: HoverExpanderProps) {
                     }, true]
             }
         } else
-            return [{height: "100%", width: "100%"}, false]
+            return [{}, false]
     }
 
     const [style, needsClass] = calculateStyle()
