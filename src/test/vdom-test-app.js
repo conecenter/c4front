@@ -1,4 +1,4 @@
-import {HoverExpander} from "../extra/HoverExpander"
+import {HoverExpander} from "../extra/hover-expander"
 
 import ReactDOM from "react-dom"
 import React from "react"
