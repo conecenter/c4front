@@ -23,7 +23,7 @@ export function HoverExpander({classNames, children}: HoverExpanderProps) {
                 const documentRect = hovered.ownerDocument.documentElement.getBoundingClientRect()
                 if (documentRect.width > left + width)
                     return [{
-                        position: "absolute",
+                        position: "fixed",
                         height: height,
                         width: width,
                         top: top,
@@ -31,7 +31,7 @@ export function HoverExpander({classNames, children}: HoverExpanderProps) {
                     }, true]
                 else
                     return [{
-                        position: "absolute",
+                        position: "fixed",
                         height: height,
                         width: width,
                         top: top,
