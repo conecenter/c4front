@@ -78,6 +78,7 @@ case class NoReceiver[C]() extends Receiver[C] {
     canDropBeside: Boolean = false,
     canDropInto: Boolean = false,
     isExpanded: Boolean = false,
+    isHeader: Boolean = false,
   ): GridRow
   @c4val def gridCol(
     colKey: String,
