@@ -7,7 +7,7 @@ interface ScrollInfo {
     scrollUpStart: number, // ???
     elementsStyles: Map<string, string>,
     totalTopHeight: number,
-    style: string
+    classes: string
 }
 
 const defaultValue: ScrollInfo = {
@@ -16,7 +16,7 @@ const defaultValue: ScrollInfo = {
     scrollUpStart: 0,
     elementsStyles: new Map(),
     totalTopHeight: 0,
-    style: ""
+    classes: ""
 }
 
 const ScrollInfoContext = createContext(defaultValue)
@@ -27,6 +27,8 @@ interface ScrollInfoProviderProps {
 
 const TOP_ROW = ".top-row"
 const HIDE_ON_SCROLL = "hide-on-scroll"
+const GRID_WRAP_SELECTOR = ".gridWrap"
+
 const MIN_SCROLL_DELTA = 5
 
 interface ScrollDiff {
@@ -89,6 +91,36 @@ function calculateTopPositions(
     return {...result, spaceUsed: Math.max(result.spaceUsed, 0)}
 }
 
+interface FilterAreaPosition {
+    filterSpaceUsed: number,
+    floatingPos: number
+}
+
+function calculateFilterArea(
+    filterAreas: HTMLElement[],
+    spaceUsed: number,
+    floatingPos: number
+): FilterAreaPosition {
+    const initialState: FilterAreaPosition = {
+        filterSpaceUsed: spaceUsed,
+        floatingPos: floatingPos,
+    }
+
+    function iteration(
+        {filterSpaceUsed, floatingPos}: FilterAreaPosition,
+        elem: HTMLElement
+    ): FilterAreaPosition {
+        const elemTop = floatingPos
+        const elemHeight = elem.offsetHeight
+        return {
+            filterSpaceUsed: Math.max(elemTop + elemHeight, filterSpaceUsed),
+            floatingPos: floatingPos + elemHeight,
+        }
+    }
+
+    return filterAreas.reduce(iteration, initialState)
+}
+
 function ScrollInfoProvider({children}: ScrollInfoProviderProps) {
     const [scrollInfo, setScrollInfo] = useState(defaultValue)
     const [docRoot, setDocRoot] = useState<Element | null>(null)
@@ -107,11 +139,16 @@ function ScrollInfoProvider({children}: ScrollInfoProviderProps) {
             else {
                 const scrollDiff = calculateScrollDiff(prev, currentScrollOffset, totalTopHeight)
                 // top-rows
-                const {spaceUsed, elementStyles} = calculateTopPositions(scrollDiff, currentScrollOffset, topElements)
+                const {
+                    spaceUsed: topSpaceUsed,
+                    elementStyles,
+                    floatingPos
+                } = calculateTopPositions(scrollDiff, currentScrollOffset, topElements)
+                const gridWrappers = ownerDocument ? [...ownerDocument.querySelectorAll<HTMLElement>(GRID_WRAP_SELECTOR)] : []
 
-                const grids = ownerDocument ? [...ownerDocument.querySelectorAll<HTMLElement>(".grid")] : []
-
-                const classes = grids.map(grid => {
+                const classes = gridWrappers.map(gridWrapper => {
+                    const {filterSpaceUsed} = calculateFilterArea([...gridWrapper.querySelectorAll<HTMLElement>(".filterArea")], topSpaceUsed, floatingPos)
+                    const grid = gridWrapper.querySelectorAll(".grid")[0]
                     const gridKey = grid.getAttribute("data-grid-key") + ""
                     const headerRows = (grid.getAttribute("header-row-keys") + "").split(" ")
                     let rowHeightMap = new Map<string, number>()
@@ -122,16 +159,17 @@ function ScrollInfoProvider({children}: ScrollInfoProviderProps) {
                             rowHeightMap.set(rowKey, header.getBoundingClientRect().height)
                         }
                     })
-                    let result = new Map<string, number>()
+                    let headerRowToOffset = new Map<string, number>()
 
                     function reduceHeight(current: number, rowKey: string): number {
-                        result.set(rowKey, current)
+                        headerRowToOffset.set(rowKey, current)
                         // @ts-ignore
                         return current + (rowHeightMap.get(rowKey) ? rowHeightMap.get(rowKey) : 0)
                     }
 
-                    headerRows.reduce(reduceHeight, spaceUsed)
-                    return [...result.entries()].map(elem => `div[data-grid-key="${gridKey}"] > div[data-row-key="${elem[0]}"]{z-index: 10000;position:sticky;top:${elem[1]}px}`)
+                    headerRows.reduce(reduceHeight, filterSpaceUsed)
+                    const headerCss = [...headerRowToOffset.entries()].map(elem => `.grid[data-grid-key="${gridKey}"] > .tableHeadContainer[data-row-key="${elem[0]}"]{z-index: 10000;position:sticky;top:${elem[1]}px}`)
+                    return headerCss
                 })
                 return {
                     currentScrollOffset: currentScrollOffset,
@@ -139,7 +177,7 @@ function ScrollInfoProvider({children}: ScrollInfoProviderProps) {
                     scrollUpStart: scrollDiff.scrollUpStart,
                     elementsStyles: elementStyles,
                     totalTopHeight: totalTopHeight,
-                    style: classes.map(cls => cls.join("\n")).join("\n")
+                    classes: classes.map(cls => cls.join("\n")).join("\n") + `\n.filterArea{z-index: 10000;position:sticky !important;top:${floatingPos}px}`
                 }
             }
         })
@@ -152,7 +190,7 @@ function ScrollInfoProvider({children}: ScrollInfoProviderProps) {
                 scrollUpStart: scrollInfo.scrollUpStart,
                 elementsStyles: scrollInfo.elementsStyles,
                 totalTopHeight: scrollInfo.totalTopHeight,
-                style: ""
+                classes: ""
             }),
         [
             scrollInfo.currentScrollOffset,
@@ -170,7 +208,7 @@ function ScrollInfoProvider({children}: ScrollInfoProviderProps) {
             style: {marginTop: scrollInfoCached.totalTopHeight + "px"},
             ref: setDocRoot
         },
-        el("style", {dangerouslySetInnerHTML: {__html: scrollInfo.style}}),
+        el("style", {dangerouslySetInnerHTML: {__html: scrollInfo.classes}}),
         el(ScrollInfoContext.Provider, {value: scrollInfoCached}, children)
     )
 }

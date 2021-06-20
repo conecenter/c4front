@@ -261,9 +261,9 @@ export function Highlighter({attrName, highlightClass: argHighlightClass, notHig
     const move = useCallback(ev => {
         setKey(findFirstParent(el=>el.getAttribute(attrName))(ev.target))
     },[setKey])
-    const highlightClass = argHighlightClass ? `[class~="${argHighlightClass}"]` : ''
-    const notHighlightClass = argNotHighlightClass ? `:not([class~="${argNotHighlightClass}"])` : ''
-    const style = key ? `div[${attrName}="${key}"]${highlightClass}${notHighlightClass}{background-color: var(--highlight-color);}` : ""
+    const elemSelector = argHighlightClass ? `.${argHighlightClass}` : 'div'
+    const notHighlightClass = argNotHighlightClass ? `:not(.${argNotHighlightClass})` : ''
+    const style = key ? `${elemSelector}[${attrName}="${key}"]${notHighlightClass}{background-color: var(--highlight-color);}` : ""
     const doc = element && element.ownerDocument
     useEventListener(doc, "mousemove", move)
     return $("style", { ref: setElement, dangerouslySetInnerHTML: { __html: style } })
