@@ -215,9 +215,10 @@ export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey 
         children,rows,cols,hasHiddenCols,hideElementsForHiddenCols,dragRowKey
     }),[children,rows,cols,hasHiddenCols,hideElementsForHiddenCols,dragRowKey])
 
+    const headerRowKeys = rows.filter(row => row.isHeader).map(row => row.rowKey).join(' ')
     const dragBGEl = $("div", { key: "gridBG", className: "gridBG", style: { gridColumn: spanAll, gridRow: spanAll }})
     const style = { display: "grid", gridTemplateRows, gridTemplateColumns }
-    const res = $("div", { onMouseDown, onClick: clickAction, style, className: "grid", "data-grid-key": gridKey, ref: setGridElement }, dragBGEl, ...allChildren)
+    const res = $("div", { onMouseDown, onClick: clickAction, style, className: "grid", "data-grid-key": gridKey, "header-row-keys": headerRowKeys, ref: setGridElement }, dragBGEl, ...allChildren)
     const dragCSSEl = $("style",{dangerouslySetInnerHTML: { __html: dragCSSContent}})
     return $(NoCaptionContext.Provider,{value:true},dragCSSEl,res)
 }
@@ -260,9 +261,9 @@ export function Highlighter({attrName, highlightClass: argHighlightClass, notHig
     const move = useCallback(ev => {
         setKey(findFirstParent(el=>el.getAttribute(attrName))(ev.target))
     },[setKey])
-    const highlightClass = argHighlightClass ? `[class~="${argHighlightClass}"]` : ''
-    const notHighlightClass = argNotHighlightClass ? `:not([class~="${argNotHighlightClass}"])` : ''
-    const style = key ? `div[${attrName}="${key}"]${highlightClass}${notHighlightClass}{background-color: var(--highlight-color);}` : ""
+    const elemSelector = argHighlightClass ? `.${argHighlightClass}` : 'div'
+    const notHighlightClass = argNotHighlightClass ? `:not(.${argNotHighlightClass})` : ''
+    const style = key ? `${elemSelector}[${attrName}="${key}"]${notHighlightClass}{background-color: var(--highlight-color);}` : ""
     const doc = element && element.ownerDocument
     useEventListener(doc, "mousemove", move)
     return $("style", { ref: setElement, dangerouslySetInnerHTML: { __html: style } })
