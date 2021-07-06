@@ -2,6 +2,7 @@ import {HoverExpander} from "../extra/hover-expander"
 
 import ReactDOM from "react-dom"
 import React from "react"
+import {ExpandableTableHeader} from "../extra/expandable-table-header";
 
 const {createElement: $} = React
 
@@ -24,7 +25,18 @@ function App() {
                         $("span", {style: {fontSize: "0.75em"}}, "very long text very long text"))
                 })),
             $("div", {
-                    key: "outer3", className: "main", style:{alignSelf:"center"}
+                    key: "header1", className: "main"
+                },
+                $(ExpandableTableHeader, {
+                    key: "test",
+                    title: "lonsssssssd",
+                    shortTitle: "short",
+                    hoverClassNames: ["test"],
+                    children: [$("div", {key: "child", style: {}},
+                        $("span", {style: {fontSize: "0.75em"}}, "child"))]
+                })),
+            $("div", {
+                    key: "outer3", className: "main", style: {alignSelf: "center"}
                 },
                 $(HoverExpander, {
                     key: "test",
