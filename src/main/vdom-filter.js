@@ -1,7 +1,7 @@
 
-import {createElement as $,useState,useLayoutEffect,useContext,createContext,useCallback,useEffect,cloneElement} from "react"
-import {findFirstParent} from "./vdom-util.js"
-import {useWidth,useEventListener} from "../main/vdom-hooks.js"
+import {createElement as $,useState,useContext,createContext,useCallback,cloneElement} from "react"
+import {em,findFirstParent} from "./vdom-util.js"
+import {useWidth,useEventListener,useChildWidths,addChildPos} from "../main/vdom-hooks.js"
 import {usePopupPos} from "../main/popup.js"
 
 //// move to shared
@@ -81,13 +81,11 @@ const fitRows = (filters,buttons,outerWidth,rowCount) => (
 
 const dMinMax = el => el.props.maxWidth - el.props.minWidth
 
-const em = v => v+'em'
-
 export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
     const [gridElement,setGridElement] = useState(null)
     const outerWidth = useWidth(gridElement)
 
-    const [btnWidths,setBtnWidths] = useState({})
+    const btnWidths = useChildWidths(gridElement,[buttons])
     const getButtonWidth = item => btnWidths[item.key]||0
     const getButtonsWidth = items => sum(items.map(getButtonWidth))
 
@@ -108,19 +106,6 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
         }},item))
     })
 
-
-    useLayoutEffect(()=>{
-        if(!gridElement) return
-        const fontSize = parseFloat(getComputedStyle(gridElement).fontSize)
-        const widths = [...gridElement.children].map(el=>{
-            const key = el.getAttribute("data-btn-key")
-            return key && [key, el.getBoundingClientRect().width / fontSize]
-        }).filter(Boolean)
-        setBtnWidths(was=>(
-            widths.every(([key,width]) => width - (key in was ? was[key] : 0) <= 0) ?
-                was : Object.fromEntries(widths)
-        ))
-    },[gridElement,buttons,outerWidth]) // ? are all child elements ready ; do we miss some due to these deps ?
     const centerWidth = getButtonsWidth(rt.buttons.slice(0,1))
     const btnPosByKey = Object.fromEntries([
         ...lt.buttons.map((item,itemIndex,items)=>[   item.key,0       , outerWidth-rt.width-getButtonsWidth(items.slice(itemIndex))]),
@@ -128,17 +113,10 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
         ...rt.buttons.map((item,itemIndex,items)=>[   item.key,0       , outerWidth-rt.width+getButtonsWidth(items.slice(0,itemIndex))]),
         ...rt.optButtons.map((item,itemIndex,items)=>[item.key,emPerRow, outerWidth-rt.width+centerWidth+getButtonsWidth(items.slice(0,itemIndex))]),
     ].map((([key,top,left])=>[key,{top,left}])))
-    const btnElements = (buttons || []).flatMap(c => [c,...(c.props.optButtons||[])]).map(c=>{
-        const pos = btnPosByKey[c.key]
-        return cloneElement(c,{getButtonWidth,pos:{
-            "data-btn-key": c.key,
-            style: {
-                height:"2em", position: "absolute", boxSizing: "border-box",
-                top: em(pos?pos.top:0), left: em(pos?pos.left:0),
-                visibility: pos?null:"hidden",
-            }
-        }})
-    })
+
+    const btnElements =
+        (buttons || []).flatMap(c => [c,...(c.props.optButtons||[])])
+        .map(c=>addChildPos(c.key,btnPosByKey[c.key],cloneElement(c,{getButtonWidth})))
 
     const children = [...filterGroupElements,...btnElements]
     /* maxWidth: maxFilterAreaWidth ? em(maxFilterAreaWidth) : "100vw"*/
@@ -171,19 +149,17 @@ export function PopupManager({children}){
     return $(PopupContext.Provider,{value:[popup,setPopup]},[...children,el])
 }
 
-export function FilterButtonExpander({identity,optButtons:rawOptButtons,pos,className,popupClassName,popupItemClassName,children,openedChildren,getButtonWidth}){
+export function FilterButtonExpander({identity,optButtons:rawOptButtons,className,popupClassName,popupItemClassName,children,openedChildren,getButtonWidth}){
     const optButtons = rawOptButtons || []
     const [popupElement,setPopupElement] = useState(null)
     const [popupStyle,popupParentStyle] = usePopupPos(popupElement)
     const width = em(Math.max(...optButtons.map(getButtonWidth)))
     const [isOpened,toggle] = usePopupState(identity)
-    const {style:posStyle,...posData} = pos
-    const parentStyle = {...popupParentStyle,...posStyle}
 
     //console.log("p-render-")
     return $("div",
         {
-            className, style:parentStyle, [popupAttrName]:1, ...posData,
+            className, style:{height:"2em"}, [popupAttrName]:1,
             onClick: ev => toggle(!isOpened),
         },
         isOpened ? [
@@ -195,8 +171,8 @@ export function FilterButtonExpander({identity,optButtons:rawOptButtons,pos,clas
     )
 }
 
-export function FilterButtonPlace({pos,className,children}){
-    return $("div",{className,...pos},children)
+export function FilterButtonPlace({className,children}){
+    return $("div",{className,style:{height:"2em"}},children)
 }
 
 export function FilterItem({className,children}){

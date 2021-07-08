@@ -20,3 +20,5 @@ export const never = o => { console.log(o); throw new Error }
 export const sortedWith = f => l => l && [...l].sort(f)
 
 export const findFirstParent = get => el => el && get(el) || el && findFirstParent(get)(el.parentElement)
+
+export const em = v => `${v}em`

@@ -1,0 +1,85 @@
+
+import {ExpanderArea,Expander} from "../main/button-area.js"
+
+import ReactDOM from "react-dom"
+import React from "react"
+
+const { createElement: $ } = React
+
+
+const button = ({caption,...prop}) => $(Expander,{...prop},[
+    $("div",{key:"content",className:"exampleButtonPlace"},caption||"VVV")
+])
+
+
+
+function App(){
+    return [
+        $(ExpanderArea,{
+            key: 0,
+            className: "exampleButtonArea",
+            expandTo: [
+                button({ key: 1, area: "ct", caption: "W", expandTo: [
+                    button({ key: 11, area: "lt", expandTo: [
+                        button({ key: 111, area: "lt", caption: "AAA" }),
+                        button({ key: 112, area: "lt", caption: "AAA" }),
+                    ]}),
+                    button({ key: 12, area: "ct", expandTo: [
+                        button({ key: 121, area: "ct", caption: "AAA" }),
+                        button({ key: 122, area: "ct", caption: "AAA" }),
+                    ]}),
+                    button({ key: 13, area: "rt", expandTo: [
+                        button({ key: 131, area: "rt", caption: "AAA" }),
+                        button({ key: 132, area: "rt", caption: "AAA" }),
+                    ]}),
+                    button({ key: 14, area: "rt", expandTo: [
+                        button({ key: 141, area: "rt", caption: "BBBBBB" }),
+                        button({ key: 142, area: "rt", caption: "BBBBBB" }),
+                        button({ key: 143, area: "rt", caption: "BBBBBB" }),
+                        button({ key: 144, area: "rt", caption: "BBBBBB" }),
+                        button({ key: 145, area: "rt", caption: "BBBBBB" }),
+                        button({ key: 146, area: "rt", caption: "BBBBBB" }),
+                        button({ key: 147, area: "rt", caption: "BBBBBB" }),
+                        button({ key: 148, area: "rt", caption: "BBBBBB" }),
+                        button({ key: 149, area: "rt", caption: "BBBBBB" }),
+                    ]}),
+                ]})
+            ]
+        }),
+        $("hr",{key:"1h"}),
+        $(ExpanderArea,{
+            key: 1,
+            className: "exampleButtonArea",
+            maxLineCount: 2,
+            expandTo: [
+                button({ key: 1, area: "ct", caption: "W", expandTo: [
+                    button({ key: 11, area: "lt", expandOrder: 0, expandTo: [
+                        button({ key: 111, area: "lt", caption: "AAA" }),
+                        button({ key: 112, area: "lt", caption: "AAA" }),
+                    ]}),
+                    button({ key: 13, area: "rt", expandOrder: 1, expandTo: [
+                        button({ key: 131, area: "rt", caption: "AAA" }),
+                        button({ key: 132, area: "rt", caption: "AAA" }),
+                        button({ key: 133, area: "rt", caption: "AAA" }),
+                        button({ key: 134, area: "rt", caption: "AAA" }),
+                    ]}),
+                    button({ key: 14, area: "rt", expandOrder: 2, expandTo: [
+                        button({ key: 141, area: "rt", caption: "BBB" }),
+                        button({ key: 142, area: "rt", caption: "BBBBBB" }),
+                        button({ key: 143, area: "rt", caption: "BBBBBB" }),
+                        button({ key: 144, area: "rt", caption: "BBBBBB" }),
+                        button({ key: 145, area: "rt", caption: "BBBBBB" }),
+                        button({ key: 146, area: "rt", caption: "BBBBBB" }),
+                        button({ key: 147, area: "rt", caption: "BBBBBB" }),
+                        button({ key: 148, area: "rt", caption: "BBBBBB" }),
+                        button({ key: 149, area: "rt", caption: "BBBBBB" }),
+                    ]}),
+                ]})
+            ]
+        }),
+    ]
+}
+
+const containerElement = document.createElement("div")
+document.body.appendChild(containerElement)
+ReactDOM.render($(App), containerElement)
