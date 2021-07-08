@@ -1,8 +1,8 @@
 
-import {createElement as $,useState,useContext,createContext,useCallback,cloneElement} from "react"
-import {em,findFirstParent} from "./vdom-util.js"
-import {useWidth,useEventListener,useChildWidths,addChildPos} from "../main/vdom-hooks.js"
-import {usePopupPos} from "../main/popup.js"
+import {createElement as $,useState,useContext,createContext,useCallback,cloneElement,useMemo} from "react"
+import {em} from "./vdom-util.js"
+import {useWidth,useChildWidths,addChildPos} from "../main/vdom-hooks.js"
+import {usePopupPos,usePopupMiss} from "../main/popup.js"
 
 //// move to shared
 
@@ -128,6 +128,7 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
 
 
 const popupAttrName = "data-is-popup"
+const popupSkipValue = "1"
 const PopupContext = createContext()
 const usePopupState = identity => {
     const [popup,setPopup] = useContext(PopupContext)
@@ -135,18 +136,13 @@ const usePopupState = identity => {
     const setOpened = useCallback(on => setPopup(on?identity:null), [setPopup,identity])
     return [isOpened(popup),setOpened]
 }
+
 export function PopupManager({children}){
     const [popup,setPopup] = useState(null) // todo useSync
-    const [element,setElement] = useState(null)
-    const doc = element && element.ownerDocument
-    const checkClose = useCallback(ev=>{
-        if(!findFirstParent(el=>el.getAttribute(popupAttrName))(ev.target)){
-            setPopup(was=>null)
-        }
-    },[setPopup])
-    useEventListener(doc,"mousedown",checkClose) // bubbling "click" will come too late, with dead toggle-element (ev.target)
-    const el = $("span", { key: "popup-manager", ref: setElement })
-    return $(PopupContext.Provider,{value:[popup,setPopup]},[...children,el])
+    const onPopupMiss = useCallback(()=>setPopup(was=>null),[setPopup])
+    const el = usePopupMiss(popupAttrName,popupSkipValue,onPopupMiss)
+    const value = useMemo(()=>[popup,setPopup],[popup,setPopup])
+    return $(PopupContext.Provider,{value},[...children,el])
 }
 
 export function FilterButtonExpander({identity,optButtons:rawOptButtons,className,popupClassName,popupItemClassName,children,openedChildren,getButtonWidth}){
@@ -159,7 +155,7 @@ export function FilterButtonExpander({identity,optButtons:rawOptButtons,classNam
     //console.log("p-render-")
     return $("div",
         {
-            className, style:{height:"2em"}, [popupAttrName]:1,
+            className, style:{height:"2em"}, [popupAttrName]:popupSkipValue,
             onClick: ev => toggle(!isOpened),
         },
         isOpened ? [

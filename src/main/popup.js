@@ -1,6 +1,9 @@
 
-import {useState,useLayoutEffect,useCallback} from "react"
-import {useAnimationFrame} from "../main/vdom-hooks.js"
+import {createElement as $,useState,useLayoutEffect,useCallback,useMemo} from "react"
+import {findFirstParent} from "../main/vdom-util.js"
+import {useAnimationFrame,useEventListener} from "../main/vdom-hooks.js"
+
+////
 
 const hiddenPosition = {position:"fixed",top:0,left:0,visibility:"hidden"}
 
@@ -60,4 +63,18 @@ export const usePopupPos = (element,lrMode) => {
     useLayoutEffect(()=>{ checkUpdPos() },[checkUpdPos])
     useAnimationFrame(element,checkUpdPos)
     return [position,popupParentStyle]
+}
+
+////
+
+export const usePopupMiss = (skipAttrName,skipValue,callback) => {
+    const [element,setElement] = useState(null)
+    const doc = element && element.ownerDocument
+    const checkClose = useCallback(ev=>{
+        if(!findFirstParent(el=>el.getAttribute(skipAttrName)===skipValue)(ev.target)){
+            callback()
+        }
+    },[skipAttrName,skipValue,callback])
+    useEventListener(doc,"mousedown",checkClose) // bubbling "click" will come too late, with dead toggle-element (ev.target)
+    return useMemo(()=>$("span", { key: "popup-manager", ref: setElement }),[setElement])
 }
