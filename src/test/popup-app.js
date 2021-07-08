@@ -39,8 +39,13 @@ function App(){
             $("div",{
                 key: "popup",
                 ref: setElement,
-                style: {...pos, width: theWidth, height: theHeight, border: "1px solid red"}
-            })
+                style: {
+                    ...pos,
+                    width: theWidth, height: theHeight,
+                    maxHeight: "90vh", boxSizing: "border-box",
+                    border: "1px solid red",
+                }
+            },"POPUP")
         ])
     ])
 }

@@ -1,5 +1,5 @@
 
-import {ExpanderArea,Expander} from "../main/button-area.js"
+import {ExpanderArea,Expander} from "../main/expander-area.js"
 
 import ReactDOM from "react-dom"
 import React from "react"
