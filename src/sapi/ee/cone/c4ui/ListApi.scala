@@ -111,6 +111,14 @@ case class NoReceiver[C]() extends Receiver[C] {
     children: ChildPairList[OfDiv] = Nil,
   ): ToChildPair
 
+  @c4el("ExpandableTableHeader") def expTableHeader(
+    key: String,
+    title: String,
+    shortTitle: String = "",
+    hoverClassNames: List[CSSClassName] = Nil,
+    children: ChildPairList[OfDiv] = Nil,
+  ): ToChildPair
+
   //
   @c4el("FilterArea") def filterArea(
     key: String,
