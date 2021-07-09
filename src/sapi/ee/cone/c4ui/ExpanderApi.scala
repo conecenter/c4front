@@ -8,7 +8,6 @@ trait Expander extends ToJson
 @c4tags("FrontApp") trait ExpanderTags {
   @c4el("ExpanderArea") def expanderArea(
     key: String,
-    className: CSSClassName = NoCSSClassName,
     expandTo: ElList[Expander] = Nil,
     maxLineCount: Int = 0,
   ): ToChildPair

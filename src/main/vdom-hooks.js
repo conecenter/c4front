@@ -35,17 +35,20 @@ export function createSyncProviders({sender,ack,children}){
 
 export const getFontSize = element => parseFloat(getComputedStyle(element).fontSize)
 
+const getWidthEm = el => el.getBoundingClientRect().width / getFontSize(el)
+
 export const useWidth = element => {
     const [width,setWidth] = useState(Infinity)
     const resizeObserver = useMemo(()=>new ResizeObserver(entries => {
-        entries.forEach(entry=>{
-            setWidth(entry.contentRect.width / getFontSize(entry.target))
-        })
-    }))
+        entries.forEach(entry=>setWidth(getWidthEm(entry.target))) // entry.contentRect.width
+    }),[setWidth])
     useLayoutEffect(()=>{
-        element && resizeObserver.observe(element)
+        if(element){
+            resizeObserver.observe(element)
+            setWidth(getWidthEm(element))
+        }
         return () => element && resizeObserver.unobserve(element)
-    },[element])
+    },[element,setWidth])
     return width
 }
 

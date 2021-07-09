@@ -1,5 +1,5 @@
 
-import {createElement as $,useState,useLayoutEffect,useCallback,useMemo} from "react"
+import {createElement as $,useState,useLayoutEffect,useCallback,useMemo,useRef} from "react"
 import {em} from "./vdom-util.js"
 import {useWidth,getFontSize,useEventListener,useChildWidths,addChildPos} from "../main/vdom-hooks.js"
 
@@ -76,7 +76,7 @@ const useViewportHeightIntEm = element => {
     const win = element && element.ownerDocument.defaultView
     useEventListener(win, "resize", refresh)
     useLayoutEffect(()=>refresh(),[refresh])
-    return [height]
+    return height
 }
 
 const deep = body => state => body(deep(body))(state)
@@ -104,7 +104,17 @@ const fitAll = (expandTo,outerWidth,childWidths,checkLineCount) => {
     return [children,height]
 }
 
-export function ExpanderArea({expandTo,className,maxLineCount}){
+const useMemoR = (calc,...depList) => useMemo(()=>calc(...depList),depList)
+/*
+const useLogDep = (hint,...depList) => {
+    const ref = useRef(null)
+    const changes = depList.flatMap((v,i)=>!(ref.current && ref.current[i]===v) ? [[i,v]] : [])
+    if(changes.length > 0) console.log(hint,Object.fromEntries(changes))
+    ref.current = depList
+}
+*/
+
+export function ExpanderArea({expandTo,maxLineCount}){
     const [theAreaElement,setAreaElement] = useState(null)
     const outerWidth = useWidth(theAreaElement)
     const childWidths = useChildWidths(theAreaElement,[expandTo])
@@ -112,11 +122,13 @@ export function ExpanderArea({expandTo,className,maxLineCount}){
     const checkLineCountVP = useCallback(lineCount => lineToEm(lineCount) * 4 <= vpHeight, [vpHeight])
     const checkLineCountVal = useCallback(lineCount => lineCount <= maxLineCount, [maxLineCount])
     const checkLineCount = maxLineCount ? checkLineCountVal : checkLineCountVP
-    const [children,height] = useMemo(()=>fitAll(
-        expandTo,outerWidth,childWidths,checkLineCount
-    ), [expandTo,outerWidth,childWidths,checkLineCount])
+    const [children,height] = useMemoR(fitAll,expandTo,outerWidth,childWidths,checkLineCount)
+
+    // console.log("render "+maxLineCount)
+    // useLogDep("changed "+maxLineCount,theAreaElement,childWidths,expandTo,outerWidth,childWidths,checkLineCount,vpHeight)
+
     const style = { position: "relative", height }
-    return $("div",{ style, className, ref: setAreaElement, children })
+    return $("div",{ style, ref: setAreaElement, children })
 }
 export function Expander({children}){ return children }
 

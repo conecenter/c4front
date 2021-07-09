@@ -8,16 +8,21 @@ const { createElement: $ } = React
 
 
 const button = ({caption,...prop}) => $(Expander,{...prop},[
-    $("div",{key:"content",className:"exampleButtonPlace"},caption||"VVV")
+    $("div",{key:"content",style:{
+        border: "1px solid blue"
+    }},caption||"VVV")
 ])
-
+const area = ({key,...props}) => $("div",{key,style:{
+    border: "1px solid silver"
+}},[
+    $(ExpanderArea,{key:"area",...props})
+])
 
 
 function App(){
     return [
-        $(ExpanderArea,{
+        area({
             key: 0,
-            className: "exampleButtonArea",
             expandTo: [
                 button({ key: 1, area: "ct", caption: "W", expandTo: [
                     button({ key: 11, area: "lt", expandTo: [
@@ -47,9 +52,8 @@ function App(){
             ]
         }),
         $("hr",{key:"1h"}),
-        $(ExpanderArea,{
+        area({
             key: 1,
-            className: "exampleButtonArea",
             maxLineCount: 2,
             expandTo: [
                 button({ key: 1, area: "ct", caption: "W", expandTo: [
