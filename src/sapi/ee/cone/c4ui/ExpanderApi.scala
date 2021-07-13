@@ -1,10 +1,11 @@
 package ee.cone.c4ui
 
-import ee.cone.c4vdom.Types.{ChildPairList, ElList}
-import ee.cone.c4vdom.{OfDiv, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags, c4val}
+import ee.cone.c4di._
+import ee.cone.c4vdom.Types._
+import ee.cone.c4vdom._
 
 @c4tagSwitch("FrontApp") trait ExpanderAreaSide extends ToJson
-trait Expander extends ToJson
+trait Expander extends ToChildPair
 @c4tags("FrontApp") trait ExpanderTags {
   @c4el("ExpanderArea") def expanderArea(
     key: String,
