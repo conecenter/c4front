@@ -122,7 +122,7 @@ case class NoReceiver[C]() extends Receiver[C] {
   //
   @c4el("FilterArea") def filterArea(
     key: String,
-    className: CSSClassName = NoCSSClassName, // do not set borders etc
+    className: CSSClassName = NoCSSClassName,
     filters: ElList[FilterItem] = Nil,
     buttons: ElList[FilterButton] = Nil,
   ): ToChildPair

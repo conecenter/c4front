@@ -1,7 +1,7 @@
 
 import {createElement as $,useState,useContext,createContext,useCallback,cloneElement,useMemo} from "react"
 import {em} from "./vdom-util.js"
-import {useWidth,useChildWidths,addChildPos} from "../main/vdom-hooks.js"
+import {useWidths} from "../main/sizes.js"
 import {usePopupPos,usePopupMiss} from "../main/popup.js"
 
 //// move to shared
@@ -82,10 +82,7 @@ const fitRows = (filters,buttons,outerWidth,rowCount) => (
 const dMinMax = el => el.props.maxWidth - el.props.minWidth
 
 export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
-    const [gridElement,setGridElement] = useState(null)
-    const outerWidth = useWidth(gridElement)
-
-    const btnWidths = useChildWidths(gridElement,[buttons])
+    const [btnWidths,addPos,outerWidth,addContainer] = useWidths(null)
     const getButtonWidth = item => btnWidths[item.key]||0
     const getButtonsWidth = items => sum(items.map(getButtonWidth))
 
@@ -116,12 +113,12 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
 
     const btnElements =
         (buttons || []).flatMap(c => [c,...(c.props.optButtons||[])])
-        .map(c=>addChildPos(c.key,btnPosByKey[c.key],cloneElement(c,{getButtonWidth})))
+        .map(c=>addPos(c.key,btnPosByKey[c.key],cloneElement(c,{getButtonWidth})))
 
     const children = [...filterGroupElements,...btnElements]
     /* maxWidth: maxFilterAreaWidth ? em(maxFilterAreaWidth) : "100vw"*/
-    const style = { position: "relative", height: yRowToEm(groupedFilters.length) }
-    return $("div",{ style, className, ref: setGridElement, children })
+    const height = yRowToEm(groupedFilters.length)
+    return $("div",{className},addContainer(height,children))
 }
 
 ////

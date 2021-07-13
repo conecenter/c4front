@@ -4,7 +4,7 @@ import {ExpanderArea,Expander} from "../main/expander-area.js"
 import ReactDOM from "react-dom"
 import React from "react"
 
-const { createElement: $ } = React
+const { createElement: $, useState } = React
 
 
 const button = ({caption,...prop}) => $(Expander,{...prop},[
@@ -20,6 +20,7 @@ const area = ({key,...props}) => $("div",{key,style:{
 
 
 function App(){
+    const [theIsWide,setIsWide] = useState(false)
     return [
         area({
             key: 0,
@@ -72,7 +73,7 @@ function App(){
                         button({ key: 142, area: "rt", caption: "BBBBBB" }),
                         button({ key: 143, area: "rt", caption: "BBBBBB" }),
                         button({ key: 144, area: "rt", caption: "BBBBBB" }),
-                        button({ key: 145, area: "rt", caption: "BBBBBB" }),
+                        button({ key: 145, area: "rt", caption: theIsWide ? "BBBBBB_BBBBBB":"BBBBBB" }),
                         button({ key: 146, area: "rt", caption: "BBBBBB" }),
                         button({ key: 147, area: "rt", caption: "BBBBBB" }),
                         button({ key: 148, area: "rt", caption: "BBBBBB" }),
@@ -81,6 +82,7 @@ function App(){
                 ]})
             ]
         }),
+        $("button",{onClick:ev=>setIsWide(was=>!was)},"wider"),
     ]
 }
 

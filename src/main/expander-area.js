@@ -1,7 +1,8 @@
 
 import {createElement as $,useState,useLayoutEffect,useCallback,useMemo,useRef} from "react"
 import {em} from "./vdom-util.js"
-import {useWidth,getFontSize,useEventListener,useChildWidths,addChildPos} from "../main/vdom-hooks.js"
+import {useEventListener,extractedUse} from "../main/vdom-hooks.js"
+import {getFontSize,useWidths} from "../main/sizes.js"
 
 const last = l => l && l.length>0 && l[l.length-1]
 
@@ -67,22 +68,24 @@ const getPositions = fitted => Object.fromEntries(fitted.sides.flatMap(side=>{
     })
 }))
 
-const useViewportHeightIntEm = element => {
-    const [height,setHeight] = useState(Infinity)
-    const refresh = useCallback(()=>{
-        if(element)
-            setHeight(parseInt(element.ownerDocument.documentElement.clientHeight / getFontSize(element)))
-    },[setHeight,element])
+const useSetViewportStateFromElement = extractedUse(setState => element => {
+    const height = element ? parseInt(element.ownerDocument.documentElement.clientHeight / getFontSize(element)) : Infinity
+    setState({element,height})
+},useMemo)
+
+const useViewportHeightIntEm = () => {
+    const [{height,element},setState] = useState(Infinity)
+    const set = useSetViewportStateFromElement(setState)
+    const refresh = useCallback(()=>set(element),[set,element])
     const win = element && element.ownerDocument.defaultView
     useEventListener(win, "resize", refresh)
-    useLayoutEffect(()=>refresh(),[refresh])
-    return height
+    return [height,set]
 }
 
 const deep = body => state => body(deep(body))(state)
 //loop(next=>st=>{ console.log(st); if(st<10) next(st+1)})(0)
 
-const fitAll = (expandTo,outerWidth,childWidths,checkLineCount) => {
+const useMemoFitAll = extractedUse((expandTo,childWidths,addPos,outerWidth,addContainer,checkLineCount) => {
     const setup = items => items.map(item=>({
         key: item.key, sideName: item.props.area, width: childWidths[item.key]
     })).filter(item=>item.width)
@@ -100,11 +103,10 @@ const fitAll = (expandTo,outerWidth,childWidths,checkLineCount) => {
         fitSides(setup(expandTo),1,outerWidth)
     const btnPosByKey = getPositions(fitted)
     const height = em(lineToEm(fitted.lineCount))
-    const children = getAllExpanded(expandTo).map(c=>addChildPos(c.key,btnPosByKey[c.key],c.props.children))
-    return [children,height]
-}
+    const children = getAllExpanded(expandTo).map(c=>addPos(c.key,btnPosByKey[c.key],c.props.children))
+    return addContainer(height,children)
+},useMemo)
 
-const useMemoR = (calc,...depList) => useMemo(()=>calc(...depList),depList)
 /*
 const useLogDep = (hint,...depList) => {
     const ref = useRef(null)
@@ -116,19 +118,15 @@ const useLogDep = (hint,...depList) => {
 
 export function ExpanderArea({expandTo,maxLineCount}){
     const [theAreaElement,setAreaElement] = useState(null)
-    const outerWidth = useWidth(theAreaElement)
-    const childWidths = useChildWidths(theAreaElement,[expandTo])
-    const vpHeight = useViewportHeightIntEm(maxLineCount ? null : theAreaElement)
+    const [vpHeight,vpRef] = useViewportHeightIntEm()
+    const [childWidths,addPos,outerWidth,addContainer] = useWidths(maxLineCount ? null : vpRef)
     const checkLineCountVP = useCallback(lineCount => lineToEm(lineCount) * 4 <= vpHeight, [vpHeight])
     const checkLineCountVal = useCallback(lineCount => lineCount <= maxLineCount, [maxLineCount])
     const checkLineCount = maxLineCount ? checkLineCountVal : checkLineCountVP
-    const [children,height] = useMemoR(fitAll,expandTo,outerWidth,childWidths,checkLineCount)
-
+    const res = useMemoFitAll(expandTo,childWidths,addPos,outerWidth,addContainer,checkLineCount)
     // console.log("render "+maxLineCount)
     // useLogDep("changed "+maxLineCount,theAreaElement,childWidths,expandTo,outerWidth,childWidths,checkLineCount,vpHeight)
-
-    const style = { position: "relative", height }
-    return $("div",{ style, ref: setAreaElement, children })
+    return res
 }
 export function Expander({children}){ return children }
 

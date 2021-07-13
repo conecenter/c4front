@@ -1,7 +1,8 @@
 import {cloneElement, createElement as $, useCallback, useLayoutEffect, useMemo, useState} from "react"
 
 import {findFirstParent, identityAt, never, sortedWith} from "./vdom-util.js"
-import {NoCaptionContext, useEventListener, useSync, useWidth} from "./vdom-hooks.js"
+import {NoCaptionContext, useEventListener, useSync} from "./vdom-hooks.js"
+import {useWidth,useMergeRef} from "./sizes.js"
 import {useGridDrag} from "./grid-drag.js"
 
 const dragRowIdOf = identityAt('dragRow')
@@ -155,14 +156,15 @@ const useSyncGridDrag = ({ identity, rows, cols, gridKey }) => {
     return [dragData,dragCSSContent,onMouseDown]
 }
 
-const useColumnGap = gridElement => { // will not react to element style changes
+const useColumnGap = () => { // will not react to element style changes
     const [columnGap,setColumnGap] = useState(0)
-    useLayoutEffect(()=>{
+    const ref = useCallback(gridElement=>{
         if(!gridElement) return;
         const {columnGap,fontSize} = getComputedStyle(gridElement)
-        setColumnGap(parseFloat(columnGap)/parseFloat(fontSize))
-    },[gridElement])
-    return columnGap
+        const columnGapF = parseFloat(columnGap)
+        setColumnGap( isNaN(columnGapF) ? 0 : columnGapF/parseFloat(fontSize) )
+    },[setColumnGap])
+    return [columnGap,ref]
 }
 
 const getCellDataAttrs = element => {
@@ -198,9 +200,9 @@ export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey 
         ...expandRowKeys(rows)
     ]), [hasDragRow, rows])
 
-    const [gridElement, setGridElement] = useState(null)
-    const outerWidth = useWidth(gridElement)
-    const columnGap = useColumnGap(gridElement)
+    const [outerWidth,outerWidthRef] = useWidth()
+    const [columnGap,columnGapRef] = useColumnGap()
+    const ref = useMergeRef(outerWidthRef,columnGapRef)
     const contentWidth = outerWidth - columnGap * cols.length
     const { hasHiddenCols, hideElementsForHiddenCols } =
         useMemo(() => calcHiddenCols(cols, contentWidth), [cols, contentWidth])
@@ -218,7 +220,7 @@ export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey 
     const headerRowKeys = rows.filter(row => row.isHeader).map(row => row.rowKey).join(' ')
     const dragBGEl = $("div", { key: "gridBG", className: "gridBG", style: { gridColumn: spanAll, gridRow: spanAll }})
     const style = { display: "grid", gridTemplateRows, gridTemplateColumns }
-    const res = $("div", { onMouseDown, onClick: clickAction, style, className: "grid", "data-grid-key": gridKey, "header-row-keys": headerRowKeys, ref: setGridElement }, dragBGEl, ...allChildren)
+    const res = $("div", { onMouseDown, onClick: clickAction, style, className: "grid", "data-grid-key": gridKey, "header-row-keys": headerRowKeys, ref }, dragBGEl, ...allChildren)
     const dragCSSEl = $("style",{dangerouslySetInnerHTML: { __html: dragCSSContent}})
     return $(NoCaptionContext.Provider,{value:true},dragCSSEl,res)
 }

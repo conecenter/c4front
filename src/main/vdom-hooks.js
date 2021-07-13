@@ -1,5 +1,5 @@
 
-import {createElement,useState,useMemo,useLayoutEffect,useContext,createContext,useCallback,useEffect} from "react"
+import {createElement,useState,useContext,createContext,useCallback,useEffect} from "react"
 
 /********* sync ***************************************************************/
 
@@ -33,72 +33,23 @@ export function createSyncProviders({sender,ack,children}){
 
 /********* stuff **************************************************************/
 
-export const getFontSize = element => parseFloat(getComputedStyle(element).fontSize)
+export const extractedUse = (body,use) => (...args) => use(()=>body(...args),args)
 
-const getWidthEm = el => el.getBoundingClientRect().width / getFontSize(el)
+export const useEventListener = extractedUse((el,evName,callback) => {
+    if(!callback || !el) return undefined
+    el.addEventListener(evName,callback)
+    return ()=>el.removeEventListener(evName,callback)
+},useEffect)
 
-export const useWidth = element => {
-    const [width,setWidth] = useState(Infinity)
-    const resizeObserver = useMemo(()=>new ResizeObserver(entries => {
-        entries.forEach(entry=>setWidth(getWidthEm(entry.target))) // entry.contentRect.width
-    }),[setWidth])
-    useLayoutEffect(()=>{
-        if(element){
-            resizeObserver.observe(element)
-            setWidth(getWidthEm(element))
-        }
-        return () => element && resizeObserver.unobserve(element)
-    },[element,setWidth])
-    return width
-}
-
-export const useEventListener = (el,evName,callback) => {
-    useEffect(()=>{
-        if(!callback || !el) return undefined
-        el.addEventListener(evName,callback)
-        return ()=>el.removeEventListener(evName,callback)
-    },[el,evName,callback])
-}
-
-export const useAnimationFrame = (element,callback) => {
-    useEffect(() => {
-        if(!callback || !element) return
-        const {requestAnimationFrame,cancelAnimationFrame} = element.ownerDocument.defaultView
-        const animate = () => {
-            callback()
-            req = requestAnimationFrame(animate,element)
-        }
-        let req = requestAnimationFrame(animate,element)
-        return () => cancelAnimationFrame(req)
-    },[element,callback])
-}
+export const useAnimationFrame = extractedUse((element,callback) => {
+    if(!callback || !element) return
+    const {requestAnimationFrame,cancelAnimationFrame} = element.ownerDocument.defaultView
+    const animate = () => {
+        callback()
+        req = requestAnimationFrame(animate,element)
+    }
+    let req = requestAnimationFrame(animate,element)
+    return () => cancelAnimationFrame(req)
+},useEffect)
 
 export const NoCaptionContext = createContext()
-
-const em = v => `${v}em`
-export const addChildPos = (key,pos,children) => createElement("div",{
-    key, "data-child-key": key, children,
-    style: {
-        /*height:"2em",*/ position: "absolute", boxSizing: "border-box",
-        top: em(pos?pos.top:0), left: em(pos?pos.left:0),
-        visibility: pos?null:"hidden",
-    }
-})
-const prepCheckUpdChildWidths = parentElement => {
-    if(!parentElement) return
-    const widths = [...parentElement.children].map(el=>{
-        const key = el.getAttribute("data-child-key")
-        return key && [key, el.getBoundingClientRect().width / getFontSize(parentElement)]
-    }).filter(Boolean)
-    return was=>(
-        widths.every(([key,width]) => width - (key in was ? was[key] : 0) <= 0) ?
-            was : Object.fromEntries(widths)
-    )
-}
-export const useChildWidths = (parentElement,depList) => {
-    const [theWidths,setWidths] = useState({})
-    useLayoutEffect(()=>{
-        if(parentElement) setWidths(prepCheckUpdChildWidths(parentElement))
-    },[parentElement,setWidths,...depList]) // ? are all child elements ready ; do we miss some due to these deps ?
-    return theWidths
-}
