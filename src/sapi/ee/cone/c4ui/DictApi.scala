@@ -4,7 +4,7 @@ import ee.cone.c4di._
 import ee.cone.c4vdom.Types._
 import ee.cone.c4vdom._
 
-class DictApi {
+@c4tags("FrontApp") trait DictApi {
   @c4el("Dict") def dict(
     key: String,
     url: String,
