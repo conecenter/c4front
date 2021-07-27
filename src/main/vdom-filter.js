@@ -69,7 +69,7 @@ const fitFilters = (filters,outerWidth,rowCount,canReduceButtonWidth,isMultiline
 
 const getWidthLimits = filters => getVisibleFilters(filters,0).map(c=>c.props.minWidth)
 
-const fitRows = (filters,buttons,outerWidth,rowCount) => (
+const fitRows = (filters,buttons,outerWidth,rowCount) => outerWidth ? (
     fitFilters(filters, outerWidth, rowCount, true ,false, fitButtonsSide(buttons,"lt",true ,false), fitButtonsSide(buttons,"rt",true ,false)) ||
     fitFilters(filters, outerWidth, rowCount, true ,false, fitButtonsSide(buttons,"lt",true ,false), fitButtonsSide(buttons,"rt",false,false)) ||
     fitFilters(filters, outerWidth, rowCount, true ,false, fitButtonsSide(buttons,"lt",false,false), fitButtonsSide(buttons,"rt",false,false)) ||
@@ -77,7 +77,7 @@ const fitRows = (filters,buttons,outerWidth,rowCount) => (
     fitFilters(filters, outerWidth, rowCount, true ,true , fitButtonsSide(buttons,"lt",true ,true ), fitButtonsSide(buttons,"rt",false,true )) ||
     fitFilters(filters, outerWidth, rowCount, false,true , fitButtonsSide(buttons,"lt",false,true ), fitButtonsSide(buttons,"rt",false,true )) ||
     fitRows(filters,buttons,outerWidth,rowCount+1)
-)
+) : { groupedFilters: [], lt: fitButtonsSide(buttons,"lt",false,true ), rt: fitButtonsSide(buttons,"rt",false,true ) }
 
 const dMinMax = el => el.props.maxWidth - el.props.minWidth
 
