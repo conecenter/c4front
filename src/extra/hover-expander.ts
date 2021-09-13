@@ -13,29 +13,23 @@ export function HoverExpander({classNames, children}: HoverExpanderProps) {
             // @ts-ignore
             const parentRect = hovered.parentElement.getBoundingClientRect()
             const childRect = hovered.children[0].getBoundingClientRect()
-            if (childRect.width < parentRect.width)
+            if (childRect.width <= parentRect.width)
                 return [{}, false]
             else {
-                const height = Math.max(parentRect.height, childRect.height)
                 const width = Math.max(parentRect.width, childRect.width)
-                const top = parentRect.top
                 const left = parentRect.left
                 const documentRect = hovered.ownerDocument.documentElement.getBoundingClientRect()
                 if (documentRect.width > left + width)
                     return [{
-                        position: "fixed",
-                        height: height,
+                        position: "absolute",
                         width: width,
-                        top: top,
                         left: left
                     }, true]
                 else
                     return [{
-                        position: "fixed",
-                        height: height,
+                        position: "absolute",
                         width: width,
-                        top: top,
-                        left: documentRect.width - width - (documentRect.width - parentRect.right)
+                        right: documentRect.width - parentRect.right
                     }, true]
             }
         } else
