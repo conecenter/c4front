@@ -8,6 +8,7 @@ import {useGridDrag} from "./grid-drag.js"
 const dragRowIdOf = identityAt('dragRow')
 const dragColIdOf = identityAt('dragCol')
 const clickActionIdOf = identityAt('clickAction')
+const hasHiddenColsIdOf = identityAt('hasHiddenCols')
 
 const ROW_KEYS = {
     HEAD: "head",
@@ -187,6 +188,13 @@ const useGridClickAction = identity => {
     }, [enqueueClickActionPatch])
 }
 
+const useValueToServer = (identity, value) => {
+    const [patches, enqueuePatch] = useSync(identity)
+    useEffect(()=>{
+        enqueuePatch({ value, skipByPath: true, retry: true })
+    },[value,enqueuePatch])
+}
+
 export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey }) {
     const children = rawChildren || noChildren//Children.toArray(rawChildren)
 
@@ -209,6 +217,8 @@ export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey 
     const gridTemplateColumns = useMemo(() => getGridTemplateColumns(
         hideExpander(hasHiddenCols)(hideElementsForHiddenCols(false,col=>col.colKey)(cols))
     ), [cols, hideElementsForHiddenCols, hasHiddenCols])
+
+    useValueToServer(hasHiddenColsIdOf(identity), hasHiddenCols)
 
     const dragRowKey = dragData.axis === "y" && dragData.drag && dragData.drag.key
     //todo: fix expand+drag -- may be prepend with bg-cell with rowspan 2
