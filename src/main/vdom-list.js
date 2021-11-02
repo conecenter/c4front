@@ -1,4 +1,4 @@
-import {cloneElement, createElement as $, useCallback, useLayoutEffect, useMemo, useState} from "react"
+import {cloneElement, createElement as $, useCallback, useEffect, useLayoutEffect, useMemo, useState} from "react"
 
 import {findFirstParent, identityAt, never, sortedWith} from "./vdom-util.js"
 import {NoCaptionContext, useEventListener, useSync} from "./vdom-hooks.js"
