@@ -38,18 +38,46 @@ export function HoverExpander({classNames, children}: HoverExpanderProps) {
 
     const [style, needsClass] = calculateStyle()
     const className = classNames && needsClass ? classNames.join(" ") : ""
-    return el("div",
-        {
-            className: className,
-            onMouseEnter: (event: MouseEvent<Element>) => setHovered(event.currentTarget),
-            onMouseLeave: () => setHovered(null),
-            style: style
-        },
-        el("div",
-            {key: "childWrapper", style: {height: "fit-content", width: "fit-content"}},
-            children
+    if (needsClass)
+        return el("div", {},
+            [el("div",
+                {
+                    className: className,
+                    onMouseEnter: (event: MouseEvent<Element>) => setHovered(event.currentTarget),
+                    onMouseLeave: () => setHovered(null),
+                    style: style
+                },
+                el("div",
+                    {key: "childWrapper", style: {height: "fit-content", width: "fit-content"}},
+                    children
+                )
+            ),
+                el("div",
+                    {
+                        className: className,
+                        onMouseEnter: (event: MouseEvent<Element>) => setHovered(event.currentTarget),
+                        onMouseLeave: () => setHovered(null),
+                        style: {visibility: "hidden"}
+                    },
+                    el("div",
+                        {key: "childWrapper", style: {height: "fit-content", width: "fit-content"}},
+                        children
+                    )
+                )]
         )
-    )
+    else
+        return el("div",
+            {
+                className: className,
+                onMouseEnter: (event: MouseEvent<Element>) => setHovered(event.currentTarget),
+                onMouseLeave: () => setHovered(null),
+                style: style
+            },
+            el("div",
+                {key: "childWrapper", style: {height: "fit-content", width: "fit-content"}},
+                children
+            )
+        )
 }
 
 export const components = {HoverExpander}
