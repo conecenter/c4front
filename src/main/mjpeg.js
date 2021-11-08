@@ -55,3 +55,5 @@ export function CamView({url}){
     console.log("render")
     return createElement("img",{ref:setElement})
 }
+
+export const components = {CamView}
