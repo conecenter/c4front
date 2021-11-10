@@ -8,5 +8,6 @@ import ee.cone.c4vdom._
   @c4el("CamView") def camView(
     key: String,
     url: String,
+    height: Int,
   ): ToChildPair
 }
