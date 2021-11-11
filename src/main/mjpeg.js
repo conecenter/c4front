@@ -42,7 +42,7 @@ const useRecentlySeen = element => {
     return now() < theLastSeenAt + 6000
 }
 
-export function CamView({url}){
+export function CamView({url, height}){
     const [theElement,setElement] = useState(null)
     const recentlySeen = useRecentlySeen(theElement)
     const onData = useCallback(data=>{
@@ -53,7 +53,7 @@ export function CamView({url}){
     }, [theElement])
     useConnected(url, recentlySeen && onData)
     console.log("render")
-    return createElement("img",{ref:setElement})
+    return createElement("img",{ref:setElement, style:{height:height+"px"}})
 }
 
 export const components = {CamView}
