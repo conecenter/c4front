@@ -290,4 +290,75 @@ div.grid {
       min-width: 0;
     }
   }
+
+  .btnCalendar {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16116 17000' width='100%25' height='100%25'%3E%3Cpath d='M1347 1671l1642 0 0 -1114c0,-307 250,-557 558,-557 307,0 557,250 557,557l0 1114 3397 0 0 -1114c0,-307 249,-557 557,-557 308,0 557,250 557,557l0 1114 3462 0 0 -1114c0,-307 250,-557 557,-557 308,0 557,250 557,557l0 1114 1578 0c369,0 706,152 951,397 244,242 396,579 396,950l0 12635c0,371 -152,708 -395,952 -244,243 -581,395 -952,395l-13422 0c-371,0 -708,-152 -952,-395 -243,-246 -395,-583 -395,-952l0 -12635c0,-368 151,-705 395,-949l2 -3c245,-244 582,-395 950,-395zm2757 1114l0 627c0,308 -250,557 -557,557 -308,0 -558,-249 -558,-557l0 -627 -1642 0c-65,0 -123,26 -164,67l-2 2c-41,41 -67,99 -67,164l0 12635c0,65 26,123 67,164l2 0c42,42 100,69 164,69l13422 0c64,0 122,-27 164,-69 42,-42 69,-100 69,-164l0 -12635c0,-63 -27,-122 -69,-164l0 -2c-41,-41 -99,-67 -164,-67l-1578 0 0 627c0,308 -249,557 -557,557 -307,0 -557,-249 -557,-557l0 -627 -3462 0 0 627c0,308 -249,557 -557,557 -308,0 -557,-249 -557,-557l0 -627 -3397 0z'/%3E%3Cpath d='M2711 4805l2159 0 0 2577 -2577 0 0 -2577 418 0zm1323 836l-905 0 0 905 905 0 0 -905z'/%3E%3Cpath d='M2711 8496l2159 0 0 2576 -2577 0 0 -2576 418 0zm1323 836l-905 0 0 905 905 0 0 -905z'/%3E%3Cpath d='M2711 12152l2159 0 0 2576 -2577 0 0 -2576 418 0zm1323 835l-905 0 0 906 905 0 0 -906z'/%3E%3Cpath d='M6889 4805l2159 0 0 2577 -2577 0 0 -2577 418 0zm1323 836l-905 0 0 905 905 0 0 -905z'/%3E%3Cpath d='M6889 8496l2159 0 0 2576 -2577 0 0 -2576 418 0zm1323 836l-905 0 0 905 905 0 0 -905z'/%3E%3Cpath d='M6889 12152l2159 0 0 2576 -2577 0 0 -2576 418 0zm1323 835l-905 0 0 906 905 0 0 -906z'/%3E%3Cpath d='M11311 4805l2159 0 0 2577 -2577 0 0 -2577 418 0zm1323 836l-905 0 0 905 905 0 0 -905z'/%3E%3Cpath d='M11311 8496l2159 0 0 2576 -2577 0 0 -2576 418 0zm1323 836l-905 0 0 905 905 0 0 -905z'/%3E%3Cpath d='M11311 12152l2159 0 0 2576 -2577 0 0 -2576 418 0zm1323 835l-905 0 0 906 905 0 0 -906z'/%3E%3C/svg%3E");
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+}
+
+.dpCalendar {
+  max-width: 320px;
+  text-align: center;
+  border: 1px solid gray;
+  padding: 0.2em;
+
+  h2 {
+    color: darkblue;
+    font-size: 1.2em;
+    text-decoration: underline;
+  }
+
+  .dpCalendarContainer {
+    display: flex;
+    flex-wrap: wrap;
+
+    span {
+      padding: 0.5em;
+    }
+
+    .dpCalendarWeekDays {
+      display: flex;
+      width: 100%;
+      margin-top: 0.5em;
+      font-size: 0.8em;
+      color: darkblue;
+
+      span {
+        flex: 1;
+      }
+    }
+
+    .dpCalendarWeekNums {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      border-right: 1px solid darkblue;
+      color: darkblue;
+      font-size: 0.9em;
+    }
+
+    .dpCalendarDays {
+      flex: 7;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      grid-template-rows: repeat(6, 1fr);
+      justify-items: center;
+
+      span {
+        width: 100%;
+
+        &:hover {
+          cursor: pointer;
+          background: lightgray;
+        }
+      }
+
+      .dayNextMonth {
+        color: gray;
+      }
+    }
+  }
 }
