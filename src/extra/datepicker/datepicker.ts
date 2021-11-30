@@ -1,10 +1,11 @@
-import {createElement as el, useMemo, useRef} from "react";
+import {createElement as el, useState, useMemo, useRef} from "react";
 import {getDateTimeFormat, useUserLocale} from "../locale";
 import {DatePickerState, useDatePickerStateSync} from "./datepicker-exchange";
 import {DateSettings, formatDate, getDate} from "./date-utils";
 import {mapOption, None, nonEmpty, Option} from "../../main/option";
 import {useSelectionEditableInput} from "./selection-control";
 import {getOnBlur, getOnChange, getOnKeyDown, onTimestampChangeAction} from "./datepicker-actions";
+import {DatepickerCalendar} from "./datepicker-calendar";
 
 
 type DatePickerServerState = TimestampServerState | InputServerState
@@ -42,9 +43,9 @@ export function DatePickerInputElement({
     const timestampFormat = getDateTimeFormat(timestampFormatId, locale)
     const dateSettings: DateSettings = {timestampFormat: timestampFormat, locale: locale, timezoneId: timezoneId}
     const {
-        currentState: currentState,
-        setTempState: setTempState,
-        setFinalState: setFinalState
+        currentState,
+        setTempState,
+        setFinalState
     } = useDatePickerStateSync(identity, state, deferredSend || false)
     const {
         date: currentDateOpt,
@@ -57,16 +58,28 @@ export function DatePickerInputElement({
     const onKeyDown = getOnKeyDown(currentDateOpt, dateFormat, dateSettings, onTimestampChange, setSelection)
     const onChange = getOnChange(dateSettings, setTempState)
     const onBlur = getOnBlur(currentState, setFinalState)
-    return el("div", {className: "inputBox"},
-        el("div", {className: "inputSubBox"},
-            el("input", {
-                ref: inputRef,
-                value: inputValue,
-                onChange: onChange,
-                onKeyDown: onKeyDown,
-                onBlur: onBlur,
-            })
-        )
+
+    const [popupOpen, setPopupOpen] = useState(false);
+    const togglePopup = () => setPopupOpen(prevPopupOpen => !prevPopupOpen);
+
+    return el('div', null,
+        el("div", {className: "inputBox"},
+            el("div", {className: "inputSubBox"},
+                el("input", {
+                    ref: inputRef,
+                    value: inputValue,
+                    onChange: onChange,
+                    onKeyDown: onKeyDown,
+                    onBlur: onBlur,
+                })
+            ),
+            el('button', {
+                type: 'button', 
+                className: 'btnCalendar',
+                onClick: togglePopup,
+            }),        
+        ),
+        popupOpen && el(DatepickerCalendar)
     )
 }
 
