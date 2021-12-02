@@ -4,20 +4,26 @@ import {DatePickerState, useDatePickerStateSync} from "./datepicker-exchange";
 import {DateSettings, formatDate, getDate} from "./date-utils";
 import {mapOption, None, nonEmpty, Option} from "../../main/option";
 import {useSelectionEditableInput} from "./selection-control";
-import {getOnBlur, getOnChange, getOnKeyDown, onTimestampChangeAction} from "./datepicker-actions";
+import {getOnBlur, getOnChange, getOnKeyDown, onTimestampChangeAction, togglePopup} from "./datepicker-actions";
 import {DatepickerCalendar} from "./datepicker-calendar";
 
 
 type DatePickerServerState = TimestampServerState | InputServerState
 
-interface InputServerState {
-    tp: 'input-state'
-    inputValue: string
+type PopupDate = { year: number, month: string } | undefined;
+
+interface PopupState {
+    popupDate?: PopupDate
+}
+
+interface InputServerState extends PopupState {
+    tp: 'input-state',
+    inputValue: string,
     tempTimestamp?: string
 }
 
-interface TimestampServerState {
-    tp: 'timestamp-state'
+interface TimestampServerState extends PopupState {
+    tp: 'timestamp-state',
     timestamp: string
 }
 
@@ -56,11 +62,10 @@ export function DatePickerInputElement({
     const setSelection: (from: number, to: number) => void = useSelectionEditableInput(inputRef)
     const onTimestampChange: (timestamp: number) => void = onTimestampChangeAction(setTempState)
     const onKeyDown = getOnKeyDown(currentDateOpt, dateFormat, dateSettings, onTimestampChange, setSelection)
-    const onChange = getOnChange(dateSettings, setTempState)
+    const onChange = getOnChange(dateSettings, currentState.popupDate, setTempState)
     const onBlur = getOnBlur(currentState, setFinalState)
 
-    const [popupOpen, setPopupOpen] = useState(false);
-    const togglePopup = () => setPopupOpen(prevPopupOpen => !prevPopupOpen);
+    const handleClick = togglePopup(currentState, setFinalState);
 
     return el('div', null,
         el("div", {className: "inputBox"},
@@ -76,10 +81,10 @@ export function DatePickerInputElement({
             el('button', {
                 type: 'button', 
                 className: 'btnCalendar',
-                onClick: togglePopup,
+                onClick: handleClick,
             }),        
         ),
-        popupOpen && el(DatepickerCalendar)
+        currentState.popupDate && el(DatepickerCalendar)
     )
 }
 
@@ -102,4 +107,4 @@ function getCurrentProps(currentState: DatePickerState, dateSettings: DateSettin
 }
 
 export const components = {DatePickerInputElement}
-export type {DatePickerServerState}
+export type {DatePickerServerState, PopupState, PopupDate}
