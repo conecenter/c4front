@@ -3,6 +3,7 @@ import {createInputState, createTimestampState, DatePickerState, isTimestampStat
 import {getOrElse, mapOption, nonEmpty, Option} from "../../main/option";
 import React, {ChangeEvent, FocusEvent, KeyboardEvent} from "react";
 import {ARROW_DOWN_KEY, ARROW_UP_KEY} from "../../main/keyboard-keys";
+import { PopupDate } from "./datepicker";
 
 function updateAndSendDate(
     currentDate: Date,
@@ -51,27 +52,36 @@ export function getOnKeyDown(
     }
 }
 
-export function getOnChange(dateSettings: DateSettings, setState: (state: DatePickerState) => void): (event: ChangeEvent<HTMLInputElement>) => void {
+export function getOnChange(dateSettings: DateSettings, popupDate: PopupDate, setState: (state: DatePickerState) => void): (event: ChangeEvent<HTMLInputElement>) => void {
     return (event: React.ChangeEvent<HTMLInputElement>) => {
         const inputValue = event.target.value
         setState(
             getOrElse(
                 mapOption(
                     parseStringToDate(inputValue, dateSettings),
-                    timestamp => createInputState(inputValue, timestamp)
+                    timestamp => createInputState(inputValue, popupDate, timestamp)
                 ),
-                createInputState(inputValue)
+                createInputState(inputValue, popupDate)
             )
-        )
-    }
-}
+        );
+    };
+};
 
 export function getOnBlur(currentState: DatePickerState, setState: (state: DatePickerState) => void): (event: FocusEvent<HTMLInputElement>) => void {
     return (event: FocusEvent<HTMLInputElement>) => {
-        isTimestampState(currentState) ?
-            setState(currentState) :
-            currentState.tempTimestamp ?
-                setState(createTimestampState(currentState.tempTimestamp)) :
-                setState(currentState)
+        if (isTimestampState(currentState)) setState(currentState);
+        else {
+            const { tempTimestamp, popupDate } = currentState;
+            tempTimestamp
+                ? setState(createTimestampState(tempTimestamp, popupDate))
+                : setState(currentState);
+        }
     }
+}
+
+export function togglePopup(currentState: DatePickerState, setState: (state: DatePickerState) => void) {
+    return () => {
+        const popupDate = currentState.popupDate ? undefined : {year: 2021, month: 'November'};
+        setState({ ...currentState, popupDate });
+    }    
 }
