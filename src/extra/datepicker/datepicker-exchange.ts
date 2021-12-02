@@ -1,46 +1,48 @@
 import {useSync} from "../../main/vdom-hooks";
 import {useCallback} from "react";
 import {identityAt} from "../../main/vdom-util";
-import {DatePickerServerState} from "./datepicker";
+import {DatePickerServerState, PopupState, PopupDate} from "./datepicker";
 
 type DatePickerState = TimestampState | InputState
 
-interface TimestampState {
-    tp: 'timestamp-state'
+interface TimestampState extends PopupState {
+    tp: 'timestamp-state',
     timestamp: number
 }
 
 const isTimestampStateType = (tp: string): tp is 'timestamp-state' => tp === 'timestamp-state'
 const isTimestampState = (mode: DatePickerState): mode is TimestampState => isTimestampStateType(mode.tp)
-const createTimestampState = (timestamp: number): TimestampState => ({tp: 'timestamp-state', timestamp: timestamp})
+const createTimestampState = (timestamp: number, popupDate?: PopupDate): TimestampState => {
+    return { tp: 'timestamp-state', timestamp, popupDate };
+};
 
-interface InputState {
-    tp: 'input-state'
-    inputValue: string
+interface InputState extends PopupState {
+    tp: 'input-state',
+    inputValue: string,
     tempTimestamp?: number
 }
 
 const isInputStateType = (tp: string): tp is 'input-state' => tp === 'input-state'
 const isInputState = (mode: DatePickerState): mode is InputState => isInputStateType(mode.tp)
-const createInputState = (inputValue: string, tempTimestamp?: number): InputState => ({
-    tp: 'input-state',
-    inputValue: inputValue,
-    tempTimestamp: tempTimestamp
-})
+const createInputState = (inputValue: string, popupDate?: PopupDate, tempTimestamp?: number): InputState => {
+    return { tp: 'input-state', inputValue, tempTimestamp, popupDate };
+};
 
 function serverStateToState(serverState: DatePickerServerState): DatePickerState {
     if (serverState.tp === 'timestamp-state')
-        return createTimestampState(parseInt(serverState.timestamp))
-    else return createInputState(serverState.inputValue, serverState.tempTimestamp !== undefined ? parseInt(serverState.tempTimestamp) : undefined)
+        return createTimestampState(parseInt(serverState.timestamp), serverState.popupDate);
+    else return createInputState(serverState.inputValue, serverState.popupDate, serverState.tempTimestamp !== undefined ? parseInt(serverState.tempTimestamp) : undefined);
 }
 
 function stateToPatch(mode: DatePickerState, changing: boolean, deferredSend: boolean): Patch {
-    const changingHeaders = changing ? {'x-r-changing': "1"} : {}
-    const extraHeaders = isInputState(mode) && mode.tempTimestamp ? {'x-r-temp-timestamp': String(mode.tempTimestamp)} : {}
+    const changingHeaders = changing ? {'x-r-changing': "1"} : {};
+    const extraHeaders = isInputState(mode) && mode.tempTimestamp ? {'x-r-temp-timestamp': String(mode.tempTimestamp)} : {};
+    const popupHeader = mode.popupDate ? {'x-r-popup': JSON.stringify(mode.popupDate)} : {};
     return {
         headers: {
             ...changingHeaders,
             ...extraHeaders,
+            ...popupHeader,
             "x-r-type": mode.tp
         },
         value: isTimestampState(mode) ? String(mode.timestamp) : mode.inputValue,
@@ -49,33 +51,36 @@ function stateToPatch(mode: DatePickerState, changing: boolean, deferredSend: bo
 }
 
 function patchToState(patch: Patch): DatePickerState {
-    const mode = patch.headers["x-r-type"]
-    const tempTimestamp = patch.headers['x-r-temp-timestamp'] ? parseInt(patch.headers['x-r-temp-timestamp']) : undefined
-    if (isTimestampStateType(mode))
-        return {
-            tp: "timestamp-state",
-            timestamp: parseInt(patch.value)
-        }
+    const mode = patch.headers["x-r-type"];
+    const tempTimestamp = patch.headers['x-r-temp-timestamp'] ? parseInt(patch.headers['x-r-temp-timestamp']) : undefined;
+    const popupDate = patch.headers['x-r-popup'] ? JSON.parse(patch.headers['x-r-popup']) : undefined;
+    if (isTimestampStateType(mode)) return {
+        tp: "timestamp-state",
+        timestamp: parseInt(patch.value),
+        popupDate,
+    }
     else if (isInputStateType(mode)) return {
         tp: "input-state",
         inputValue: patch.value,
-        tempTimestamp: tempTimestamp
+        tempTimestamp: tempTimestamp,
+        popupDate,
     }
     else throw new Error("Unsupported mode")
 }
 
 interface PatchHeaders {
-    'x-r-changing'?: string
-    'x-r-type': string
-    'x-r-temp-timestamp'?: string
+    'x-r-changing'?: string,
+    'x-r-type': string,
+    'x-r-temp-timestamp'?: string,
+    'x-r-popup'?: string,
 }
 
 interface Patch {
-    headers: PatchHeaders
+    headers: PatchHeaders,
     value: string,
-    skipByPath: boolean
-    retry: boolean
-    defer: boolean
+    skipByPath: boolean,
+    retry: boolean,
+    defer: boolean,
 }
 
 interface DatePickerSyncState {
