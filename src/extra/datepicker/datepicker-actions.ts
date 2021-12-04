@@ -79,9 +79,17 @@ export function getOnBlur(currentState: DatePickerState, setState: (state: DateP
     }
 }
 
-export function togglePopup(currentState: DatePickerState, setState: (state: DatePickerState) => void) {
+export function togglePopup(
+    currentDateOpt: Option<Date>, 
+    currentState: DatePickerState, 
+    setState: (state: DatePickerState) => void) {
     return () => {
-        const popupDate = currentState.popupDate ? undefined : {year: 2021, month: 'November'};
+        const today = new Date();
+        const popupDate = currentState.popupDate 
+            ? undefined 
+            : nonEmpty(currentDateOpt)
+                ? { year: currentDateOpt.getFullYear(), month: currentDateOpt.getMonth() }
+                : { year: today.getFullYear(), month: today.getMonth() };
         setState({ ...currentState, popupDate });
     }    
 }
