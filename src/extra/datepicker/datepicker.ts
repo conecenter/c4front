@@ -10,7 +10,7 @@ import {DatepickerCalendar} from "./datepicker-calendar";
 
 type DatePickerServerState = TimestampServerState | InputServerState
 
-type PopupDate = { year: number, month: string } | undefined;
+type PopupDate = { year: number, month: number } | undefined;
 
 interface PopupState {
     popupDate?: PopupDate
@@ -65,7 +65,7 @@ export function DatePickerInputElement({
     const onChange = getOnChange(dateSettings, currentState.popupDate, setTempState)
     const onBlur = getOnBlur(currentState, setFinalState)
 
-    const handleClick = togglePopup(currentState, setFinalState);
+    const handleClick = togglePopup(currentDateOpt, currentState, setFinalState);
 
     return el('div', null,
         el("div", {className: "inputBox"},
@@ -75,16 +75,18 @@ export function DatePickerInputElement({
                     value: inputValue,
                     onChange: onChange,
                     onKeyDown: onKeyDown,
-                    onBlur: onBlur,
+                    onBlur: onBlur
                 })
             ),
             el('button', {
                 type: 'button', 
                 className: 'btnCalendar',
-                onClick: handleClick,
+                onClick: handleClick
             }),        
         ),
-        currentState.popupDate && el(DatepickerCalendar)
+        currentState.popupDate && el(DatepickerCalendar, {
+            popupDate: currentState.popupDate
+        })
     )
 }
 
