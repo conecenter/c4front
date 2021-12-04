@@ -1,33 +1,78 @@
-import React, {createElement as el} from "react";
+import React from "react";
+import { useUserLocale } from "../locale";
+import { endOfYear, getDate, getDaysInMonth, getWeek, isMonday, startOfWeek } from "date-fns";
+import { subWeeks } from "date-fns/esm";
+import { PopupDate } from "./datepicker";
 
-export function DatepickerCalendar() {
-  const daysCurrMonth = Array.from({length: 30}, (_, i) => 
-    <span key={`curr${i + 1}`}>{i + 1}</span>);
+interface DatepickerCalendarProps {
+  popupDate: { year: number, month: number }
+}
 
-  const daysNextMonth = Array.from({length: 12}, (_, i) => 
-    <span className='dayNextMonth' key={`next${i + 1}`}>{i + 1}</span>);
+export function DatepickerCalendar({ popupDate }: DatepickerCalendarProps) {
+  const { year, month } = popupDate;
 
-  let weekNumbers = [44, 45, 46, 47, 48, 49]
-    .map(week => <span key={`wk${week}`}>{week}</span>);
+  const pageDate = new Date(year, month);
+  const weeksToShow = 6;
 
-  const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    .map(weekDay => <span key={`wd${weekDay}`}>{weekDay}</span>)
+  const locale = useUserLocale();
+  const pageMonth = locale.getMonthNameFull(month);
+
+  let fromDatePrevMonth: Date;
+  let startIndex: number, endIndex: number;
+  
+  if (isMonday(pageDate)) {
+    fromDatePrevMonth = subWeeks(pageDate, 1);
+    startIndex = getDate(fromDatePrevMonth);
+    endIndex = startIndex + 6;
+  } else {
+    fromDatePrevMonth = startOfWeek(pageDate, { weekStartsOn: 1 });
+    startIndex = getDate(fromDatePrevMonth);
+    endIndex = getDaysInMonth(fromDatePrevMonth);
+  }
+  const daysPrevMonth = getSpanList(createArray(startIndex, endIndex), 'prev', 'dayPrevMonth');
+
+  const daysCurrMonth = getSpanList(createArray(1, getDaysInMonth(pageDate)), 'curr');
+
+  const numDaysNextMonth = weeksToShow * 7 - daysPrevMonth.length - daysCurrMonth.length;
+  const daysNextMonth = getSpanList(createArray(1, numDaysNextMonth), 'next', 'dayNextMonth');  
+
+  const weekNumStart = getWeek(fromDatePrevMonth, { weekStartsOn: 1, firstWeekContainsDate: 4 });
+  const weekNumEnd = weekNumStart + weeksToShow - 1;
+
+  const weekNumbersArr = (month === 0 && weekNumStart !== 1)
+    ? [weekNumStart, ...createArray(1, 5)]
+    : month === 11
+      ? [...createArray(weekNumStart, weekNumEnd - 1), 1]
+      : createArray(weekNumStart, weekNumEnd);
+  const weekNumbers = getSpanList(weekNumbersArr, 'week');
+
+  const weekDays = locale.weekDays
+    .map(({ shortName }) => <span key={`${shortName}`}>{shortName}</span>);
 
   return (
     <div className='dpCalendar'>
-      <h2>November 2021</h2>
+      <h2>{pageMonth} {year}</h2>
       <div className='dpCalendarContainer'>
         <div className='dpCalendarWeekDays'>
-            {weekDays}
+          {weekDays}
         </div>
         <div className='dpCalendarWeekNums'>
           {weekNumbers}
         </div>
         <div className='dpCalendarDays'>
+          {daysPrevMonth}
           {daysCurrMonth}
           {daysNextMonth}
         </div>
       </div>
     </div>
   );
+}
+
+function createArray(start: number, end: number) {
+  return Array.from({length: end - start + 1}, (_, i) => i + start);
+}
+
+function getSpanList(array: number[], keyPrefix: string, className?: string) {
+  return array.map(number => <span className={className} key={`${keyPrefix}${number}`}>{number}</span>);
 }
