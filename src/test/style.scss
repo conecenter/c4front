@@ -344,7 +344,6 @@ div.grid {
       flex: 7;
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      grid-template-rows: repeat(6, 1fr);
       justify-items: center;
 
       span {
@@ -356,7 +355,8 @@ div.grid {
         }
       }
 
-      .dayNextMonth {
+      .dayNextMonth,
+      .dayPrevMonth {
         color: gray;
       }
     }
