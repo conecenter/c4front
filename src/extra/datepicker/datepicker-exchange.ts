@@ -1,9 +1,15 @@
 import {useSync} from "../../main/vdom-hooks";
 import {useCallback} from "react";
 import {identityAt} from "../../main/vdom-util";
-import {DatePickerServerState, PopupState, PopupDate} from "./datepicker";
+import {DatePickerServerState} from "./datepicker";
 
 type DatePickerState = TimestampState | InputState
+
+type PopupDate = { year: number, month: number } | undefined;
+
+interface PopupState {
+    popupDate?: PopupDate
+}
 
 interface TimestampState extends PopupState {
     tp: 'timestamp-state',
@@ -29,9 +35,10 @@ const createInputState = (inputValue: string, popupDate?: PopupDate, tempTimesta
 };
 
 function serverStateToState(serverState: DatePickerServerState): DatePickerState {
+    const popupDate = serverState.popupDate ? JSON.parse(serverState.popupDate) : undefined;
     if (serverState.tp === 'timestamp-state')
-        return createTimestampState(parseInt(serverState.timestamp), serverState.popupDate);
-    else return createInputState(serverState.inputValue, serverState.popupDate, serverState.tempTimestamp !== undefined ? parseInt(serverState.tempTimestamp) : undefined);
+        return createTimestampState(parseInt(serverState.timestamp), popupDate);
+    else return createInputState(serverState.inputValue, popupDate, serverState.tempTimestamp !== undefined ? parseInt(serverState.tempTimestamp) : undefined);
 }
 
 function stateToPatch(mode: DatePickerState, changing: boolean, deferredSend: boolean): Patch {
@@ -105,4 +112,4 @@ function useDatePickerStateSync(
 }
 
 export {useDatePickerStateSync, isInputState, isTimestampState, createTimestampState, createInputState};
-export type {DatePickerState};
+export type {DatePickerState, PopupDate};
