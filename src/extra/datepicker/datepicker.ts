@@ -10,19 +10,19 @@ import {DatepickerCalendar} from "./datepicker-calendar";
 
 type DatePickerServerState = TimestampServerState | InputServerState
 
-type PopupDate = { year: number, month: number } | undefined;
+type PopupServerDate = string | undefined;
 
-interface PopupState {
-    popupDate?: PopupDate
+interface PopupServerState {
+    popupDate?: PopupServerDate
 }
 
-interface InputServerState extends PopupState {
+interface InputServerState extends PopupServerState {
     tp: 'input-state',
     inputValue: string,
     tempTimestamp?: string
 }
 
-interface TimestampServerState extends PopupState {
+interface TimestampServerState extends PopupServerState {
     tp: 'timestamp-state',
     timestamp: string
 }
@@ -85,7 +85,8 @@ export function DatePickerInputElement({
             }),        
         ),
         currentState.popupDate && el(DatepickerCalendar, {
-            popupDate: currentState.popupDate
+            popupDate: currentState.popupDate,
+            onClickAway: handleClick
         })
     )
 }
@@ -109,4 +110,4 @@ function getCurrentProps(currentState: DatePickerState, dateSettings: DateSettin
 }
 
 export const components = {DatePickerInputElement}
-export type {DatePickerServerState, PopupState, PopupDate}
+export type {DatePickerServerState}
