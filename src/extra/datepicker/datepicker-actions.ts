@@ -3,7 +3,7 @@ import {createInputState, createTimestampState, DatePickerState, isTimestampStat
 import {getOrElse, mapOption, nonEmpty, Option} from "../../main/option";
 import React, {ChangeEvent, FocusEvent, KeyboardEvent} from "react";
 import {ARROW_DOWN_KEY, ARROW_UP_KEY} from "../../main/keyboard-keys";
-import { PopupDate } from "./datepicker";
+import { PopupDate } from "./datepicker-exchange";
 
 function updateAndSendDate(
     currentDate: Date,
