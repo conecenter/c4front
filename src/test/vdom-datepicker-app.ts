@@ -18,7 +18,7 @@ function App() {
         state: {
             tp: "timestamp-state",
             timestamp: String(testTS),
-            // popupDate: { year: 2021, month: '0' }
+            popupDate: '{ "year": 2021, "month": 10 }'
         }
     })
     const sender = {
