@@ -1,32 +1,38 @@
 import React, { useEffect, useRef } from "react";
 import { useUserLocale } from "../locale";
-import { getDate, getDaysInMonth, getWeek, isMonday, startOfWeek } from "date-fns";
-import { useEventListener } from '../../main/vdom-hooks'
+import { addMonths, getDate, getDaysInMonth, getWeek, isMonday, parse, startOfWeek } from "date-fns";
+import { DatePickerState, PopupDate } from "./datepicker-exchange";
+import { onDateChoiceAction } from './datepicker-actions';
 
 interface DatepickerCalendarProps {
   popupDate: { year: number, month: number },
-  onClickAway: () => void
+  onClickAway: () => void,
+  onDateChoice: (state: DatePickerState) => void
 }
 
-export function DatepickerCalendar({ popupDate, onClickAway }: DatepickerCalendarProps) {
+export function DatepickerCalendar({ popupDate, onClickAway, onDateChoice: setFinalState }: DatepickerCalendarProps) {
   const { year, month } = popupDate;
 
   const pageDate = new Date(year, month);
   const weeksToShow = 6;
 
   const locale = useUserLocale();
-  const pageMonth = locale.getMonthNameFull(month);
   
   const daysPrevMonth = isMonday(pageDate) ? [] : calcDaysPrevMonth(pageDate);
 
-  const daysCurrMonth = getSpanList(createArray(1, getDaysInMonth(pageDate)), 'curr');
+  const daysCurrMonth = getSpanList(createArray(1, getDaysInMonth(pageDate)), 'curr', { year, month });
 
   const numDaysNextMonth = weeksToShow * 7 - daysPrevMonth.length - daysCurrMonth.length;
-  const daysNextMonth = getSpanList(createArray(1, numDaysNextMonth), 'next', 'dayNextMonth');  
+  const nextMonth = addMonths(pageDate, 1);
+  const daysNextMonth = getSpanList(
+    createArray(1, numDaysNextMonth), 
+    'next', 
+    { year: nextMonth.getFullYear(), month: nextMonth.getMonth() },
+    'dayNextMonth'
+  );
 
   const weekNumStart = getWeek(pageDate, { weekStartsOn: 1, firstWeekContainsDate: 4 });
   const weekNumEnd = weekNumStart + weeksToShow - 1;
-
   const weekNumbersArr = (month === 0 && weekNumStart !== 1)
     ? [weekNumStart, ...createArray(1, 5)]
     : month === 11
@@ -41,9 +47,12 @@ export function DatepickerCalendar({ popupDate, onClickAway }: DatepickerCalenda
   useEffect(() => {
     function handleClick (e: MouseEvent) {
       if (dpCalendar.current && !dpCalendar.current.contains(e.target as Node)) onClickAway();
+      else if (e.target instanceof HTMLSpanElement && e.target.dataset.date) 
+        onDateChoiceAction(e.target.dataset.date, setFinalState);
     }
-    document.addEventListener('click', handleClick);
-    return () => document.removeEventListener('click', handleClick);
+    const doc = dpCalendar.current!.ownerDocument;
+    doc.addEventListener('click', handleClick);
+    return () => doc.removeEventListener('click', handleClick);
   }, []);
 
   return (
@@ -77,13 +86,24 @@ function createArray(start: number, end: number) {
   return Array.from({length: end - start + 1}, (_, i) => i + start);
 }
 
-function getSpanList(array: number[], keyPrefix: string, className?: string) {
-  return array.map(number => <span className={className} key={`${keyPrefix}${number}`}>{number}</span>);
+function getSpanList(array: number[], keyPrefix: string, dataset?: PopupDate, className?: string) {
+  return array.map(number => 
+    <span 
+      className={className} 
+      data-date={dataset? `${number}-${dataset.month + 1}-${dataset.year}` : ''} 
+      key={`${keyPrefix}${number}`}>
+        {number}
+    </span>);
 }
 
 function calcDaysPrevMonth(pageDate: Date) {
   const firstWeekStart = startOfWeek(pageDate, { weekStartsOn: 1 });
   const startIndex = getDate(firstWeekStart);
   const endIndex = getDaysInMonth(firstWeekStart);
-  return getSpanList(createArray(startIndex, endIndex), 'prev', 'dayPrevMonth');
+  return getSpanList(
+    createArray(startIndex, endIndex), 
+    'prev', 
+    { year: firstWeekStart.getFullYear(), month: firstWeekStart.getMonth() }, 
+    'dayPrevMonth'
+  );
 }

@@ -4,6 +4,7 @@ import {getOrElse, mapOption, nonEmpty, Option} from "../../main/option";
 import React, {ChangeEvent, FocusEvent, KeyboardEvent} from "react";
 import {ARROW_DOWN_KEY, ARROW_UP_KEY} from "../../main/keyboard-keys";
 import { PopupDate } from "./datepicker-exchange";
+import { parse } from "date-fns";
 
 function updateAndSendDate(
     currentDate: Date,
@@ -92,4 +93,9 @@ export function togglePopup(
                 : { year: today.getFullYear(), month: today.getMonth() };
         setState({ ...currentState, popupDate });
     }    
+}
+
+export function onDateChoiceAction(dateString: string, setState: (state: DatePickerState) => void) {
+    const chosenDate = parse(dateString, 'd-M-yyyy', new Date());
+    setState(createTimestampState(chosenDate.getTime()));
 }

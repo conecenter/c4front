@@ -1,4 +1,4 @@
-import {createElement as el, useState, useMemo, useRef} from "react";
+import {createElement as el, useMemo, useRef} from "react";
 import {getDateTimeFormat, useUserLocale} from "../locale";
 import {DatePickerState, useDatePickerStateSync} from "./datepicker-exchange";
 import {DateSettings, formatDate, getDate} from "./date-utils";
@@ -86,7 +86,8 @@ export function DatePickerInputElement({
         ),
         currentState.popupDate && el(DatepickerCalendar, {
             popupDate: currentState.popupDate,
-            onClickAway: handleClick
+            onClickAway: handleClick,
+            onDateChoice: setFinalState
         })
     )
 }
