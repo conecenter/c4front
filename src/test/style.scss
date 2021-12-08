@@ -373,6 +373,11 @@ div.grid {
       span {
         width: 100%;
 
+        &.today {
+          color: white;
+          background-color: red;
+        }
+
         &:hover {
           cursor: pointer;
           background: lightgray;

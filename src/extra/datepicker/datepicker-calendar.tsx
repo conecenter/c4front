@@ -1,22 +1,26 @@
 import React, { useEffect, useRef } from "react";
 import { useUserLocale } from "../locale";
-import { addMonths, getDate, getDaysInMonth, getWeek, isMonday, parse, startOfWeek } from "date-fns";
+import { addMonths, getDate, getDaysInMonth, getWeek, isMonday, format, startOfWeek } from "date-fns";
 import { DatePickerState, PopupDate } from "./datepicker-exchange";
 import { onDateChoiceAction } from './datepicker-actions';
+import { getOrElse, Option } from '../../main/option';
 
 interface DatepickerCalendarProps {
   popupDate: { year: number, month: number },
+  currentDateOpt: Option<Date>,
   onClickAway: () => void,
   onDateChoice: (state: DatePickerState) => void
 }
 
-export function DatepickerCalendar({ popupDate, onClickAway, onDateChoice: setFinalState }: DatepickerCalendarProps) {
+export function DatepickerCalendar({ popupDate, currentDateOpt, onClickAway, onDateChoice: setFinalState }: DatepickerCalendarProps) {
   const { year, month } = popupDate;
-
   const pageDate = new Date(year, month);
-  const weeksToShow = 6;
+
+  const dpCalendar = useRef<HTMLDivElement>(null);
 
   const locale = useUserLocale();
+
+  const weeksToShow = 6;
   
   const daysPrevMonth = isMonday(pageDate) ? [] : calcDaysPrevMonth(pageDate);
 
@@ -43,7 +47,12 @@ export function DatepickerCalendar({ popupDate, onClickAway, onDateChoice: setFi
   const weekDays = locale.weekDays
     .map(({ shortName }) => <span key={`${shortName}`}>{shortName}</span>);
 
-  const dpCalendar = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const dateString = format(getOrElse(currentDateOpt, new Date()), 'd-M-yyyy');
+    const today = dpCalendar.current!.querySelector(`[data-date='${dateString}']`);
+    if (today) today.classList.add('today');
+  });
+  
   useEffect(() => {
     function handleClick (e: MouseEvent) {
       if (dpCalendar.current && !dpCalendar.current.contains(e.target as Node)) onClickAway();
