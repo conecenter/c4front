@@ -368,5 +368,5 @@ function incrementDate(
     return {timestamp: getTimestamp(adjustedDate, dateSettings), startPosition, endPosition}
 }
 
-export {incrementDate, formatDate, getDate, parseStringToDate}
+export {incrementDate, formatDate, getDate, parseStringToDate, getTimestamp}
 export type {DateSettings}
