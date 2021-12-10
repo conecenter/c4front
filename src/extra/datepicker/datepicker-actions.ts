@@ -1,10 +1,9 @@
-import {DateSettings, incrementDate, parseStringToDate} from "./date-utils";
-import {createInputState, createTimestampState, DatePickerState, isTimestampState} from "./datepicker-exchange";
-import {getOrElse, mapOption, nonEmpty, Option} from "../../main/option";
-import React, {ChangeEvent, FocusEvent, KeyboardEvent} from "react";
+import {DateSettings, incrementDate, parseStringToDate, getTimestamp, getDate} from "./date-utils";
+import {createInputState, createTimestampState, DatePickerState, isTimestampState, PopupDate} from "./datepicker-exchange";
+import {getOrElse, isEmpty, mapOption, nonEmpty, Option} from "../../main/option";
+import React, {ChangeEvent, FocusEvent, KeyboardEvent, MouseEvent} from "react";
 import {ARROW_DOWN_KEY, ARROW_UP_KEY} from "../../main/keyboard-keys";
-import { PopupDate } from "./datepicker-exchange";
-import { parse } from "date-fns";
+import {addMonths, set} from "date-fns";
 
 function updateAndSendDate(
     currentDate: Date,
@@ -27,6 +26,12 @@ function updateAndSendDate(
 export const onTimestampChangeAction = (setState: (state: DatePickerState) => void) => (timestamp: number): void => {
     setState(createTimestampState(timestamp))
 };
+
+// export const onTimestampChangeAction = (setState: (state: DatePickerState) => void) => (timestamp: number): void => {
+//     const tpDate = new Date(timestamp);
+//     const popupDate = { year: tpDate.getFullYear(), month: tpDate.getMonth() };
+//     setState(createTimestampState(timestamp, popupDate));
+// };
 
 export function getOnKeyDown(
     currentDateOpt: Option<Date>,
@@ -80,7 +85,7 @@ export function getOnBlur(currentState: DatePickerState, setState: (state: DateP
     }
 }
 
-export function togglePopup(
+export function getOnPopupToggle(
     currentDateOpt: Option<Date>, 
     currentState: DatePickerState, 
     setState: (state: DatePickerState) => void) {
@@ -95,7 +100,32 @@ export function togglePopup(
     }    
 }
 
-export function onDateChoiceAction(dateString: string, setState: (state: DatePickerState) => void) {
-    const chosenDate = parse(dateString, 'd-M-yyyy', new Date());
-    setState(createTimestampState(chosenDate.getTime()));
+export function getOnDateChoice(currentDateOpt: Option<Date>, dateSettings: DateSettings, setFinalState: (state: DatePickerState) => void) {
+    return (e: MouseEvent) => {
+        const dateString = e.target instanceof HTMLSpanElement ? e.target.dataset.date : undefined;
+        if (!dateString) return;
+        const dateValues = dateString.split('-');
+        const isDateAvailable = nonEmpty(currentDateOpt);
+        const baseDate = isDateAvailable ? currentDateOpt : getDate(Date.now(), dateSettings);
+        if (isEmpty(baseDate)) return;
+        const timeSettings = isDateAvailable ? {} : { hours: 0, minutes: 0, seconds: 0 };
+        const chosenDate = set(baseDate, {
+            year: +dateValues[2],
+            month: +dateValues[1],
+            date: +dateValues[0],
+            ...timeSettings
+        });
+        setFinalState(createTimestampState(getTimestamp(chosenDate, dateSettings)));
+    }
 }
+
+export function getOnMonthArrowClick(currentState: DatePickerState, setFinalState: (state: DatePickerState) => void) {
+    return (e: MouseEvent) => {
+        const change = e.target instanceof HTMLButtonElement ? e.target.dataset.change : undefined;
+        if (change) {
+            const { year, month } = currentState.popupDate!;
+            const newDate = addMonths(new Date(year, month), +change);
+            setFinalState({...currentState, popupDate: {year: newDate.getFullYear(), month: newDate.getMonth() }});
+        }
+    }
+};
