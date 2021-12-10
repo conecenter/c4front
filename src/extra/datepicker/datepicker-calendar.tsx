@@ -1,18 +1,19 @@
 import React, { useEffect, useRef } from "react";
 import { useUserLocale } from "../locale";
 import { addMonths, getDate, getDaysInMonth, getWeek, isMonday, format, startOfWeek } from "date-fns";
-import { DatePickerState, PopupDate } from "./datepicker-exchange";
-import { onDateChoiceAction } from './datepicker-actions';
+import { PopupDate } from "./datepicker-exchange";
 import { getOrElse, Option } from '../../main/option';
 
 interface DatepickerCalendarProps {
   popupDate: { year: number, month: number },
   currentDateOpt: Option<Date>,
+  inputRef: React.MutableRefObject<HTMLInputElement | undefined>,
   onClickAway: () => void,
-  onDateChoice: (state: DatePickerState) => void
+  onDateChoice: (e: React.MouseEvent) => void,
+  onMonthArrowClick: (e: React.MouseEvent) => void
 }
 
-export function DatepickerCalendar({ popupDate, currentDateOpt, onClickAway, onDateChoice: setFinalState }: DatepickerCalendarProps) {
+export function DatepickerCalendar({ popupDate, currentDateOpt, inputRef, onClickAway, onDateChoice, onMonthArrowClick }: DatepickerCalendarProps) {
   const { year, month } = popupDate;
   const pageDate = new Date(year, month);
 
@@ -22,9 +23,9 @@ export function DatepickerCalendar({ popupDate, currentDateOpt, onClickAway, onD
 
   const weeksToShow = 6;
   
-  const daysPrevMonth = isMonday(pageDate) ? [] : calcDaysPrevMonth(pageDate);
+  const daysPrevMonth = isMonday(pageDate) ? [] : calcDaysPrevMonth(pageDate, currentDateOpt);
 
-  const daysCurrMonth = getSpanList(createArray(1, getDaysInMonth(pageDate)), 'curr', { year, month });
+  const daysCurrMonth = getSpanList(createArray(1, getDaysInMonth(pageDate)), 'curr', { year, month }, currentDateOpt);
 
   const numDaysNextMonth = weeksToShow * 7 - daysPrevMonth.length - daysCurrMonth.length;
   const nextMonth = addMonths(pageDate, 1);
@@ -32,6 +33,7 @@ export function DatepickerCalendar({ popupDate, currentDateOpt, onClickAway, onD
     createArray(1, numDaysNextMonth), 
     'next', 
     { year: nextMonth.getFullYear(), month: nextMonth.getMonth() },
+    currentDateOpt,
     'dayNextMonth'
   );
 
@@ -42,22 +44,22 @@ export function DatepickerCalendar({ popupDate, currentDateOpt, onClickAway, onD
     : month === 11
       ? [...createArray(weekNumStart, weekNumEnd - 1), 1]
       : createArray(weekNumStart, weekNumEnd);
-  const weekNumbers = getSpanList(weekNumbersArr, 'week');
+  const weekNumbers = weekNumbersArr.map(weekNum => <span key={`week${weekNum}`}>{weekNum}</span>);
 
   const weekDays = locale.weekDays
     .map(({ shortName }) => <span key={`${shortName}`}>{shortName}</span>);
 
-  useEffect(() => {
-    const dateString = format(getOrElse(currentDateOpt, new Date()), 'd-M-yyyy');
-    const today = dpCalendar.current!.querySelector(`[data-date='${dateString}']`);
-    if (today) today.classList.add('today');
-  });
+  // useEffect(() => {
+  //   const dateString = format(getOrElse(currentDateOpt, new Date()), 'd-M-yyyy');
+  //   const today = dpCalendar.current!.querySelector(`[data-date='${dateString}']`);
+  //   if (today) today.classList.add('today');
+  // });
   
   useEffect(() => {
     function handleClick (e: MouseEvent) {
-      if (dpCalendar.current && !dpCalendar.current.contains(e.target as Node)) onClickAway();
-      else if (e.target instanceof HTMLSpanElement && e.target.dataset.date) 
-        onDateChoiceAction(e.target.dataset.date, setFinalState);
+      if (dpCalendar.current 
+        && !dpCalendar.current.contains(e.target as Node) 
+        && e.target !== inputRef.current) onClickAway();
     }
     const doc = dpCalendar.current!.ownerDocument;
     doc.addEventListener('click', handleClick);
@@ -65,15 +67,19 @@ export function DatepickerCalendar({ popupDate, currentDateOpt, onClickAway, onD
   }, []);
 
   return (
-    <div ref={dpCalendar} className='dpCalendar'>
-      <h2>
-        <select defaultValue={month}>
-          {locale.months.map(monthName => 
-            <option key={`month-${monthName.id}`} value={monthName.id}>{monthName.fullName}</option>
-          )}
-        </select>
-        {year}
-      </h2>
+    <div ref={dpCalendar} onClick={onDateChoice} className='dpCalendar'>
+      <div className='dpCalendarHeader'>
+        <button data-change='-1' onClick={onMonthArrowClick}>{'<'}</button>
+        <h2>
+          <select defaultValue={month} key={month}>
+            {locale.months.map(monthName => 
+              <option key={`month-${monthName.id}`} value={monthName.id}>{monthName.fullName}</option>
+            )}
+          </select>
+          {year}
+        </h2>
+        <button data-change='1' onClick={onMonthArrowClick}>{'>'}</button>
+      </div>
       <div className='dpCalendarContainer'>
         <div className='dpCalendarWeekDays'>
           {weekDays}
@@ -95,24 +101,29 @@ function createArray(start: number, end: number) {
   return Array.from({length: end - start + 1}, (_, i) => i + start);
 }
 
-function getSpanList(array: number[], keyPrefix: string, dataset?: PopupDate, className?: string) {
-  return array.map(number => 
-    <span 
-      className={className} 
-      data-date={dataset? `${number}-${dataset.month + 1}-${dataset.year}` : ''} 
-      key={`${keyPrefix}${number}`}>
+function getSpanList(array: number[], keyPrefix: string, dataset: PopupDate, currentDate: Option<Date>, className?: string) {
+  const currDate = getOrElse(currentDate, new Date());
+  const currDateString = `${currDate.getDate()}-${currDate.getMonth()}-${currDate.getFullYear()}`;
+  return array.map(number => {
+    const datasetDate = dataset? `${number}-${dataset.month}-${dataset.year}` : '';
+    const todayClass = datasetDate === currDateString ? 'today' : '';
+    return (
+      <span className={`${className} ${todayClass}`} data-date={datasetDate} key={`${keyPrefix}${number}`}>
         {number}
-    </span>);
+      </span>
+    );
+  });
 }
 
-function calcDaysPrevMonth(pageDate: Date) {
+function calcDaysPrevMonth(pageDate: Date, currentDateOpt: Option<Date>) {
   const firstWeekStart = startOfWeek(pageDate, { weekStartsOn: 1 });
   const startIndex = getDate(firstWeekStart);
   const endIndex = getDaysInMonth(firstWeekStart);
   return getSpanList(
     createArray(startIndex, endIndex), 
     'prev', 
-    { year: firstWeekStart.getFullYear(), month: firstWeekStart.getMonth() }, 
+    { year: firstWeekStart.getFullYear(), month: firstWeekStart.getMonth() },
+    currentDateOpt,
     'dayPrevMonth'
   );
 }
