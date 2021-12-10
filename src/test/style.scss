@@ -304,33 +304,43 @@ div.grid {
   border: 1px solid gray;
   padding: 0.2em;
 
-  h2 {
-    color: darkblue;
-    font-size: 1.2em;
-    text-decoration: underline;
+  .dpCalendarHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 
-    select {
-      appearance: menulist;
-      background: transparent;
-      border: none;
-      border-radius: 0;
-      box-sizing: border-box;
-      color: inherit;
-      cursor: pointer;
-      font-size: inherit;
-      font-family: inherit;
-      font-weight: 300;
-      height: auto;
-      line-height: inherit;
-      margin: -1px 0 0 0;
-      outline: none;
-      padding: 0 0 0 0.5ch;
-      position: relative;
-      vertical-align: initial;
-      -webkit-box-sizing: border-box;
-      -webkit-appearance: menulist;
-      -moz-appearance: menulist;
-      width: auto;
+    button:hover {
+      color: red;
+    }
+
+    h2 {
+      color: darkblue;
+      font-size: 1.2em;
+      text-decoration: underline;
+
+      select {
+        appearance: menulist;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        box-sizing: border-box;
+        color: inherit;
+        cursor: pointer;
+        font-size: inherit;
+        font-family: inherit;
+        font-weight: 300;
+        height: auto;
+        line-height: inherit;
+        margin: -1px 0 0 0;
+        outline: none;
+        padding: 0 0 0 0.5ch;
+        position: relative;
+        vertical-align: initial;
+        -webkit-box-sizing: border-box;
+        -webkit-appearance: menulist;
+        -moz-appearance: menulist;
+        width: auto;
+      }
     }
   }
 
