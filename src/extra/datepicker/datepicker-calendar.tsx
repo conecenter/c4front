@@ -1,19 +1,30 @@
 import React, { useEffect, useRef } from "react";
 import { useUserLocale } from "../locale";
-import { addMonths, getDate, getDaysInMonth, getWeek, isMonday, format, startOfWeek } from "date-fns";
+import { addMonths, getDate as getDayOfMonth, getDaysInMonth, getWeek, isMonday, startOfWeek } from "date-fns";
 import { PopupDate } from "./datepicker-exchange";
-import { getOrElse, Option } from '../../main/option';
+import { getOrElse, nonEmpty, Option } from '../../main/option';
+import { DateSettings, getDate } from "./date-utils";
+
 
 interface DatepickerCalendarProps {
   popupDate: { year: number, month: number },
   currentDateOpt: Option<Date>,
+  dateSettings: DateSettings,
   inputRef: React.MutableRefObject<HTMLInputElement | undefined>,
   onClickAway: () => void,
   onDateChoice: (e: React.MouseEvent) => void,
   onMonthArrowClick: (e: React.MouseEvent) => void
 }
 
-export function DatepickerCalendar({ popupDate, currentDateOpt, inputRef, onClickAway, onDateChoice, onMonthArrowClick }: DatepickerCalendarProps) {
+export function DatepickerCalendar({
+                                    popupDate, 
+                                    currentDateOpt, 
+                                    dateSettings, 
+                                    inputRef, 
+                                    onClickAway, 
+                                    onDateChoice, 
+                                    onMonthArrowClick 
+                                   }: DatepickerCalendarProps) {
   const { year, month } = popupDate;
   const pageDate = new Date(year, month);
 
@@ -23,31 +34,31 @@ export function DatepickerCalendar({ popupDate, currentDateOpt, inputRef, onClic
 
   const weeksToShow = 6;
   
-  const daysPrevMonth = isMonday(pageDate) ? [] : calcDaysPrevMonth(pageDate, currentDateOpt);
+  const daysPrevMonth = isMonday(pageDate) ? [] : calcDaysPrevMonth(pageDate, currentDateOpt, dateSettings);
 
-  const daysCurrMonth = getSpanList(createArray(1, getDaysInMonth(pageDate)), 'curr', { year, month }, currentDateOpt);
+  const daysCurrMonth = getSpanList(createArray(1, getDaysInMonth(pageDate)), { year, month }, currentDateOpt, dateSettings);
 
   const numDaysNextMonth = weeksToShow * 7 - daysPrevMonth.length - daysCurrMonth.length;
   const nextMonth = addMonths(pageDate, 1);
   const daysNextMonth = getSpanList(
-    createArray(1, numDaysNextMonth), 
-    'next', 
+    createArray(1, numDaysNextMonth),
     { year: nextMonth.getFullYear(), month: nextMonth.getMonth() },
     currentDateOpt,
+    dateSettings,
     'dayNextMonth'
   );
 
-  const weekNumStart = getWeek(pageDate, { weekStartsOn: 1, firstWeekContainsDate: 4 });
+  const weekNumStart = getWeek(pageDate, { weekStartsOn: 1, firstWeekContainsDate: 4 });;
   const weekNumEnd = weekNumStart + weeksToShow - 1;
   const weekNumbersArr = (month === 0 && weekNumStart !== 1)
     ? [weekNumStart, ...createArray(1, 5)]
     : month === 11
       ? [...createArray(weekNumStart, weekNumEnd - 1), 1]
       : createArray(weekNumStart, weekNumEnd);
-  const weekNumbers = weekNumbersArr.map(weekNum => <span key={`week${weekNum}`}>{weekNum}</span>);
+  const weekNumbers = weekNumbersArr.map(weekNum => getSpan(weekNum));
 
   const weekDays = locale.weekDays
-    .map(({ shortName }) => <span key={`${shortName}`}>{shortName}</span>);
+    .map(({ shortName }) => getSpan(shortName));
 
   // useEffect(() => {
   //   const dateString = format(getOrElse(currentDateOpt, new Date()), 'd-M-yyyy');
@@ -101,29 +112,36 @@ function createArray(start: number, end: number) {
   return Array.from({length: end - start + 1}, (_, i) => i + start);
 }
 
-function getSpanList(array: number[], keyPrefix: string, dataset: PopupDate, currentDate: Option<Date>, className?: string) {
-  const currDate = getOrElse(currentDate, new Date());
-  const currDateString = `${currDate.getDate()}-${currDate.getMonth()}-${currDate.getFullYear()}`;
+function getSpan(value: number | string, className?: string, dataset?: string) {
+  return <span className={className} data-date={dataset} key={dataset || value}>{value}</span>;
+};
+
+function getSpanList(
+                      array: number[], 
+                      dataset: PopupDate, 
+                      currentDate: Option<Date>, 
+                      dateSettings: DateSettings, 
+                      className?: string
+                    ) {
+  const currDate = getOrElse(currentDate, getDate(Date.now(), dateSettings));
+  const currDateString = nonEmpty(currDate) 
+    ? `${currDate.getDate()}-${currDate.getMonth()}-${currDate.getFullYear()}` : '';
   return array.map(number => {
     const datasetDate = dataset? `${number}-${dataset.month}-${dataset.year}` : '';
-    const todayClass = datasetDate === currDateString ? 'today' : '';
-    return (
-      <span className={`${className} ${todayClass}`} data-date={datasetDate} key={`${keyPrefix}${number}`}>
-        {number}
-      </span>
-    );
+    const classString = `${className || ''} ${datasetDate === currDateString ? 'today' : ''}`.trim();
+    return getSpan(number, classString, datasetDate);
   });
 }
 
-function calcDaysPrevMonth(pageDate: Date, currentDateOpt: Option<Date>) {
+function calcDaysPrevMonth(pageDate: Date, currentDateOpt: Option<Date>, dateSettings: DateSettings) {
   const firstWeekStart = startOfWeek(pageDate, { weekStartsOn: 1 });
-  const startIndex = getDate(firstWeekStart);
+  const startIndex = getDayOfMonth(firstWeekStart);
   const endIndex = getDaysInMonth(firstWeekStart);
   return getSpanList(
-    createArray(startIndex, endIndex), 
-    'prev', 
+    createArray(startIndex, endIndex),
     { year: firstWeekStart.getFullYear(), month: firstWeekStart.getMonth() },
     currentDateOpt,
+    dateSettings,
     'dayPrevMonth'
   );
 }
