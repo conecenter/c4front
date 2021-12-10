@@ -4,7 +4,7 @@ import {DatePickerState, useDatePickerStateSync} from "./datepicker-exchange";
 import {DateSettings, formatDate, getDate} from "./date-utils";
 import {mapOption, None, nonEmpty, Option} from "../../main/option";
 import {useSelectionEditableInput} from "./selection-control";
-import {getOnBlur, getOnChange, getOnKeyDown, onTimestampChangeAction, togglePopup} from "./datepicker-actions";
+import {getOnBlur, getOnChange, getOnKeyDown, onTimestampChangeAction, getOnPopupToggle, getOnDateChoice, getOnMonthArrowClick} from "./datepicker-actions";
 import {DatepickerCalendar} from "./datepicker-calendar";
 
 
@@ -65,7 +65,9 @@ export function DatePickerInputElement({
     const onChange = getOnChange(dateSettings, currentState.popupDate, setTempState)
     const onBlur = getOnBlur(currentState, setFinalState)
 
-    const handleClick = togglePopup(currentDateOpt, currentState, setFinalState);
+    const onPopupToggle = getOnPopupToggle(currentDateOpt, currentState, setFinalState);
+    const onDateChoice = getOnDateChoice(currentDateOpt, dateSettings, setFinalState);
+    const onMonthArrowClick = getOnMonthArrowClick(currentState, setFinalState);
 
     return el('div', null,
         el("div", {className: "inputBox"},
@@ -81,14 +83,16 @@ export function DatePickerInputElement({
             el('button', {
                 type: 'button', 
                 className: 'btnCalendar',
-                onClick: handleClick
+                onClick: onPopupToggle
             }),        
         ),
         currentState.popupDate && el(DatepickerCalendar, {
             popupDate: currentState.popupDate,
             currentDateOpt,
-            onClickAway: handleClick,
-            onDateChoice: setFinalState
+            inputRef,
+            onClickAway: onPopupToggle,
+            onDateChoice,
+            onMonthArrowClick
         })
     )
 }
