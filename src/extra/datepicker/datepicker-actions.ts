@@ -73,14 +73,20 @@ export function getOnChange(dateSettings: DateSettings, popupDate: PopupDate, se
     };
 };
 
-export function getOnBlur(currentState: DatePickerState, setState: (state: DatePickerState) => void): (event: FocusEvent<HTMLInputElement>) => void {
+export function getOnBlur(currentState: DatePickerState, dateSettings: DateSettings, setState: (state: DatePickerState) => void): (event: FocusEvent<HTMLInputElement>) => void {
     return (event: FocusEvent<HTMLInputElement>) => {
+        console.log('onBlur')
         if (isTimestampState(currentState)) setState(currentState);
         else {
             const { tempTimestamp, popupDate } = currentState;
-            tempTimestamp
-                ? setState(createTimestampState(tempTimestamp, popupDate))
-                : setState(currentState);
+            console.log(tempTimestamp, popupDate)
+            if (tempTimestamp && popupDate) {
+                 const newDate = getDate(tempTimestamp, dateSettings);
+                 const newPopupDate = { year: newDate.getFullYear(), month: newDate.getMonth() };
+                 setState(createTimestampState(tempTimestamp, newPopupDate));
+            } 
+            else if (tempTimestamp) setState(createTimestampState(tempTimestamp));
+            else setState(currentState);
         }
     }
 }
@@ -90,7 +96,8 @@ export function getOnPopupToggle(
     currentState: DatePickerState, 
     setState: (state: DatePickerState) => void) {
     return () => {
-        const today = new Date();
+        console.log('onPopupToggle', currentState)
+        const today = new Date();  // correct to server timezone
         const popupDate = currentState.popupDate 
             ? undefined 
             : nonEmpty(currentDateOpt)
