@@ -45,6 +45,13 @@ function stateToPatch(mode: DatePickerState, changing: boolean, deferredSend: bo
     const changingHeaders = changing ? {'x-r-changing': "1"} : {};
     const extraHeaders = isInputState(mode) && mode.tempTimestamp ? {'x-r-temp-timestamp': String(mode.tempTimestamp)} : {};
     const popupHeader = mode.popupDate ? {'x-r-popup': JSON.stringify(mode.popupDate)} : {};
+
+    // let popupDate;
+    // if (prevState.popupDate && isTimestampState(mode)) {
+    //     let date = new Date(mode.timestamp);
+    //     popupDate = { year: date.getFullYear(), month: date.getMonth() };
+    // }
+
     return {
         headers: {
             ...changingHeaders,
