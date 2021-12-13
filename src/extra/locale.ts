@@ -171,6 +171,10 @@ class DefaultLocale implements Locale {
     dateTimeFormats: DateTimeFormat[] = [{
         id: 0,
         pattern: "dd/MMMM/yyyy HH:mm:ss"
+    },
+    {
+        id: 1,
+        pattern: "dd/MMMM/yyyy"
     }]
     defaultDateTimeFormatId: number = 0
 }
