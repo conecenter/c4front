@@ -27,7 +27,6 @@ interface TimestampServerState extends PopupServerState {
     timestamp: string
 }
 
-
 interface DatePickerProps {
     key: string
     identity: Object
@@ -52,7 +51,7 @@ export function DatePickerInputElement({
         currentState,
         setTempState,
         setFinalState
-    } = useDatePickerStateSync(identity, state, deferredSend || false)
+    } = useDatePickerStateSync(identity, state, dateSettings, deferredSend || false)
     const {
         date: currentDateOpt,
         dateFormat,
@@ -62,10 +61,10 @@ export function DatePickerInputElement({
     const setSelection: (from: number, to: number) => void = useSelectionEditableInput(inputRef)
     const onTimestampChange: (timestamp: number) => void = onTimestampChangeAction(setTempState)
     const onKeyDown = getOnKeyDown(currentDateOpt, dateFormat, dateSettings, onTimestampChange, setSelection)
-    const onChange = getOnChange(dateSettings, currentState.popupDate, setTempState)
-    const onBlur = getOnBlur(currentState, dateSettings, setFinalState)
+    const onChange = getOnChange(dateSettings, setTempState)
+    const onBlur = getOnBlur(currentState, setFinalState)
 
-    const onPopupToggle = getOnPopupToggle(currentDateOpt, currentState, setFinalState);
+    const onPopupToggle = getOnPopupToggle(currentDateOpt, currentState, dateSettings, setFinalState);
     const onDateChoice = getOnDateChoice(currentDateOpt, dateSettings, setFinalState);
     const onMonthArrowClick = getOnMonthArrowClick(currentState, setFinalState);
 
@@ -86,7 +85,7 @@ export function DatePickerInputElement({
                 onClick: onPopupToggle
             }),        
         ),
-        currentState.popupDate && el(DatepickerCalendar, {
+        currentState.popupDate && nonEmpty(currentState.popupDate) && el(DatepickerCalendar, {
             popupDate: currentState.popupDate,
             currentDateOpt,
             dateSettings,

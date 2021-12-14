@@ -1,11 +1,12 @@
-import {useSync} from "../../main/vdom-hooks";
-import {useCallback} from "react";
-import {identityAt} from "../../main/vdom-util";
-import {DatePickerServerState} from "./datepicker";
+import { useSync } from "../../main/vdom-hooks";
+import { identityAt } from "../../main/vdom-util";
+import { DatePickerServerState } from "./datepicker";
+import { DateSettings, getDate } from "./date-utils";
+import { None, nonEmpty } from "../../main/option";
 
 type DatePickerState = TimestampState | InputState
 
-type PopupDate = { year: number, month: number } | undefined;
+type PopupDate = { year: number, month: number } | None | undefined;
 
 interface PopupState {
     popupDate?: PopupDate
@@ -30,28 +31,27 @@ interface InputState extends PopupState {
 
 const isInputStateType = (tp: string): tp is 'input-state' => tp === 'input-state'
 const isInputState = (mode: DatePickerState): mode is InputState => isInputStateType(mode.tp)
-const createInputState = (inputValue: string, popupDate?: PopupDate, tempTimestamp?: number): InputState => {
-    return { tp: 'input-state', inputValue, tempTimestamp, popupDate };
+const createInputState = (inputValue: string, tempTimestamp?: number): InputState => {
+    return { tp: 'input-state', inputValue, tempTimestamp };
 };
 
 function serverStateToState(serverState: DatePickerServerState): DatePickerState {
     const popupDate = serverState.popupDate ? JSON.parse(serverState.popupDate) : undefined;
     if (serverState.tp === 'timestamp-state')
         return createTimestampState(parseInt(serverState.timestamp), popupDate);
-    else return createInputState(serverState.inputValue, popupDate, serverState.tempTimestamp !== undefined ? parseInt(serverState.tempTimestamp) : undefined);
+    else return createInputState(serverState.inputValue, serverState.tempTimestamp !== undefined ? parseInt(serverState.tempTimestamp) : undefined);
 }
 
-function stateToPatch(mode: DatePickerState, changing: boolean, deferredSend: boolean): Patch {
+function stateToPatch(
+    mode: DatePickerState, 
+    prevState: DatePickerState, 
+    dateSettings: DateSettings, 
+    changing: boolean, 
+    deferredSend: boolean
+): Patch {
     const changingHeaders = changing ? {'x-r-changing': "1"} : {};
     const extraHeaders = isInputState(mode) && mode.tempTimestamp ? {'x-r-temp-timestamp': String(mode.tempTimestamp)} : {};
-    const popupHeader = mode.popupDate ? {'x-r-popup': JSON.stringify(mode.popupDate)} : {};
-
-    // let popupDate;
-    // if (prevState.popupDate && isTimestampState(mode)) {
-    //     let date = new Date(mode.timestamp);
-    //     popupDate = { year: date.getFullYear(), month: date.getMonth() };
-    // }
-
+    const popupHeader = setPopupHeader(mode, prevState, dateSettings);
     return {
         headers: {
             ...changingHeaders,
@@ -62,6 +62,21 @@ function stateToPatch(mode: DatePickerState, changing: boolean, deferredSend: bo
         value: isTimestampState(mode) ? String(mode.timestamp) : mode.inputValue,
         skipByPath: true, retry: true, defer: deferredSend
     }
+}
+
+function setPopupHeader(currState: DatePickerState, prevState: DatePickerState, dateSettings: DateSettings) {
+    let popupDate: PopupDate;
+    if (currState.popupDate) {
+        popupDate = currState.popupDate;
+    } 
+    else if (prevState.popupDate) {
+        if (isTimestampState(currState)) {
+            const newDate = getDate(currState.timestamp, dateSettings);
+            popupDate = nonEmpty(newDate) ? { year: newDate.getFullYear(), month: newDate.getMonth() } : None;
+        } 
+        else popupDate = prevState.popupDate;
+    }
+    return nonEmpty(popupDate) ? {'x-r-popup': JSON.stringify(popupDate)} : {};
 }
 
 function patchToState(patch: Patch): DatePickerState {
@@ -108,15 +123,16 @@ const receiverIdOf = identityAt('receiver')
 function useDatePickerStateSync(
     identity: Object,
     state: DatePickerServerState,
+    dateSettings: DateSettings,
     deferredSend: boolean
 ): DatePickerSyncState {
-    const [patches, enqueuePatch] = <[Patch[], (patch: Patch) => void]>useSync(receiverIdOf(identity))
-    const patch: Patch = patches.slice(-1)[0]
-    const currentState: DatePickerState = patch ? patchToState(patch) : serverStateToState(state)
-    const onChange = useCallback((state: DatePickerState) => enqueuePatch(stateToPatch(state, true, deferredSend)), [enqueuePatch])
-    const onBlur = useCallback((state: DatePickerState) => enqueuePatch(stateToPatch(state, false, false)), [enqueuePatch])
-    return {currentState: currentState, setTempState: onChange, setFinalState: onBlur}
+    const [patches, enqueuePatch] = <[Patch[], (patch: Patch) => void]>useSync(receiverIdOf(identity));
+    const patch: Patch = patches.slice(-1)[0];
+    const currentState: DatePickerState = patch ? patchToState(patch) : serverStateToState(state);
+    const onChange = (state: DatePickerState) => enqueuePatch(stateToPatch(state, currentState, dateSettings, true, deferredSend));
+    const onBlur = (state: DatePickerState) => enqueuePatch(stateToPatch(state, currentState, dateSettings, false, false));
+    return {currentState: currentState, setTempState: onChange, setFinalState: onBlur};
 }
 
-export {useDatePickerStateSync, isInputState, isTimestampState, createTimestampState, createInputState};
-export type {DatePickerState, PopupDate};
+export { useDatePickerStateSync, isInputState, isTimestampState, createTimestampState, createInputState };
+export type { DatePickerState, PopupDate };

@@ -6,19 +6,18 @@ import {DatePickerInputElement} from "../extra/datepicker/datepicker";
 const {createElement: $} = React
 
 function App() {
-    // const testTS = 1635714000000 // 1 November 2021
     const testTS = 1609459200000 // Friday, 1 January 2021 00:00:00
     console.log(testTS)
     const children = $(DatePickerInputElement, {
         key: "TEST",
         identity: {parent: "test"},
         timestampFormatId: 0,
-        // userTimezoneId: 'America/New_York',
-        userTimezoneId: "Europe/Moscow",
+        userTimezoneId: 'America/New_York',
+        // userTimezoneId: "Europe/Moscow",
         state: {
             tp: "timestamp-state",
             timestamp: String(testTS),
-            popupDate: '{ "year": 2021, "month": 10 }'
+            // popupDate: '{ "year": 2021, "month": 10 }'
         }
     })
     const sender = {

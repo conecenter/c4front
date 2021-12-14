@@ -1,13 +1,16 @@
 import React, { useEffect, useRef } from "react";
 import { useUserLocale } from "../locale";
 import { addMonths, getDate as getDayOfMonth, getDaysInMonth, getWeek, isMonday, startOfWeek } from "date-fns";
-import { PopupDate } from "./datepicker-exchange";
 import { getOrElse, nonEmpty, Option } from '../../main/option';
 import { DateSettings, getDate } from "./date-utils";
 
+interface calendarDate {
+  year: number;
+  month: number;
+}
 
 interface DatepickerCalendarProps {
-  popupDate: { year: number, month: number },
+  popupDate: calendarDate,
   currentDateOpt: Option<Date>,
   dateSettings: DateSettings,
   inputRef: React.MutableRefObject<HTMLInputElement | undefined>,
@@ -36,7 +39,7 @@ export function DatepickerCalendar({
   
   const daysPrevMonth = isMonday(pageDate) ? [] : calcDaysPrevMonth(pageDate, currentDateOpt, dateSettings);
 
-  const daysCurrMonth = getSpanList(createArray(1, getDaysInMonth(pageDate)), { year, month }, currentDateOpt, dateSettings);
+  const daysCurrMonth = getSpanList(createArray(1, getDaysInMonth(pageDate)), popupDate, currentDateOpt, dateSettings);
 
   const numDaysNextMonth = weeksToShow * 7 - daysPrevMonth.length - daysCurrMonth.length;
   const nextMonth = addMonths(pageDate, 1);
@@ -60,11 +63,33 @@ export function DatepickerCalendar({
   const weekDays = locale.weekDays
     .map(({ shortName }) => getSpan(shortName));
 
-  // useEffect(() => {
-  //   const dateString = format(getOrElse(currentDateOpt, new Date()), 'd-M-yyyy');
-  //   const today = dpCalendar.current!.querySelector(`[data-date='${dateString}']`);
-  //   if (today) today.classList.add('today');
-  // });
+  /*
+   * Вариант onClickAway с колбэком в useRef и однократной привязкой листенера
+
+  const savedCallback = useRef();
+
+  useEffect(() => {
+    function callback (e: MouseEvent) {
+      if (dpCalendar.current 
+        && !dpCalendar.current.contains(e.target as Node) 
+        && e.target !== inputRef.current) onClickAway();
+    }
+    savedCallback.current = callback;
+  });
+  
+  useEffect(() => {
+    function handleClick (e: MouseEvent) {
+      savedCallback.current(e);
+    }
+    const doc = dpCalendar.current!.ownerDocument;
+    doc.addEventListener('click', handleClick);
+    return () => {
+      console.log('removeListener');
+      doc.removeEventListener('click', handleClick);
+    }
+  }, []);
+
+  */
   
   useEffect(() => {
     function handleClick (e: MouseEvent) {
@@ -75,7 +100,7 @@ export function DatepickerCalendar({
     const doc = dpCalendar.current!.ownerDocument;
     doc.addEventListener('click', handleClick);
     return () => doc.removeEventListener('click', handleClick);
-  }, []);
+  }, [onClickAway]);
 
   return (
     <div ref={dpCalendar} onClick={onDateChoice} className='dpCalendar'>
@@ -113,12 +138,12 @@ function createArray(start: number, end: number) {
 }
 
 function getSpan(value: number | string, className?: string, dataset?: string) {
-  return <span className={className} data-date={dataset} key={dataset || value}>{value}</span>;
+  return <span className={className || undefined} data-date={dataset} key={dataset || value}>{value}</span>;
 };
 
 function getSpanList(
                       array: number[], 
-                      dataset: PopupDate, 
+                      dataset: calendarDate, 
                       currentDate: Option<Date>, 
                       dateSettings: DateSettings, 
                       className?: string
@@ -127,7 +152,7 @@ function getSpanList(
   const currDateString = nonEmpty(currDate) 
     ? `${currDate.getDate()}-${currDate.getMonth()}-${currDate.getFullYear()}` : '';
   return array.map(number => {
-    const datasetDate = dataset? `${number}-${dataset.month}-${dataset.year}` : '';
+    const datasetDate = `${number}-${dataset.month}-${dataset.year}`;
     const classString = `${className || ''} ${datasetDate === currDateString ? 'today' : ''}`.trim();
     return getSpan(number, classString, datasetDate);
   });
