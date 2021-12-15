@@ -141,6 +141,10 @@ function getOnNowBtnClick(setFinalState: (state: DatePickerState) => void) {
     return () => setFinalState(createTimestampState(Date.now(), None));
 }
 
+ function getOnClearBtnClick(setFinalState: (state: DatePickerState) => void) {
+     return () => setFinalState(createInputState(''));
+ }
+
 export { 
     onTimestampChangeAction, 
     getOnKeyDown, 
@@ -150,5 +154,6 @@ export {
     getOnDateChoice,
     getOnMonthArrowClick,
     getOnTimeBtnClick,
-    getOnNowBtnClick
+    getOnNowBtnClick,
+    getOnClearBtnClick
 };

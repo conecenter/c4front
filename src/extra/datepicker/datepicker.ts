@@ -14,7 +14,8 @@ import {
     getOnDateChoice, 
     getOnMonthArrowClick, 
     getOnTimeBtnClick, 
-    getOnNowBtnClick
+    getOnNowBtnClick,
+    getOnClearBtnClick
 } from "./datepicker-actions";
 
 
@@ -79,6 +80,7 @@ export function DatePickerInputElement({
     const onMonthArrowClick = getOnMonthArrowClick(currentState, setFinalState);
     const onTimeBtnClick = getOnTimeBtnClick(currentState, setFinalState);
     const onNowBtnClick = getOnNowBtnClick(setFinalState);
+    const onClearBtnClick = getOnClearBtnClick(setFinalState);
 
     return el('div', null,
         el("div", {className: "inputBox"},
@@ -106,7 +108,8 @@ export function DatePickerInputElement({
             onDateChoice,
             onMonthArrowClick,
             onTimeBtnClick,
-            onNowBtnClick
+            onNowBtnClick,
+            onClearBtnClick
         })
     )
 }
