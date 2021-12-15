@@ -17,7 +17,8 @@ interface DatepickerCalendarProps {
   onClickAway: () => void,
   onDateChoice: (e: React.MouseEvent) => void,
   onMonthArrowClick: (e: React.MouseEvent) => void,
-  onTimeBtnClick: (e: React.MouseEvent) => void
+  onTimeBtnClick: (e: React.MouseEvent) => void,
+  onNowBtnClick: () => void
 }
 
 export function DatepickerCalendar({
@@ -28,7 +29,8 @@ export function DatepickerCalendar({
                                     onClickAway, 
                                     onDateChoice, 
                                     onMonthArrowClick,
-                                    onTimeBtnClick
+                                    onTimeBtnClick,
+                                    onNowBtnClick
                                    }: DatepickerCalendarProps) {
   const { year, month } = popupDate;
   const pageDate = new Date(year, month);
@@ -166,6 +168,11 @@ export function DatepickerCalendar({
       </div>
 
       {dateSettings.timestampFormat.hasTime && timeDisplay}
+
+      <div className='dpCtrlBtnsCont'>
+        <button className='dpBtnNow' onClick={onNowBtnClick}>Now</button>
+        <button className='dpBtnClear'>Clear</button>
+      </div>
     </div>
   );
 }

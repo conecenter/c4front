@@ -385,7 +385,7 @@ div.grid {
 
         &.today {
           color: white;
-          background-color: red;
+          background-color: blue;
         }
 
         &:hover {
@@ -467,5 +467,34 @@ div.grid {
       margin: 0 0.4em;
       font-weight: bold;
     }    
+  }
+
+  .dpCtrlBtnsCont {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    border-top: 1px solid lightgray;
+    padding: 0.3em 0;
+
+    button {
+      border: 1px solid lightgray;
+      width: 38%;
+      min-width: min-content;
+      padding: 0.4em 0;
+
+      &:hover {
+        color: white;
+
+        &.dpBtnNow {
+          background: blue;
+        }
+
+        &.dpBtnClear {
+          background: red;
+        }
+      }
+    }
+
+    
   }
 }
