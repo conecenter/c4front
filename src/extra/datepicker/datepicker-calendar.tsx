@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { useUserLocale } from "../locale";
 import { addMonths, getDate as getDayOfMonth, getDaysInMonth, getWeek, isMonday, startOfWeek } from "date-fns";
-import { getOrElse, nonEmpty, Option } from '../../main/option';
+import { getOrElse, isEmpty, nonEmpty, Option } from '../../main/option';
 import { DateSettings, getDate } from "./date-utils";
 
 interface calendarDate {
@@ -16,7 +16,8 @@ interface DatepickerCalendarProps {
   inputRef: React.MutableRefObject<HTMLInputElement | undefined>,
   onClickAway: () => void,
   onDateChoice: (e: React.MouseEvent) => void,
-  onMonthArrowClick: (e: React.MouseEvent) => void
+  onMonthArrowClick: (e: React.MouseEvent) => void,
+  onTimeBtnClick: (e: React.MouseEvent) => void
 }
 
 export function DatepickerCalendar({
@@ -26,7 +27,8 @@ export function DatepickerCalendar({
                                     inputRef, 
                                     onClickAway, 
                                     onDateChoice, 
-                                    onMonthArrowClick 
+                                    onMonthArrowClick,
+                                    onTimeBtnClick
                                    }: DatepickerCalendarProps) {
   const { year, month } = popupDate;
   const pageDate = new Date(year, month);
@@ -60,8 +62,40 @@ export function DatepickerCalendar({
       : createArray(weekNumStart, weekNumEnd);
   const weekNumbers = weekNumbersArr.map(weekNum => getSpan(weekNum));
 
-  const weekDays = locale.weekDays
-    .map(({ shortName }) => getSpan(shortName));
+  const weekDays = locale.weekDays.map(({ shortName }) => getSpan(shortName));
+
+  /*
+   * Time (hours : minutes) part of calendar
+  */
+
+  const hoursTimeSection = getTimeSection('hours');
+  const minsTimeSection = getTimeSection('minutes');
+
+  const timeDisplay = (
+    <div className='dpTimeContainer'>
+      {hoursTimeSection}
+      <span className='dpTimeSeparator'>:</span>
+      {minsTimeSection}
+    </div>
+  );
+
+  function getTimeSection(sectionUnit: 'hours' | 'minutes', btnClasses = ['dpTimeBtnUp', 'dpTimeBtnDown']) {
+      const currValue = isEmpty(currentDateOpt) ? 0 : sectionUnit === 'hours' 
+        ? currentDateOpt.getHours() : currentDateOpt.getMinutes();
+      const changeValue = sectionUnit === 'hours' ? '3600' : '60';
+    return (
+      <div className='dpTimeSection'>
+        <span>{currValue.toString().padStart(2, '0')}</span>
+        <div className='dpTimeBtnsContainer'>
+          {btnClasses.map(className => <button 
+            key={className}
+            className={className} 
+            data-change={className === 'dpTimeBtnUp' ? changeValue : -changeValue} 
+            onClick={onTimeBtnClick} />)}
+        </div>
+      </div>
+    );
+  }
 
   /*
    * Вариант onClickAway с колбэком в useRef и однократной привязкой листенера
@@ -101,9 +135,9 @@ export function DatepickerCalendar({
     doc.addEventListener('click', handleClick);
     return () => doc.removeEventListener('click', handleClick);
   }, [onClickAway]);
-
+  
   return (
-    <div ref={dpCalendar} onClick={onDateChoice} className='dpCalendar'>
+    <div ref={dpCalendar} className='dpCalendar'>
       <div className='dpCalendarHeader'>
         <button data-change='-1' onClick={onMonthArrowClick}>{'<'}</button>
         <h2>
@@ -116,6 +150,7 @@ export function DatepickerCalendar({
         </h2>
         <button data-change='1' onClick={onMonthArrowClick}>{'>'}</button>
       </div>
+
       <div className='dpCalendarContainer'>
         <div className='dpCalendarWeekDays'>
           {weekDays}
@@ -123,12 +158,14 @@ export function DatepickerCalendar({
         <div className='dpCalendarWeekNums'>
           {weekNumbers}
         </div>
-        <div className='dpCalendarDays'>
+        <div className='dpCalendarDays' onClick={onDateChoice}>
           {daysPrevMonth}
           {daysCurrMonth}
           {daysNextMonth}
         </div>
       </div>
+
+      {dateSettings.timestampFormat.hasTime && timeDisplay}
     </div>
   );
 }
@@ -138,7 +175,7 @@ function createArray(start: number, end: number) {
 }
 
 function getSpan(value: number | string, className?: string, dataset?: string) {
-  return <span className={className || undefined} data-date={dataset} key={dataset || value}>{value}</span>;
+  return <span className={className || undefined} data-date={dataset} key={dataset || value} >{value}</span>;
 };
 
 function getSpanList(

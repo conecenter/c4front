@@ -302,7 +302,6 @@ div.grid {
   max-width: 320px;
   text-align: center;
   border: 1px solid gray;
-  padding: 0.2em;
 
   .dpCalendarHeader {
     display: flex;
@@ -347,6 +346,7 @@ div.grid {
   .dpCalendarContainer {
     display: flex;
     flex-wrap: wrap;
+    padding-bottom: 0.5em;
 
     span {
       padding: 0.5em;
@@ -399,5 +399,73 @@ div.grid {
         color: gray;
       }
     }
+  }
+  .dpTimeContainer {
+    display: flex;
+    width: 100%;    
+    border-top: 1px solid lightgray;
+    height: 2.4em;
+
+    > .dpTimeSection {
+      flex-grow: 1;
+      display: flex;
+
+      &:hover {
+        background: #f3f3f3;
+      }
+
+      > span {
+        flex-grow: 1;
+        align-self: center;
+        font-size: 1.1em;
+      }
+
+      &:hover .dpTimeBtnsContainer {
+        opacity: 1;
+      }
+
+      .dpTimeBtnsContainer {
+        opacity: 0;
+        border-left: 1px solid gray;
+        border-right: 1px solid transparent;
+
+        button {
+          display: block;
+          margin: 0;
+          padding: 0 0.2em;
+          min-width: 0.5em;
+          min-height: 0.5em;
+          height: 50%;
+
+          &:hover {
+            background: lightgray;
+          }
+  
+          &::after {
+            display: block;
+            content: "";
+            width: 0.5em;
+            height: 0.4em;
+            background-color: black;
+            clip-path: polygon(100% 0%, 0 0%, 50% 100%);
+          }
+
+          &.dpTimeBtnUp {
+            transform: rotate(180deg);
+            border-top: 1px solid gray;
+          }
+        }
+      }
+
+      &:first-child .dpTimeBtnsContainer {
+        border-right: 1px solid gray;
+      }
+    }
+
+    .dpTimeSeparator {
+      align-self: center;
+      margin: 0 0.4em;
+      font-weight: bold;
+    }    
   }
 }

@@ -100,8 +100,8 @@ function getOnDateChoice(
     dateSettings: DateSettings,
     setFinalState: (state: DatePickerState) => void) {
     return (e: MouseEvent) => {
-        const dateString = e.target instanceof HTMLSpanElement ? e.target.dataset.date : undefined;
-        if (!dateString) return;
+        if (!(e.target instanceof HTMLSpanElement && e.target.dataset.date)) return;
+        const dateString = e.target.dataset.date;
         const dateValues = dateString.split('-');
         const isDateAvailable = nonEmpty(currentDateOpt);
         const baseDate = isDateAvailable ? currentDateOpt : getDate(Date.now(), dateSettings);
@@ -128,6 +128,15 @@ function getOnMonthArrowClick(currentState: DatePickerState, setFinalState: (sta
     }
 };
 
+function getOnTimeBtnClick(currentState: DatePickerState, setFinalState: (state: DatePickerState) => void) {
+    return (e: MouseEvent) => {
+        const target = e.target as HTMLButtonElement;
+        if (isTimestampState(currentState) && target.dataset.change) {
+            setFinalState(createTimestampState(currentState.timestamp + +target.dataset.change * 1000));
+        }
+    }
+}
+
 export { 
     onTimestampChangeAction, 
     getOnKeyDown, 
@@ -135,5 +144,6 @@ export {
     getOnBlur, 
     getOnPopupToggle, 
     getOnDateChoice,
-    getOnMonthArrowClick 
+    getOnMonthArrowClick,
+    getOnTimeBtnClick
 };
