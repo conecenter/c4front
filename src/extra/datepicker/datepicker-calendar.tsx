@@ -102,10 +102,11 @@ export function DatepickerCalendar({
   }
 
   /*
-   * Вариант onClickAway с колбэком в useRef и однократной привязкой листенера
+   * onClickAway с колбэком в useRef и однократной привязкой листенера к document
+  */
 
-  const savedCallback = useRef();
-
+  const savedCallback = useRef() as React.MutableRefObject<Function>;
+  
   useEffect(() => {
     function callback (e: MouseEvent) {
       if (dpCalendar.current 
@@ -113,7 +114,7 @@ export function DatepickerCalendar({
         && e.target !== inputRef.current) onClickAway();
     }
     savedCallback.current = callback;
-  });
+  }, [onClickAway]);
   
   useEffect(() => {
     function handleClick (e: MouseEvent) {
@@ -121,14 +122,12 @@ export function DatepickerCalendar({
     }
     const doc = dpCalendar.current!.ownerDocument;
     doc.addEventListener('click', handleClick);
-    return () => {
-      console.log('removeListener');
-      doc.removeEventListener('click', handleClick);
-    }
+    return () => doc.removeEventListener('click', handleClick);
   }, []);
 
-  */
-  
+  /*
+   * Вариант onClickAway c перепривязкой листенера при каждом ререндере
+
   useEffect(() => {
     function handleClick (e: MouseEvent) {
       if (dpCalendar.current 
@@ -139,6 +138,8 @@ export function DatepickerCalendar({
     doc.addEventListener('click', handleClick);
     return () => doc.removeEventListener('click', handleClick);
   }, [onClickAway]);
+
+  */
   
   return (
     <div ref={dpCalendar} className='dpCalendar'>
