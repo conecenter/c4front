@@ -2,7 +2,7 @@ import {DateSettings, incrementDate, parseStringToDate, getTimestamp, getDate} f
 import {createInputState, createTimestampState, DatePickerState, isTimestampState, PopupDate} from "./datepicker-exchange";
 import {getOrElse, isEmpty, mapOption, None, nonEmpty, Option} from "../../main/option";
 import React, {ChangeEvent, KeyboardEvent, MouseEvent} from "react";
-import {ARROW_DOWN_KEY, ARROW_UP_KEY} from "../../main/keyboard-keys";
+import {ARROW_DOWN_KEY, ARROW_UP_KEY, ENTER_KEY} from "../../main/keyboard-keys";
 import {addMonths, set} from "date-fns";
 
 function updateAndSendDate(
@@ -32,8 +32,10 @@ function getOnKeyDown(
     dateFormat: Option<string>,
     dateSettings: DateSettings,
     onTimestampChange: (timestamp: number) => void,
-    setSelection: (from: number, to: number) => void): (event: KeyboardEvent<HTMLInputElement>) => void {
+    setSelection: (from: number, to: number) => void,
+    onBlur: () => void): (event: KeyboardEvent<HTMLInputElement>) => void {
     return (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.code === ENTER_KEY.code) onBlur();
         if (nonEmpty(currentDateOpt) && nonEmpty(dateFormat)) {
             const cycleThroughout = !event.ctrlKey
             const target = <HTMLInputElement>event.target
