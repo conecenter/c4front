@@ -4,7 +4,7 @@ import { addMonths, getDate as getDayOfMonth, getDaysInMonth, getWeek, isMonday,
 import { getOrElse, isEmpty, nonEmpty, Option } from '../../main/option';
 import { DateSettings, getDate } from "./date-utils";
 import { usePopupPos } from "../../main/popup";
-import { getOnMonthChoice, getOnToggleMonthPopup } from "./datepicker-actions";
+import { getOnMonthChoice, getOnMonthPopupMiss, getOnToggleMonthPopup } from "./datepicker-actions";
 
 interface calendarDate {
   year: number;
@@ -51,9 +51,9 @@ export function DatepickerCalendar({
 
   const weeksToShow = 6;
 
-  /*
+ /*
    * Months selection functionality
-  */
+  */ 
 
   const currMonthObj = locale.months.find(monthName => monthName.id === month);
   const currMonthName = currMonthObj ? currMonthObj.fullName : null;
@@ -61,9 +61,11 @@ export function DatepickerCalendar({
   const [monthPopupShow, setMonthPopupShow] = useState(false);
 
   const [popupMonth,setpopupMonth] = useState(null);
+
   const [popupMonthPos] = usePopupPos(popupMonth);
 
   const onToggleMonthPopup = getOnToggleMonthPopup(setMonthPopupShow);
+  const onMonthPopupMiss = getOnMonthPopupMiss(popupMonth, setMonthPopupShow);
   const onMonthChoice = getOnMonthChoice(currentState, setFinalState, setMonthPopupShow);
   
   // refactor with getSpan ?
@@ -75,7 +77,18 @@ export function DatepickerCalendar({
     </div>
   );
 
-  
+  /*
+   * Years change functionality
+  */ 
+
+  function changeCalendarYear(e: React.MouseEvent<HTMLButtonElement>) {
+    const change = e.currentTarget.dataset.change;
+    if (!change) return;
+    const newPopupDate = { ...currentState.popupDate, year: currentState.popupDate.year + +change };
+    setFinalState({...currentState, popupDate: newPopupDate });
+  }
+
+
   const daysPrevMonth = isMonday(pageDate) ? [] : calcDaysPrevMonth(pageDate, currentDateOpt, dateSettings);
 
   const daysCurrMonth = getSpanList(createArray(1, getDaysInMonth(pageDate)), popupDate, currentDateOpt, dateSettings);
@@ -116,18 +129,18 @@ export function DatepickerCalendar({
     </div>
   );
 
-  function getTimeSection(sectionUnit: 'hours' | 'minutes', btnClasses = ['dpTimeBtnUp', 'dpTimeBtnDown']) {
+  function getTimeSection(sectionUnit: 'hours' | 'minutes', btnClasses = ['dpArrowBtnUp', 'dpArrowBtnDown']) {
       const currValue = isEmpty(currentDateOpt) ? 0 : sectionUnit === 'hours' 
         ? currentDateOpt.getHours() : currentDateOpt.getMinutes();
       const changeValue = sectionUnit === 'hours' ? '3600' : '60';
     return (
       <div className='dpTimeSection'>
         <span>{currValue.toString().padStart(2, '0')}</span>
-        <div className='dpTimeBtnsContainer'>
+        <div className='dpArrowBtnsCont'>
           {btnClasses.map(className => <button 
             key={className}
             className={className} 
-            data-change={className === 'dpTimeBtnUp' ? changeValue : -changeValue} 
+            data-change={className === 'dpArrowBtnUp' ? changeValue : -changeValue} 
             onClick={onTimeBtnClick} />)}
         </div>
       </div>
@@ -142,11 +155,7 @@ export function DatepickerCalendar({
   
   useEffect(() => {
     function callback (e: MouseEvent) {
-      if (popupElement && !popupElement.contains(e.target as Node) && !fieldEl.contains(e.target)) {
-        console.log('closing Popup', popupElement.contains(e.target))
-        onClickAway();
-      }
-      else if (popupMonth && !popupMonth.contains(e.target as Node) && e.target.id !== 'btnDpMonthPopup') setMonthPopupShow(false);
+      if (popupElement && !popupElement.contains(e.target as Node) && !fieldEl.contains(e.target)) onClickAway();
     }
     savedCallback.current = callback;
   }, [onClickAway, popupElement, fieldEl, popupMonth]);
@@ -178,12 +187,22 @@ export function DatepickerCalendar({
 console.log('render Calendar');
 
   return (
-    <div ref={setPopupElement} style={pos} className='dpCalendar'>
+    <div ref={setPopupElement} style={pos} onClick={monthPopupShow? onMonthPopupMiss : undefined} className='dpCalendar'>
       <div className='dpCalendarHeader'>
         <button data-change='-1' onClick={onMonthArrowClick}>{'<'}</button>
         <div className="dpCalendarMonthYear">
           <button id='btnDpMonthPopup' className='dpCalendarCurrMonth' onClick={onToggleMonthPopup}>{currMonthName}</button>
-          <span>{year}</span>
+          <div className="dpCalendarYears">
+            <span>{year}</span>
+            <div className='dpArrowBtnsCont'>
+              {['dpArrowBtnUp', 'dpArrowBtnDown'].map(className => <button 
+                key={className}
+                className={className} 
+                data-change={className === 'dpArrowBtnUp' ? 1 : -1} 
+                onClick={changeCalendarYear}
+               />)}
+            </div>
+          </div>
           {monthPopupShow && monthPopup}
         </div>
         <button data-change='1' onClick={onMonthArrowClick}>{'>'}</button>

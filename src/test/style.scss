@@ -307,6 +307,7 @@ div.grid {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    height: 2.2em;
 
     button:hover {
       color: red;
@@ -314,7 +315,6 @@ div.grid {
 
     .dpCalendarMonthYear {
       display: flex;
-      align-items: center;
 
       .dpCalendarCurrMonth {
         display: flex;
@@ -356,6 +356,59 @@ div.grid {
         }
       }
 
+      .dpCalendarYears {
+        display: flex;
+        padding-left: 0.3em;
+
+        &:hover {
+          background: #f3f3f3;
+        }
+        
+        span {
+          align-self: center;
+          margin-right: 0.5em;
+        }
+
+        & .dpArrowBtnsCont {
+          border: 1px solid lightgray;
+        }
+
+        &:hover .dpArrowBtnsCont {
+          opacity: 1;
+        }
+      }
+
+    }
+  }
+
+  .dpArrowBtnsCont {
+    opacity: 0;
+
+    button {
+      display: block;
+      margin: 0;
+      padding: 0 0.2em;
+      min-width: 0.5em;
+      min-height: 0.5em;
+      height: 50%;
+
+      &:hover {
+        background: lightgray;
+      }
+
+      &::after {
+        display: block;
+        content: "";
+        width: 0.5em;
+        height: 0.4em;
+        background-color: black;
+        clip-path: polygon(100% 0%, 0 0%, 50% 100%);
+      }
+
+      &.dpArrowBtnUp {
+        transform: rotate(180deg);
+        border-top: 1px solid gray;
+      }
     }
   }
 
@@ -416,6 +469,7 @@ div.grid {
       }
     }
   }
+
   .dpTimeContainer {
     display: flex;
     width: 100%;    
@@ -433,47 +487,18 @@ div.grid {
       > span {
         flex-grow: 1;
         align-self: center;
-        font-size: 1.1em;
       }
 
-      &:hover .dpTimeBtnsContainer {
+      .dpArrowBtnsCont {
+        border-left: 1px solid gray;
+        border-right: 1px solid transparent;
+      }
+
+      &:hover .dpArrowBtnsCont {
         opacity: 1;
       }
 
-      .dpTimeBtnsContainer {
-        opacity: 0;
-        border-left: 1px solid gray;
-        border-right: 1px solid transparent;
-
-        button {
-          display: block;
-          margin: 0;
-          padding: 0 0.2em;
-          min-width: 0.5em;
-          min-height: 0.5em;
-          height: 50%;
-
-          &:hover {
-            background: lightgray;
-          }
-  
-          &::after {
-            display: block;
-            content: "";
-            width: 0.5em;
-            height: 0.4em;
-            background-color: black;
-            clip-path: polygon(100% 0%, 0 0%, 50% 100%);
-          }
-
-          &.dpTimeBtnUp {
-            transform: rotate(180deg);
-            border-top: 1px solid gray;
-          }
-        }
-      }
-
-      &:first-child .dpTimeBtnsContainer {
+      &:first-child .dpArrowBtnsCont {
         border-right: 1px solid gray;
       }
     }

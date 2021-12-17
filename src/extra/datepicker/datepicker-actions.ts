@@ -151,6 +151,12 @@ function getOnNowBtnClick(setFinalState: (state: DatePickerState) => void) {
      return () => setMonthPopupShow(prevMonthPopup => !prevMonthPopup);
  }
 
+ function getOnMonthPopupMiss(element: HTMLDivElement | null, setMonthPopupShow: React.Dispatch<React.SetStateAction<boolean>>) {
+     return (e: React.MouseEvent<HTMLElement>) => {
+        if (element && !element.contains(e.target as Node) && (<HTMLButtonElement>e.target).id !== 'btnDpMonthPopup') setMonthPopupShow(false);
+      }
+ }
+
  function getOnMonthChoice(currentState: DatePickerState, setFinalState: (state: DatePickerState) => void, setMonthPopupShow: React.Dispatch<React.SetStateAction<boolean>>) {
     return (e: MouseEvent) => {
         const newPopupDate = { year: currentState.popupDate!.year, month: +e.target.dataset.month };
@@ -171,5 +177,6 @@ export {
     getOnNowBtnClick,
     getOnClearBtnClick,
     getOnToggleMonthPopup,
+    getOnMonthPopupMiss,
     getOnMonthChoice
 };
