@@ -1,0 +1,83 @@
+.pivotSettingPart {
+  border-color: gray;
+  border-style: dashed;
+  margin: 0.4em;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+}
+
+.pivotSettings {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
+  gap: 0px 0px;
+  grid-auto-flow: row;
+  grid-template-areas:
+    "pivotFields pivotFilters pivotFilters pivotFilters"
+    "pivotFields pivotBreaks pivotBreaks pivotBreaks"
+    "pivotFields . pivotColumns pivotColumns"
+    "pivotFields pivotRows pivotData pivotCells"
+    "pivotFields pivotRows pivotData pivotCells";
+  height: 50em;
+}
+
+.pivotFields {
+  @extend .pivotSettingPart;
+  flex-direction: column;
+  grid-area: pivotFields;
+}
+
+.pivotFilters {
+  @extend .pivotSettingPart;
+  grid-area: pivotFilters;
+  flex-direction: row;
+}
+
+.pivotBreaks {
+  @extend .pivotSettingPart;
+  grid-area: pivotBreaks;
+  flex-direction: row;
+}
+
+.pivotColumns {
+  @extend .pivotSettingPart;
+  grid-area: pivotColumns;
+  flex-direction: row;
+}
+
+.pivotRows {
+  @extend .pivotSettingPart;
+  grid-area: pivotRows;
+  flex-direction: column;
+}
+
+.pivotData {
+  @extend .pivotSettingPart;
+  grid-area: pivotData;
+  flex-direction: column;
+}
+
+.pivotCells {
+  @extend .pivotSettingPart;
+  grid-area: pivotCells;
+  flex-direction: column;
+}
+
+.button {
+  min-height: 1.6em;
+  min-width: 1.6em;
+  color: black;
+  background-color: #6464e5;
+  cursor: pointer;
+  margin: 0.2em;
+  border: medium none;
+  font-size: 1em;
+  font-family: inherit;
+  line-height: 1;
+  align-self: center;
+  padding: 0 0.2em;
+  white-space: nowrap;
+  outline: currentcolor none medium;
+  outline-offset: -0.1em;
+}
