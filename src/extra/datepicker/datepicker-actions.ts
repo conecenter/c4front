@@ -147,6 +147,18 @@ function getOnNowBtnClick(setFinalState: (state: DatePickerState) => void) {
      return () => setFinalState(createInputState(''));
  }
 
+ function getOnToggleMonthPopup(setMonthPopupShow: React.Dispatch<React.SetStateAction<boolean>>) {
+     return () => setMonthPopupShow(prevMonthPopup => !prevMonthPopup);
+ }
+
+ function getOnMonthChoice(currentState: DatePickerState, setFinalState: (state: DatePickerState) => void, setMonthPopupShow: React.Dispatch<React.SetStateAction<boolean>>) {
+    return (e: MouseEvent) => {
+        const newPopupDate = { year: currentState.popupDate!.year, month: +e.target.dataset.month };
+        setMonthPopupShow(false);
+        setFinalState({...currentState, popupDate: newPopupDate });
+    }
+ }
+
 export { 
     onTimestampChangeAction, 
     getOnKeyDown, 
@@ -157,5 +169,7 @@ export {
     getOnMonthArrowClick,
     getOnTimeBtnClick,
     getOnNowBtnClick,
-    getOnClearBtnClick
+    getOnClearBtnClick,
+    getOnToggleMonthPopup,
+    getOnMonthChoice
 };

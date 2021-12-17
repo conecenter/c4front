@@ -1,8 +1,10 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useUserLocale } from "../locale";
 import { addMonths, getDate as getDayOfMonth, getDaysInMonth, getWeek, isMonday, startOfWeek } from "date-fns";
 import { getOrElse, isEmpty, nonEmpty, Option } from '../../main/option';
 import { DateSettings, getDate } from "./date-utils";
+import { usePopupPos } from "../../main/popup";
+import { getOnMonthChoice, getOnToggleMonthPopup } from "./datepicker-actions";
 
 interface calendarDate {
   year: number;
@@ -23,6 +25,9 @@ interface DatepickerCalendarProps {
 }
 
 export function DatepickerCalendar({
+                                    currentState,
+                                    setFinalState,
+                                    fieldEl,
                                     popupDate, 
                                     currentDateOpt, 
                                     dateSettings, 
@@ -37,11 +42,39 @@ export function DatepickerCalendar({
   const { year, month } = popupDate;
   const pageDate = new Date(year, month);
 
-  const dpCalendar = useRef<HTMLDivElement>(null);
+  //const dpCalendar = useRef<HTMLDivElement>(null);
 
+  const [popupElement,setPopupElement] = useState(null);
+  const [pos] = usePopupPos(popupElement);
+  
   const locale = useUserLocale();
 
   const weeksToShow = 6;
+
+  /*
+   * Months selection functionality
+  */
+
+  const currMonthObj = locale.months.find(monthName => monthName.id === month);
+  const currMonthName = currMonthObj ? currMonthObj.fullName : null;
+
+  const [monthPopupShow, setMonthPopupShow] = useState(false);
+
+  const [popupMonth,setpopupMonth] = useState(null);
+  const [popupMonthPos] = usePopupPos(popupMonth);
+
+  const onToggleMonthPopup = getOnToggleMonthPopup(setMonthPopupShow);
+  const onMonthChoice = getOnMonthChoice(currentState, setFinalState, setMonthPopupShow);
+  
+  // refactor with getSpan ?
+  const monthPopup = (
+    <div ref={setpopupMonth} style={popupMonthPos} className='dpCalendarMonthPopup'>
+      {locale.months.map(month => 
+        <span key={month.fullName} onClick={onMonthChoice} data-month={month.id}>{month.fullName}</span>
+      )}
+    </div>
+  );
+
   
   const daysPrevMonth = isMonday(pageDate) ? [] : calcDaysPrevMonth(pageDate, currentDateOpt, dateSettings);
 
@@ -109,21 +142,22 @@ export function DatepickerCalendar({
   
   useEffect(() => {
     function callback (e: MouseEvent) {
-      if (dpCalendar.current 
-        && !dpCalendar.current.contains(e.target as Node) 
-        && e.target !== inputRef.current) onClickAway();
+      if (popupElement && !popupElement.contains(e.target as Node) && !fieldEl.contains(e.target)) {
+        console.log('closing Popup', popupElement.contains(e.target))
+        onClickAway();
+      }
+      else if (popupMonth && !popupMonth.contains(e.target as Node) && e.target.id !== 'btnDpMonthPopup') setMonthPopupShow(false);
     }
     savedCallback.current = callback;
-  }, [onClickAway]);
+  }, [onClickAway, popupElement, fieldEl, popupMonth]);
   
   useEffect(() => {
-    function handleClick (e: MouseEvent) {
-      savedCallback.current(e);
-    }
-    const doc = dpCalendar.current!.ownerDocument;
-    doc.addEventListener('click', handleClick);
-    return () => doc.removeEventListener('click', handleClick);
-  }, []);
+    if(!popupElement) return;
+    const handleClick = (e: MouseEvent) => savedCallback.current(e);
+    const doc = popupElement.ownerDocument;
+    doc.addEventListener('mousedown', handleClick);
+    return () => doc.removeEventListener('mousedown', handleClick);
+  }, [popupElement]);
 
   /*
    * Вариант onClickAway c перепривязкой листенера при каждом ререндере
@@ -140,19 +174,18 @@ export function DatepickerCalendar({
   }, [onClickAway]);
 
   */
-  
+
+console.log('render Calendar');
+
   return (
-    <div ref={dpCalendar} className='dpCalendar'>
+    <div ref={setPopupElement} style={pos} className='dpCalendar'>
       <div className='dpCalendarHeader'>
         <button data-change='-1' onClick={onMonthArrowClick}>{'<'}</button>
-        <h2>
-          <select defaultValue={month} key={month}>
-            {locale.months.map(monthName => 
-              <option key={`month-${monthName.id}`} value={monthName.id}>{monthName.fullName}</option>
-            )}
-          </select>
-          {year}
-        </h2>
+        <div className="dpCalendarMonthYear">
+          <button id='btnDpMonthPopup' className='dpCalendarCurrMonth' onClick={onToggleMonthPopup}>{currMonthName}</button>
+          <span>{year}</span>
+          {monthPopupShow && monthPopup}
+        </div>
         <button data-change='1' onClick={onMonthArrowClick}>{'>'}</button>
       </div>
 

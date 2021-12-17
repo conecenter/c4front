@@ -1,4 +1,4 @@
-import {createElement as el, useMemo, useRef} from "react";
+import {createElement as el, useMemo, useRef, useState} from "react";
 import {getDateTimeFormat, useUserLocale} from "../locale";
 import {DatePickerState, useDatePickerStateSync} from "./datepicker-exchange";
 import {DateSettings, formatDate, getDate} from "./date-utils";
@@ -68,7 +68,9 @@ export function DatePickerInputElement({
         dateFormat,
         inputValue
     } = useMemo(() => getCurrentProps(currentState, dateSettings), [currentState, dateSettings])
+
     const inputRef = useRef<HTMLInputElement>()
+
     const setSelection: (from: number, to: number) => void = useSelectionEditableInput(inputRef)
     const onTimestampChange: (timestamp: number) => void = onTimestampChangeAction(setTempState)
     const onBlur = getOnBlur(currentState, setFinalState)
@@ -82,8 +84,12 @@ export function DatePickerInputElement({
     const onNowBtnClick = getOnNowBtnClick(setFinalState);
     const onClearBtnClick = getOnClearBtnClick(setFinalState);
 
-    return el('div', null,
-        el("div", {className: "inputBox"},
+    const [fieldEl, setFieldEl] = useState(null) // 2 рендера изначально
+
+    console.log('render datepicker');
+
+    return el('div', {style: {margin: '1em'}},
+        el("div", {ref: setFieldEl, className: "inputBox"},
             el("div", {className: "inputSubBox"},
                 el("input", {
                     ref: inputRef,
@@ -100,6 +106,9 @@ export function DatePickerInputElement({
             }),        
         ),
         currentState.popupDate && nonEmpty(currentState.popupDate) && el(DatepickerCalendar, {
+            currentState,
+            setFinalState,
+            fieldEl,
             popupDate: currentState.popupDate,
             currentDateOpt,
             dateSettings,

@@ -312,34 +312,50 @@ div.grid {
       color: red;
     }
 
-    h2 {
-      color: darkblue;
-      font-size: 1.2em;
-      text-decoration: underline;
+    .dpCalendarMonthYear {
+      display: flex;
+      align-items: center;
 
-      select {
-        appearance: menulist;
-        background: transparent;
-        border: none;
-        border-radius: 0;
-        box-sizing: border-box;
-        color: inherit;
-        cursor: pointer;
-        font-size: inherit;
-        font-family: inherit;
-        font-weight: 300;
-        height: auto;
-        line-height: inherit;
-        margin: -1px 0 0 0;
-        outline: none;
-        padding: 0 0 0 0.5ch;
-        position: relative;
-        vertical-align: initial;
-        -webkit-box-sizing: border-box;
-        -webkit-appearance: menulist;
-        -moz-appearance: menulist;
-        width: auto;
+      .dpCalendarCurrMonth {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 6.3em;
+        min-height: auto;
+        margin: 0 0.7em 0 0;
+        padding: 0.4em 0.2em 0.4em 0.4em;
+  
+        &::after {
+          display: block;
+          content: "";
+          width: 0.5em;
+          height: 0.4em;
+          background-color: black;
+          clip-path: polygon(100% 0%, 0 0%, 50% 100%);
+        }
+
+        &:hover {
+          background: #f3f3f3;
+          color: initial;
+        }
       }
+  
+      .dpCalendarMonthPopup {
+        text-align: start;
+        background: white;
+        box-shadow: 0 0 2px 2px lightgrey;
+  
+        & span {
+          display: block;
+          cursor: default;
+          padding: 0.1em 1em 0.1em 0.4em;
+  
+          &:hover {
+            background: lightgray;
+          }
+        }
+      }
+
     }
   }
 
