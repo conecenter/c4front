@@ -2,24 +2,24 @@ import React, { useEffect, useRef, useState } from "react";
 import { useUserLocale } from "../locale";
 import { addMonths, getDate as getDayOfMonth, getDaysInMonth, getWeek, isMonday, startOfWeek } from "date-fns";
 import { getOrElse, isEmpty, nonEmpty, Option } from '../../main/option';
-import { DateSettings, getDate } from "./date-utils";
+import { adjustDate, DateSettings, getDate, getTimestamp } from "./date-utils";
 import { usePopupPos } from "../../main/popup";
 import { getOnMonthChoice, getOnMonthPopupMiss, getOnToggleMonthPopup } from "./datepicker-actions";
+import { createTimestampState, DatePickerState } from "./datepicker-exchange";
 
-interface calendarDate {
+interface CalendarDate {
   year: number;
   month: number;
 }
 
 interface DatepickerCalendarProps {
-  popupDate: calendarDate,
+  currentState: DatePickerState,
   currentDateOpt: Option<Date>,
   dateSettings: DateSettings,
   inputRef: React.MutableRefObject<HTMLInputElement | undefined>,
   onClickAway: () => void,
   onDateChoice: (e: React.MouseEvent) => void,
   onMonthArrowClick: (e: React.MouseEvent) => void,
-  onTimeBtnClick: (e: React.MouseEvent) => void,
   onNowBtnClick: () => void,
   onClearBtnClick: () => void
 }
@@ -28,18 +28,18 @@ export function DatepickerCalendar({
                                     currentState,
                                     setFinalState,
                                     fieldEl,
-                                    popupDate, 
                                     currentDateOpt, 
                                     dateSettings, 
                                     inputRef, 
                                     onClickAway, 
                                     onDateChoice, 
                                     onMonthArrowClick,
-                                    onTimeBtnClick,
                                     onNowBtnClick,
                                     onClearBtnClick
                                    }: DatepickerCalendarProps) {
+  const popupDate = currentState.popupDate as CalendarDate;
   const { year, month } = popupDate;
+
   const pageDate = new Date(year, month);
 
   //const dpCalendar = useRef<HTMLDivElement>(null);
@@ -52,7 +52,7 @@ export function DatepickerCalendar({
   const weeksToShow = 6;
 
  /*
-   * Months selection functionality
+   * Months section functionality
   */ 
 
   const currMonthObj = locale.months.find(monthName => monthName.id === month);
@@ -78,16 +78,21 @@ export function DatepickerCalendar({
   );
 
   /*
-   * Years change functionality
+   * Years section functionality
   */ 
+
+  const yearsArrowBtnsDiv = getArrowBtnsDiv(changeCalendarYear);
 
   function changeCalendarYear(e: React.MouseEvent<HTMLButtonElement>) {
     const change = e.currentTarget.dataset.change;
     if (!change) return;
-    const newPopupDate = { ...currentState.popupDate, year: currentState.popupDate.year + +change };
+    const newPopupDate = { month, year: year + +change };
     setFinalState({...currentState, popupDate: newPopupDate });
   }
 
+  /*
+   * 
+  */ 
 
   const daysPrevMonth = isMonday(pageDate) ? [] : calcDaysPrevMonth(pageDate, currentDateOpt, dateSettings);
 
@@ -115,11 +120,31 @@ export function DatepickerCalendar({
   const weekDays = locale.weekDays.map(({ shortName }) => getSpan(shortName));
 
   /*
-   * Time (hours : minutes) part of calendar
+   * Time section functionality
   */
 
-  const hoursTimeSection = getTimeSection('hours');
-  const minsTimeSection = getTimeSection('minutes');
+  const hoursTimeSection = getTimeSection('H');
+  const minsTimeSection = getTimeSection('m');
+
+  function getTimeSection(symbol: 'H' | 'm') {
+    const currValue = isEmpty(currentDateOpt) ? 0 : symbol === 'H' 
+      ? currentDateOpt.getHours() : currentDateOpt.getMinutes();
+    return (
+      <div className='dpTimeSection'>
+        <span>{currValue.toString().padStart(2, '0')}</span>
+        {getArrowBtnsDiv(getOnTimeBtnClick(symbol))}
+      </div>
+    );
+  }
+
+  function getOnTimeBtnClick(symbol: 'H' | 'm') {
+    return (e: React.MouseEvent<HTMLButtonElement>) => {
+      if (e.currentTarget.dataset.change) {
+          const adjustedDate = adjustDate(currentDateOpt as Date, symbol, +e.currentTarget.dataset.change, true);
+          setFinalState(createTimestampState(getTimestamp(adjustedDate, dateSettings)));
+      }
+    }
+  }
 
   const timeDisplay = (
     <div className='dpTimeContainer'>
@@ -129,30 +154,13 @@ export function DatepickerCalendar({
     </div>
   );
 
-  function getTimeSection(sectionUnit: 'hours' | 'minutes', btnClasses = ['dpArrowBtnUp', 'dpArrowBtnDown']) {
-      const currValue = isEmpty(currentDateOpt) ? 0 : sectionUnit === 'hours' 
-        ? currentDateOpt.getHours() : currentDateOpt.getMinutes();
-      const changeValue = sectionUnit === 'hours' ? '3600' : '60';
-    return (
-      <div className='dpTimeSection'>
-        <span>{currValue.toString().padStart(2, '0')}</span>
-        <div className='dpArrowBtnsCont'>
-          {btnClasses.map(className => <button 
-            key={className}
-            className={className} 
-            data-change={className === 'dpArrowBtnUp' ? changeValue : -changeValue} 
-            onClick={onTimeBtnClick} />)}
-        </div>
-      </div>
-    );
-  }
-
   /*
    * onClickAway с колбэком в useRef и однократной привязкой листенера к document
   */
 
   const savedCallback = useRef() as React.MutableRefObject<Function>;
   
+  // Add ids list of exceptions or inputref?? Separate into reusable custom hook??
   useEffect(() => {
     function callback (e: MouseEvent) {
       if (popupElement && !popupElement.contains(e.target as Node) && !fieldEl.contains(e.target)) onClickAway();
@@ -194,14 +202,7 @@ console.log('render Calendar');
           <button id='btnDpMonthPopup' className='dpCalendarCurrMonth' onClick={onToggleMonthPopup}>{currMonthName}</button>
           <div className="dpCalendarYears">
             <span>{year}</span>
-            <div className='dpArrowBtnsCont'>
-              {['dpArrowBtnUp', 'dpArrowBtnDown'].map(className => <button 
-                key={className}
-                className={className} 
-                data-change={className === 'dpArrowBtnUp' ? 1 : -1} 
-                onClick={changeCalendarYear}
-               />)}
-            </div>
+            {yearsArrowBtnsDiv}
           </div>
           {monthPopupShow && monthPopup}
         </div>
@@ -232,6 +233,19 @@ console.log('render Calendar');
   );
 }
 
+function getArrowBtnsDiv(callback: React.MouseEventHandler) {
+  const arrowBtnClasses = ['dpArrowBtnUp', 'dpArrowBtnDown'];
+  return (
+      <div className='dpArrowBtnsCont'>
+        {arrowBtnClasses.map(className => <button 
+          key={className}
+          className={className} 
+          data-change={className === 'dpArrowBtnUp' ? 1 : -1} 
+          onClick={callback} />)}
+      </div>
+  );
+}
+
 function createArray(start: number, end: number) {
   return Array.from({length: end - start + 1}, (_, i) => i + start);
 }
@@ -240,9 +254,10 @@ function getSpan(value: number | string, className?: string, dataset?: string) {
   return <span className={className || undefined} data-date={dataset} key={dataset || value} >{value}</span>;
 };
 
+// Move inside and useCallback?
 function getSpanList(
                       array: number[], 
-                      dataset: calendarDate, 
+                      dataset: CalendarDate, 
                       currentDate: Option<Date>, 
                       dateSettings: DateSettings, 
                       className?: string
@@ -257,6 +272,7 @@ function getSpanList(
   });
 }
 
+// Move inside and useCallback?
 function calcDaysPrevMonth(pageDate: Date, currentDateOpt: Option<Date>, dateSettings: DateSettings) {
   const firstWeekStart = startOfWeek(pageDate, { weekStartsOn: 1 });
   const startIndex = getDayOfMonth(firstWeekStart);
