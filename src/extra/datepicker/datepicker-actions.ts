@@ -130,15 +130,6 @@ function getOnMonthArrowClick(currentState: DatePickerState, setFinalState: (sta
     }
 };
 
-function getOnTimeBtnClick(currentState: DatePickerState, setFinalState: (state: DatePickerState) => void) {
-    return (e: MouseEvent) => {
-        const target = e.target as HTMLButtonElement;
-        if (isTimestampState(currentState) && target.dataset.change) {
-            setFinalState(createTimestampState(currentState.timestamp + +target.dataset.change * 1000));
-        }
-    }
-}
-
 function getOnNowBtnClick(setFinalState: (state: DatePickerState) => void) {
     return () => setFinalState(createTimestampState(Date.now(), None));
 }
@@ -173,7 +164,6 @@ export {
     getOnPopupToggle, 
     getOnDateChoice,
     getOnMonthArrowClick,
-    getOnTimeBtnClick,
     getOnNowBtnClick,
     getOnClearBtnClick,
     getOnToggleMonthPopup,
