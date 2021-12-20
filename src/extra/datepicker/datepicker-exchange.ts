@@ -6,7 +6,7 @@ import { None, nonEmpty } from "../../main/option";
 
 type DatePickerState = TimestampState | InputState
 
-type PopupDate = { year: number, month: number } | None | undefined;
+type PopupDate = { year: number, month: number } | None ;
 
 interface PopupState {
     popupDate?: PopupDate
@@ -65,7 +65,7 @@ function stateToPatch(
 }
 
 function setPopupHeader(currState: DatePickerState, prevState: DatePickerState, dateSettings: DateSettings) {
-    let popupDate: PopupDate;
+    let popupDate: PopupDate | undefined;
     if (currState.popupDate) {
         popupDate = currState.popupDate;
     } 
