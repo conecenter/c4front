@@ -1,10 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useUserLocale } from "../locale";
-import { addMonths, getDate as getDayOfMonth, getDaysInMonth, getWeek, isMonday, startOfWeek } from "date-fns";
-import { getOrElse, isEmpty, nonEmpty, Option } from '../../main/option';
+import { addMonths, getDate as getDayOfMonth, getDaysInMonth, getWeek, isMonday, set, startOfWeek } from "date-fns";
+import { getOrElse, isEmpty, None, nonEmpty, Option } from '../../main/option';
 import { adjustDate, DateSettings, getDate, getTimestamp } from "./date-utils";
 import { usePopupPos } from "../../main/popup";
-import { getOnMonthChoice, getOnMonthPopupMiss, getOnToggleMonthPopup } from "./datepicker-actions";
 import { createTimestampState, DatePickerState } from "./datepicker-exchange";
 
 interface CalendarDate {
@@ -16,99 +15,136 @@ interface DatepickerCalendarProps {
   currentState: DatePickerState,
   currentDateOpt: Option<Date>,
   dateSettings: DateSettings,
+  setFinalState: (state: DatePickerState) => void,
   inputRef: React.MutableRefObject<HTMLInputElement | undefined>,
-  onClickAway: () => void,
-  onDateChoice: (e: React.MouseEvent) => void,
-  onMonthArrowClick: (e: React.MouseEvent) => void,
-  onNowBtnClick: () => void,
-  onClearBtnClick: () => void
+  inputBoxRef: React.MutableRefObject<HTMLDivElement | undefined>
 }
 
 export function DatepickerCalendar({
-                                    currentState,
-                                    setFinalState,
-                                    fieldEl,
-                                    currentDateOpt, 
-                                    dateSettings, 
-                                    inputRef, 
-                                    onClickAway, 
-                                    onDateChoice, 
-                                    onMonthArrowClick,
-                                    onNowBtnClick,
-                                    onClearBtnClick
-                                   }: DatepickerCalendarProps) {
+  currentState,
+  currentDateOpt,
+  dateSettings,
+  setFinalState,
+  inputRef,
+  inputBoxRef
+}: DatepickerCalendarProps) {
+
   const popupDate = currentState.popupDate as CalendarDate;
   const { year, month } = popupDate;
 
   const pageDate = new Date(year, month);
 
-  //const dpCalendar = useRef<HTMLDivElement>(null);
-
-  const [popupElement,setPopupElement] = useState(null);
-  const [pos] = usePopupPos(popupElement);
-  
   const locale = useUserLocale();
 
   const weeksToShow = 6;
 
- /*
+  /*
+   * Popup elements positioning
+  */ 
+
+  const [popupCalendarRef,setPopupCalendarRef] = useState<HTMLDivElement | null>(null);
+  const [popupCalendarPos] = usePopupPos(popupCalendarRef);
+
+  const [popupMonthRef,setPopupMonthRef] = useState<HTMLDivElement | null>(null);
+  const [popupMonthPos] = usePopupPos(popupMonthRef);
+
+  /*
    * Months section functionality
   */ 
 
   const currMonthObj = locale.months.find(monthName => monthName.id === month);
   const currMonthName = currMonthObj ? currMonthObj.fullName : null;
 
-  const [monthPopupShow, setMonthPopupShow] = useState(false);
-
-  const [popupMonth,setpopupMonth] = useState(null);
-
-  const [popupMonthPos] = usePopupPos(popupMonth);
-
-  const onToggleMonthPopup = getOnToggleMonthPopup(setMonthPopupShow);
-  const onMonthPopupMiss = getOnMonthPopupMiss(popupMonth, setMonthPopupShow);
-  const onMonthChoice = getOnMonthChoice(currentState, setFinalState, setMonthPopupShow);
-  
-  // refactor with getSpan ?
-  const monthPopup = (
-    <div ref={setpopupMonth} style={popupMonthPos} className='dpCalendarMonthPopup'>
-      {locale.months.map(month => 
-        <span key={month.fullName} onClick={onMonthChoice} data-month={month.id}>{month.fullName}</span>
-      )}
-    </div>
-  );
-
-  /*
-   * Years section functionality
-  */ 
-
-  const yearsArrowBtnsDiv = getArrowBtnsDiv(changeCalendarYear);
-
-  function changeCalendarYear(e: React.MouseEvent<HTMLButtonElement>) {
+  function onMonthArrowClick(e: React.MouseEvent<HTMLButtonElement>) {
     const change = e.currentTarget.dataset.change;
-    if (!change) return;
-    const newPopupDate = { month, year: year + +change };
-    setFinalState({...currentState, popupDate: newPopupDate });
+    if (change) {
+      const newDate = addMonths(new Date(year, month), +change);
+      setFinalState({...currentState, popupDate: { year: newDate.getFullYear(), month: newDate.getMonth() }});
+    }
+  }
+
+  const [popupMonthShow, setPopupMonthShow] = useState(false);
+
+  const onToggleMonthPopup = () => setPopupMonthShow(prevMonthPopup => !prevMonthPopup);
+
+  const onMonthPopupMiss = () => setPopupMonthShow(false);
+
+  function onMonthChoice(e: React.MouseEvent<HTMLButtonElement>) {
+    const newMonth = e.currentTarget.dataset.month;
+    if (newMonth) setFinalState({ ...currentState, popupDate: { year, month: +newMonth } });
   }
 
   /*
-   * 
+   * Years section functionality
+  */
+
+  const yearsArrowBtnsDiv = getArrowBtnsDiv(onCalendarYearChange);
+
+  function onCalendarYearChange(e: React.MouseEvent<HTMLButtonElement>) {
+    const change = e.currentTarget.dataset.change;
+    if (change) setFinalState({...currentState, popupDate: { month, year: year + +change } });
+  }
+
+  /*
+   * Calendar days section functionality
   */ 
 
-  const daysPrevMonth = isMonday(pageDate) ? [] : calcDaysPrevMonth(pageDate, currentDateOpt, dateSettings);
+  function getSpanList(array: number[], dataset: CalendarDate, className?: string) {
+    const currDate = getOrElse(currentDateOpt, getDate(Date.now(), dateSettings));
+    const currDateString = nonEmpty(currDate) 
+      ? `${currDate.getDate()}-${currDate.getMonth()}-${currDate.getFullYear()}` : '';
+    return array.map(number => {
+      const datasetDate = `${number}-${dataset.month}-${dataset.year}`;
+      const isToday = datasetDate === currDateString;
+      const classString = `${className || ''} ${isToday ? 'today' : ''}`.trim();
+      return getSpan(number, classString, datasetDate);
+    });
+  }
 
-  const daysCurrMonth = getSpanList(createArray(1, getDaysInMonth(pageDate)), popupDate, currentDateOpt, dateSettings);
+  const daysPrevMonth = isMonday(pageDate) ? [] : calcDaysPrevMonth();
+  function calcDaysPrevMonth() {
+    const firstWeekStart = startOfWeek(pageDate, { weekStartsOn: 1 });
+    const startIndex = getDayOfMonth(firstWeekStart);
+    const endIndex = getDaysInMonth(firstWeekStart);
+    return getSpanList(
+      createArray(startIndex, endIndex),
+      { year: firstWeekStart.getFullYear(), month: firstWeekStart.getMonth() },
+      'dayPrevMonth'
+    );
+  }
+
+  const daysCurrMonth = getSpanList(createArray(1, getDaysInMonth(pageDate)), popupDate);
 
   const numDaysNextMonth = weeksToShow * 7 - daysPrevMonth.length - daysCurrMonth.length;
   const nextMonth = addMonths(pageDate, 1);
   const daysNextMonth = getSpanList(
-    createArray(1, numDaysNextMonth),
+    createArray(1, numDaysNextMonth), 
     { year: nextMonth.getFullYear(), month: nextMonth.getMonth() },
-    currentDateOpt,
-    dateSettings,
     'dayNextMonth'
   );
 
-  const weekNumStart = getWeek(pageDate, { weekStartsOn: 1, firstWeekContainsDate: 4 });;
+  function onDateChoice(e: React.MouseEvent) {
+    if (!(e.target instanceof HTMLSpanElement && e.target.dataset.date)) return;
+    const dateString = e.target.dataset.date;
+    const dateValues = dateString.split('-');
+    const isDateAvailable = nonEmpty(currentDateOpt);
+    const baseDate = isDateAvailable ? currentDateOpt : getDate(Date.now(), dateSettings);
+    if (isEmpty(baseDate)) return;
+    const timeSettings = isDateAvailable ? {} : { hours: 0, minutes: 0, seconds: 0 };
+    const chosenDate = set(baseDate, {
+        year: +dateValues[2],
+        month: +dateValues[1],
+        date: +dateValues[0],
+        ...timeSettings
+    });
+    setFinalState(createTimestampState(getTimestamp(chosenDate, dateSettings), None));
+  }
+
+  /*
+   * Calendar weeks section functionality
+  */ 
+
+  const weekNumStart = getWeek(pageDate, { weekStartsOn: 1, firstWeekContainsDate: 4 });
   const weekNumEnd = weekNumStart + weeksToShow - 1;
   const weekNumbersArr = (month === 0 && weekNumStart !== 1)
     ? [weekNumStart, ...createArray(1, 5)]
@@ -155,47 +191,52 @@ export function DatepickerCalendar({
   );
 
   /*
-   * onClickAway с колбэком в useRef и однократной привязкой листенера к document
+   * Now & Close buttons functionality
+  */
+
+  const onNowBtnClick = () => setFinalState(createTimestampState(Date.now(), None));
+
+  function onCloseBtnClick() {
+    if (inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.setSelectionRange(100, 100);
+    }
+    setFinalState({ ...currentState, popupDate: None });
+  }
+
+  /*
+   * Closing popup calendar on click outside functionality
   */
 
   const savedCallback = useRef() as React.MutableRefObject<Function>;
   
-  // Add ids list of exceptions or inputref?? Separate into reusable custom hook??
   useEffect(() => {
-    function callback (e: MouseEvent) {
-      if (popupElement && !popupElement.contains(e.target as Node) && !fieldEl.contains(e.target)) onClickAway();
+    function onClickAway(e: MouseEvent) {
+      const target = e.target as Node;
+      if ((popupCalendarRef && popupCalendarRef.contains(target)) 
+        || (inputBoxRef.current && inputBoxRef.current.contains(target))) return;
+      setFinalState({ ...currentState, popupDate: None });
     }
-    savedCallback.current = callback;
-  }, [onClickAway, popupElement, fieldEl, popupMonth]);
+    savedCallback.current = onClickAway;
+  });
   
   useEffect(() => {
-    if(!popupElement) return;
+    if(!popupCalendarRef) return;
     const handleClick = (e: MouseEvent) => savedCallback.current(e);
-    const doc = popupElement.ownerDocument;
+    const doc = popupCalendarRef.ownerDocument;
     doc.addEventListener('mousedown', handleClick);
     return () => doc.removeEventListener('mousedown', handleClick);
-  }, [popupElement]);
+  }, [popupCalendarRef]);
 
-  /*
-   * Вариант onClickAway c перепривязкой листенера при каждом ререндере
-
-  useEffect(() => {
-    function handleClick (e: MouseEvent) {
-      if (dpCalendar.current 
-        && !dpCalendar.current.contains(e.target as Node) 
-        && e.target !== inputRef.current) onClickAway();
-    }
-    const doc = dpCalendar.current!.ownerDocument;
-    doc.addEventListener('click', handleClick);
-    return () => doc.removeEventListener('click', handleClick);
-  }, [onClickAway]);
-
-  */
-
-console.log('render Calendar');
+  console.log('render Calendar');
 
   return (
-    <div ref={setPopupElement} style={pos} onClick={monthPopupShow? onMonthPopupMiss : undefined} className='dpCalendar'>
+    <div 
+      ref={setPopupCalendarRef} 
+      style={popupCalendarPos}
+      className='dpCalendar'
+      onClick={popupMonthShow? onMonthPopupMiss : undefined} 
+    >
       <div className='dpCalendarHeader'>
         <button data-change='-1' onClick={onMonthArrowClick}>{'<'}</button>
         <div className="dpCalendarMonthYear">
@@ -204,7 +245,13 @@ console.log('render Calendar');
             <span>{year}</span>
             {yearsArrowBtnsDiv}
           </div>
-          {monthPopupShow && monthPopup}
+          {popupMonthShow &&
+            <div ref={setPopupMonthRef} style={popupMonthPos} className='dpCalendarMonthPopup'>
+              {locale.months.map(month => 
+                <span key={month.fullName} onClick={onMonthChoice} data-month={month.id}>{month.fullName}</span>
+              )}
+            </div>
+          }
         </div>
         <button data-change='1' onClick={onMonthArrowClick}>{'>'}</button>
       </div>
@@ -227,7 +274,7 @@ console.log('render Calendar');
 
       <div className='dpCtrlBtnsCont'>
         <button className='dpBtnNow' onClick={onNowBtnClick}>Now</button>
-        <button className='dpBtnClear' onClick={onClearBtnClick}>Clear</button>
+        <button className='dpBtnClose' onClick={onCloseBtnClick}>Close</button>
       </div>
     </div>
   );
@@ -237,11 +284,12 @@ function getArrowBtnsDiv(callback: React.MouseEventHandler) {
   const arrowBtnClasses = ['dpArrowBtnUp', 'dpArrowBtnDown'];
   return (
       <div className='dpArrowBtnsCont'>
-        {arrowBtnClasses.map(className => <button 
-          key={className}
-          className={className} 
-          data-change={className === 'dpArrowBtnUp' ? 1 : -1} 
-          onClick={callback} />)}
+        {arrowBtnClasses.map(className => 
+          <button 
+            key={className}
+            className={className} 
+            data-change={className === 'dpArrowBtnUp' ? 1 : -1} 
+            onClick={callback} />) }
       </div>
   );
 }
@@ -253,35 +301,3 @@ function createArray(start: number, end: number) {
 function getSpan(value: number | string, className?: string, dataset?: string) {
   return <span className={className || undefined} data-date={dataset} key={dataset || value} >{value}</span>;
 };
-
-// Move inside and useCallback?
-function getSpanList(
-                      array: number[], 
-                      dataset: CalendarDate, 
-                      currentDate: Option<Date>, 
-                      dateSettings: DateSettings, 
-                      className?: string
-                    ) {
-  const currDate = getOrElse(currentDate, getDate(Date.now(), dateSettings));
-  const currDateString = nonEmpty(currDate) 
-    ? `${currDate.getDate()}-${currDate.getMonth()}-${currDate.getFullYear()}` : '';
-  return array.map(number => {
-    const datasetDate = `${number}-${dataset.month}-${dataset.year}`;
-    const classString = `${className || ''} ${datasetDate === currDateString ? 'today' : ''}`.trim();
-    return getSpan(number, classString, datasetDate);
-  });
-}
-
-// Move inside and useCallback?
-function calcDaysPrevMonth(pageDate: Date, currentDateOpt: Option<Date>, dateSettings: DateSettings) {
-  const firstWeekStart = startOfWeek(pageDate, { weekStartsOn: 1 });
-  const startIndex = getDayOfMonth(firstWeekStart);
-  const endIndex = getDaysInMonth(firstWeekStart);
-  return getSpanList(
-    createArray(startIndex, endIndex),
-    { year: firstWeekStart.getFullYear(), month: firstWeekStart.getMonth() },
-    currentDateOpt,
-    dateSettings,
-    'dayPrevMonth'
-  );
-}
