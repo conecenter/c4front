@@ -1,23 +1,11 @@
-import {createElement as el, useMemo, useRef, useState} from "react";
+import {createElement as el, useEffect, useMemo, useRef} from "react";
 import {getDateTimeFormat, useUserLocale} from "../locale";
 import {DatePickerState, useDatePickerStateSync} from "./datepicker-exchange";
 import {DateSettings, formatDate, getDate} from "./date-utils";
 import {mapOption, None, nonEmpty, Option} from "../../main/option";
 import {useSelectionEditableInput} from "./selection-control";
 import {DatepickerCalendar} from "./datepicker-calendar";
-import {
-    getOnBlur, 
-    getOnChange, 
-    getOnKeyDown, 
-    onTimestampChangeAction, 
-    getOnPopupToggle, 
-    getOnDateChoice, 
-    getOnMonthArrowClick, 
-    getOnTimeBtnClick, 
-    getOnNowBtnClick,
-    getOnClearBtnClick
-} from "./datepicker-actions";
-
+import {getOnBlur, getOnChange, getOnKeyDown, onTimestampChangeAction, getOnPopupToggle} from "./datepicker-actions";
 
 type DatePickerServerState = TimestampServerState | InputServerState
 
@@ -69,27 +57,30 @@ export function DatePickerInputElement({
         inputValue
     } = useMemo(() => getCurrentProps(currentState, dateSettings), [currentState, dateSettings])
 
-    const inputRef = useRef<HTMLInputElement>()
+    const inputRef = useRef()
 
     const setSelection: (from: number, to: number) => void = useSelectionEditableInput(inputRef)
     const onTimestampChange: (timestamp: number) => void = onTimestampChangeAction(setTempState)
     const onBlur = getOnBlur(currentState, setFinalState)
     const onKeyDown = getOnKeyDown(currentDateOpt, dateFormat, dateSettings, onTimestampChange, setSelection, onBlur)
     const onChange = getOnChange(dateSettings, setTempState)
+    const onPopupToggle = getOnPopupToggle(currentDateOpt, currentState, dateSettings, setFinalState)
 
-    const onPopupToggle = getOnPopupToggle(currentDateOpt, currentState, dateSettings, setFinalState);
-    const onDateChoice = getOnDateChoice(currentDateOpt, dateSettings, setFinalState);
-    const onMonthArrowClick = getOnMonthArrowClick(currentState, setFinalState);
-    const onTimeBtnClick = getOnTimeBtnClick(currentState, setFinalState);
-    const onNowBtnClick = getOnNowBtnClick(setFinalState);
-    const onClearBtnClick = getOnClearBtnClick(setFinalState);
+    const inputBoxRef = useRef() as React.MutableRefObject<HTMLDivElement | undefined>;
 
-    const [fieldEl, setFieldEl] = useState(null) // 2 рендера изначально
+    useEffect(() => {
+        const inputBox = inputBoxRef.current;
+        if (inputBox) {
+            currentState.popupDate 
+                ? inputBox.classList.add('dpCalendarOpen') 
+                : inputBox.classList.remove('dpCalendarOpen');
+        }
+    }, [currentState]);
 
     console.log('render datepicker');
 
     return el('div', {style: {margin: '1em'}},
-        el("div", {ref: setFieldEl, className: "inputBox"},
+        el("div", {ref: inputBoxRef, className: "inputBox"},
             el("div", {className: "inputSubBox"},
                 el("input", {
                     ref: inputRef,
@@ -107,18 +98,11 @@ export function DatePickerInputElement({
         ),
         currentState.popupDate && nonEmpty(currentState.popupDate) && el(DatepickerCalendar, {
             currentState,
-            setFinalState,
-            fieldEl,
-            popupDate: currentState.popupDate,
             currentDateOpt,
             dateSettings,
+            setFinalState,
             inputRef,
-            onClickAway: onPopupToggle,
-            onDateChoice,
-            onMonthArrowClick,
-            onTimeBtnClick,
-            onNowBtnClick,
-            onClearBtnClick
+            inputBoxRef
         })
     )
 }
