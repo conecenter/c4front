@@ -9,10 +9,8 @@ import {getOnBlur, getOnChange, getOnKeyDown, onTimestampChangeAction, getOnPopu
 
 type DatePickerServerState = TimestampServerState | InputServerState
 
-type PopupServerDate = string | undefined;
-
 interface PopupServerState {
-    popupDate?: PopupServerDate
+    popupDate?: string | undefined
 }
 
 interface InputServerState extends PopupServerState {

@@ -75,7 +75,7 @@ function setPopupHeader(currState: DatePickerState, prevState: DatePickerState, 
             popupDate = nonEmpty(newDate) ? { year: newDate.getFullYear(), month: newDate.getMonth() } : None;
         } 
         else popupDate = prevState.popupDate;
-    }
+    } else popupDate = None;
     return nonEmpty(popupDate) ? {'x-r-popup': JSON.stringify(popupDate)} : {};
 }
 
