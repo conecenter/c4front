@@ -90,13 +90,16 @@ export function DatepickerCalendar({
   */ 
 
   function getSpanList(array: number[], dataset: CalendarDate, className?: string) {
-    const currDate = getOrElse(currentDateOpt, getDate(Date.now(), dateSettings));
-    const currDateString = nonEmpty(currDate) 
-      ? `${currDate.getDate()}-${currDate.getMonth()}-${currDate.getFullYear()}` : '';
+    const getDateString = (date: Option<Date>) => nonEmpty(date) 
+      ? `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}` : '';
+    const today = getDate(Date.now(), dateSettings);
+    const todayString = getDateString(today);
+    const currDateString = getDateString(getOrElse(currentDateOpt, today));
     return array.map(number => {
       const datasetDate = `${number}-${dataset.month}-${dataset.year}`;
-      const isToday = datasetDate === currDateString;
-      const classString = `${className || ''} ${isToday ? 'today' : ''}`.trim();
+      const isCurrent = datasetDate === currDateString;
+      const isToday = datasetDate === todayString;
+      const classString = `${className || ''} ${isCurrent ? 'current' : ''} ${isToday ? 'today' : ''}`.trim();
       return getSpan(number, classString, datasetDate);
     });
   }
@@ -125,8 +128,7 @@ export function DatepickerCalendar({
 
   function onDateChoice(e: React.MouseEvent) {
     if (!(e.target instanceof HTMLSpanElement && e.target.dataset.date)) return;
-    const dateString = e.target.dataset.date;
-    const dateValues = dateString.split('-');
+    const dateValues = e.target.dataset.date.split('-');
     const isDateAvailable = nonEmpty(currentDateOpt);
     const baseDate = isDateAvailable ? currentDateOpt : getDate(Date.now(), dateSettings);
     if (isEmpty(baseDate)) return;
@@ -231,16 +233,14 @@ export function DatepickerCalendar({
   console.log('render Calendar');
 
   return (
-    <div 
-      ref={setPopupCalendarRef} 
-      style={popupCalendarPos}
-      className='dpCalendar'
-      onClick={popupMonthShow? onMonthPopupMiss : undefined} 
-    >
+    <div ref={setPopupCalendarRef} 
+         style={popupCalendarPos}
+         className='dpCalendar'
+         onClick={popupMonthShow ?  onMonthPopupMiss : undefined} >
       <div className='dpCalendarHeader'>
         <button data-change='-1' onClick={onMonthArrowClick}>{'<'}</button>
         <div className="dpCalendarMonthYear">
-          <button id='btnDpMonthPopup' className='dpCalendarCurrMonth' onClick={onToggleMonthPopup}>{currMonthName}</button>
+          <button className='dpCalendarCurrMonth' onClick={onToggleMonthPopup}>{currMonthName}</button>
           <div className="dpCalendarYears">
             <span>{year}</span>
             {yearsArrowBtnsDiv}
