@@ -24,12 +24,14 @@ trait DatePicker extends ToChildPair
   ): DatePicker
 
   @c4val("timestamp-state") def timeStampState(
-    timestamp: String
+    timestamp: String,
+    popupDate: String = "",
   ): DatePickerState
 
   @c4val("input-state") def inputState(
     inputValue: String,
-    tempTimestamp: String = ""
+    tempTimestamp: String = "",
+    popupDate: String = "",
   ): DatePickerState
 }
 
