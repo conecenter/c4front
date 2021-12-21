@@ -96,10 +96,4 @@ function getOnPopupToggle(
     }
 }
 
-export { 
-    onTimestampChangeAction, 
-    getOnKeyDown, 
-    getOnChange, 
-    getOnBlur, 
-    getOnPopupToggle
-};
+export { onTimestampChangeAction, getOnKeyDown, getOnChange, getOnBlur, getOnPopupToggle };
