@@ -313,9 +313,14 @@ div.grid {
     justify-content: space-between;
     align-items: center;
     height: 2.2em;
+    font-size: 1.05em;
+
+    >button {
+      font-weight: bold;
+    }
 
     button:hover {
-      color: red;
+      color:  darkblue;
     }
 
     .dpCalendarMonthYear {
@@ -325,7 +330,7 @@ div.grid {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        width: 6.3em;
+        width: 6.5em;
         min-height: auto;
         margin: 0 0.7em 0 0;
         padding: 0.4em 0.2em 0.4em 0.4em;
@@ -354,6 +359,7 @@ div.grid {
           display: block;
           cursor: default;
           padding: 0.1em 1em 0.1em 0.4em;
+          font-weight: normal;
   
           &:hover {
             background: lightgray;
@@ -429,7 +435,7 @@ div.grid {
     .dpCalendarWeekDays {
       display: flex;
       width: 100%;
-      margin: 0.5em 0 0 12.5%;
+      margin: 0 0 0 12.5%;
       font-size: 0.8em;
       color: darkblue;
 
@@ -457,9 +463,13 @@ div.grid {
       span {
         width: 100%;
 
-        &.today {
+        &.current {
           color: white;
           background-color: blue;
+        }
+
+        &.today {
+          border: 1px solid blue;
         }
 
         &:hover {
