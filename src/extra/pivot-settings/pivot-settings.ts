@@ -88,6 +88,7 @@ export function PivotField({origin, type, field}: PivotFieldProps) {
   const style = isDragging ? {opacity: 0} : {}
   return el("button", {
     key: field.id,
+    "data-id": field.id,
     ref: drag,
     className: "button",
     style: style

@@ -8,3 +8,5 @@ export const ItemTypes = {
 export const PartNames = {
   FIELDS: 'pivotFields',
 }
+
+export const DATA_ID = "data-id"

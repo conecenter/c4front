@@ -11,7 +11,7 @@ function App() {
     return Array.from(Array(5).keys()).map((value) => ({id: `${key}-${value}`, name: `${key}-${value}`}))
   }
   const pivotProps: PivotSettingsProps = {
-    fields: getFields("fields"), pivotBreaks: [], pivotCells: [], pivotColumns: [], pivotData: [], pivotFilters: [], pivotRows: []
+    fields: getFields("fields"), pivotBreaks: [], pivotCells: [], pivotColumns: [], pivotData: [], pivotFilters: getFields("filters"), pivotRows: []
   }
   return (
     <DndProvider backend={HTML5Backend}>

@@ -11,6 +11,7 @@ html, body {
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;
+  flex-direction: row;
   min-height: 2em;
 }
 
@@ -35,37 +36,31 @@ html, body {
 .pivotFilters {
   @extend .pivotSettingPart;
   grid-area: pivotFilters;
-  flex-direction: row;
 }
 
 .pivotBreaks {
   @extend .pivotSettingPart;
   grid-area: pivotBreaks;
-  flex-direction: row;
 }
 
 .pivotColumns {
   @extend .pivotSettingPart;
   grid-area: pivotColumns;
-  flex-direction: row;
 }
 
 .pivotRows {
   @extend .pivotSettingPart;
   grid-area: pivotRows;
-  flex-direction: column;
 }
 
 .pivotData {
   @extend .pivotSettingPart;
   grid-area: pivotData;
-  flex-direction: column;
 }
 
 .pivotCells {
   @extend .pivotSettingPart;
   grid-area: pivotCells;
-  flex-direction: column;
 }
 
 .button {
