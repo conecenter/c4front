@@ -96,7 +96,7 @@ export function DatePickerInputElement({
                 onClick: onPopupToggle
             }),        
         ),
-        currentState.popupDate && nonEmpty(currentState.popupDate) && el(DatepickerCalendar, {
+        currentState.popupDate && el(DatepickerCalendar, {
             currentState,
             currentDateOpt,
             dateSettings,
