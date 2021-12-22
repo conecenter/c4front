@@ -1,17 +1,14 @@
 import {createElement as el, useCallback, useRef, useState} from "react";
-import {useDrag, useDrop} from "react-dnd";
+import {DndProvider, useDrag, useDrop} from "react-dnd";
 import {PivotFields} from "./pivot-fields";
 import {PivotDragItem, PivotDropAction, updateState} from "./pivot-exchange";
 import {ItemTypes} from "./pivot-const";
+import {HTML5Backend} from "react-dnd-html5-backend";
 
 
 export interface PivotField {
   id: string,
   name: string,
-}
-
-export interface aaa {
-  data: PivotSettingsProps
 }
 
 export interface PivotSettingsProps {
@@ -26,39 +23,46 @@ export interface PivotSettingsProps {
   [key: string]: PivotField[],
 }
 
-export function PivotSettings(props: aaa) {
-  const [state, setState] = useState<PivotSettingsProps>(props.data)
+export function PivotSettings(props: PivotSettingsProps) {
+  return el(DndProvider, {backend: HTML5Backend},
+    el(PivotSettingsInner, {...props})
+  )
+}
+
+function PivotSettingsInner(props: PivotSettingsProps) {
+  const [state, setState] = useState<PivotSettingsProps>(props)
   const ref = useRef()
   const dropAction: PivotDropAction = useCallback((event: PivotDragItem, dropLocation: string, dropCoordinates) => {
-    return setState(prev => updateState(prev, ref?.current,{...event, dropLocation, dropCoordinates}));
+    return setState(prev => updateState(prev, ref?.current, {...event, dropLocation, dropCoordinates}));
   }, [setState])
   return el("div", {ref, className: "pivotSettings"},
     el(PivotFields, {fields: state.fields, dropAction}),
-    el(PivotSettingsPart, {key: "filterFields", className: "pivotFilters", state, dropAction}),
-    el(PivotSettingsPart, {key: "breakFields",  className: "pivotBreaks", state, dropAction}),
-    el(PivotSettingsPart, {key: "rowFields",  className: "pivotColumns", state, dropAction}),
-    el(PivotSettingsPart, {key: "colFields", className: "pivotRows", state, dropAction}),
-    el(PivotSettingsPart, {key: "dataFields",  className: "pivotData", state, dropAction}),
-    el(PivotSettingsPart, {key: "cellFields", className: "pivotCells", state, dropAction})
+    el(PivotSettingsPart, {key: "filterFields", className: "pivotFilters", state, dropAction, accepts: ItemTypes.FILTER}),
+    el(PivotSettingsPart, {key: "breakFields", className: "pivotBreaks", state, dropAction, accepts: ItemTypes.DIMENSION}),
+    el(PivotSettingsPart, {key: "rowFields", className: "pivotColumns", state, dropAction, accepts: ItemTypes.DIMENSION}),
+    el(PivotSettingsPart, {key: "colFields", className: "pivotRows", state, dropAction, accepts: ItemTypes.DIMENSION}),
+    el(PivotSettingsPart, {key: "dataFields", className: "pivotData", state, dropAction, accepts: ItemTypes.DATA}),
+    el(PivotSettingsPart, {key: "cellFields", className: "pivotCells", state, dropAction, accepts: ItemTypes.DIMENSION})
   )
 }
 
 interface PivotSettingsPartProps {
   className: string,
   state: PivotSettingsProps,
-  dropAction:PivotDropAction,
+  dropAction: PivotDropAction,
+  accepts: string
 }
 
-export function PivotSettingsPart({className, state, dropAction}: PivotSettingsPartProps) {
+function PivotSettingsPart({className, state, dropAction, accepts}: PivotSettingsPartProps) {
   const [{canDrop}, drop] = useDrop(() => ({
-    accept: [ItemTypes.FIELD, ItemTypes.FILTER],
+    accept: [ItemTypes.FIELD, accepts],
     drop: (item: PivotDragItem, monitor) => {
       dropAction(item, className, monitor.getClientOffset())
     },
     collect: (monitor) => ({
       canDrop: monitor.canDrop()
     })
-  }),[className, dropAction])
+  }), [className, dropAction])
   const style = canDrop ? {backgroundColor: "lightBlue"} : {}
   return el("div", {
       key: className,
@@ -66,30 +70,38 @@ export function PivotSettingsPart({className, state, dropAction}: PivotSettingsP
       className: className,
       style: style
     },
-    state[className].map((value) => el(PivotField, {key: value.id, type: ItemTypes.FILTER, origin: className, field: value}))
+    state[className].map((value) => el(PivotField, {key: value.id, type: accepts, origin: className, field: value, dropAction}))
   )
 }
 
 interface PivotFieldProps {
   origin: string,
   type: string,
-  field: PivotField
+  field: PivotField,
+  dropAction: PivotDropAction
 }
 
-export function PivotField({origin, type, field}: PivotFieldProps) {
+export function PivotField({origin, type, field, dropAction}: PivotFieldProps) {
+  const accepts = type !== ItemTypes.FIELD ? [type] : []
+  const [{}, drop] = useDrop({
+    accept: accepts,
+    hover(item: PivotDragItem, monitor) {
+      dropAction(item, origin, monitor.getClientOffset())
+    }
+  })
   const [{isDragging}, drag] = useDrag(() => ({
       type: type,
       item: {dragOrigin: origin, item: field},
       collect: (monitor) => ({
         isDragging: monitor.isDragging()
-      })
+      }),
     })
   )
   const style = isDragging ? {opacity: 0} : {}
   return el("button", {
     key: field.id,
     "data-id": field.id,
-    ref: drag,
+    ref: (ref) => drag(drop(ref)),
     className: "button",
     style: style
   }, field.name)

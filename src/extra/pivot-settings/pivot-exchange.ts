@@ -30,7 +30,7 @@ interface ReorderCommand {
 }
 
 export function updateState(state: PivotSettingsProps, root: Element | undefined, event: PivotDragEvent): PivotSettingsProps {
-  if (event.dragOrigin == event.dropLocation && event.dropCoordinates) {
+  if (event.dragOrigin == event.dropLocation && event.dropCoordinates) { // Reorder
     const childrenList = root?.querySelector<HTMLDivElement>("." + event.dragOrigin)?.childNodes
     const children = childrenList ? [...childrenList] : []
     const dropXY = event.dropCoordinates
@@ -58,12 +58,16 @@ export function updateState(state: PivotSettingsProps, root: Element | undefined
     } else return state
   }
 
-  if (event.dropLocation == PartNames.FIELDS) { // @ts-ignore
+  if (event.dropLocation == PartNames.FIELDS) { // @ts-ignore // Remove field
     return update(state, {[event.dragOrigin]: {$rmField: event.item}})
   }
 
-  if (event.dragOrigin == PartNames.FIELDS) {
+  if (event.dragOrigin == PartNames.FIELDS) { // Add field
     return update(state, {[event.dropLocation]: {$push: [event.item]}})
+  }
+
+  if (event.dragOrigin != event.dropLocation) { // @ts-ignore // Move field
+    return update(state, {[event.dragOrigin]: {$rmField: event.item}, [event.dropLocation]: {$push: [event.item]}})
   }
 
   return state
