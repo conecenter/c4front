@@ -238,7 +238,7 @@ export function DatepickerCalendar({
          className='dpCalendar'
          onClick={popupMonthShow ?  onMonthPopupMiss : undefined} >
       <div className='dpCalendarHeader'>
-        <button data-change='-1' onClick={onMonthArrowClick}>{'<'}</button>
+        <button data-change='-1' onClick={onMonthArrowClick} />
         <div className="dpCalendarMonthYear">
           <button className='dpCalendarCurrMonth' onClick={onToggleMonthPopup}>{currMonthName}</button>
           <div className="dpCalendarYears">
@@ -253,7 +253,7 @@ export function DatepickerCalendar({
             </div>
           }
         </div>
-        <button data-change='1' onClick={onMonthArrowClick}>{'>'}</button>
+        <button className='dpArrowRight' data-change='1' onClick={onMonthArrowClick} />
       </div>
 
       <div className='dpCalendarContainer'>

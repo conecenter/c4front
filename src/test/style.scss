@@ -307,6 +307,7 @@ div.grid {
   max-width: 320px;
   text-align: center;
   border: 1px solid gray;
+  padding: 0.1em;
 
   .dpCalendarHeader {
     display: flex;
@@ -317,10 +318,17 @@ div.grid {
 
     >button {
       font-weight: bold;
-    }
+      background: no-repeat center url(https://de-aaf-alc-def.cone.dev/mod/main/ee/cone/core/ui/c4view/pagging/left.svg);
+      background-size: 50% 50%;
 
-    button:hover {
-      color:  darkblue;
+      &.dpArrowRight {
+        transform: rotate(180deg);
+      }
+
+      &:hover {
+        // change svg color to darkblue
+        filter: invert(17%) sepia(66%) saturate(6664%) hue-rotate(244deg) brightness(53%) contrast(150%);
+      }
     }
 
     .dpCalendarMonthYear {
@@ -338,10 +346,13 @@ div.grid {
         &::after {
           display: block;
           content: "";
-          width: 0.5em;
-          height: 0.4em;
-          background-color: black;
-          clip-path: polygon(100% 0%, 0 0%, 50% 100%);
+          width: 0.6em;
+          height: 0.6em;
+          background: no-repeat center url(https://de-aaf-alc-def.cone.dev/mod/main/ee/cone/core/ui/c4view/pagging/left.svg);
+          background-size: 100% 100%;
+          transform: rotate(-90deg);
+          // background-color: black;
+          // clip-path: polygon(100% 0%, 0 0%, 50% 100%);
         }
 
         &:hover {
@@ -398,23 +409,25 @@ div.grid {
     button {
       display: block;
       margin: 0;
-      padding: 0 0.2em;
+      padding: 0 6px;
       min-width: 0.5em;
       min-height: 0.5em;
+      background: no-repeat center url(https://de-aaf-alc-def.cone.dev/mod/main/ee/cone/core/ui/c4view/listControl/sort-desc.svg);
+      background-size: 0.5em 0.5em;
       height: 50%;
 
       &:hover {
-        background: lightgray;
+        background-color: lightgray;
       }
 
-      &::after {
-        display: block;
-        content: "";
-        width: 0.5em;
-        height: 0.4em;
-        background-color: black;
-        clip-path: polygon(100% 0%, 0 0%, 50% 100%);
-      }
+      // &::after {
+      //   display: block;
+      //   content: "";
+      //   width: 0.5em;
+      //   height: 0.5em;
+      //   background-color: black;
+      //   clip-path: polygon(100% 0%, 0 0%, 50% 100%);
+      // }
 
       &.dpArrowBtnUp {
         transform: rotate(180deg);
@@ -429,7 +442,8 @@ div.grid {
     padding-bottom: 0.5em;
 
     span {
-      padding: 0.5em;
+      padding: 0.4em 0.05em;
+      margin: 0.1em;
     }
 
     .dpCalendarWeekDays {
@@ -489,7 +503,7 @@ div.grid {
     display: flex;
     width: 100%;    
     border-top: 1px solid lightgray;
-    height: 2.4em;
+    height: 2.1em;
 
     > .dpTimeSection {
       flex-grow: 1;
@@ -536,7 +550,7 @@ div.grid {
       border: 1px solid lightgray;
       width: 38%;
       min-width: min-content;
-      padding: 0.4em 0;
+      padding: 0;
 
       &:hover {
         color: white;
