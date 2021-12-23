@@ -2,7 +2,6 @@ import {DateSettings, incrementDate, parseStringToDate, getDate} from "./date-ut
 import {createInputState, createTimestampState, DatePickerState, isTimestampState, PopupDate} from "./datepicker-exchange";
 import {getOrElse, mapOption, None, nonEmpty, Option} from "../../main/option";
 import React, {ChangeEvent, KeyboardEvent} from "react";
-import {ARROW_DOWN_KEY, ARROW_UP_KEY, ENTER_KEY} from "../../main/keyboard-keys";
 
 function updateAndSendDate(
     currentDate: Date,
@@ -33,22 +32,15 @@ function getOnKeyDown(
     onTimestampChange: (timestamp: number) => void,
     setSelection: (from: number, to: number) => void,
     onBlur: () => void): (event: KeyboardEvent<HTMLInputElement>) => void {
-    return (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.code === ENTER_KEY.code) onBlur();
-        if (nonEmpty(currentDateOpt) && nonEmpty(dateFormat)) {
-            const cycleThroughout = !event.ctrlKey
-            const target = <HTMLInputElement>event.target
-            const selectionStart = target.selectionStart ? target.selectionStart : 0
-            switch (event.code) {
-                case ARROW_UP_KEY.code:
-                    updateAndSendDate(currentDateOpt, dateFormat, dateSettings, selectionStart, true, cycleThroughout, onTimestampChange, setSelection)
-                    event.preventDefault()
-                    break
-                case ARROW_DOWN_KEY.code:
-                    updateAndSendDate(currentDateOpt, dateFormat, dateSettings, selectionStart, false, cycleThroughout, onTimestampChange, setSelection)
-                    event.preventDefault()
-                    break
-            }
+    return (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') onBlur();
+        else if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') 
+                && nonEmpty(currentDateOpt) && nonEmpty(dateFormat)) {
+            const cycleThroughout = !e.ctrlKey;
+            const selectionStart = e.currentTarget.selectionStart || 0;
+            const up = e.key === 'ArrowUp';
+            updateAndSendDate(currentDateOpt, dateFormat, dateSettings, selectionStart, up, cycleThroughout, onTimestampChange, setSelection);
+            e.preventDefault();
         }
     }
 }
