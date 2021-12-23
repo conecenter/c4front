@@ -1,9 +1,10 @@
-import {createElement as el, useCallback, useRef, useState} from "react";
+import {createElement as el, ReactNode, useCallback, useMemo, useRef, useState} from "react";
 import {DndProvider, useDrag, useDrop} from "react-dnd";
 import {PivotFields} from "./pivot-fields";
 import {PivotDragItem, PivotDropAction, updateState} from "./pivot-exchange";
 import {ItemTypes} from "./pivot-const";
 import {HTML5Backend} from "react-dnd-html5-backend";
+import {XYCoord} from "react-dnd/lib";
 
 
 export interface PivotField {
@@ -32,8 +33,8 @@ export function PivotSettings(props: PivotSettingsProps) {
 function PivotSettingsInner(props: PivotSettingsProps) {
   const [state, setState] = useState<PivotSettingsProps>(props)
   const ref = useRef()
-  const dropAction: PivotDropAction = useCallback((event: PivotDragItem, dropLocation: string, dropCoordinates) => {
-    return setState(prev => updateState(prev, ref?.current, {...event, dropLocation, dropCoordinates}));
+  const dropAction: PivotDropAction = useCallback((event: PivotDragItem, dropLocation: string, dropCoordinates?: XYCoord | null, temporary?: boolean) => {
+    return setState(prev => updateState(prev, ref?.current, {...event, dropLocation, dropCoordinates}, temporary));
   }, [setState])
   return el("div", {ref, className: "pivotSettings"},
     el(PivotFields, {fields: state.fields, dropAction}),
@@ -63,12 +64,11 @@ function PivotSettingsPart({className, state, dropAction, accepts}: PivotSetting
       canDrop: monitor.canDrop()
     })
   }), [className, dropAction])
-  const style = canDrop ? {backgroundColor: "lightBlue"} : {}
+  const canDropClass = canDrop ? "pivotCanDrop" : ""
   return el("div", {
       key: className,
       ref: drop,
-      className: className,
-      style: style
+      className: `${className} ${canDropClass}`,
     },
     state[className].map((value) => el(PivotField, {key: value.id, type: accepts, origin: className, field: value, dropAction}))
   )
@@ -86,7 +86,7 @@ export function PivotField({origin, type, field, dropAction}: PivotFieldProps) {
   const [{}, drop] = useDrop({
     accept: accepts,
     hover(item: PivotDragItem, monitor) {
-      dropAction(item, origin, monitor.getClientOffset())
+      dropAction(item, origin, monitor.getClientOffset(), true)
     }
   })
   const [{isDragging}, drag] = useDrag(() => ({
@@ -97,12 +97,11 @@ export function PivotField({origin, type, field, dropAction}: PivotFieldProps) {
       }),
     })
   )
-  const style = isDragging ? {opacity: 0} : {}
+  const draggedElementClass = isDragging ? "pivotDraggedElement" : ""
   return el("button", {
     key: field.id,
     "data-id": field.id,
     ref: (ref) => drag(drop(ref)),
-    className: "button",
-    style: style
+    className: `pivotButton ${draggedElementClass}`,
   }, field.name)
 }

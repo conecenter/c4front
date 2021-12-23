@@ -1,7 +1,6 @@
 import {PivotField, PivotSettingsProps} from "./pivot-settings";
 import {DATA_ID, PartNames} from "./pivot-const";
-import {extend} from "immutability-helper";
-import update from 'immutability-helper';
+import update, {extend} from "immutability-helper";
 import {XYCoord} from "react-dnd/dist/types/types/monitors";
 
 export interface PivotDragItem {
@@ -9,7 +8,7 @@ export interface PivotDragItem {
   item: PivotField
 }
 
-export type PivotDropAction = (event: PivotDragItem, dropLocation: string, dropCoordinates?: XYCoord | null) => void
+export type PivotDropAction = (event: PivotDragItem, dropLocation: string, dropCoordinates?: XYCoord | null, temporary?: boolean) => void
 
 export interface PivotDragEvent extends PivotDragItem {
   dropLocation: string,
@@ -29,8 +28,8 @@ interface ReorderCommand {
   id: string
 }
 
-export function updateState(state: PivotSettingsProps, root: Element | undefined, event: PivotDragEvent): PivotSettingsProps {
-  if (event.dragOrigin == event.dropLocation && event.dropCoordinates) { // Reorder
+export function updateState(state: PivotSettingsProps, root: Element | undefined, event: PivotDragEvent, temporary?: boolean): PivotSettingsProps {
+  if (event.dragOrigin == event.dropLocation && event.dropCoordinates && temporary) { // Reorder
     const childrenList = root?.querySelector<HTMLDivElement>("." + event.dragOrigin)?.childNodes
     const children = childrenList ? [...childrenList] : []
     const dropXY = event.dropCoordinates
@@ -57,17 +56,18 @@ export function updateState(state: PivotSettingsProps, root: Element | undefined
       return update(state, {[event.dragOrigin]: {$set: draggedList}})
     } else return state
   }
+  if (!temporary) {
+    if (event.dropLocation == PartNames.FIELDS) { // @ts-ignore // Remove field
+      return update(state, {[event.dragOrigin]: {$rmField: event.item}})
+    }
 
-  if (event.dropLocation == PartNames.FIELDS) { // @ts-ignore // Remove field
-    return update(state, {[event.dragOrigin]: {$rmField: event.item}})
-  }
+    if (event.dragOrigin == PartNames.FIELDS) { // Add field
+      return update(state, {[event.dropLocation]: {$push: [event.item]}})
+    }
 
-  if (event.dragOrigin == PartNames.FIELDS) { // Add field
-    return update(state, {[event.dropLocation]: {$push: [event.item]}})
-  }
-
-  if (event.dragOrigin != event.dropLocation) { // @ts-ignore // Move field
-    return update(state, {[event.dragOrigin]: {$rmField: event.item}, [event.dropLocation]: {$push: [event.item]}})
+    if (event.dragOrigin != event.dropLocation) { // @ts-ignore // Move field
+      return update(state, {[event.dragOrigin]: {$rmField: event.item}, [event.dropLocation]: {$push: [event.item]}})
+    }
   }
 
   return state
