@@ -64,18 +64,14 @@ export function DatePickerInputElement({
     const onChange = getOnChange(dateSettings, setTempState)
     const onPopupToggle = getOnPopupToggle(currentDateOpt, currentState, dateSettings, setFinalState)
 
-    const inputBoxRef = useRef() as React.MutableRefObject<HTMLDivElement | undefined>;
+    const inputBoxRef = useRef<HTMLDivElement>();
 
     useEffect(() => {
-        const inputBox = inputBoxRef.current;
-        if (inputBox) {
-            currentState.popupDate 
-                ? inputBox.classList.add('dpCalendarOpen') 
-                : inputBox.classList.remove('dpCalendarOpen');
-        }
+        if (!inputBoxRef.current) return;
+        currentState.popupDate 
+            ? inputBoxRef.current.classList.add('dpCalendarOpen') 
+            : inputBoxRef.current.classList.remove('dpCalendarOpen');
     }, [currentState]);
-
-    console.log('render datepicker');
 
     return el('div', {style: {margin: '1em'}},
         el("div", {ref: inputBoxRef, className: "inputBox"},
