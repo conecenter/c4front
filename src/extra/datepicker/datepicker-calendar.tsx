@@ -1,15 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useUserLocale } from "../locale";
 import { addMonths, getDate as getDayOfMonth, getDaysInMonth, getWeek, isMonday, set, startOfWeek } from "date-fns";
-import { getOrElse, isEmpty, None, nonEmpty, Option } from '../../main/option';
+import { isEmpty, None, nonEmpty, Option, toOption } from '../../main/option';
 import { adjustDate, DateSettings, getDate, getTimestamp } from "./date-utils";
 import { usePopupPos } from "../../main/popup";
-import { createTimestampState, DatePickerState } from "./datepicker-exchange";
-
-interface CalendarDate {
-  year: number;
-  month: number;
-}
+import { createTimestampState, DatePickerState, CalendarDate } from "./datepicker-exchange";
 
 interface DatepickerCalendarProps {
   currentState: DatePickerState,
@@ -59,7 +54,7 @@ export function DatepickerCalendar({
     const change = e.currentTarget.dataset.change;
     if (change) {
       const newDate = addMonths(new Date(year, month), +change);
-      setFinalState({...currentState, popupDate: { year: newDate.getFullYear(), month: newDate.getMonth() }});
+      setFinalState({...currentState, popupDate: getCalendarDate(newDate) });
     }
   }
 
@@ -87,22 +82,7 @@ export function DatepickerCalendar({
 
   /*
    * Calendar days section functionality
-  */ 
-
-  function getSpanList(array: number[], dataset: CalendarDate, className?: string) {
-    const getDateString = (date: Option<Date>) => nonEmpty(date) 
-      ? `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}` : '';
-    const today = getDate(Date.now(), dateSettings);
-    const todayString = getDateString(today);
-    const currDateString = getDateString(getOrElse(currentDateOpt, today));
-    return array.map(number => {
-      const datasetDate = `${number}-${dataset.month}-${dataset.year}`;
-      const isCurrent = datasetDate === currDateString;
-      const isToday = datasetDate === todayString;
-      const classString = `${className || ''} ${isCurrent ? 'current' : ''} ${isToday ? 'today' : ''}`.trim();
-      return getSpan(number, classString, datasetDate);
-    });
-  }
+  */  
 
   const daysPrevMonth = isMonday(pageDate) ? [] : calcDaysPrevMonth();
   function calcDaysPrevMonth() {
@@ -111,18 +91,22 @@ export function DatepickerCalendar({
     const endIndex = getDaysInMonth(firstWeekStart);
     return getSpanList(
       createArray(startIndex, endIndex),
-      { year: firstWeekStart.getFullYear(), month: firstWeekStart.getMonth() },
+      getCalendarDate(firstWeekStart),
+      dateSettings,
+      currentDateOpt,
       'dayPrevMonth'
     );
   }
 
-  const daysCurrMonth = getSpanList(createArray(1, getDaysInMonth(pageDate)), popupDate);
+  const daysCurrMonth = getSpanList(createArray(1, getDaysInMonth(pageDate)), popupDate, dateSettings, currentDateOpt);
 
   const numDaysNextMonth = weeksToShow * 7 - daysPrevMonth.length - daysCurrMonth.length;
   const nextMonth = addMonths(pageDate, 1);
   const daysNextMonth = getSpanList(
     createArray(1, numDaysNextMonth), 
-    { year: nextMonth.getFullYear(), month: nextMonth.getMonth() },
+    getCalendarDate(nextMonth),
+    dateSettings,
+    currentDateOpt,
     'dayNextMonth'
   );
 
@@ -177,20 +161,12 @@ export function DatepickerCalendar({
 
   function getOnTimeBtnClick(symbol: 'H' | 'm') {
     return (e: React.MouseEvent<HTMLButtonElement>) => {
-      if (e.currentTarget.dataset.change) {
-          const adjustedDate = adjustDate(currentDateOpt as Date, symbol, +e.currentTarget.dataset.change, true);
+      if (nonEmpty(currentDateOpt) && e.currentTarget.dataset.change) {
+          const adjustedDate = adjustDate(currentDateOpt, symbol, +e.currentTarget.dataset.change, true);
           setFinalState(createTimestampState(getTimestamp(adjustedDate, dateSettings)));
       }
     }
   }
-
-  const timeDisplay = (
-    <div className='dpTimeContainer'>
-      {hoursTimeSection}
-      <span className='dpTimeSeparator'>:</span>
-      {minsTimeSection}
-    </div>
-  );
 
   /*
    * Now & Close buttons functionality
@@ -210,27 +186,14 @@ export function DatepickerCalendar({
    * Closing popup calendar on click outside functionality
   */
 
-  const savedCallback = useRef() as React.MutableRefObject<Function>;
-  
-  useEffect(() => {
-    function onClickAway(e: MouseEvent) {
-      const target = e.target as Node;
-      if ((popupCalendarRef && popupCalendarRef.contains(target)) 
-        || (inputBoxRef.current && inputBoxRef.current.contains(target))) return;
-      setFinalState({ ...currentState, popupDate: None });
-    }
-    savedCallback.current = onClickAway;
-  });
-  
-  useEffect(() => {
-    if(!popupCalendarRef) return;
-    const handleClick = (e: MouseEvent) => savedCallback.current(e);
-    const doc = popupCalendarRef.ownerDocument;
-    doc.addEventListener('mousedown', handleClick);
-    return () => doc.removeEventListener('mousedown', handleClick);
-  }, [popupCalendarRef]);
+  useOnClickAwayListener(popupCalendarRef, onClickAway);
 
-  console.log('render Calendar');
+  function onClickAway(e: MouseEvent) {
+    const target = e.target as Node;
+    if ((popupCalendarRef && popupCalendarRef.contains(target)) 
+      || (inputBoxRef.current && inputBoxRef.current.contains(target))) return;
+    setFinalState({ ...currentState, popupDate: None });
+  }
 
   return (
     <div ref={setPopupCalendarRef} 
@@ -270,7 +233,12 @@ export function DatepickerCalendar({
         </div>
       </div>
 
-      {dateSettings.timestampFormat.hasTime && timeDisplay}
+      {dateSettings.timestampFormat.hasTime && 
+        <div className='dpTimeContainer'>
+          {hoursTimeSection}
+          <span className='dpTimeSeparator'>:</span>
+          {minsTimeSection}
+        </div>}
 
       <div className='dpCtrlBtnsCont'>
         <button className='dpBtnNow' onClick={onNowBtnClick}>Now</button>
@@ -278,6 +246,49 @@ export function DatepickerCalendar({
       </div>
     </div>
   );
+}
+
+function useOnClickAwayListener(popupElemRef: HTMLElement | null, callback: (e: MouseEvent) => void) {
+  const savedCallback = useRef() as React.MutableRefObject<Function>;
+  useEffect(() => {
+    savedCallback.current = callback;
+  });
+  useEffect(() => {
+    if(!popupElemRef) return;
+    const handleClick = (e: MouseEvent) => savedCallback.current(e);
+    const doc = popupElemRef.ownerDocument;
+    doc.addEventListener('mousedown', handleClick);
+    return () => doc.removeEventListener('mousedown', handleClick);
+  }, [popupElemRef]);
+}
+
+function createArray(start: number, end: number) {
+  return Array.from({length: end - start + 1}, (_, i) => i + start);
+}
+
+function getSpan(value: number | string, className?: string, dataset?: string) {
+  return <span className={className || undefined} data-date={dataset} key={dataset || value} >{value}</span>;
+};
+
+function getSpanList(
+    array: number[], 
+    dataset: CalendarDate, 
+    dateSettings: DateSettings, 
+    currentDateOpt: Option<Date>, 
+    className?: string
+) {
+  const getDateString = (date: Option<Date>) => nonEmpty(date) 
+    ? `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}` : '';
+  const today = getDate(Date.now(), dateSettings);
+  const todayString = getDateString(today);
+  const currDateString = getDateString(toOption(currentDateOpt));
+  return array.map(number => {
+    const datasetDate = `${number}-${dataset.month}-${dataset.year}`;
+    const isCurrent = datasetDate === currDateString;
+    const isToday = datasetDate === todayString;
+    const classString = `${className || ''} ${isCurrent ? 'current' : ''} ${isToday ? 'today' : ''}`.trim();
+    return getSpan(number, classString, datasetDate);
+  });
 }
 
 function getArrowBtnsDiv(callback: React.MouseEventHandler) {
@@ -294,10 +305,6 @@ function getArrowBtnsDiv(callback: React.MouseEventHandler) {
   );
 }
 
-function createArray(start: number, end: number) {
-  return Array.from({length: end - start + 1}, (_, i) => i + start);
+function getCalendarDate(date: Date): CalendarDate {
+  return { year: date.getFullYear(), month: date.getMonth() };
 }
-
-function getSpan(value: number | string, className?: string, dataset?: string) {
-  return <span className={className || undefined} data-date={dataset} key={dataset || value} >{value}</span>;
-};
