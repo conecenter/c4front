@@ -2,15 +2,15 @@ import { useSync } from "../../main/vdom-hooks";
 import { identityAt } from "../../main/vdom-util";
 import { DatePickerServerState } from "./datepicker";
 import { DateSettings, getDate } from "./date-utils";
-import { None, nonEmpty } from "../../main/option";
+import { mapOption, None, nonEmpty, Option } from "../../main/option";
+
+interface CalendarDate { year: number; month: number }
+
+type PopupDate = Option<CalendarDate>;
+
+interface PopupState { popupDate?: PopupDate }
 
 type DatePickerState = TimestampState | InputState
-
-type PopupDate = { year: number, month: number } | None ;
-
-interface PopupState {
-    popupDate?: PopupDate
-}
 
 interface TimestampState extends PopupState {
     tp: 'timestamp-state',
@@ -31,15 +31,18 @@ interface InputState extends PopupState {
 
 const isInputStateType = (tp: string): tp is 'input-state' => tp === 'input-state'
 const isInputState = (mode: DatePickerState): mode is InputState => isInputStateType(mode.tp)
-const createInputState = (inputValue: string, tempTimestamp?: number): InputState => {
-    return { tp: 'input-state', inputValue, tempTimestamp };
+const createInputState = (inputValue: string, tempTimestamp?: number, popupDate?: PopupDate): InputState => {
+    return { tp: 'input-state', inputValue, tempTimestamp, popupDate };
 };
 
 function serverStateToState(serverState: DatePickerServerState): DatePickerState {
     const popupDate = serverState.popupDate ? JSON.parse(serverState.popupDate) : undefined;
-    if (serverState.tp === 'timestamp-state')
-        return createTimestampState(parseInt(serverState.timestamp), popupDate);
-    else return createInputState(serverState.inputValue, serverState.tempTimestamp !== undefined ? parseInt(serverState.tempTimestamp) : undefined);
+    return serverState.tp === 'timestamp-state' 
+        ? createTimestampState(parseInt(serverState.timestamp), popupDate) 
+        : createInputState(
+            serverState.inputValue, 
+            serverState.tempTimestamp ? parseInt(serverState.tempTimestamp) : undefined, 
+            popupDate);
 }
 
 function stateToPatch(
@@ -65,36 +68,22 @@ function stateToPatch(
 }
 
 function setPopupHeader(currState: DatePickerState, prevState: DatePickerState, dateSettings: DateSettings) {
-    let popupDate: PopupDate | undefined;
-    if (currState.popupDate) {
-        popupDate = currState.popupDate;
-    } 
-    else if (prevState.popupDate) {
-        if (isTimestampState(currState)) {
-            const newDate = getDate(currState.timestamp, dateSettings);
-            popupDate = nonEmpty(newDate) ? { year: newDate.getFullYear(), month: newDate.getMonth() } : None;
-        } 
-        else popupDate = prevState.popupDate;
-    } else popupDate = None;
-    return nonEmpty(popupDate) ? {'x-r-popup': JSON.stringify(popupDate)} : {};
+    const getPopupDate = (date: Date) => ({ year: date.getFullYear(), month: date.getMonth() });
+    const popupDate = currState.popupDate || (
+        prevState.popupDate && isTimestampState(currState)
+            ? mapOption(getDate(currState.timestamp, dateSettings), getPopupDate)
+            : (prevState.popupDate || None)
+        );
+    return nonEmpty(popupDate) ? { 'x-r-popup': JSON.stringify(popupDate) } : {};
 }
 
 function patchToState(patch: Patch): DatePickerState {
     const mode = patch.headers["x-r-type"];
     const tempTimestamp = patch.headers['x-r-temp-timestamp'] ? parseInt(patch.headers['x-r-temp-timestamp']) : undefined;
     const popupDate = patch.headers['x-r-popup'] ? JSON.parse(patch.headers['x-r-popup']) : undefined;
-    if (isTimestampStateType(mode)) return {
-        tp: "timestamp-state",
-        timestamp: parseInt(patch.value),
-        popupDate,
-    }
-    else if (isInputStateType(mode)) return {
-        tp: "input-state",
-        inputValue: patch.value,
-        tempTimestamp: tempTimestamp,
-        popupDate,
-    }
-    else throw new Error("Unsupported mode")
+    return isTimestampStateType(mode) 
+        ? createTimestampState(parseInt(patch.value), popupDate)
+        : createInputState(patch.value, tempTimestamp, popupDate);
 }
 
 interface PatchHeaders {
@@ -135,4 +124,4 @@ function useDatePickerStateSync(
 }
 
 export { useDatePickerStateSync, isInputState, isTimestampState, createTimestampState, createInputState };
-export type { DatePickerState, PopupDate };
+export type { DatePickerState, PopupDate, CalendarDate };
