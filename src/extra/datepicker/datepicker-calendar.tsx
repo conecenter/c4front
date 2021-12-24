@@ -11,8 +11,8 @@ interface DatepickerCalendarProps {
   currentDateOpt: Option<Date>,
   dateSettings: DateSettings,
   setFinalState: (state: DatePickerState) => void,
-  inputRef: React.MutableRefObject<HTMLInputElement | undefined>,
-  inputBoxRef: React.MutableRefObject<HTMLDivElement | undefined>
+  inputRef: React.MutableRefObject<HTMLInputElement | null>,
+  inputBoxRef: React.MutableRefObject<HTMLDivElement | null>
 }
 
 export function DatepickerCalendar({
@@ -203,7 +203,11 @@ export function DatepickerCalendar({
       <div className='dpCalendarHeader'>
         <button data-change='-1' onClick={onMonthArrowClick} />
         <div className="dpCalendarMonthYear">
-          <button className='dpCalendarCurrMonth' onClick={onToggleMonthPopup}>{currMonthName}</button>
+          <button 
+            type='button'
+            className={`${popupMonthShow ? 'rotateArrow ' : ''}dpCalendarCurrMonth`} 
+            onClick={onToggleMonthPopup}>{currMonthName}
+          </button>
           <div className="dpCalendarYears">
             <span>{year}</span>
             {yearsArrowBtnsDiv}

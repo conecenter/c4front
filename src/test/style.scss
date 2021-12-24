@@ -246,6 +246,10 @@ div.grid {
 //     transform: skewY(-15deg);
 // }
 
+.rotate180deg {
+  transform: rotate(-180deg);
+}
+
 .inputBox {
   display: flex;
   height: auto;
@@ -297,10 +301,6 @@ div.grid {
     background-repeat: no-repeat;
     transition: all 200ms ease;
   }
-
-  &.dpCalendarOpen .btnCalendar {
-    transform: rotate(180deg);
-  }
 }
 
 .dpCalendar {
@@ -317,12 +317,12 @@ div.grid {
     font-size: 1.05em;
 
     >button {
-      font-weight: bold;
-      background: no-repeat center url(https://de-aaf-alc-def.cone.dev/mod/main/ee/cone/core/ui/c4view/pagging/left.svg);
-      background-size: 50% 50%;
+      background: no-repeat center url(https://de-aaf-alc-def.cone.dev/mod/main/ee/cone/core/ui/c4view/arrow-down.svg);
+      transform: rotate(90deg);
+      background-size: 55% 55%;
 
       &.dpArrowRight {
-        transform: rotate(180deg);
+        transform: rotate(-90deg);
       }
 
       &:hover {
@@ -346,13 +346,15 @@ div.grid {
         &::after {
           display: block;
           content: "";
-          width: 0.6em;
-          height: 0.6em;
-          background: no-repeat center url(https://de-aaf-alc-def.cone.dev/mod/main/ee/cone/core/ui/c4view/pagging/left.svg);
+          width: 0.7em;
+          height: 0.7em;
+          background: no-repeat center url(https://de-aaf-alc-def.cone.dev/mod/main/ee/cone/core/ui/c4view/arrow-down.svg);
           background-size: 100% 100%;
-          transform: rotate(-90deg);
-          // background-color: black;
-          // clip-path: polygon(100% 0%, 0 0%, 50% 100%);
+          transition: all 0.15s ease;
+        }
+
+        &.rotateArrow::after {
+          transform: rotate(180deg);
         }
 
         &:hover {
