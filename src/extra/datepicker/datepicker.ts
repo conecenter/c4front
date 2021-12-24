@@ -1,4 +1,4 @@
-import React, {useMemo, useRef} from "react";
+import {createElement as el, useMemo, useRef} from "react";
 import {getDateTimeFormat, useUserLocale} from "../locale";
 import {DatePickerState, useDatePickerStateSync} from "./datepicker-exchange";
 import {DateSettings, formatDate, getDate} from "./date-utils";
@@ -65,21 +65,31 @@ export function DatePickerInputElement({
 	const onChange = getOnChange(dateSettings, setTempState)
 	const onPopupToggle = getOnPopupToggle(currentDateOpt, currentState, dateSettings, setFinalState)
 
-	return (
-		<div style={{ margin: '1em' }}>
-			<div ref={inputBoxRef} className="inputBox">
-				<div className="inputSubBox">
-					<input ref={inputRef} value={inputValue} onChange={onChange} onKeyDown={onKeyDown} onBlur={onBlur} />
-				</div>
-				<button 
-					type='button' 
-					className={`${currentState.popupDate ? 'rotate180deg ' : ''}btnCalendar`} 
-					onClick={onPopupToggle} />
-			</div>
-
-			{currentState.popupDate && 
-				<DatepickerCalendar { ...{ currentState, currentDateOpt, dateSettings, setFinalState, inputRef, inputBoxRef } } />}
-		</div>
+	return el('div', {style: {margin: '1em'}},
+		el("div", {ref: inputBoxRef, className: "inputBox"},
+			el("div", {className: "inputSubBox"},
+				el("input", {
+					ref: inputRef,
+					value: inputValue,
+					onChange: onChange,
+					onKeyDown: onKeyDown,
+					onBlur: onBlur
+				})
+			),
+			el('button', {
+				type: 'button', 
+				className: `${currentState.popupDate ? 'rotate180deg ' : ''}btnCalendar`,
+				onClick: onPopupToggle
+			}),        
+		),
+		currentState.popupDate && el(DatepickerCalendar, {
+			currentState,
+			currentDateOpt,
+			dateSettings,
+			setFinalState,
+			inputRef,
+			inputBoxRef
+		})
 	)
 }
 
