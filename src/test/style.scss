@@ -304,10 +304,11 @@ div.grid {
 }
 
 .dpCalendar {
-  max-width: 320px;
+  max-width: 19.5em;
   text-align: center;
   border: 1px solid gray;
   padding: 0.1em;
+  z-index: 1;
 
   .dpCalendarHeader {
     display: flex;
@@ -326,8 +327,7 @@ div.grid {
       }
 
       &:hover {
-        // change svg color to darkblue
-        filter: invert(17%) sepia(66%) saturate(6664%) hue-rotate(244deg) brightness(53%) contrast(150%);
+        background-color: lightgray;
       }
     }
 
@@ -354,7 +354,7 @@ div.grid {
         }
 
         &.rotateArrow::after {
-          transform: rotate(180deg);
+          transform: rotate(-180deg);
         }
 
         &:hover {
@@ -371,7 +371,7 @@ div.grid {
         & span {
           display: block;
           cursor: default;
-          padding: 0.1em 1em 0.1em 0.4em;
+          padding: 0 1em 0.1em 0.4em;
           font-weight: normal;
   
           &:hover {
@@ -383,10 +383,6 @@ div.grid {
       .dpCalendarYears {
         display: flex;
         padding-left: 0.3em;
-
-        &:hover {
-          background: #f3f3f3;
-        }
         
         span {
           align-self: center;
@@ -396,17 +392,11 @@ div.grid {
         & .dpArrowBtnsCont {
           border: 1px solid lightgray;
         }
-
-        &:hover .dpArrowBtnsCont {
-          opacity: 1;
-        }
       }
-
     }
   }
 
   .dpArrowBtnsCont {
-    opacity: 0;
 
     button {
       display: block;
@@ -422,15 +412,6 @@ div.grid {
         background-color: lightgray;
       }
 
-      // &::after {
-      //   display: block;
-      //   content: "";
-      //   width: 0.5em;
-      //   height: 0.5em;
-      //   background-color: black;
-      //   clip-path: polygon(100% 0%, 0 0%, 50% 100%);
-      // }
-
       &.dpArrowBtnUp {
         transform: rotate(180deg);
         border-top: 1px solid gray;
@@ -444,7 +425,7 @@ div.grid {
     padding-bottom: 0.5em;
 
     span {
-      padding: 0.4em 0.05em;
+      padding: 0.3em 0;
       margin: 0.1em;
     }
 
@@ -494,8 +475,7 @@ div.grid {
         }
       }
 
-      .dayNextMonth,
-      .dayPrevMonth {
+      .dayNextMonth, .dayPrevMonth {
         color: gray;
       }
     }
@@ -511,10 +491,6 @@ div.grid {
       flex-grow: 1;
       display: flex;
 
-      &:hover {
-        background: #f3f3f3;
-      }
-
       > span {
         flex-grow: 1;
         align-self: center;
@@ -523,10 +499,6 @@ div.grid {
       .dpArrowBtnsCont {
         border-left: 1px solid gray;
         border-right: 1px solid transparent;
-      }
-
-      &:hover .dpArrowBtnsCont {
-        opacity: 1;
       }
 
       &:first-child .dpArrowBtnsCont {
@@ -566,7 +538,5 @@ div.grid {
         }
       }
     }
-
-    
   }
 }

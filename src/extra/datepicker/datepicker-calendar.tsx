@@ -198,7 +198,7 @@ export function DatepickerCalendar({
   return (
     <div ref={setPopupCalendarRef} 
          style={popupCalendarPos}
-         className='dpCalendar'
+         className='dpCalendar dpPopup'
          onClick={popupMonthShow ?  onMonthPopupMiss : undefined} >
       <div className='dpCalendarHeader'>
         <button data-change='-1' onClick={onMonthArrowClick} />
@@ -213,7 +213,7 @@ export function DatepickerCalendar({
             {yearsArrowBtnsDiv}
           </div>
           {popupMonthShow &&
-            <div ref={setPopupMonthRef} style={popupMonthPos} className='dpCalendarMonthPopup'>
+            <div ref={setPopupMonthRef} style={popupMonthPos} className='dpCalendarMonthPopup dpPopup'>
               {locale.months.map(month => 
                 <span key={month.fullName} onClick={onMonthChoice} data-month={month.id}>{month.fullName}</span>
               )}
