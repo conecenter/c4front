@@ -6,7 +6,7 @@ import {
     PivotDropAction,
     getPivotChange,
     pivotServerStateToState,
-    pivotChangeToState, patchToPivotChange, applyPivotChange
+    pivotChangeToState, patchToPivotChange, applyPivotChange, PivotClickAction, getClickChange
 } from "./pivot-exchange";
 import {ItemTypes} from "./pivot-const";
 import {HTML5Backend} from "react-dnd-html5-backend";
@@ -16,7 +16,8 @@ import {usePatchSync} from "../exchange/patch-sync";
 
 export interface PivotField {
     id: string,
-    name: string
+    name: string,
+    selected: boolean
 }
 
 export interface PivotSettingsState {
@@ -43,7 +44,7 @@ export function PivotSettings(props: PivotSettingsProps) {
 }
 
 function PivotSettingsInner(props: PivotSettingsProps) {
-    const {currentState: state, sendTempChange,sendFinalChange} = usePatchSync(
+    const {currentState: state, sendTempChange, sendFinalChange} = usePatchSync(
         props.identity,
         'receiver',
         props,
@@ -60,6 +61,7 @@ function PivotSettingsInner(props: PivotSettingsProps) {
         else if (temporary) sendTempChange(change)
         else sendFinalChange(change)
     }, [state])
+    const clickAction: PivotClickAction = useCallback(((origin, itemId) => sendFinalChange(getClickChange(origin, itemId))), [state])
     return el("div", {ref, className: "pivotSettings"},
         el(PivotFields, {fields: state.fields, dropAction}),
         el(PivotSettingsPart, {
@@ -67,6 +69,7 @@ function PivotSettingsInner(props: PivotSettingsProps) {
             className: "pivotFilters",
             state,
             dropAction,
+            clickAction,
             accepts: ItemTypes.FILTER
         }),
         el(PivotSettingsPart, {
@@ -74,6 +77,7 @@ function PivotSettingsInner(props: PivotSettingsProps) {
             className: "pivotBreaks",
             state,
             dropAction,
+            clickAction,
             accepts: ItemTypes.DIMENSION
         }),
         el(PivotSettingsPart, {
@@ -81,6 +85,7 @@ function PivotSettingsInner(props: PivotSettingsProps) {
             className: "pivotColumns",
             state,
             dropAction,
+            clickAction,
             accepts: ItemTypes.DIMENSION
         }),
         el(PivotSettingsPart, {
@@ -88,27 +93,37 @@ function PivotSettingsInner(props: PivotSettingsProps) {
             className: "pivotRows",
             state,
             dropAction,
+            clickAction,
             accepts: ItemTypes.DIMENSION
         }),
-        el(PivotSettingsPart, {key: "dataFields", className: "pivotData", state, dropAction, accepts: ItemTypes.DATA}),
+        el(PivotSettingsPart, {
+            key: "dataFields",
+            className: "pivotData",
+            state,
+            dropAction,
+            clickAction,
+            accepts: ItemTypes.DATA
+        }),
         el(PivotSettingsPart, {
             key: "cellFields",
             className: "pivotCells",
             state,
             dropAction,
+            clickAction,
             accepts: ItemTypes.DIMENSION
         })
     )
 }
 
 interface PivotSettingsPartProps {
-    className: string,
-    state: PivotSettingsState,
-    dropAction: PivotDropAction,
+    className: string
+    state: PivotSettingsState
+    dropAction: PivotDropAction
+    clickAction: PivotClickAction
     accepts: string
 }
 
-function PivotSettingsPart({className, state, dropAction, accepts}: PivotSettingsPartProps) {
+function PivotSettingsPart({className, state, dropAction,clickAction, accepts}: PivotSettingsPartProps) {
     const [{canDrop}, drop] = useDrop(() => ({
         accept: [ItemTypes.FIELD, accepts],
         drop: (item: PivotDragItem, monitor) => {
@@ -129,19 +144,21 @@ function PivotSettingsPart({className, state, dropAction, accepts}: PivotSetting
             type: accepts,
             origin: className,
             field: value,
-            dropAction
+            dropAction,
+            clickAction
         }))
     )
 }
 
 interface PivotFieldProps {
-    origin: string,
-    type: string,
-    field: PivotField,
+    origin: string
+    type: string
+    field: PivotField
     dropAction: PivotDropAction
+    clickAction?: PivotClickAction
 }
 
-export function PivotField({origin, type, field, dropAction}: PivotFieldProps) {
+export function PivotField({origin, type, field, dropAction, clickAction}: PivotFieldProps) {
     const accepts = type !== ItemTypes.FIELD ? [type] : []
     const [{}, drop] = useDrop({
         accept: accepts,
@@ -158,10 +175,13 @@ export function PivotField({origin, type, field, dropAction}: PivotFieldProps) {
         })
     )
     const draggedElementClass = isDragging ? "pivotDraggedElement" : ""
+    const selectedElementClass = field.selected ? "pivotSelectedElement" : ""
+    const onClick = clickAction ? () => clickAction(origin, field.id) : undefined
     return el("button", {
         key: field.id,
         "data-id": field.id,
         ref: (ref) => drag(drop(ref)),
-        className: `pivotButton ${draggedElementClass}`,
+        onClick: onClick,
+        className: `pivotButton ${draggedElementClass} ${selectedElementClass}`,
     }, field.name)
 }

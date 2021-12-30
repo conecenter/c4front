@@ -7,7 +7,7 @@ interface PatchHeaders {
 }
 
 interface Patch {
-    headers?: PatchHeaders
+    headers: PatchHeaders
     value: string
 }
 
@@ -31,11 +31,10 @@ interface SendPatch {
 const receiverId = (name: string) => identityAt(name)
 
 function stateToSendPatch(patch: Patch, changing: boolean, deferredSend: boolean): SendPatch {
-    const prepHeaders: SendPatchHeaders = patch.headers ? patch.headers : {}
     const changingHeaders: SendPatchHeaders = changing ? {"x-r-changing": "1"} : {}
     const headers: SendPatchHeaders = {
         ...changingHeaders,
-        ...prepHeaders,
+        ...patch.headers,
     }
     return {
         value: patch.value,

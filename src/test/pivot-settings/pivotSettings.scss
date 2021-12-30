@@ -80,3 +80,11 @@ html, body {
   outline: currentcolor none medium;
   outline-offset: -0.1em;
 }
+
+.pivotSelectedElement {
+  background-color: #ffc800;
+}
+
+.pivotDraggedElement {
+  opacity: 0.5;
+}

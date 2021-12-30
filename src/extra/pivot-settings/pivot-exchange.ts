@@ -4,7 +4,7 @@ import update, {extend} from "immutability-helper";
 import {XYCoord} from "react-dnd/dist/types/types/monitors";
 import {Patch, PatchHeaders} from "../exchange/patch-sync";
 
-type PivotChangeType = "reorder" | "move" | "add" | "remove" | "noop"
+type PivotChangeType = "reorder" | "move" | "add" | "remove" | "select" | "noop"
 
 interface PivotChangeCommon {
     tp: PivotChangeType
@@ -37,11 +37,17 @@ interface Remove extends PivotChangeCommon {
     draggedItemId: string
 }
 
+interface Select extends PivotChangeCommon {
+    tp: "select"
+    location: string
+    itemId: string
+}
+
 interface NoAction extends PivotChangeCommon {
     tp: "noop"
 }
 
-type PivotChange = Reorder | Move | Add | Remove | NoAction
+type PivotChange = Reorder | Move | Add | Remove | Select | NoAction
 
 const pivotServerStateToState: (s: PivotSettingsProps) => PivotSettingsState = s => ({
     fields: s.fields,
@@ -75,8 +81,13 @@ function getHeaders(ch: PivotChange): PatchHeaders {
             return {
                 "x-r-in": ch.in,
                 "x-r-target-id": ch.targetId,
-                "x-r-drop-left": ch.dropLeft ? "1" : "",
+                "x-r-drop-left": ch.dropLeft ? "1" : "0",
                 "x-r-dragged-id": ch.draggedItemId
+            }
+        case "select":
+            return {
+                "x-r-location": ch.location,
+                "x-r-item-id": ch.itemId
             }
         default :
             return {}
@@ -90,36 +101,43 @@ const pivotChangeToState: (ch: PivotChange) => Patch = ch => {
     }
 }
 
-const su: (su: string | undefined) => string = s => s ? s : ""
+const header: (headers: PatchHeaders, key: string) => string = (headers, key) => headers[key]
 
 const patchToPivotChange: (p: Patch) => PivotChange = p => {
+    const headers = p.headers
     switch (p.value) {
         case "add":
             return {
                 tp: "add",
-                to: su(p.headers?.["x-r-to"]),
-                draggedItemId: su(p.headers?.["x-r-dragged-id"])
+                to: headers["x-r-to"],
+                draggedItemId: headers["x-r-dragged-id"]
             }
         case "remove":
             return {
                 tp: "remove",
-                from: su(p.headers?.["x-r-from"]),
-                draggedItemId: su(p.headers?.["x-r-dragged-id"])
+                from: headers["x-r-from"],
+                draggedItemId: headers["x-r-dragged-id"]
             }
         case "move":
             return {
                 tp: "move",
-                from: su(p.headers?.["x-r-from"]),
-                to: su(p.headers?.["x-r-to"]),
-                draggedItemId: su(p.headers?.["x-r-dragged-id"])
+                from: headers["x-r-from"],
+                to: headers["x-r-to"],
+                draggedItemId: headers["x-r-dragged-id"]
             }
         case "reorder":
             return {
                 tp: "reorder",
-                in: su(p.headers?.["x-r-in"]),
-                targetId: su(p.headers?.["x-r-target-id"]),
-                dropLeft: !!p.headers?.["x-r-drop-left"],
-                draggedItemId: su(p.headers?.["x-r-dragged-id"])
+                in: headers["x-r-in"],
+                targetId: headers["x-r-target-id"],
+                dropLeft: p.headers["x-r-drop-left"] === "1",
+                draggedItemId: headers["x-r-dragged-id"]
+            }
+        case "select" :
+            return {
+                tp: "select",
+                location: headers["x-r-location"],
+                itemId: headers["x-r-item-id"]
             }
         default:
             return {tp: "noop"}
@@ -137,6 +155,10 @@ function find(id: string, list: PivotField[]): PivotField[] {
 
 extend('$filterOut', function (itemId: string, list: PivotField[]) {
     return list.filter((value) => value.id != itemId);
+});
+
+extend('$select', function (itemId: string, list: PivotField[]) {
+    return list.map((value) => value.id === itemId ? {...value, selected: !value.selected} : value);
 });
 
 const applyPivotChange: (prev: PivotSettingsState, ch: PivotChange) => PivotSettingsState = (prev, ch) => {
@@ -160,6 +182,9 @@ const applyPivotChange: (prev: PivotSettingsState, ch: PivotChange) => PivotSett
             const indexOffset = ch.dropLeft ? 0 : 1
             draggedList.splice(targetInd + indexOffset, 0, ...item)
             return update(prev, {[ch.in]: {$set: draggedList}})
+        case "select":
+            // @ts-ignore
+            return update(prev, {[ch.location]: {$select: ch.itemId}})
         default:
             return prev
     }
@@ -189,7 +214,7 @@ interface ReorderCommand {
 const NO_OP: NoAction = {tp: "noop"}
 
 function getPivotChange(state: PivotSettingsState, root: Element | undefined, event: PivotDragEvent, temporary?: boolean): PivotChange {
-    if (event.dragOrigin == event.dropLocation && event.dropCoordinates && temporary) { // Reorder
+    if (event.dragOrigin == event.dropLocation && event.dropCoordinates) { // Reorder
         const childrenList = root?.querySelector<HTMLDivElement>("." + event.dragOrigin)?.childNodes
         const children = childrenList ? [...childrenList] : []
         const dropXY = event.dropCoordinates
@@ -223,7 +248,7 @@ function getPivotChange(state: PivotSettingsState, root: Element | undefined, ev
         } else return NO_OP
     }
     if (!temporary) {
-        if (event.dropLocation == PartNames.FIELDS) { // @ts-ignore // Remove field
+        if (event.dropLocation == PartNames.FIELDS) { // Remove field
             return {
                 tp: "remove",
                 from: event.dragOrigin,
@@ -239,7 +264,7 @@ function getPivotChange(state: PivotSettingsState, root: Element | undefined, ev
             }
         }
 
-        if (event.dragOrigin != event.dropLocation) { // @ts-ignore // Move field
+        if (event.dragOrigin != event.dropLocation) { // Move field
             return {
                 tp: "move",
                 from: event.dragOrigin,
@@ -252,4 +277,14 @@ function getPivotChange(state: PivotSettingsState, root: Element | undefined, ev
     return NO_OP
 }
 
-export {applyPivotChange, patchToPivotChange, pivotChangeToState, pivotServerStateToState, getPivotChange}
+export type PivotClickAction = (origin: string, itemId: string) => void
+
+function getClickChange(origin: string, itemId: string): PivotChange {
+    return {
+        tp: "select",
+        location: origin,
+        itemId: itemId
+    }
+}
+
+export {applyPivotChange, patchToPivotChange, pivotChangeToState, pivotServerStateToState, getPivotChange, getClickChange}
