@@ -109,6 +109,16 @@ div.grid {
     vertical-align: middle;
     display: flex;
     align-items: center;
+
+    &:hover {
+      overflow: visible;
+
+      .hoverExpander {
+          background-color: var(--color-primaryColor);
+          position: relative;
+          z-index: 10;
+      }
+    }
   }
 
 

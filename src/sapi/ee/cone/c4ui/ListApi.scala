@@ -108,7 +108,6 @@ case class NoReceiver[C]() extends Receiver[C] {
 
   @c4el("HoverExpander") def hoverExpander(
     key: String,
-    classNames: List[CSSClassName] = Nil,
     children: ChildPairList[OfDiv] = Nil,
   ): ToChildPair
 
