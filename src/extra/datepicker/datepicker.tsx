@@ -1,4 +1,4 @@
-import {createElement as el, useMemo, useRef} from "react";
+import React, {ReactNode, useMemo, useRef} from "react";
 import {getDateTimeFormat, useUserLocale} from "../locale";
 import {DatePickerState, useDatePickerStateSync} from "./datepicker-exchange";
 import {DateSettings, formatDate, getDate} from "./date-utils";
@@ -29,8 +29,9 @@ interface DatePickerProps {
 	identity: Object
 	state: DatePickerServerState
 	timestampFormatId: number
-	userTimezoneId?: string,
+	userTimezoneId?: string
 	deferredSend?: boolean
+	children?: ReactNode[]
 }
 
 export function DatePickerInputElement({
@@ -38,7 +39,8 @@ export function DatePickerInputElement({
 		state,
 		timestampFormatId,
 		userTimezoneId,
-		deferredSend
+		deferredSend,
+		children
 }: DatePickerProps) {
 	const locale = useUserLocale()
 	const timezoneId = userTimezoneId ? userTimezoneId : locale.timezoneId
@@ -65,32 +67,32 @@ export function DatePickerInputElement({
 	const onChange = getOnChange(dateSettings, setTempState)
 	const onPopupToggle = getOnPopupToggle(currentDateOpt, currentState, dateSettings, setFinalState)
 
-	return el('div', {style: {margin: '1em'}},
-		el("div", {ref: inputBoxRef, className: "inputBox"},
-			el("div", {className: "inputSubBox"},
-				el("input", {
-					ref: inputRef,
-					value: inputValue,
-					onChange: onChange,
-					onKeyDown: onKeyDown,
-					onBlur: onBlur
-				})
-			),
-			el('button', {
-				type: 'button', 
-				className: `${currentState.popupDate ? 'rotate180deg ' : ''}btnCalendar`,
-				onClick: onPopupToggle
-			}),        
-		),
-		currentState.popupDate && el(DatepickerCalendar, {
-			currentState,
-			currentDateOpt,
-			dateSettings,
-			setFinalState,
-			inputRef,
-			inputBoxRef
-		})
-	)
+  	return (
+		<div className="inputBoxWrapper">
+			<div ref={inputBoxRef} className="inputBox">
+				<div className="inputSubBox">
+					<input ref={inputRef} value={inputValue} onChange={onChange} onKeyDown={onKeyDown} onBlur={onBlur} />
+				</div>
+				<button 
+					type='button' 
+					className={`${currentState.popupDate ? 'rotate180deg ' : ''}btnCalendar`} 
+					onClick={onPopupToggle} />
+			</div>
+
+			{currentState.popupDate && 
+				<DatepickerCalendar {...{
+					currentState, 
+					currentDateOpt, 
+					dateSettings, 
+					setFinalState, 
+					inputRef, 
+					inputBoxRef
+				}} />
+			}
+
+			{children}
+		</div>
+	);
 }
 
 interface CurrentProps {

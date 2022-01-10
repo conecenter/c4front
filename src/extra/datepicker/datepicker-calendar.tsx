@@ -36,7 +36,6 @@ export function DatepickerCalendar({
   /*
    * Popup elements positioning
   */ 
-
   const [popupCalendarRef,setPopupCalendarRef] = useState<HTMLDivElement | null>(null);
   const [popupCalendarPos] = usePopupPos(popupCalendarRef);
 
@@ -45,8 +44,7 @@ export function DatepickerCalendar({
 
   /*
    * Months section functionality
-  */ 
-
+  */
   const currMonthObj = locale.months.find(monthName => monthName.id === month);
   const currMonthName = currMonthObj ? currMonthObj.fullName : null;
 
@@ -72,7 +70,6 @@ export function DatepickerCalendar({
   /*
    * Years section functionality
   */
-
   const yearsArrowBtnsDiv = getArrowBtnsDiv(onCalendarYearChange);
 
   function onCalendarYearChange(e: React.MouseEvent<HTMLButtonElement>) {
@@ -82,8 +79,7 @@ export function DatepickerCalendar({
 
   /*
    * Calendar days section functionality
-  */  
-
+  */
   const daysPrevMonth = isMonday(pageDate) ? [] : calcDaysPrevMonth();
   function calcDaysPrevMonth() {
     const firstWeekStart = startOfWeek(pageDate, { weekStartsOn: 1 });
@@ -128,8 +124,7 @@ export function DatepickerCalendar({
 
   /*
    * Calendar weeks section functionality
-  */ 
-
+  */
   const weekNumStart = getWeek(pageDate, { weekStartsOn: 1, firstWeekContainsDate: 4 });
   const weekNumEnd = weekNumStart + weeksToShow - 1;
   const weekNumbersArr = (month === 0 && weekNumStart !== 1)
@@ -144,7 +139,6 @@ export function DatepickerCalendar({
   /*
    * Time section functionality
   */
-
   const hoursTimeSection = getTimeSection('H');
   const minsTimeSection = getTimeSection('m');
 
@@ -171,7 +165,6 @@ export function DatepickerCalendar({
   /*
    * Now & Close buttons functionality
   */
-
   const onNowBtnClick = () => setFinalState(createTimestampState(Date.now(), None));
 
   function onCloseBtnClick() {
@@ -185,7 +178,6 @@ export function DatepickerCalendar({
   /*
    * Closing popup calendar on click outside functionality
   */
-
   useOnClickAwayListener(popupCalendarRef, onClickAway);
 
   function onClickAway(e: MouseEvent) {
