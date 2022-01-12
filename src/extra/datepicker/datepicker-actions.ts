@@ -1,4 +1,4 @@
-import {DateSettings, incrementDate, parseStringToDate, getDate} from "./date-utils";
+import {DateSettings, incrementDate, parseStringToDate, getDate, getCalendarDate} from "./date-utils";
 import {createInputState, createTimestampState, DatePickerState, isTimestampState, PopupDate} from "./datepicker-exchange";
 import {getOrElse, mapOption, None, nonEmpty, Option} from "../../main/option";
 import React, {ChangeEvent, KeyboardEvent} from "react";
@@ -76,14 +76,9 @@ function getOnPopupToggle(
     dateSettings: DateSettings, 
     setState: (state: DatePickerState) => void) {
     return () => {
-        let popupDate: PopupDate;
-        if (currentState.popupDate) popupDate = None;
-        else if (nonEmpty(currentDateOpt)) {
-            popupDate = { year: currentDateOpt.getFullYear(), month: currentDateOpt.getMonth() };
-        } else {
-            const today =  getDate(Date.now(), dateSettings);
-            popupDate = nonEmpty(today) ? { year: today.getFullYear(), month: today.getMonth() } : None;
-        }
+        const dateToShow = currentState.popupDate 
+            ? None : getOrElse(currentDateOpt, getDate(Date.now(), dateSettings));
+        const popupDate = mapOption(dateToShow, getCalendarDate);
         setState({ ...currentState, popupDate });
     }
 }

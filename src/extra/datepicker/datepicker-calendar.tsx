@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useUserLocale } from "../locale";
 import { addMonths, getDate as getDayOfMonth, getDaysInMonth, getWeek, isMonday, set, startOfWeek } from "date-fns";
 import { isEmpty, None, nonEmpty, Option, toOption } from '../../main/option';
-import { adjustDate, DateSettings, getDate, getTimestamp } from "./date-utils";
+import { adjustDate, DateSettings, getDate, getTimestamp, getCalendarDate } from "./date-utils";
 import { usePopupPos } from "../../main/popup";
 import { createTimestampState, DatePickerState, CalendarDate } from "./datepicker-exchange";
 
@@ -299,8 +299,4 @@ function getArrowBtnsDiv(callback: React.MouseEventHandler) {
             onClick={callback} />) }
       </div>
   );
-}
-
-function getCalendarDate(date: Date): CalendarDate {
-  return { year: date.getFullYear(), month: date.getMonth() };
 }

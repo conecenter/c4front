@@ -1,7 +1,7 @@
 import { useSync } from "../../main/vdom-hooks";
 import { identityAt } from "../../main/vdom-util";
 import { DatePickerServerState } from "./datepicker";
-import { DateSettings, getDate } from "./date-utils";
+import { DateSettings, getCalendarDate, getDate } from "./date-utils";
 import { mapOption, None, nonEmpty, Option } from "../../main/option";
 
 interface CalendarDate { year: number; month: number }
@@ -68,10 +68,9 @@ function stateToPatch(
 }
 
 function setPopupHeader(currState: DatePickerState, prevState: DatePickerState, dateSettings: DateSettings) {
-    const getPopupDate = (date: Date) => ({ year: date.getFullYear(), month: date.getMonth() });
     const popupDate = currState.popupDate || (
         prevState.popupDate && isTimestampState(currState)
-            ? mapOption(getDate(currState.timestamp, dateSettings), getPopupDate)
+            ? mapOption(getDate(currState.timestamp, dateSettings), getCalendarDate)
             : (prevState.popupDate || None)
         );
     return nonEmpty(popupDate) ? { 'x-r-popup': JSON.stringify(popupDate) } : {};
