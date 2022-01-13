@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom"
 import React from "react"
-import {createSyncProviders} from "../main/vdom-hooks";
-import {DatePickerInputElement} from "../extra/datepicker/datepicker";
+import {createSyncProviders} from "../../main/vdom-hooks";
+import {DatePickerInputElement} from "../../extra/datepicker/datepicker";
 
 const {createElement: $} = React
 
