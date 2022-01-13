@@ -15,6 +15,8 @@ interface DatepickerCalendarProps {
   inputBoxRef: React.MutableRefObject<HTMLDivElement | null>
 }
 
+const WEEKS_TO_SHOW = 6;
+
 export function DatepickerCalendar({
   currentState,
   currentDateOpt,
@@ -30,8 +32,6 @@ export function DatepickerCalendar({
   const pageDate = new Date(year, month);
 
   const locale = useUserLocale();
-
-  const weeksToShow = 6;
 
   /*
    * Popup elements positioning
@@ -51,7 +51,7 @@ export function DatepickerCalendar({
   function onMonthArrowClick(e: React.MouseEvent<HTMLButtonElement>) {
     const change = e.currentTarget.dataset.change;
     if (change) {
-      const newDate = addMonths(new Date(year, month), +change);
+      const newDate = addMonths(new Date(year, month), Number(change));
       setFinalState({...currentState, popupDate: getCalendarDate(newDate) });
     }
   }
@@ -74,7 +74,7 @@ export function DatepickerCalendar({
 
   function onCalendarYearChange(e: React.MouseEvent<HTMLButtonElement>) {
     const change = e.currentTarget.dataset.change;
-    if (change) setFinalState({...currentState, popupDate: { month, year: year + +change } });
+    if (change) setFinalState({...currentState, popupDate: { month, year: year + Number(change) } });
   }
 
   /*
@@ -96,7 +96,7 @@ export function DatepickerCalendar({
 
   const daysCurrMonth = getSpanList(createArray(1, getDaysInMonth(pageDate)), popupDate, dateSettings, currentDateOpt);
 
-  const numDaysNextMonth = weeksToShow * 7 - daysPrevMonth.length - daysCurrMonth.length;
+  const numDaysNextMonth = WEEKS_TO_SHOW * 7 - daysPrevMonth.length - daysCurrMonth.length;
   const nextMonth = addMonths(pageDate, 1);
   const daysNextMonth = getSpanList(
     createArray(1, numDaysNextMonth), 
@@ -126,7 +126,7 @@ export function DatepickerCalendar({
    * Calendar weeks section functionality
   */
   const weekNumStart = getWeek(pageDate, { weekStartsOn: 1, firstWeekContainsDate: 4 });
-  const weekNumEnd = weekNumStart + weeksToShow - 1;
+  const weekNumEnd = weekNumStart + WEEKS_TO_SHOW - 1;
   const weekNumbersArr = (month === 0 && weekNumStart !== 1)
     ? [weekNumStart, ...createArray(1, 5)]
     : month === 11
