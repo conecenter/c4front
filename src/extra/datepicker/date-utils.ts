@@ -368,5 +368,9 @@ function incrementDate(
     return {timestamp: getTimestamp(adjustedDate, dateSettings), startPosition, endPosition}
 }
 
-export {incrementDate, formatDate, getDate, parseStringToDate}
+function getCalendarDate(date: Date) {
+    return { year: date.getFullYear(), month: date.getMonth() };
+  }
+
+export {incrementDate, formatDate, getDate, parseStringToDate, getTimestamp, adjustDate, getCalendarDate}
 export type {DateSettings}

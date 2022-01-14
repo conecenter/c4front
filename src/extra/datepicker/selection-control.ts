@@ -12,7 +12,7 @@ const initialSelectionState: SelectionState = {
     endPosition: 0,
 }
 
-export function useSelectionEditableInput(inputRef: MutableRefObject<HTMLInputElement | undefined>): (from: number, to: number) => void {
+export function useSelectionEditableInput(inputRef: MutableRefObject<HTMLInputElement | null>): (from: number, to: number) => void {
     const [selectionState, setSelectionState] = useState<SelectionState>(initialSelectionState)
     const setSelection = (from: number, to: number): void => {
         setSelectionState((state: SelectionState) => ({...state, needsSet: true, startPosition: from, endPosition: to}))
