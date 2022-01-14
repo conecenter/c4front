@@ -77,6 +77,7 @@ export function DatePickerInputElement({
 					type='button' 
 					className={`${currentState.popupDate ? 'rotate180deg ' : ''}btnCalendar`} 
 					onClick={onPopupToggle} />
+				{children}
 			</div>
 
 			{currentState.popupDate && 
@@ -89,8 +90,6 @@ export function DatePickerInputElement({
 					inputBoxRef
 				}} />
 			}
-
-			{children}
 		</div>
 	);
 }
