@@ -42,6 +42,7 @@ function getOnKeyDown(
             const up = e.key === ARROW_UP_KEY;
             updateAndSendDate(currentDateOpt, dateFormat, dateSettings, selectionStart, up, cycleThroughout, onTimestampChange, setSelection);
             e.preventDefault();
+            e.stopPropagation();
         }
     }
 }
