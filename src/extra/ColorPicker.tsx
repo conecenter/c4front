@@ -1,8 +1,7 @@
-import React, { useRef, useState } from "react"
+import React, { useState } from "react"
 import { Patch, useInputSync } from "./input-sync";
 import { HexColorPicker, HexColorInput } from "react-colorful";
 import { usePopupPos } from "../main/popup";
-import { useOnClickAwayListener } from "./datepicker/datepicker-calendar";
 
 interface ColorPickerProps {
 	identity: Object,
@@ -30,21 +29,7 @@ function ColorPicker({identity, value, ro}: ColorPickerProps) {
 	 * Popup positioning
 	*/
 	const [popupRef,setPopupRef] = useState<HTMLDivElement | null>(null);
-
 	const [popupPos] = usePopupPos(popupRef);
-
-	/*
-	 * Closing popup on click outside color picker
-	*/
-	const inputBoxRef = useRef<HTMLDivElement | null>(null);
-
-	useOnClickAwayListener(popupRef, onClickAway);
-
-	function onClickAway(e: MouseEvent) {
-		const target = e.target as Node;
-		if (inputBoxRef.current && inputBoxRef.current.contains(target)) return;
-		setActive(false);
-	}
 
 	/*
 	 * Styling
@@ -55,20 +40,23 @@ function ColorPicker({identity, value, ro}: ColorPickerProps) {
 	};
 
 	return (
-		<div ref={inputBoxRef} className="inputBox" style={{margin: '1em', width: '80px'}}>
+		<div 
+			className="inputBox" 
+			style={{margin: '1em', width: '80px'}} // remove for production
+			onFocus={() => setActive(true)}
+			onBlur={() => setActive(false)} >
+
 			<div className="inputSubBox">
 				<HexColorInput
 					className={active? undefined : 'colorPickerChip'}
 					style={active? undefined : inputStyle}
 					color={currentState}
-					onClick={() => setActive(true)}
 					onChange={setFinalState} 
 					onInput={(e) => {
 						if (e.target.value === '#' || e.target.value === '') setFinalState('');
 					}} 
 					disabled={ro}
-					prefixed
-				/>
+					prefixed />
 			</div>
 
 			{active && 
@@ -76,21 +64,7 @@ function ColorPicker({identity, value, ro}: ColorPickerProps) {
 					<HexColorPicker color={currentState} onChange={setFinalState} />
 				</div>}
 		</div>
-	)
-    // createElement(
-    //     "input",
-    //     {
-    //         type: "color",
-    //         style: {
-    //             width: '10em',
-    //             border: "none",
-    //         },
-    //         disabled: ro,
-    //         value: currentState,
-    //         onChange: e => setTempState(e.target.value),
-    //         onBlur: e => setFinalState(currentState)
-    //     }
-    // )
+	);
 }
 
 export { ColorPicker };
