@@ -13,10 +13,10 @@ function App() {
         value: '#ff0000'
     })
     const child2 = $(ColorPicker, {
-        key: "TEST",
+        key: "TEST2",
         identity: {parent: "test"},
-        ro: false,
-        value: '#ff0000'
+        ro: true,
+        value: ''
     })
     const sender = {
         enqueue: (identity: any, patch: any) => console.log(patch)

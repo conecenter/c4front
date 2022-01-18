@@ -46,18 +46,27 @@ function ColorPicker({identity, value, ro}: ColorPickerProps) {
 		setActive(false);
 	}
 
+	/*
+	 * Styling
+	*/
+	const inputStyle = {
+		background: currentState || 'repeating-linear-gradient(45deg, lightgray 0 8%, white 8% 16%)',
+		cursor: ro ? 'default' : 'pointer'
+	};
+
 	return (
 		<div ref={inputBoxRef} className="inputBox" style={{margin: '1em', width: '80px'}}>
 			<div className="inputSubBox">
 				<HexColorInput
 					className={active? undefined : 'colorPickerChip'}
-					style={active? undefined : {background: currentState}}
+					style={active? undefined : inputStyle}
 					color={currentState}
 					onClick={() => setActive(true)}
 					onChange={setFinalState} 
 					onInput={(e) => {
-						if (e.target.value === '#') setFinalState('');
+						if (e.target.value === '#' || e.target.value === '') setFinalState('');
 					}} 
+					disabled={ro}
 					prefixed
 				/>
 			</div>
