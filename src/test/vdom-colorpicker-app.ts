@@ -6,18 +6,24 @@ import { ColorPicker } from "../extra/ColorPicker";
 const {createElement: $} = React
 
 function App() {
-    const children = $(ColorPicker, {
+    const child1 = $(ColorPicker, {
         key: "TEST",
         identity: {parent: "test"},
         ro: false,
-        value: ''
+        value: '#ff0000'
+    })
+    const child2 = $(ColorPicker, {
+        key: "TEST",
+        identity: {parent: "test"},
+        ro: false,
+        value: '#ff0000'
     })
     const sender = {
         enqueue: (identity: any, patch: any) => console.log(patch)
     }
     const ack: boolean | null = null
 
-    return createSyncProviders({sender, ack, children: [children]})
+    return createSyncProviders({sender, ack, children: [child1, child2]})
 }
 
 const containerElement = document.createElement("div")

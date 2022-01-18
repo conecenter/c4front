@@ -256,6 +256,7 @@ div.grid {
 //     transform: skewY(-15deg);
 // }
 
+// Datepicker
 .rotate180deg {
   transform: rotate(-180deg);
 }
@@ -551,6 +552,44 @@ div.grid {
           background: red;
         }
       }
+    }
+  }
+}
+
+// Color Picker
+.inputBox {
+  input.colorPickerChip {
+    color: transparent;
+    cursor: pointer;
+    border-radius: 0.28em;
+    margin: 0 0.2em;
+    height: 80%;
+    align-self: center;
+    border: 1px solid gray;
+    transition: background 0.2s ease-out;
+  }
+
+  > .colorPickerPopup {
+    z-index: 1;
+    border: 1px solid black;
+
+    .react-colorful__saturation-pointer {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    .react-colorful__hue-pointer {
+      width: 14px;
+      border-radius: 0px;
+    }
+
+    .react-colorful__saturation {
+      border-radius: 0px;
+    }
+
+    .react-colorful__last-control {
+      border-radius: 0px;
     }
   }
 }

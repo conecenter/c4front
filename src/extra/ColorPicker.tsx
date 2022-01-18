@@ -1,8 +1,8 @@
-import React, { useState } from "react"
+import React, { useRef, useState } from "react"
 import { Patch, useInputSync } from "./input-sync";
-import { ChromePicker } from 'react-color';
 import { HexColorPicker, HexColorInput } from "react-colorful";
 import { usePopupPos } from "../main/popup";
+import { useOnClickAwayListener } from "./datepicker/datepicker-calendar";
 
 interface ColorPickerProps {
 	identity: Object,
@@ -14,9 +14,9 @@ function ColorPicker({identity, value, ro}: ColorPickerProps) {
 
 	console.log('render');
 
-	const {currentState, setTempState, setFinalState} = useInputSync<string, string>(
+	const { currentState, setTempState, setFinalState } = useInputSync<string, string>(
 		identity,
-		"receiver",
+		'receiver',
 		value,
 		true,
 		(p: Patch) => p.value,
@@ -24,25 +24,49 @@ function ColorPicker({identity, value, ro}: ColorPickerProps) {
 		s => ({value: s})
 	);
 
-	const [color, setColor] = useState("");
+	const [active, setActive] = useState(false);
 
+	/*
+	 * Popup positioning
+	*/
 	const [popupRef,setPopupRef] = useState<HTMLDivElement | null>(null);
+
 	const [popupPos] = usePopupPos(popupRef);
 
-	const [popupOpen, setPopupOpen] = useState(false);
+	/*
+	 * Closing popup on click outside color picker
+	*/
+	const inputBoxRef = useRef<HTMLDivElement | null>(null);
 
-	// console.log(currentState)
+	useOnClickAwayListener(popupRef, onClickAway);
+
+	function onClickAway(e: MouseEvent) {
+		const target = e.target as Node;
+		if (inputBoxRef.current && inputBoxRef.current.contains(target)) return;
+		setActive(false);
+	}
+
 	return (
-		<div className="inputBox" style={{margin: '1em'}}>
-			<div className="inputSubBox" onClick={() => setPopupOpen(prevPopupOpen => !prevPopupOpen)}>
-				<HexColorInput color={currentState} onChange={setFinalState} onBlur={() => console.log('blur')} prefixed/>
+		<div ref={inputBoxRef} className="inputBox" style={{margin: '1em', width: '80px'}}>
+			<div className="inputSubBox">
+				<HexColorInput
+					className={active? undefined : 'colorPickerChip'}
+					style={active? undefined : {background: currentState}}
+					color={currentState}
+					onClick={() => setActive(true)}
+					onChange={setFinalState} 
+					onInput={(e) => {
+						if (e.target.value === '#') setFinalState('');
+					}} 
+					prefixed
+				/>
 			</div>
 
-			{popupOpen && 
-				<div ref={setPopupRef} style={popupPos} >
+			{active && 
+				<div ref={setPopupRef} className='colorPickerPopup' style={popupPos} >
 					<HexColorPicker color={currentState} onChange={setFinalState} />
 				</div>}
-			</div>
+		</div>
 	)
     // createElement(
     //     "input",
@@ -61,40 +85,3 @@ function ColorPicker({identity, value, ro}: ColorPickerProps) {
 }
 
 export { ColorPicker };
-
-// class ButtonExample extends React.Component {
-//     state = {
-//       displayColorPicker: false,
-//     };
-  
-//     handleClick = () => {
-//       this.setState({ displayColorPicker: !this.state.displayColorPicker })
-//     };
-  
-//     handleClose = () => {
-//       this.setState({ displayColorPicker: false })
-//     };
-  
-//     render() {
-//       const popover = {
-//         position: 'absolute',
-//         zIndex: '2',
-//       }
-//       const cover = {
-//         position: 'fixed',
-//         top: '0px',
-//         right: '0px',
-//         bottom: '0px',
-//         left: '0px',
-//       }
-//       return (
-//         <div>
-//           <button onClick={ this.handleClick }>Pick Color</button>
-//           { this.state.displayColorPicker ? <div style={ popover }>
-//             <div style={ cover } onClick={ this.handleClose }/>
-//             <ChromePicker />
-//           </div> : null }
-//         </div>
-//       )
-//     }
-//   }
