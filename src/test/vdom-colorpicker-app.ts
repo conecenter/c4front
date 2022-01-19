@@ -7,7 +7,7 @@ const {createElement: $} = React
 
 function App() {
     const child1 = $(ColorPicker, {
-        key: "TEST",
+        key: "TEST1",
         identity: {parent: "test"},
         ro: false,
         value: '#ff0000'

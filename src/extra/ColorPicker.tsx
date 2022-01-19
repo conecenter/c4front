@@ -2,6 +2,7 @@ import React, { useState } from "react"
 import { Patch, useInputSync } from "./input-sync";
 import { HexColorPicker, HexColorInput } from "react-colorful";
 import { usePopupPos } from "../main/popup";
+import { ENTER_KEY } from "../main/keyboard-keys";
 
 interface ColorPickerProps {
 	identity: Object,
@@ -10,10 +11,8 @@ interface ColorPickerProps {
 }
 
 function ColorPicker({identity, value, ro}: ColorPickerProps) {
-
-	console.log('render');
-
-	const { currentState, setTempState, setFinalState } = useInputSync<string, string>(
+	
+	const { currentState, setFinalState } = useInputSync<string, string>(
 		identity,
 		'receiver',
 		value,
@@ -32,6 +31,29 @@ function ColorPicker({identity, value, ro}: ColorPickerProps) {
 	const [popupPos] = usePopupPos(popupRef);
 
 	/*
+	 * Event handlers
+	*/
+	function handleBlur(e: React.FocusEvent) {
+		if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) return;
+		setActive(false);
+	}
+
+	function handleInput(e: React.FormEvent<HTMLInputElement>) {
+		if (['', '#'].includes(e.currentTarget.value)) setFinalState('');
+	}
+
+	function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+		if (e.key === ENTER_KEY) e.currentTarget.blur();
+	}
+
+	function handleInputFocus(e: React.FocusEvent<HTMLInputElement>) {
+		if (!active) {
+			const target = e.currentTarget;
+			setTimeout(() => target.setSelectionRange(7, 7), 0);
+		}
+	}
+
+	/*
 	 * Styling
 	*/
 	const inputStyle = {
@@ -44,23 +66,23 @@ function ColorPicker({identity, value, ro}: ColorPickerProps) {
 			className="inputBox" 
 			style={{margin: '1em', width: '80px'}} // remove for production
 			onFocus={() => setActive(true)}
-			onBlur={() => setActive(false)} >
+			onBlur={handleBlur} >
 
-			<div className="inputSubBox">
+			<div className="inputSubBox" >
 				<HexColorInput
 					className={active? undefined : 'colorPickerChip'}
 					style={active? undefined : inputStyle}
 					color={currentState}
 					onChange={setFinalState} 
-					onInput={(e) => {
-						if (e.target.value === '#' || e.target.value === '') setFinalState('');
-					}} 
+					onInput={handleInput}
+					onKeyDown={handleKeyDown}
+					onFocus={handleInputFocus}
 					disabled={ro}
 					prefixed />
 			</div>
 
 			{active && 
-				<div ref={setPopupRef} className='colorPickerPopup' style={popupPos} >
+				<div ref={setPopupRef} className='colorPickerPopup' tabIndex={-1} style={popupPos} >
 					<HexColorPicker color={currentState} onChange={setFinalState} />
 				</div>}
 		</div>
