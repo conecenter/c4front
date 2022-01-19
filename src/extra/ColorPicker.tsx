@@ -63,8 +63,7 @@ function ColorPicker({identity, value, ro}: ColorPickerProps) {
 
 	return (
 		<div 
-			className="inputBox" 
-			style={{margin: '1em', width: '80px'}} // remove for production
+			className="inputBox"
 			onFocus={() => setActive(true)}
 			onBlur={handleBlur} >
 
