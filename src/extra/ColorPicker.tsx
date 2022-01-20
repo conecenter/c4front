@@ -10,9 +10,9 @@ interface ColorPickerProps {
 	ro: boolean
 }
 
-function ColorPicker({identity, value, ro}: ColorPickerProps) {
+export function ColorPicker({identity, value, ro}: ColorPickerProps) {
 	
-	const { currentState, setFinalState } = useInputSync<string, string>(
+	const { currentState, setTempState, setFinalState } = useInputSync<string, string>(
 		identity,
 		'receiver',
 		value,
@@ -35,11 +35,12 @@ function ColorPicker({identity, value, ro}: ColorPickerProps) {
 	*/
 	function handleBlur(e: React.FocusEvent) {
 		if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) return;
+		setFinalState(currentState);
 		setActive(false);
 	}
 
 	function handleInput(e: React.FormEvent<HTMLInputElement>) {
-		if (['', '#'].includes(e.currentTarget.value)) setFinalState('');
+		if (['', '#'].includes(e.currentTarget.value)) setTempState('');
 	}
 
 	function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -53,26 +54,18 @@ function ColorPicker({identity, value, ro}: ColorPickerProps) {
 		}
 	}
 
-	/*
-	 * Styling
-	*/
-	const inputStyle = {
-		background: currentState || 'repeating-linear-gradient(45deg, lightgray 0 8%, white 8% 16%)',
-		cursor: ro ? 'default' : 'pointer'
-	};
-
 	return (
 		<div 
-			className="inputBox"
+			className={`inputBox${ro ? ' colorPickerRo' : ''}`}
 			onFocus={() => setActive(true)}
 			onBlur={handleBlur} >
 
 			<div className="inputSubBox" >
 				<HexColorInput
 					className={active? undefined : 'colorPickerChip'}
-					style={active? undefined : inputStyle}
+					style={active? undefined : {background: currentState}}
 					color={currentState}
-					onChange={setFinalState} 
+					onChange={setTempState} 
 					onInput={handleInput}
 					onKeyDown={handleKeyDown}
 					onFocus={handleInputFocus}
@@ -82,10 +75,8 @@ function ColorPicker({identity, value, ro}: ColorPickerProps) {
 
 			{active && 
 				<div ref={setPopupRef} className='colorPickerPopup' tabIndex={-1} style={popupPos} >
-					<HexColorPicker color={currentState} onChange={setFinalState} />
+					<HexColorPicker color={currentState} onChange={setTempState} />
 				</div>}
 		</div>
 	);
 }
-
-export { ColorPicker };
