@@ -244,7 +244,7 @@ export function DatepickerCalendar({
   );
 }
 
-function useOnClickAwayListener(popupElemRef: HTMLElement | null, callback: (e: MouseEvent) => void) {
+export function useOnClickAwayListener(popupElemRef: HTMLElement | null, callback: (e: MouseEvent) => void) {
   const savedCallback = useRef() as React.MutableRefObject<Function>;
   useEffect(() => {
     savedCallback.current = callback;
