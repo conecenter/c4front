@@ -6,6 +6,7 @@
   --color-body: hsl(0, 0%, 100%);
   --textColor-body: hsl(0, 0%, 12.9412%);
   --color-darkPrimaryColor: rgb(176, 162, 116);
+  --color-headerColor: #CFD8DC;
 }
 
 body {
@@ -551,6 +552,23 @@ div.grid {
           background: red;
         }
       }
+    }
+  }
+}
+
+// Dropdown with custom content
+.customDropdownBox {
+  box-sizing: border-box;
+  background: var(--color-body);
+  color: var(--textColor-body);
+  border: 0.05em solid var(--color-headerColor);
+
+  .customContentBox {
+
+    span {
+      vertical-align: middle;
+      cursor: default;
+      margin: 0 0.2em;
     }
   }
 }
