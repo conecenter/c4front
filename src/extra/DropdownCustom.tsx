@@ -30,6 +30,9 @@ export function DropdownCustom({ identity, content, open }: DropdownCustomProps)
 					: <span>{item}</span>
 				)}
 			</div>
+			<button type='button' className='buttonEl' >
+				<img src='../test/datepicker/arrow-down.svg' alt='arrow-down-icon' />
+			</button>
 		</div>
 	);
 }

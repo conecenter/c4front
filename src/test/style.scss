@@ -16,6 +16,18 @@ body {
   overflow-x: hidden;
 }
 
+.buttonEl {
+  button {
+      margin: 0;
+      padding: 0.2em;
+  }
+  img, svg {
+      vertical-align: middle;
+      transition: all 200ms ease 0s;
+      height: 1.2em;
+  }
+}
+
 button {
   min-height: 1.6em;
   min-width: 1.6em;
@@ -39,6 +51,11 @@ button {
 
   > .text {
     padding: 0 1em;
+  }
+// ????????????????????????????????????????????????
+  &.buttonEl {
+    margin: 0;
+    padding: 0.2em;
   }
 }
 
@@ -559,16 +576,26 @@ div.grid {
 // Dropdown with custom content
 .customDropdownBox {
   box-sizing: border-box;
+  display: flex;
   background: var(--color-body);
   color: var(--textColor-body);
   border: 0.05em solid var(--color-headerColor);
 
   .customContentBox {
-
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 0.2172em 0.3125em;
+    
     span {
-      vertical-align: middle;
       cursor: default;
-      margin: 0 0.2em;
+      margin: 0 0.2em 0 0;
+      user-select: none;
     }
+  }
+
+  button.buttonEl {
+    align-self: flex-start;
+    margin-top: 0.2172em;
   }
 }

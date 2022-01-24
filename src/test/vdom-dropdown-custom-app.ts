@@ -16,15 +16,15 @@ function App() {
         ],
         // popupChildren: ReactNode[]
         open: false,
-    })
+    });
     const sender = {
         enqueue: (identity: any, patch: any) => console.log(patch)
-    }
-    const ack: boolean | null = null
+    };
+    const ack: boolean | null = null;
 
-    return createSyncProviders({sender, ack, children: [children]})
+    return createSyncProviders({sender, ack, children: [children]});
 }
 
-const containerElement = document.createElement("div")
-document.body.appendChild(containerElement)
-ReactDOM.render($(App), containerElement)
+const containerElement = document.createElement("div");
+document.body.appendChild(containerElement);
+ReactDOM.render($(App), containerElement);
