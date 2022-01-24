@@ -10,8 +10,8 @@ function App() {
         value: '45 LEGB [45 9 6]',
         content: [
             { color: '#43A047', text: 'LEGB' },
-            'OPS HAMBURG',
-            'OPS ST.PETERSBURG',
+            { text: 'OPS HAMBURG' },
+            { text: 'OPS ST.PETERSBURG' },
             { color: '#4db6ac', text: '45HC'},
         ],
         // popupChildren: ReactNode[]

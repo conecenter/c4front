@@ -8,18 +8,18 @@ interface DropdownCustomProps {
 	open: boolean
 }
 
-type Content = Chip | string;
+type Content = Chip | Text;
 
 interface Chip {
 	color: string,
 	text: string
 }
 
-// interface Text {
-// 	text: string
-// }
+interface Text {
+	text: string
+}
 
-const isChip = (item: Content): item is Chip => typeof item === 'object';
+const isChip = (item: Content): item is Chip => (item as Chip).color !== undefined;
 
 export function DropdownCustom({ identity, value, content, open }: DropdownCustomProps) {
 	console.log('render');
@@ -36,9 +36,13 @@ export function DropdownCustom({ identity, value, content, open }: DropdownCusto
 		<div className="customDropdownBox" tabIndex={-1} onBlur={handleBlur} style={{ maxWidth: '300px', margin: '1em' }}>
 			{mode === 'display' && 
 				<div className="customContentBox" tabIndex={-1} onFocus={() => setMode('input')}>
-					{content.map((item, i) => isChip(item)
-						? <span className='chipItem' style={{backgroundColor: item.color}} key={item.text + i}>{item.text}</span>
-						: <span key={item + i}>{item}</span>
+					{content.map((item, i) =>
+						<span 
+							className={isChip(item) ? 'chipItem' : undefined}
+							style={{backgroundColor: (item as any).color}}
+							key={item.text + i}>
+							{item.text}
+						</span>
 					)}
 				</div>}
 			{mode === 'input' &&
