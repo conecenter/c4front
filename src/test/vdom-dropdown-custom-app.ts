@@ -7,7 +7,7 @@ function App() {
     const children = $(DropdownCustom, {
         key: "TEST",
         identity: {parent: "test"},
-        // value: string,
+        value: '45 LEGB [45 9 6]',
         content: [
             { color: '#43A047', text: 'LEGB' },
             'OPS HAMBURG',

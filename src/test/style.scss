@@ -7,6 +7,7 @@
   --textColor-body: hsl(0, 0%, 12.9412%);
   --color-darkPrimaryColor: rgb(176, 162, 116);
   --color-headerColor: #CFD8DC;
+  --color-dark-headerColor: #B0BEC5;
 }
 
 body {
@@ -580,22 +581,36 @@ div.grid {
   background: var(--color-body);
   color: var(--textColor-body);
   border: 0.05em solid var(--color-headerColor);
+  
+  &:hover{
+    border-color: var(--color-dark-headerColor);
+  }
+
+  .customContentBox, input {
+    flex-grow: 1;
+    padding: 0.2172em 0.3125em;
+  }
 
   .customContentBox {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    padding: 0.2172em 0.3125em;
+    cursor: pointer;
     
     span {
-      cursor: default;
       margin: 0 0.2em 0 0;
-      user-select: none;
     }
+  }
+
+  input {
+    font-size: inherit;
+    font-family: inherit;
+    background-color: inherit;
+    min-width: 0;
+    border: none;
   }
 
   button.buttonEl {
     align-self: flex-start;
-    margin-top: 0.2172em;
   }
 }
