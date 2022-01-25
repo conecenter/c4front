@@ -1,17 +1,19 @@
-import React from "react";
+import React, { ReactNode, useState } from "react";
+import { usePopupPos } from '../main/popup';
 import { Patch, PatchHeaders, useInputSync } from './input-sync';
 
 interface DropdownProps {
 	key: string,
 	identity: Object,
 	state: DropdownState,
-	content: Content[]
+	content: Content[],
+	popupChildren: ReactNode[]
 }
 
 interface DropdownState {
 	inputValue: string,
 	mode: Mode,
-	open: boolean
+	popupOpen: boolean
 }
 type Mode = 'content'|'input';
 
@@ -26,20 +28,44 @@ interface Text {
 }
 const isChip = (item: Content): item is Chip => (item as Chip).color !== undefined;
 
-export function DropdownCustom({ identity, state, content }: DropdownProps) {
+export function DropdownCustom({ identity, state, content, popupChildren }: DropdownProps) {
 	console.log('render');
 
+	/*
+     * Server sync
+  	*/ 
 	const {
 		currentState, 
 		setTempState, 
 		setFinalState 
 	} = useInputSync(identity, 'receiver', state, true, patchToState, s => s, stateToPatch);
 
-	const { inputValue, mode, open } = currentState;
+	const { inputValue, mode, popupOpen } = currentState;
 
+	/*
+     * Popup positioning
+  	*/ 
+	const [popupRef,setPopupRef] = useState<HTMLDivElement | null>(null);
+	const [popupPos] = usePopupPos(popupRef);
+
+	/*
+     * Event handlers
+  	*/ 
 	function handleBlur(e: React.FocusEvent) {
 		if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) return;
-		setFinalState({ ...currentState, mode: 'content' });
+		setFinalState({ inputValue, mode: 'content', popupOpen: false });
+	}
+
+	function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+		setTempState({
+			inputValue: e.target.value,
+			mode: 'input',
+			popupOpen: true
+		});
+	}
+
+	function handleClick() {
+		setFinalState({ ...currentState, popupOpen: !popupOpen });
 	}
 
   	return (
@@ -57,18 +83,23 @@ export function DropdownCustom({ identity, state, content }: DropdownProps) {
 					)}
 				</div>}
 			{mode === 'input' &&
-				<input type='text' value={inputValue} autoFocus onChange={() => console.log('hi')} />}
-			<button type='button' className='buttonEl'>
-				<img src='../test/datepicker/arrow-down.svg' alt='arrow-down-icon' />
+				<input type='text' value={inputValue} autoFocus onChange={handleChange} />}
+			<button type='button' className='buttonEl' onClick={handleClick}>
+				<img className={popupOpen ? 'rotate180deg' : undefined} src='../test/datepicker/arrow-down.svg' alt='arrow-down-icon' />
 			</button>
+
+			{popupOpen && 
+				<div ref={setPopupRef} className='dropdownPopup' style={popupPos}>
+					{popupChildren}
+				</div>}
 		</div>
 	);
 }
 
-function stateToPatch({inputValue, mode, open}: DropdownState): Patch {
+function stateToPatch({inputValue, mode, popupOpen}: DropdownState): Patch {
 	const headers = {
 		'x-r-mode': mode,
-		...(open && {'x-r-open': '1'})
+		...(popupOpen && {'x-r-popupOpen': '1'})
 	};
 	return { value: inputValue, headers };
 }
@@ -78,7 +109,7 @@ function patchToState(patch: Patch): DropdownState {
 	return {
 		inputValue: patch.value,
 		mode: headers['x-r-mode'] as Mode,
-		open: !!headers['x-r-open']
+		popupOpen: !!headers['x-r-popupOpen']
 	};
 }
 
@@ -89,12 +120,12 @@ function patchToState(patch: Patch): DropdownState {
   text: string
   inputContent: List[Content]
   popupChildren: ReactNode[]
-  open: boolean
+  popupOpen: boolean
   mode: string }
 
 - на сервер идут данные:
 interface SendPatch {
-    headers: {'x-r-open', 'x-r-changing', 'x-r-mode'}
+    headers: {'x-r-popupOpen', 'x-r-changing', 'x-r-mode'}
     value: string
     skipByPath: boolean
     retry: boolean

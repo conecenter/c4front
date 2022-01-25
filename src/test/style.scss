@@ -8,6 +8,7 @@
   --color-darkPrimaryColor: rgb(176, 162, 116);
   --color-headerColor: #CFD8DC;
   --color-dark-headerColor: #B0BEC5;
+  --textColor-dark-primaryColor: #000000;
 }
 
 body {
@@ -612,5 +613,11 @@ div.grid {
 
   button.buttonEl {
     align-self: flex-start;
+  }
+
+  .dropdownPopup {
+    border: 1px solid var(--textColor-dark-primaryColor);
+    z-index: 10003;
+    background: var(--color-body);
   }
 }
