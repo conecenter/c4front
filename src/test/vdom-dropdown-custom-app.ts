@@ -7,7 +7,11 @@ function App() {
     const children = $(DropdownCustom, {
         key: "TEST",
         identity: {parent: "test"},
-        value: '45 LEGB [45 9 6]',
+        state: {
+            inputValue: '45 LEGB [45 9 6]',
+            mode: 'content',
+            open: false
+        },
         content: [
             { color: '#43A047', text: 'LEGB' },
             { text: 'OPS HAMBURG' },
@@ -15,7 +19,7 @@ function App() {
             { color: '#4db6ac', text: '45HC'},
         ],
         // popupChildren: ReactNode[]
-        open: false,
+        
     });
     const sender = {
         enqueue: (identity: any, patch: any) => console.log(patch)

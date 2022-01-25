@@ -2,7 +2,6 @@ import {identityAt} from "../main/vdom-util";
 import {useSync} from "../main/vdom-hooks";
 import {useCallback} from "react";
 
-
 interface PatchHeaders {
     [name: string]: string
 }
@@ -18,10 +17,8 @@ interface SyncState<State> {
     setFinalState: (s: State) => void,
 }
 
-interface SendPatchHeaders extends PatchHeaders {}
-
 interface SendPatch {
-    headers: SendPatchHeaders
+    headers: PatchHeaders
     value: string
     skipByPath: boolean
     retry: boolean
@@ -31,9 +28,9 @@ interface SendPatch {
 const receiverId = (name: string) => identityAt(name)
 
 function stateToSendPatch(patch: Patch, changing: boolean, deferredSend: boolean): SendPatch {
-    const prepHeaders: SendPatchHeaders = patch.headers ? patch.headers : {}
-    const changingHeaders: SendPatchHeaders = changing ? {"x-r-changing": "1"} : {}
-    const headers: SendPatchHeaders = {
+    const prepHeaders: PatchHeaders = patch.headers ? patch.headers : {}
+    const changingHeaders: PatchHeaders = changing ? {"x-r-changing": "1"} : {}
+    const headers: PatchHeaders = {
         ...changingHeaders,
         ...prepHeaders,
     }
