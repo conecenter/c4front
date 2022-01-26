@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom";
 import { createElement as $ } from "react";
 import { createSyncProviders } from "../main/vdom-hooks";
-import { DropdownCustom } from "../extra/DropdownCustom";
+import { DropdownCustom } from "../extra/dropdown-custom";
 
 function App() {
     const child1 = $(DropdownCustom, {
@@ -10,7 +10,7 @@ function App() {
         state: {
             inputValue: '45 LEGB [45 9 6]',
             mode: 'content',
-            popupOpen: false
+            popupOpen: ''
         },
         content: [
             { color: '#43A047', text: 'LEGB' },
@@ -20,7 +20,8 @@ function App() {
         ],
         popupChildren: [
             $('p', { key: 'popupChild1' }, 'Hello World'),
-            $('p', { key: 'popupChild2' }, 'Overlanded')
+            $('p', { key: 'popupChild2' }, 'Overlanded'),
+            $('input', { key: 'popupChild3' })
         ]
     });
     const child2 = $(DropdownCustom, {
@@ -29,7 +30,7 @@ function App() {
         state: {
             inputValue: '45 LEGB [45 9 6]',
             mode: 'content',
-            popupOpen: false
+            popupOpen: ''
         },
         content: [
             { color: '#43A047', text: 'LEGB' },

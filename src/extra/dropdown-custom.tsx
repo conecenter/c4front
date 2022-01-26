@@ -5,17 +5,25 @@ import { Patch, PatchHeaders, useInputSync } from './input-sync';
 interface DropdownProps {
 	key: string,
 	identity: Object,
-	state: DropdownState,
+	state: DropdownServerState,
 	content: Content[],
 	popupChildren: ReactNode[]
 }
 
-interface DropdownState {
+interface State {
 	inputValue: string,
-	mode: Mode,
+	mode: Mode
+}
+
+type Mode = 'content'|'input';
+
+interface DropdownServerState extends State {
+	popupOpen?: string
+}
+
+interface DropdownState extends State {
 	popupOpen: boolean
 }
-type Mode = 'content'|'input';
 
 type Content = Chip | Text;
 
@@ -23,9 +31,11 @@ interface Chip {
 	color: string,
 	text: string
 }
+
 interface Text {
 	text: string
 }
+
 const isChip = (item: Content): item is Chip => (item as Chip).color !== undefined;
 
 export function DropdownCustom({ identity, state, content, popupChildren }: DropdownProps) {
@@ -38,7 +48,7 @@ export function DropdownCustom({ identity, state, content, popupChildren }: Drop
 		currentState, 
 		setTempState, 
 		setFinalState 
-	} = useInputSync(identity, 'receiver', state, true, patchToState, s => s, stateToPatch);
+	} = useInputSync(identity, 'receiver', state, false, patchToState, serverToState, stateToPatch);
 
 	const { inputValue, mode, popupOpen } = currentState;
 
@@ -85,7 +95,10 @@ export function DropdownCustom({ identity, state, content, popupChildren }: Drop
 			{mode === 'input' &&
 				<input type='text' value={inputValue} autoFocus onChange={handleChange} />}
 			<button type='button' className='buttonEl' onClick={handleClick}>
-				<img className={popupOpen ? 'rotate180deg' : undefined} src='../test/datepicker/arrow-down.svg' alt='arrow-down-icon' />
+				<img 
+					className={popupOpen ? 'rotate180deg' : undefined} 
+					src='../test/datepicker/arrow-down.svg'	// change for production
+					alt='arrow-down-icon' />
 			</button>
 
 			{popupOpen && 
@@ -94,6 +107,11 @@ export function DropdownCustom({ identity, state, content, popupChildren }: Drop
 				</div>}
 		</div>
 	);
+}
+
+function serverToState(serverState: DropdownServerState) {
+	const popupOpen = !!serverState.popupOpen;
+	return { ...serverState, popupOpen };
 }
 
 function stateToPatch({inputValue, mode, popupOpen}: DropdownState): Patch {
