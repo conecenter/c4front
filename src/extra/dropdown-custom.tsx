@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import React, { ReactNode, useState } from "react";
 import { usePopupPos } from '../main/popup';
 import { Patch, PatchHeaders, useInputSync } from './input-sync';
@@ -8,6 +9,7 @@ interface DropdownProps {
 	state: DropdownServerState,
 	content: Content[],
 	popupChildren: ReactNode[]
+	popupClassname?: string
 }
 
 interface State {
@@ -38,7 +40,7 @@ interface Text {
 
 const isChip = (item: Content): item is Chip => (item as Chip).color !== undefined;
 
-export function DropdownCustom({ identity, state, content, popupChildren }: DropdownProps) {
+export function DropdownCustom({ identity, state, content, popupChildren, popupClassname }: DropdownProps) {
 	console.log('render');
 
 	/*
@@ -102,7 +104,7 @@ export function DropdownCustom({ identity, state, content, popupChildren }: Drop
 			</button>
 
 			{popupOpen && 
-				<div ref={setPopupRef} className='dropdownPopup' style={popupPos}>
+				<div ref={setPopupRef} className={clsx('dropdownPopup', popupClassname)} style={popupPos}>
 					{popupChildren}
 				</div>}
 		</div>
@@ -138,7 +140,8 @@ function patchToState(patch: Patch): DropdownState {
   text: string
   inputContent: List[Content]
   popupChildren: ReactNode[]
-  popupOpen: boolean
+  popupClassname?: string
+  popupOpen: string
   mode: string }
 
 - на сервер идут данные:

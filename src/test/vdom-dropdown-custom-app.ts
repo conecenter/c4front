@@ -22,7 +22,8 @@ function App() {
             $('p', { key: 'popupChild1' }, 'Hello World'),
             $('p', { key: 'popupChild2' }, 'Overlanded'),
             $('input', { key: 'popupChild3' })
-        ]
+        ],
+        popupClassname: 'popupClassname'
     });
     const child2 = $(DropdownCustom, {
         key: "TEST2",
