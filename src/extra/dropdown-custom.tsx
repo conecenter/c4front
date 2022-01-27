@@ -6,26 +6,19 @@ import { Patch, PatchHeaders, useInputSync } from './input-sync';
 interface DropdownProps {
 	key: string,
 	identity: Object,
-	state: DropdownServerState,
+	state: DropdownState,
 	content: Content[],
 	popupChildren: ReactNode[]
 	popupClassname?: string
 }
 
-interface State {
+interface DropdownState {
 	inputValue: string,
-	mode: Mode
+	mode: Mode,
+	popupOpen: boolean
 }
 
 type Mode = 'content'|'input';
-
-interface DropdownServerState extends State {
-	popupOpen?: string
-}
-
-interface DropdownState extends State {
-	popupOpen: boolean
-}
 
 type Content = Chip | Text;
 
@@ -50,7 +43,7 @@ export function DropdownCustom({ identity, state, content, popupChildren, popupC
 		currentState, 
 		setTempState, 
 		setFinalState 
-	} = useInputSync(identity, 'receiver', state, false, patchToState, serverToState, stateToPatch);
+	} = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
 
 	const { inputValue, mode, popupOpen } = currentState;
 
@@ -111,11 +104,6 @@ export function DropdownCustom({ identity, state, content, popupChildren, popupC
 	);
 }
 
-function serverToState(serverState: DropdownServerState) {
-	const popupOpen = !!serverState.popupOpen;
-	return { ...serverState, popupOpen };
-}
-
 function stateToPatch({inputValue, mode, popupOpen}: DropdownState): Patch {
 	const headers = {
 		'x-r-mode': mode,
@@ -141,7 +129,7 @@ function patchToState(patch: Patch): DropdownState {
   inputContent: List[Content]
   popupChildren: ReactNode[]
   popupClassname?: string
-  popupOpen: string
+  popupOpen: boolean
   mode: string }
 
 - на сервер идут данные:

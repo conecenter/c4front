@@ -2,6 +2,7 @@ import ReactDOM from "react-dom";
 import { createElement as $ } from "react";
 import { createSyncProviders } from "../main/vdom-hooks";
 import { DropdownCustom } from "../extra/dropdown-custom";
+//import FocusModule		from "../extra/focus-module"
 
 function App() {
     const child1 = $(DropdownCustom, {
@@ -10,7 +11,7 @@ function App() {
         state: {
             inputValue: '45 LEGB [45 9 6]',
             mode: 'content',
-            popupOpen: ''
+            popupOpen: false
         },
         content: [
             { color: '#43A047', text: 'LEGB' },
@@ -31,7 +32,7 @@ function App() {
         state: {
             inputValue: '45 LEGB [45 9 6]',
             mode: 'content',
-            popupOpen: ''
+            popupOpen: false
         },
         content: [
             { color: '#43A047', text: 'LEGB' },
