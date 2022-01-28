@@ -2,7 +2,6 @@ import ReactDOM from "react-dom";
 import { createElement as $ } from "react";
 import { createSyncProviders } from "../main/vdom-hooks";
 import { DropdownCustom } from "../extra/dropdown-custom";
-//import FocusModule		from "../extra/focus-module"
 
 function App() {
     const child1 = $(DropdownCustom, {
@@ -11,12 +10,12 @@ function App() {
         state: {
             inputValue: '45 LEGB [45 9 6]',
             mode: 'content',
-            popupOpen: false
+            popupOpen: false,
         },
         content: [
             { color: '#43A047', text: 'LEGB' },
             { text: 'OPS HAMBURG' },
-            { text: 'OPS ST.PETERSBURG' },
+            { text: 'OPS ST.PETERSBURGdfghdfhdfhdhdfhfhfdh' },
             { color: '#4db6ac', text: '45HC'},
         ],
         popupChildren: [
@@ -24,6 +23,7 @@ function App() {
             $('p', { key: 'popupChild2' }, 'Overlanded'),
             $('input', { key: 'popupChild3' })
         ],
+        ro: false,
         popupClassname: 'popupClassname'
     });
     const child2 = $(DropdownCustom, {
@@ -43,7 +43,8 @@ function App() {
         popupChildren: [
             $('p', { key: 'popupChild1' }, 'Hello World'),
             $('p', { key: 'popupChild2' }, 'Overlanded')
-        ]
+        ],
+        ro: true
     });
     const sender = {
         enqueue: (identity: any, patch: any) => console.log(patch)

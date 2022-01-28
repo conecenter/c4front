@@ -11,7 +11,8 @@ interface DropdownProps {
 	identity: Object,
 	state: DropdownState,
 	content: Content[],
-	popupChildren: ReactNode[]
+	popupChildren: ReactNode[],
+	ro: boolean,
 	popupClassname?: string
 }
 
@@ -36,11 +37,7 @@ interface Text {
 
 const isChip = (item: Content): item is Chip => (item as Chip).color !== undefined;
 
-type EnqueueKeyboardActionPatch = {  
-	(arg: object): void;
-}; 
-
-export function DropdownCustom({ identity, state, content, popupChildren, popupClassname }: DropdownProps) {
+export function DropdownCustom({ identity, state, content, popupChildren, ro, popupClassname }: DropdownProps) {
 	console.log('render');
 
     // Server sync
@@ -58,7 +55,9 @@ export function DropdownCustom({ identity, state, content, popupChildren, popupC
 
 	// Keyboard events sync
 	const keyboardActionIdOf = identityAt('keyboardAction');
-	const [keyboardActionPatches, enqueueKeyboardActionPatch ] = useSync(keyboardActionIdOf(identity));
+	const [keyboardActionPatches, enqueueKeyboardActionPatch] = (
+		useSync(keyboardActionIdOf(identity)) as [Patch[], (patch: Patch) => void]
+	);
 
 	// Event handlers
 	function handleBlur(e: React.FocusEvent) {
@@ -87,7 +86,7 @@ export function DropdownCustom({ identity, state, content, popupChildren, popupC
 				if (popupOpen) {
 					e.stopPropagation();
 					e.preventDefault();
-					(enqueueKeyboardActionPatch as EnqueueKeyboardActionPatch)({value: e.key});
+					enqueueKeyboardActionPatch({value: e.key});
 				}
 				break;
 			case ESCAPE_KEY:
@@ -100,27 +99,44 @@ export function DropdownCustom({ identity, state, content, popupChildren, popupC
 		if (!popupOpen && e.key === ENTER_KEY) e.currentTarget.blur();
 	}
 
+	// Custom content JSX
+	const customContent = content.map((item, i) =>
+		<span 
+			className={isChip(item) ? 'chipItem' : undefined}
+			style={{backgroundColor: (item as any).color}}
+			key={item.text + i}>
+			{item.text}
+		</span>
+	);
+
+	if (ro) {
+		return (
+			<div className='customDropdownBox' style={{ maxWidth: '300px', margin: '1em' }}>
+				<div className="customContentBox">{customContent}</div>
+			</div>
+		);
+	}
+
   	return (
 		// remove style for production!!!
 		<div 
-			className="customDropdownBox" 
+			className='customDropdownBox' 
 			tabIndex={-1} 
 			onBlur={handleBlur}
 			onKeyDown={handleBoxKeyDown}
 			style={{ maxWidth: '300px', margin: '1em' }}>
+
 			{mode === 'content' && 
-				<div className="customContentBox" tabIndex={-1} onFocus={() => setFinalState({ ...currentState, mode: 'input' })}>
-					{content.map((item, i) =>
-						<span 
-							className={isChip(item) ? 'chipItem' : undefined}
-							style={{backgroundColor: (item as any).color}}
-							key={item.text + i}>
-							{item.text}
-						</span>
-					)}
+				<div 
+					className="customContentBox" 
+					tabIndex={-1} 
+					onFocus={() => {setFinalState({ ...currentState, mode: 'input' })}}>
+					{customContent}
 				</div>}
+
 			{mode === 'input' &&
 				<input type='text' value={inputValue} autoFocus onChange={handleChange} onKeyDown={handleInputKeyDown} />}
+			
 			<button 
 				type='button' 
 				className='buttonEl' 
@@ -157,25 +173,3 @@ function patchToState(patch: Patch): DropdownState {
 		popupOpen: !!headers['x-r-popupOpen']
 	};
 }
-
-/*
-- от сервера приходят данные:
-{ key
-  identity
-  text: string
-  inputContent: List[Content]
-  popupChildren: ReactNode[]
-  popupClassname?: string
-  popupOpen: boolean
-  mode: string 
-}
-
-- на сервер идут данные:
-interface SendPatch {
-    headers: {'x-r-popupOpen', 'x-r-changing', 'x-r-mode'}
-    value: string
-    skipByPath: boolean
-    retry: boolean
-    defer: boolean
-}
-*/
