@@ -1,6 +1,9 @@
 import clsx from 'clsx';
 import React, { ReactNode, useState } from "react";
+import { ARROW_DOWN_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY } from '../main/keyboard-keys';
 import { usePopupPos } from '../main/popup';
+import { useSync } from '../main/vdom-hooks';
+import { identityAt } from '../main/vdom-util';
 import { Patch, PatchHeaders, useInputSync } from './input-sync';
 
 interface DropdownProps {
@@ -33,12 +36,14 @@ interface Text {
 
 const isChip = (item: Content): item is Chip => (item as Chip).color !== undefined;
 
+type EnqueueKeyboardActionPatch = {  
+	(arg: object): void;
+}; 
+
 export function DropdownCustom({ identity, state, content, popupChildren, popupClassname }: DropdownProps) {
 	console.log('render');
 
-	/*
-     * Server sync
-  	*/ 
+    // Server sync
 	const {
 		currentState, 
 		setTempState, 
@@ -47,15 +52,15 @@ export function DropdownCustom({ identity, state, content, popupChildren, popupC
 
 	const { inputValue, mode, popupOpen } = currentState;
 
-	/*
-     * Popup positioning
-  	*/ 
+    // Popup positioning
 	const [popupRef,setPopupRef] = useState<HTMLDivElement | null>(null);
 	const [popupPos] = usePopupPos(popupRef);
 
-	/*
-     * Event handlers
-  	*/ 
+	// Keyboard events sync
+	const keyboardActionIdOf = identityAt('keyboardAction');
+	const [keyboardActionPatches, enqueueKeyboardActionPatch ] = useSync(keyboardActionIdOf(identity));
+
+	// Event handlers
 	function handleBlur(e: React.FocusEvent) {
 		if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) return;
 		setFinalState({ inputValue, mode: 'content', popupOpen: false });
@@ -69,13 +74,40 @@ export function DropdownCustom({ identity, state, content, popupChildren, popupC
 		});
 	}
 
-	function handleClick() {
-		setFinalState({ ...currentState, popupOpen: !popupOpen });
+	function handleBoxKeyDown(e: React.KeyboardEvent) {
+		switch(e.key) {
+			case ARROW_DOWN_KEY:
+				if (!popupOpen) {
+					e.stopPropagation();
+					setFinalState({ ...currentState, popupOpen: true });
+					break;
+				}
+			case ARROW_UP_KEY:
+			case ENTER_KEY:
+				if (popupOpen) {
+					e.stopPropagation();
+					e.preventDefault();
+					(enqueueKeyboardActionPatch as EnqueueKeyboardActionPatch)({value: e.key});
+				}
+				break;
+			case ESCAPE_KEY:
+				setFinalState({ ...currentState, popupOpen: false });
+				break;
+		}
+	}
+
+	function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+		if (!popupOpen && e.key === ENTER_KEY) e.currentTarget.blur();
 	}
 
   	return (
 		// remove style for production!!!
-		<div className="customDropdownBox" tabIndex={-1} onBlur={handleBlur} style={{ maxWidth: '300px', margin: '1em' }}>
+		<div 
+			className="customDropdownBox" 
+			tabIndex={-1} 
+			onBlur={handleBlur}
+			onKeyDown={handleBoxKeyDown}
+			style={{ maxWidth: '300px', margin: '1em' }}>
 			{mode === 'content' && 
 				<div className="customContentBox" tabIndex={-1} onFocus={() => setFinalState({ ...currentState, mode: 'input' })}>
 					{content.map((item, i) =>
@@ -88,8 +120,13 @@ export function DropdownCustom({ identity, state, content, popupChildren, popupC
 					)}
 				</div>}
 			{mode === 'input' &&
-				<input type='text' value={inputValue} autoFocus onChange={handleChange} />}
-			<button type='button' className='buttonEl' onClick={handleClick}>
+				<input type='text' value={inputValue} autoFocus onChange={handleChange} onKeyDown={handleInputKeyDown} />}
+			<button 
+				type='button' 
+				className='buttonEl' 
+				tabIndex={-1} 
+				onClick={() => setFinalState({ ...currentState, popupOpen: !popupOpen })} 
+				onKeyDown={(e) => e.preventDefault()} >
 				<img 
 					className={popupOpen ? 'rotate180deg' : undefined} 
 					src='../test/datepicker/arrow-down.svg'	// change for production
@@ -130,7 +167,8 @@ function patchToState(patch: Patch): DropdownState {
   popupChildren: ReactNode[]
   popupClassname?: string
   popupOpen: boolean
-  mode: string }
+  mode: string 
+}
 
 - на сервер идут данные:
 interface SendPatch {
@@ -138,5 +176,6 @@ interface SendPatch {
     value: string
     skipByPath: boolean
     retry: boolean
-    defer: boolean }
+    defer: boolean
+}
 */
