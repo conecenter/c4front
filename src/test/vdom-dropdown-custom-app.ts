@@ -13,10 +13,10 @@ function App() {
             popupOpen: false,
         },
         content: [
-            { color: '#43A047', text: 'LEGB' },
+            { text: 'LEGB', bgColor: '#43A047', textColor: '#000000' },
             { text: 'OPS HAMBURG' },
-            { text: 'OPS ST.PETERSBURGdfghdfhdfhdhdfhfhfdh' },
-            { color: '#4db6ac', text: '45HC'},
+            { text: 'OPS ST.PETERSBURG' },
+            { text: '45HC', bgColor: '#4db6ac', textColor: '#000000' }
         ],
         popupChildren: [
             $('p', { key: 'popupChild1' }, 'Hello World'),
@@ -35,10 +35,10 @@ function App() {
             popupOpen: false
         },
         content: [
-            { color: '#43A047', text: 'LEGB' },
+            { text: 'LEGB', bgColor: '#43A047', textColor: '#FFFFFF' },
+            { text: '45HC', bgColor: '#4db6ac', textColor: '#FFFFFF' },
             { text: 'OPS HAMBURG' },
-            { text: 'OPS ST.PETERSBURG' },
-            { color: '#4db6ac', text: '45HC'},
+            { text: 'OPS ST.PETERSBURG' }
         ],
         popupChildren: [
             $('p', { key: 'popupChild1' }, 'Hello World'),

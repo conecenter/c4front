@@ -27,15 +27,17 @@ type Mode = 'content'|'input';
 type Content = Chip | Text;
 
 interface Chip {
-	color: string,
-	text: string
+	text: string,
+	bgColor: string,
+	textColor: string
+	
 }
 
 interface Text {
 	text: string
 }
 
-const isChip = (item: Content): item is Chip => (item as Chip).color !== undefined;
+const isChip = (item: Content): item is Chip => (item as Chip).bgColor !== undefined;
 
 export function DropdownCustom({ identity, state, content, popupChildren, ro, popupClassname }: DropdownProps) {
 	console.log('render');
@@ -103,7 +105,7 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 	const customContent = content.map((item, i) =>
 		<span 
 			className={isChip(item) ? 'chipItem' : undefined}
-			style={{backgroundColor: (item as any).color}}
+			style={{ backgroundColor: (item as Chip).bgColor, color: (item as Chip).textColor }}
 			key={item.text + i}>
 			{item.text}
 		</span>
@@ -111,7 +113,7 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 
 	if (ro) {
 		return (
-			<div className='customDropdownBox' style={{ maxWidth: '300px', margin: '1em' }}>
+			<div className='customDropdownBox customDropdownRo' style={{ maxWidth: '300px', margin: '1em' }}>
 				<div className="customContentBox">{customContent}</div>
 			</div>
 		);
@@ -135,7 +137,12 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 				</div>}
 
 			{mode === 'input' &&
-				<input type='text' value={inputValue} autoFocus onChange={handleChange} onKeyDown={handleInputKeyDown} />}
+				<input 
+					type='text' 
+					value={inputValue} 
+					autoFocus 
+					onChange={handleChange} 
+					onKeyDown={handleInputKeyDown} />}
 			
 			<button 
 				type='button' 

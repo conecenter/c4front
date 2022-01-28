@@ -596,10 +596,21 @@ div.grid {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    overflow-wrap: anywhere;
     cursor: pointer;
     
     span {
       margin: 0 0.2em 0 0;
+
+      &:not(.chipItem) {
+        padding: 0.25em 0;
+      }
+    }
+  }
+
+  &.customDropdownRo {
+      .customContentBox, span {
+        cursor: default;
     }
   }
 
