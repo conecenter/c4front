@@ -26,7 +26,8 @@ interface DropdownProps {
 	content: Content[],
 	popupChildren: ReactNode[],
 	ro: boolean,
-	popupClassname?: string
+	popupClassname?: string,
+	children?: ReactNode[]
 }
 
 interface DropdownState {
@@ -51,9 +52,7 @@ interface Text {
 
 const isChip = (item: Content): item is Chip => (item as Chip).bgColor !== undefined;
 
-export function DropdownCustom({ identity, state, content, popupChildren, ro, popupClassname }: DropdownProps) {
-	console.log('render');
-
+export function DropdownCustom({ identity, state, content, popupChildren, ro, popupClassname, children }: DropdownProps) {
 	const {
 		currentState, 
 		setTempState, 
@@ -70,7 +69,7 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 
 	// Keyboard events sync
 	const keyboardActionIdOf = identityAt('keyboardAction');
-	const [keyboardActionPatches, enqueueKeyboardActionPatch] = (
+	const [_, enqueueKeyboardActionPatch] = (
 		useSync(keyboardActionIdOf(identity)) as [Patch[], (patch: Patch) => void]
 	);
 
@@ -165,21 +164,19 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 
 	if (ro) {
 		return (
-			<div className='customDropdownBox customDropdownRo' style={{ maxWidth: '300px', margin: '1em' }}>
+			<div className='customDropdownBox customDropdownRo' >
 				<div className="customContentBox">{customContent}</div>
 			</div>
 		);
 	}
 
   	return (
-		// remove style for production!!!
 		<div 
 			className='customDropdownBox' 
 			tabIndex={1}
 			ref={dropdownBoxRef}
 			onBlur={handleBlur}
-			onKeyDown={handleBoxKeyDown}
-			style={{ maxWidth: '300px', margin: '1em' }}>
+			onKeyDown={handleBoxKeyDown} >
 
 			{mode === 'content' && 
 				<div 
@@ -204,12 +201,14 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 				onKeyDown={(e) => e.preventDefault()} >
 				<img 
 					className={popupOpen ? 'rotate180deg' : undefined} 
-					src='../test/datepicker/arrow-down.svg'	// change for production
+					src='/mod/main/ee/cone/core/ui/c4view/arrow-down.svg'
 					alt='arrow-down-icon' />
 			</button>
 
+			{children}
+
 			{popupOpen && 
-				<div ref={setPopupRef} className={clsx('dropdownPopup', popupClassname)} style={popupPos}>
+				<div ref={setPopupRef} className={clsx('popupEl', 'dropdownPopup', popupClassname)} style={popupPos}>
 					{popupChildren}
 				</div>}
 		</div>

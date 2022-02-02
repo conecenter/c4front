@@ -627,8 +627,13 @@ div.grid {
   }
 
   .dropdownPopup {
-    border: 1px solid var(--textColor-dark-primaryColor);
-    z-index: 10003;
-    background: var(--color-body);
+    max-height: 10em;
+    overflow: auto;
   }
+}
+
+.popupEl {
+  border: 0.05em solid var(--color-headerColor);
+  z-index: 10003;
+  background: var(--color-body);
 }
