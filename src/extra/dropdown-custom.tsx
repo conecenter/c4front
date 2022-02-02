@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import React, { ReactNode, useEffect, useRef, useState } from "react";
+import React, { ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ARROW_DOWN_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY } from '../main/keyboard-keys';
 import { usePopupPos } from '../main/popup';
 import { useSync } from '../main/vdom-hooks';
@@ -61,11 +61,21 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 
 	const { inputValue, mode, popupOpen } = currentState;
 
+	const dropdownBoxRef = useRef<HTMLDivElement>(null);
+
 	const stableInputValue = useRef(inputValue);
 
     // Popup positioning
 	const [popupRef,setPopupRef] = useState<HTMLDivElement | null>(null);
 	const [popupPos] = usePopupPos(popupRef);
+
+	const [popupMinWidth, setPopupMinWidth] = useState(0);
+
+	useLayoutEffect(() => {
+		if (popupRef && dropdownBoxRef.current) {
+			setPopupMinWidth(dropdownBoxRef.current.offsetWidth);
+		}
+	}, [popupRef]);
 
 	// Keyboard events sync
 	const keyboardActionIdOf = identityAt('keyboardAction');
@@ -74,8 +84,6 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 	);
 
 	// Interaction with FocusModule (c4enterprise\client\src\extra\focus-module.js) - Excel-style keyboard controls
-	const dropdownBoxRef = useRef<HTMLDivElement>(null);	
-	
 	useEffect(() => {
 		const dropdownBox = dropdownBoxRef.current;
 		if (!dropdownBox || mode !== 'content') return;
@@ -208,7 +216,10 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 			{children}
 
 			{popupOpen && 
-				<div ref={setPopupRef} className={clsx('popupEl', 'dropdownPopup', popupClassname)} style={popupPos}>
+				<div 
+					ref={setPopupRef} 
+					className={clsx('popupEl', 'dropdownPopup', popupClassname)} 
+					style={{ ...popupPos, minWidth: `${popupMinWidth}px` }} >
 					{popupChildren}
 				</div>}
 		</div>
