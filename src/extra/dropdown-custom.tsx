@@ -11,11 +11,13 @@ declare global {
 	  enter: CustomEvent,
 	  delete: CustomEvent,
 	  backspace: CustomEvent,
-	  cpaste: CustomEvent
+	  cpaste: CustomEvent,
+	  ccopy: CustomEvent,
+	  ccut: CustomEvent
 	}
 }
 
-type customEventNames = 'enter' | 'delete' | 'backspace' | 'cpaste';
+type customEventNames = 'enter' | 'delete' | 'backspace' | 'cpaste' | 'ccopy' | 'ccut';
 
 interface DropdownProps {
 	key: string,
@@ -88,11 +90,23 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 			});
 		}
 
+		async function handleClipboardWrite(e: CustomEvent) {
+			// On Firefox writing to the clipboard is blocked (available only from user-initiated event callbacks)
+			try {
+				await navigator.clipboard.writeText(inputValue);
+				if (e.type === 'ccut') setFinalState({ ...currentState, inputValue: '' });
+			} catch(err) {
+				console.log(err);
+			}
+		}
+
 		const customEventHandlers = {
 			enter: () => setFinalState({ ...currentState, mode: 'input' }),
 			delete: handleCustomDelete,
 			backspace: handleCustomDelete,
-			cpaste: (e: CustomEvent) => setTempState({ inputValue: e.detail, mode: 'input', popupOpen: true })
+			cpaste: (e: CustomEvent) => setTempState({ inputValue: e.detail, mode: 'input', popupOpen: true }),
+			ccopy: handleClipboardWrite,
+			ccut: handleClipboardWrite
 		};
 		
 		const cEventNames = Object.keys(customEventHandlers) as customEventNames[];
