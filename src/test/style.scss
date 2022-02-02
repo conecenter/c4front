@@ -109,6 +109,16 @@ div.grid {
     vertical-align: middle;
     display: flex;
     align-items: center;
+
+    &:hover {
+      overflow: visible;
+
+      .hoverExpander {
+          background-color: var(--color-primaryColor);
+          position: relative;
+          z-index: 10;
+      }
+    }
   }
 
 
@@ -246,12 +256,21 @@ div.grid {
 //     transform: skewY(-15deg);
 // }
 
+// Datepicker
+.rotate180deg {
+  transform: rotate(-180deg);
+}
+
+.inputBoxWrapper {
+  margin: 0.1px;
+}
+
 .inputBox {
   display: flex;
   height: auto;
   line-height: 1;
   vertical-align: middle;
-  width: 100%;
+  width: 350px;
   background: var(--color-body);
   color: var(--textColor-body);
   box-sizing: border-box;
@@ -289,5 +308,300 @@ div.grid {
       flex: 1 1 20%;
       min-width: 0;
     }
+  }
+
+  .btnCalendar {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16116 17000' width='100%25' height='100%25'%3E%3Cpath d='M1347 1671l1642 0 0 -1114c0,-307 250,-557 558,-557 307,0 557,250 557,557l0 1114 3397 0 0 -1114c0,-307 249,-557 557,-557 308,0 557,250 557,557l0 1114 3462 0 0 -1114c0,-307 250,-557 557,-557 308,0 557,250 557,557l0 1114 1578 0c369,0 706,152 951,397 244,242 396,579 396,950l0 12635c0,371 -152,708 -395,952 -244,243 -581,395 -952,395l-13422 0c-371,0 -708,-152 -952,-395 -243,-246 -395,-583 -395,-952l0 -12635c0,-368 151,-705 395,-949l2 -3c245,-244 582,-395 950,-395zm2757 1114l0 627c0,308 -250,557 -557,557 -308,0 -558,-249 -558,-557l0 -627 -1642 0c-65,0 -123,26 -164,67l-2 2c-41,41 -67,99 -67,164l0 12635c0,65 26,123 67,164l2 0c42,42 100,69 164,69l13422 0c64,0 122,-27 164,-69 42,-42 69,-100 69,-164l0 -12635c0,-63 -27,-122 -69,-164l0 -2c-41,-41 -99,-67 -164,-67l-1578 0 0 627c0,308 -249,557 -557,557 -307,0 -557,-249 -557,-557l0 -627 -3462 0 0 627c0,308 -249,557 -557,557 -308,0 -557,-249 -557,-557l0 -627 -3397 0z'/%3E%3Cpath d='M2711 4805l2159 0 0 2577 -2577 0 0 -2577 418 0zm1323 836l-905 0 0 905 905 0 0 -905z'/%3E%3Cpath d='M2711 8496l2159 0 0 2576 -2577 0 0 -2576 418 0zm1323 836l-905 0 0 905 905 0 0 -905z'/%3E%3Cpath d='M2711 12152l2159 0 0 2576 -2577 0 0 -2576 418 0zm1323 835l-905 0 0 906 905 0 0 -906z'/%3E%3Cpath d='M6889 4805l2159 0 0 2577 -2577 0 0 -2577 418 0zm1323 836l-905 0 0 905 905 0 0 -905z'/%3E%3Cpath d='M6889 8496l2159 0 0 2576 -2577 0 0 -2576 418 0zm1323 836l-905 0 0 905 905 0 0 -905z'/%3E%3Cpath d='M6889 12152l2159 0 0 2576 -2577 0 0 -2576 418 0zm1323 835l-905 0 0 906 905 0 0 -906z'/%3E%3Cpath d='M11311 4805l2159 0 0 2577 -2577 0 0 -2577 418 0zm1323 836l-905 0 0 905 905 0 0 -905z'/%3E%3Cpath d='M11311 8496l2159 0 0 2576 -2577 0 0 -2576 418 0zm1323 836l-905 0 0 905 905 0 0 -905z'/%3E%3Cpath d='M11311 12152l2159 0 0 2576 -2577 0 0 -2576 418 0zm1323 835l-905 0 0 906 905 0 0 -906z'/%3E%3C/svg%3E");
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: all 200ms ease;
+  }
+}
+
+.dpCalendar {
+  max-width: 19.5em;
+  text-align: center;
+  border: 1px solid gray;
+  padding: 0.1em;
+  z-index: 1;
+
+  .dpCalendarHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 2.2em;
+    font-size: 1.05em;
+
+    >button {
+      background: no-repeat center url(.\datepicker\arrow-down.svg);
+      transform: rotate(90deg);
+      background-size: 55% 55%;
+
+      &.dpArrowRight {
+        transform: rotate(-90deg);
+      }
+
+      &:hover {
+        background-color: lightgray;
+      }
+    }
+
+    .dpCalendarMonthYear {
+      display: flex;
+
+      .dpCalendarCurrMonth {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 6.5em;
+        min-height: auto;
+        margin: 0 0.7em 0 0;
+        padding: 0.4em 0.2em 0.4em 0.4em;
+  
+        &::after {
+          display: block;
+          content: "";
+          width: 0.7em;
+          height: 0.7em;
+          background: no-repeat center url(.\datepicker\arrow-down.svg);
+          background-size: 100% 100%;
+          transition: all 0.15s ease;
+        }
+
+        &.rotateArrow::after {
+          transform: rotate(-180deg);
+        }
+
+        &:hover {
+          background: #f3f3f3;
+          color: initial;
+        }
+      }
+  
+      .dpCalendarMonthPopup {
+        text-align: start;
+        background: white;
+        box-shadow: 0 0 2px 2px lightgrey;
+  
+        & span {
+          display: block;
+          cursor: default;
+          padding: 0 1em 0.1em 0.4em;
+          font-weight: normal;
+  
+          &:hover {
+            background: lightgray;
+          }
+        }
+      }
+
+      .dpCalendarYears {
+        display: flex;
+        padding-left: 0.3em;
+        
+        span {
+          align-self: center;
+          margin-right: 0.5em;
+        }
+
+        & .dpArrowBtnsCont {
+          border: 1px solid lightgray;
+        }
+      }
+    }
+  }
+
+  .dpArrowBtnsCont {
+
+    button {
+      display: block;
+      margin: 0;
+      padding: 0 6px;
+      min-width: 0.5em;
+      min-height: 0.5em;
+      background: no-repeat center url(.\datepicker\sort-desc.svg);
+      background-size: 0.5em 0.5em;
+      height: 50%;
+
+      &:hover {
+        background-color: lightgray;
+      }
+
+      &.dpArrowBtnUp {
+        transform: rotate(180deg);
+        border-top: 1px solid gray;
+      }
+    }
+  }
+
+  .dpCalendarContainer {
+    display: flex;
+    flex-wrap: wrap;
+    padding-bottom: 0.5em;
+
+    span {
+      padding: 0.3em 0;
+      margin: 0.1em;
+    }
+
+    .dpCalendarWeekDays {
+      display: flex;
+      width: 100%;
+      margin: 0 0 0 12.5%;
+      font-size: 0.8em;
+      color: darkblue;
+
+      span {
+        flex: 1;
+      }
+    }
+
+    .dpCalendarWeekNums {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      border-right: 1px solid darkblue;
+      color: darkblue;
+      font-size: 0.9em;
+    }
+
+    .dpCalendarDays {
+      flex: 7;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      justify-items: center;
+
+      span {
+        width: 100%;
+
+        &.current {
+          color: white;
+          background-color: blue;
+        }
+
+        &.today {
+          border: 1px solid blue;
+        }
+
+        &:hover {
+          cursor: pointer;
+          background: lightgray;
+        }
+      }
+
+      .dayNextMonth, .dayPrevMonth {
+        color: gray;
+      }
+    }
+  }
+
+  .dpTimeContainer {
+    display: flex;
+    width: 100%;    
+    border-top: 1px solid lightgray;
+    height: 2.1em;
+
+    > .dpTimeSection {
+      flex-grow: 1;
+      display: flex;
+
+      > span {
+        flex-grow: 1;
+        align-self: center;
+      }
+
+      .dpArrowBtnsCont {
+        border-left: 1px solid gray;
+        border-right: 1px solid transparent;
+      }
+
+      &:first-child .dpArrowBtnsCont {
+        border-right: 1px solid gray;
+      }
+    }
+
+    .dpTimeSeparator {
+      align-self: center;
+      margin: 0 0.4em;
+      font-weight: bold;
+    }    
+  }
+
+  .dpCtrlBtnsCont {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    border-top: 1px solid lightgray;
+    padding: 0.3em 0;
+
+    button {
+      border: 1px solid lightgray;
+      width: 38%;
+      min-width: min-content;
+      padding: 0;
+
+      &:hover {
+        color: white;
+
+        &.dpBtnNow {
+          background: blue;
+        }
+
+        &.dpBtnClose {
+          background: red;
+        }
+      }
+    }
+  }
+}
+
+// Color Picker
+
+.inputBox {
+  &.colorPickerRo {
+      border: none;
+
+      input {
+          margin: 0;
+          height: 100%;
+          cursor: default;
+      }
+  }
+
+  input.colorPickerChip {
+      color: transparent!important;
+      border-radius: 0.28em;
+      margin: 0 0.2em;
+      height: 78%;
+      align-self: center;
+      cursor: pointer;
+      background: repeating-linear-gradient(45deg, lightgray 0 8%, white 8% 16%);
+      box-shadow: 0px 0px 0px 1px var(--color-headerColor);
+      transition: background 0.2s ease-out;
+  }
+
+  > .colorPickerPopup {
+      z-index: 501;   // to overcome .filterArea z-index
+      border: 1px solid var(--textColor-primaryColor);
+
+      .react-colorful__saturation-pointer {
+          width: 8px;
+          height: 8px;
+          border-radius: 2px;
+      }
+
+      .react-colorful__hue-pointer {
+          width: 14px;
+          border-radius: 0px;
+      }
+
+      .react-colorful__saturation {
+          border-radius: 0px;
+      }
+
+      .react-colorful__last-control {
+          border-radius: 0px;
+      }
   }
 }

@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom"
 import React from "react"
-import {createSyncProviders} from "../main/vdom-hooks";
-import {DatePickerInputElement} from "../extra/datepicker/datepicker";
+import {createSyncProviders} from "../../main/vdom-hooks";
+import {DatePickerInputElement} from "../../extra/datepicker/datepicker";
 
 const {createElement: $} = React
 
@@ -12,10 +12,11 @@ function App() {
         key: "TEST",
         identity: {parent: "test"},
         timestampFormatId: 0,
-        userTimezoneId: "Europe/Moscow",
+        userTimezoneId: 'America/New_York',
+        // userTimezoneId: "Europe/Moscow",
         state: {
             tp: "timestamp-state",
-            timestamp: String(testTS)
+            timestamp: String(testTS),
         }
     })
     const sender = {
