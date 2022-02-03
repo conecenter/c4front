@@ -155,10 +155,12 @@ export function DatepickerCalendar({
 
   function getOnTimeBtnClick(symbol: 'H' | 'm') {
     return (e: React.MouseEvent<HTMLButtonElement>) => {
-      if (nonEmpty(currentDateOpt) && e.currentTarget.dataset.change) {
+      if (!e.currentTarget.dataset.change) return;
+      if (nonEmpty(currentDateOpt)) {
           const adjustedDate = adjustDate(currentDateOpt, symbol, +e.currentTarget.dataset.change, true);
           setFinalState(createTimestampState(getTimestamp(adjustedDate, dateSettings)));
-      }
+      } 
+      else setFinalState(createTimestampState(Date.now()));
     }
   }
 
