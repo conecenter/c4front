@@ -68,18 +68,15 @@ export function DatePickerInputElement({
 	const onPopupToggle = getOnPopupToggle(currentDateOpt, currentState, dateSettings, setFinalState)
 
   	return (
-		<div className="inputBoxWrapper">
-			<div ref={inputBoxRef} className="inputBox">
-				<div className="inputSubBox">
-					<input ref={inputRef} value={inputValue} onChange={onChange} onKeyDown={onKeyDown} onBlur={onBlur} />
-				</div>
-				<button 
-					type='button' 
-					className={`${currentState.popupDate ? 'rotate180deg ' : ''}btnCalendar`} 
-					onClick={onPopupToggle} />
-				{children}
+		<div ref={inputBoxRef} className="inputBox">
+			<div className="inputSubBox">
+				<input ref={inputRef} value={inputValue} onChange={onChange} onKeyDown={onKeyDown} onBlur={onBlur} />
 			</div>
-
+			<button 
+				type='button' 
+				className={`${currentState.popupDate ? 'rotate180deg ' : ''}btnCalendar`} 
+				onClick={onPopupToggle} />
+			{children}
 			{currentState.popupDate && 
 				<DatepickerCalendar {...{
 					currentState, 
@@ -88,9 +85,9 @@ export function DatePickerInputElement({
 					setFinalState, 
 					inputRef, 
 					inputBoxRef
-				}} />
-			}
+				}} />}
 		</div>
+
 	);
 }
 

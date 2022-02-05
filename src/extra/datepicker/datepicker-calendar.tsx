@@ -4,6 +4,7 @@ import { addMonths, getDate as getDayOfMonth, getDaysInMonth, getWeek, isMonday,
 import { isEmpty, None, nonEmpty, Option, toOption } from '../../main/option';
 import { adjustDate, DateSettings, getDate, getTimestamp, getCalendarDate } from "./date-utils";
 import { usePopupPos } from "../../main/popup";
+import { PopupPosition } from '../common-types';
 import { createTimestampState, DatePickerState, CalendarDate } from "./datepicker-exchange";
 
 interface DatepickerCalendarProps {
@@ -37,10 +38,10 @@ export function DatepickerCalendar({
    * Popup elements positioning
   */ 
   const [popupCalendarRef,setPopupCalendarRef] = useState<HTMLDivElement | null>(null);
-  const [popupCalendarPos] = usePopupPos(popupCalendarRef);
+  const [popupCalendarPos] = usePopupPos(popupCalendarRef) as PopupPosition[];
 
   const [popupMonthRef,setPopupMonthRef] = useState<HTMLDivElement | null>(null);
-  const [popupMonthPos] = usePopupPos(popupMonthRef);
+  const [popupMonthPos] = usePopupPos(popupMonthRef) as PopupPosition[];
 
   /*
    * Months section functionality
@@ -191,28 +192,34 @@ export function DatepickerCalendar({
 
   return (
     <div ref={setPopupCalendarRef} 
-         style={popupCalendarPos}
+         style={{ ...popupCalendarPos, minWidth: 'auto' }}
          className='dpCalendar popupEl'
          onClick={popupMonthShow ?  onMonthPopupMiss : undefined} >
+
       <div className='dpCalendarHeader'>
         <button data-change='-1' onClick={onMonthArrowClick} />
+
         <div className="dpCalendarMonthYear">
-          <button 
-            type='button'
-            className={`${popupMonthShow ? 'rotateArrow ' : ''}dpCalendarCurrMonth`} 
-            onClick={onToggleMonthPopup}>{currMonthName}
-          </button>
+          <div className='dpCalendarMonth'>
+            <button 
+              type='button'
+              className={popupMonthShow ? 'rotateArrow' : undefined} 
+              onClick={onToggleMonthPopup}>
+                {currMonthName} 
+            </button>
+
+            {popupMonthShow &&
+              <div ref={setPopupMonthRef} style={popupMonthPos} className='popupEl'>
+                {locale.months.map(month => 
+                  <span key={month.fullName} onClick={onMonthChoice} data-month={month.id}>{month.fullName}</span>
+                )}
+              </div>}
+          </div>
+
           <div className="dpCalendarYears">
             <span>{year}</span>
             {yearsArrowBtnsDiv}
           </div>
-          {popupMonthShow &&
-            <div ref={setPopupMonthRef} style={popupMonthPos} className='dpCalendarMonthPopup popupEl'>
-              {locale.months.map(month => 
-                <span key={month.fullName} onClick={onMonthChoice} data-month={month.id}>{month.fullName}</span>
-              )}
-            </div>
-          }
         </div>
         <button className='dpArrowRight' data-change='1' onClick={onMonthArrowClick} />
       </div>
