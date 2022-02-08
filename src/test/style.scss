@@ -261,7 +261,7 @@ div.grid {
 
 .popupEl, .popup:not(.popup .popup) {
   border: 0.05em solid var(--color-headerColor) !important;
-  box-shadow: 0px 0px 0.3125em var(--color-dark-headerColor);
+  box-shadow: 0 0 0.3125em var(--color-dark-headerColor);
   z-index: 10003;
   background-color: var(--color-body);
 }

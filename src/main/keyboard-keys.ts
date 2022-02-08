@@ -3,6 +3,7 @@ const ARROW_DOWN_KEY = "ArrowDown"
 const ARROW_LEFT_KEY = "ArrowLeft"
 const ARROW_RIGHT_KEY = "ArrowRight"
 const ENTER_KEY = "Enter"
+const ESCAPE_KEY = "Escape"
 const M_KEY = "m"
 
-export { ARROW_UP_KEY, ARROW_DOWN_KEY, ARROW_LEFT_KEY, ARROW_RIGHT_KEY, ENTER_KEY, M_KEY }
+export { ARROW_UP_KEY, ARROW_DOWN_KEY, ARROW_LEFT_KEY, ARROW_RIGHT_KEY, ENTER_KEY, ESCAPE_KEY, M_KEY }
