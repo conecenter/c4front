@@ -7,7 +7,7 @@ import {
     createTimestampState,
     DatePickerState,
     InputState,
-    isTimestampState,
+    isInputState,
     TimestampState
 } from "./datepicker-exchange";
 
@@ -103,12 +103,18 @@ function getOnBlur(
     memoInputValue: React.MutableRefObject<string>, 
     setState: (state: DatePickerState) => void) {
     return () => {
-        if (isTimestampState(currentState)) setState(currentState);
-        else if (currentState.tempTimestamp) setState(createTimestampState(currentState.tempTimestamp));
-        else {
+        if (isInputState(currentState)) {
+            if (currentState.tempTimestamp) return setState(createTimestampState(currentState.tempTimestamp));
             memoInputValue.current = currentState.inputValue;
-            setState(currentState);
         }
+        setState(currentState);
+    }
+}
+
+function getOnInputBoxBlur(currentState: DatePickerState, setFinalState: (state: DatePickerState) => void) {
+    return (e: React.FocusEvent<HTMLDivElement>) => {
+        if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) return;		
+        setFinalState({...currentState, popupDate: None });
     }
 }
 
@@ -125,4 +131,4 @@ function getOnPopupToggle(
     }
 }
 
-export { onTimestampChangeAction, getOnKeyDown, getOnChange, getOnBlur, getOnPopupToggle };
+export { onTimestampChangeAction, getOnKeyDown, getOnChange, getOnBlur, getOnInputBoxBlur, getOnPopupToggle };

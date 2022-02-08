@@ -5,8 +5,15 @@ import {DateSettings, formatDate, getDate, parseStringToDate} from "./date-utils
 import {getOrElse, mapOption, None, nonEmpty, Option} from "../../main/option";
 import {useSelectionEditableInput} from "./selection-control";
 import {DatepickerCalendar} from "./datepicker-calendar";
-import {getOnBlur, getOnChange, getOnKeyDown, onTimestampChangeAction, getOnPopupToggle} from "./datepicker-actions";
-import { useExternalKeyboardControls } from '../../main/custom-hooks';
+import {useExternalKeyboardControls} from '../../main/custom-hooks';
+import {
+	getOnBlur, 
+	getOnChange,
+	getOnKeyDown, 
+	onTimestampChangeAction, 
+	getOnPopupToggle, 
+	getOnInputBoxBlur
+} from "./datepicker-actions";
 
 type DatePickerServerState = TimestampServerState | InputServerState
 
@@ -105,7 +112,7 @@ export function DatePickerInputElement({
 			console.log(err);
 		}
 	}
-	
+
 	function handleCustomPaste(e: CustomEvent) {
 		if (isFocusedInside(inputBoxRef.current)) return;
 		const inputVal = e.detail;
@@ -122,7 +129,8 @@ export function DatePickerInputElement({
 
 	const setSelection: (from: number, to: number) => void = useSelectionEditableInput(inputRef)
 	const onTimestampChange: (timestamp: number) => void = onTimestampChangeAction(setTempState)
-	const onBlur = getOnBlur(currentState, memoInputValue, setFinalState)
+	const onInputBlur = getOnBlur(currentState, memoInputValue, setFinalState)
+	const onInputBoxBlur = getOnInputBoxBlur(currentState, setFinalState)
 	const onChange = getOnChange(dateSettings, setTempState)
 	const onPopupToggle = getOnPopupToggle(currentDateOpt, currentState, dateSettings, setFinalState)
 	const onKeyDown = getOnKeyDown(
@@ -136,9 +144,9 @@ export function DatePickerInputElement({
 	)	
 
   	return (
-		<div ref={inputBoxRef} className="inputBox">
+		<div ref={inputBoxRef} className="inputBox" onBlur={onInputBoxBlur} >
 			<div className="inputSubBox">
-				<input ref={inputRef} value={inputValue} onChange={onChange} onKeyDown={onKeyDown} onBlur={onBlur} />
+				<input ref={inputRef} value={inputValue} onChange={onChange} onKeyDown={onKeyDown} onBlur={onInputBlur} />
 			</div>
 			<button 
 				type='button' 
@@ -151,8 +159,7 @@ export function DatePickerInputElement({
 					currentDateOpt, 
 					dateSettings, 
 					setFinalState, 
-					inputRef, 
-					inputBoxRef
+					inputRef
 				}} />}
 		</div>
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { useUserLocale } from "../locale";
 import { addMonths, getDate as getDayOfMonth, getDaysInMonth, getWeek, isMonday, set, startOfWeek } from "date-fns";
 import { isEmpty, None, nonEmpty, Option, toOption } from '../../main/option';
@@ -12,8 +12,7 @@ interface DatepickerCalendarProps {
   currentDateOpt: Option<Date>,
   dateSettings: DateSettings,
   setFinalState: (state: DatePickerState) => void,
-  inputRef: React.MutableRefObject<HTMLInputElement | null>,
-  inputBoxRef: React.MutableRefObject<HTMLDivElement | null>
+  inputRef: React.MutableRefObject<HTMLInputElement | null>
 }
 
 const WEEKS_TO_SHOW = 6;
@@ -23,8 +22,7 @@ export function DatepickerCalendar({
   currentDateOpt,
   dateSettings,
   setFinalState,
-  inputRef,
-  inputBoxRef
+  inputRef
 }: DatepickerCalendarProps) {
 
   const popupDate = currentState.popupDate as CalendarDate;
@@ -178,22 +176,11 @@ export function DatepickerCalendar({
     setFinalState({ ...currentState, popupDate: None });
   }
 
-  /*
-   * Closing popup calendar on click outside functionality
-  */
-  useOnClickAwayListener(popupCalendarRef, onClickAway);
-
-  function onClickAway(e: MouseEvent) {
-    const target = e.target as Node;
-    if ((popupCalendarRef && popupCalendarRef.contains(target)) 
-      || (inputBoxRef.current && inputBoxRef.current.contains(target))) return;
-    setFinalState({ ...currentState, popupDate: None });
-  }
-
   return (
     <div ref={setPopupCalendarRef} 
          style={{ ...popupCalendarPos, minWidth: 'auto' }}
          className='dpCalendar popupEl'
+         tabIndex={-1}
          onClick={popupMonthShow ?  onMonthPopupMiss : undefined} >
 
       <div className='dpCalendarHeader'>
@@ -251,20 +238,6 @@ export function DatepickerCalendar({
       </div>
     </div>
   );
-}
-
-function useOnClickAwayListener(popupElemRef: HTMLElement | null, callback: (e: MouseEvent) => void) {
-  const savedCallback = useRef() as React.MutableRefObject<Function>;
-  useEffect(() => {
-    savedCallback.current = callback;
-  });
-  useEffect(() => {
-    if(!popupElemRef) return;
-    const handleClick = (e: MouseEvent) => savedCallback.current(e);
-    const doc = popupElemRef.ownerDocument;
-    doc.addEventListener('mousedown', handleClick);
-    return () => doc.removeEventListener('mousedown', handleClick);
-  }, [popupElemRef]);
 }
 
 function createArray(start: number, end: number) {
