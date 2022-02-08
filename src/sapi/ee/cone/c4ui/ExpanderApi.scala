@@ -15,7 +15,7 @@ trait Expander extends ToChildPair
   @c4el("Expander") def expander(
     key: String,
     area: ExpanderAreaSide,
-    children: ChildPairList[OfDiv] = Nil,
+    children: ViewRes = Nil,
     expandTo: ElList[Expander] = Nil,
     expandOrder: Int = 0,
   ): Expander
