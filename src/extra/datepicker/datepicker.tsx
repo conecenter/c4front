@@ -5,7 +5,7 @@ import {DateSettings, formatDate, getDate, parseStringToDate} from "./date-utils
 import {getOrElse, mapOption, None, nonEmpty, Option} from "../../main/option";
 import {useSelectionEditableInput} from "./selection-control";
 import {DatepickerCalendar} from "./datepicker-calendar";
-import {useExternalKeyboardControls} from '../../main/custom-hooks';
+import {useExternalKeyboardControls} from '../focus-module-interface';
 import {
 	getOnBlur, 
 	getOnChange,
@@ -72,7 +72,7 @@ export function DatePickerInputElement({
 	const inputBoxRef = useRef(null)
 
 	// Interaction with FocusModule (c4e\client\src\extra\focus-module.js) - Excel-style keyboard controls
-	const customEventHandlers = {
+	const KeyboardEventHandlers = {
 		enter: handleCustomEnter,
 		delete: handleCustomDelete,
 		backspace: handleCustomDelete,
@@ -125,7 +125,7 @@ export function DatePickerInputElement({
 		memoInputValue.current = inputVal;
 	}
 
-	useExternalKeyboardControls(inputRef, customEventHandlers);
+	useExternalKeyboardControls(inputRef, KeyboardEventHandlers);
 
 	const setSelection: (from: number, to: number) => void = useSelectionEditableInput(inputRef)
 	const onTimestampChange: (timestamp: number) => void = onTimestampChangeAction(setTempState)
