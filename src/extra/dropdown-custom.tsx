@@ -1,9 +1,11 @@
 import clsx from 'clsx';
-import React, { ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { ARROW_DOWN_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY } from '../main/keyboard-keys';
 import { usePopupPos } from '../main/popup';
 import { useSync } from '../main/vdom-hooks';
 import { identityAt } from '../main/vdom-util';
+import { PopupPosition } from './common-types';
+import { useExternalKeyboardControls } from './focus-module-interface';
 import { Patch, PatchHeaders, useInputSync } from './input-sync';
 
 declare global {
@@ -67,15 +69,7 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 
     // Popup positioning
 	const [popupRef,setPopupRef] = useState<HTMLDivElement | null>(null);
-	const [popupPos] = usePopupPos(popupRef);
-
-	const [popupMinWidth, setPopupMinWidth] = useState(0);
-
-	useLayoutEffect(() => {
-		if (popupRef && dropdownBoxRef.current) {
-			setPopupMinWidth(dropdownBoxRef.current.offsetWidth);
-		}
-	}, [popupRef]);
+	const [popupPos] = usePopupPos(popupRef) as PopupPosition[];
 
 	// Keyboard events sync
 	const keyboardActionIdOf = identityAt('keyboardAction');
@@ -83,44 +77,36 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 		useSync(keyboardActionIdOf(identity)) as [Patch[], (patch: Patch) => void]
 	);
 
-	// Interaction with FocusModule (c4enterprise\client\src\extra\focus-module.js) - Excel-style keyboard controls
-	useEffect(() => {
-		const dropdownBox = dropdownBoxRef.current;
-		if (!dropdownBox || mode !== 'content') return;
+	// Interaction with FocusModule (c4e\client\src\extra\focus-module.js) - Excel-style keyboard controls
+	function handleCustomDelete(e: CustomEvent) {
+		const printableKey = (e.detail && e.detail.key) as string | null;
+		setTempState({ 
+			inputValue: (printableKey && printableKey !== 'Backspace') ? printableKey : '',
+			mode: 'input',
+			popupOpen: true
+		});
+	}
 
-		function handleCustomDelete(e: CustomEvent) {
-			const printableKey = (e.detail && e.detail.key) as string | null;
-			setTempState({ 
-				inputValue: (printableKey && printableKey !== 'Backspace') ? printableKey : '',
-				mode: 'input',
-				popupOpen: true
-			});
+	async function handleClipboardWrite(e: CustomEvent) {
+		// On Firefox writing to the clipboard is blocked (available only from user-initiated event callbacks)
+		try {
+			await navigator.clipboard.writeText(inputValue);
+			if (e.type === 'ccut') setFinalState({ ...currentState, inputValue: '' });
+		} catch(err) {
+			console.log(err);
 		}
+	}
 
-		async function handleClipboardWrite(e: CustomEvent) {
-			// On Firefox writing to the clipboard is blocked (available only from user-initiated event callbacks)
-			try {
-				await navigator.clipboard.writeText(inputValue);
-				if (e.type === 'ccut') setFinalState({ ...currentState, inputValue: '' });
-			} catch(err) {
-				console.log(err);
-			}
-		}
+	const customEventHandlers = {
+		enter: () => setFinalState({ ...currentState, mode: 'input' }),
+		delete: handleCustomDelete,
+		backspace: handleCustomDelete,
+		cpaste: (e: CustomEvent) => setTempState({ inputValue: e.detail, mode: 'input', popupOpen: true }),
+		ccopy: handleClipboardWrite,
+		ccut: handleClipboardWrite
+	};
 
-		const customEventHandlers = {
-			enter: () => setFinalState({ ...currentState, mode: 'input' }),
-			delete: handleCustomDelete,
-			backspace: handleCustomDelete,
-			cpaste: (e: CustomEvent) => setTempState({ inputValue: e.detail, mode: 'input', popupOpen: true }),
-			ccopy: handleClipboardWrite,
-			ccut: handleClipboardWrite
-		};
-		
-		const cEventNames = Object.keys(customEventHandlers) as customEventNames[];
-		cEventNames.forEach(event => dropdownBox.addEventListener(event, customEventHandlers[event]));
-
-		return () => cEventNames.forEach(event => dropdownBox.removeEventListener(event, customEventHandlers[event]));
-	}, [currentState, setTempState, setFinalState]);
+	useExternalKeyboardControls(dropdownBoxRef, customEventHandlers);
 
 	// Event handlers
 	function handleBlur(e: React.FocusEvent) {
@@ -219,7 +205,7 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 				<div 
 					ref={setPopupRef} 
 					className={clsx('popupEl', 'dropdownPopup', popupClassname)} 
-					style={{ ...popupPos, minWidth: `${popupMinWidth}px` }} >
+					style={popupPos} >
 					{popupChildren}
 				</div>}
 		</div>
