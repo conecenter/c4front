@@ -12,12 +12,12 @@ declare global {
 }
 
 interface KeyboardEventHandlers {
-	enter: CustomEventHandler,
-	delete: CustomEventHandler,
-	backspace: CustomEventHandler,
-	cpaste: CustomEventHandler,
-	ccopy: CustomEventHandler,
-	ccut: CustomEventHandler
+	enter?: CustomEventHandler,
+	delete?: CustomEventHandler,
+	backspace?: CustomEventHandler,
+	cpaste?: CustomEventHandler,
+	ccopy?: CustomEventHandler,
+	ccut?: CustomEventHandler
 }
 
 type KeyboardEventNames = 'enter' | 'delete' | 'backspace' | 'cpaste' | 'ccopy' | 'ccut';
@@ -32,8 +32,8 @@ function useExternalKeyboardControls(
 		const element = ref.current;
 		if (!element) return;
 		const cEventNames = Object.keys(keyboardEventHandlers) as KeyboardEventNames[];
-		cEventNames.forEach(event => element.addEventListener(event, keyboardEventHandlers[event]));
-		return () => cEventNames.forEach(event => element.removeEventListener(event, keyboardEventHandlers[event]));
+		cEventNames.forEach(event => element.addEventListener(event, keyboardEventHandlers[event] as CustomEventHandler));
+		return () => cEventNames.forEach(event => element.removeEventListener(event, keyboardEventHandlers[event] as CustomEventHandler));
 	});
 }
 
