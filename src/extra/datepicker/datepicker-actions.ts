@@ -79,6 +79,8 @@ function getOnKeyDown(
                         createInputState(inputVal)
                     )
                 );
+                const target = e.currentTarget;
+                setTimeout(() => target.blur(), 0);
         }
     }
 }
@@ -101,19 +103,23 @@ function getOnChange(dateSettings: DateSettings, setState: (state: DatePickerSta
 function getOnBlur(
     currentState: DatePickerState, 
     memoInputValue: React.MutableRefObject<string>, 
-    setState: (state: DatePickerState) => void) {
-    return () => {
+    setState: (state: DatePickerState) => void,
+    inputBoxRef: React.MutableRefObject<HTMLDivElement | null>) {
+    return (e: React.FocusEvent<HTMLDivElement>) => {
+        e.stopPropagation();
+        const popupDate = (inputBoxRef.current && inputBoxRef.current.contains(e.relatedTarget as Node | null))
+            ? undefined : None;
         if (isInputState(currentState)) {
-            if (currentState.tempTimestamp) return setState(createTimestampState(currentState.tempTimestamp));
+            if (currentState.tempTimestamp) return setState(createTimestampState(currentState.tempTimestamp, popupDate));
             memoInputValue.current = currentState.inputValue;
         }
-        setState(currentState);
+        setState({...currentState, popupDate });        
     }
 }
 
 function getOnInputBoxBlur(currentState: DatePickerState, setFinalState: (state: DatePickerState) => void) {
     return (e: React.FocusEvent<HTMLDivElement>) => {
-        if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) return;		
+        if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) return;
         setFinalState({...currentState, popupDate: None });
     }
 }

@@ -129,7 +129,7 @@ export function DatePickerInputElement({
 
 	const setSelection: (from: number, to: number) => void = useSelectionEditableInput(inputRef)
 	const onTimestampChange: (timestamp: number) => void = onTimestampChangeAction(setTempState)
-	const onInputBlur = getOnBlur(currentState, memoInputValue, setFinalState)
+	const onInputBlur = getOnBlur(currentState, memoInputValue, setFinalState, inputBoxRef)
 	const onInputBoxBlur = getOnInputBoxBlur(currentState, setFinalState)
 	const onChange = getOnChange(dateSettings, setTempState)
 	const onPopupToggle = getOnPopupToggle(currentDateOpt, currentState, dateSettings, setFinalState)
