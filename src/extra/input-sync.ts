@@ -17,8 +17,10 @@ interface SyncState<State> {
     setFinalState: (s: State) => void,
 }
 
+interface SendPatchHeaders extends PatchHeaders {}
+
 interface SendPatch {
-    headers: PatchHeaders
+    headers: SendPatchHeaders
     value: string
     skipByPath: boolean
     retry: boolean
@@ -28,9 +30,9 @@ interface SendPatch {
 const receiverId = (name: string) => identityAt(name)
 
 function stateToSendPatch(patch: Patch, changing: boolean, deferredSend: boolean): SendPatch {
-    const prepHeaders: PatchHeaders = patch.headers ? patch.headers : {}
-    const changingHeaders: PatchHeaders = changing ? {"x-r-changing": "1"} : {}
-    const headers: PatchHeaders = {
+    const prepHeaders: SendPatchHeaders = patch.headers ? patch.headers : {}
+    const changingHeaders: SendPatchHeaders = changing ? {"x-r-changing": "1"} : {}
+    const headers: SendPatchHeaders = {
         ...changingHeaders,
         ...prepHeaders,
     }

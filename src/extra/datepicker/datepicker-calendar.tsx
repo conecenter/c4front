@@ -5,6 +5,7 @@ import { isEmpty, None, nonEmpty, Option, toOption } from '../../main/option';
 import { adjustDate, DateSettings, getDate, getTimestamp, getCalendarDate } from "./date-utils";
 import { usePopupPos } from "../../main/popup";
 import { createTimestampState, DatePickerState, CalendarDate } from "./datepicker-exchange";
+import { findFirstParent } from '../../main/vdom-util';
 
 interface DatepickerCalendarProps {
   currentState: DatePickerState,
@@ -165,7 +166,13 @@ export function DatepickerCalendar({
   /*
    * Now & Close buttons functionality
   */
-  const onNowBtnClick = () => setFinalState(createTimestampState(Date.now(), None));
+  const onNowBtnClick = () => {
+    setFinalState(createTimestampState(Date.now(), None));
+    // fix for a bug when focus goes to null and popup with datepicker closes
+    const findActiveFocusWrapper = (el: HTMLElement) => el.classList.contains("activeFocusWrapper") ? el : null;
+    const focEl = findFirstParent(findActiveFocusWrapper)(popupCalendarRef);
+		if (focEl) focEl.focus();
+  }
 
   function onCloseBtnClick() {
     if (inputRef.current) {
@@ -244,7 +251,7 @@ export function DatepickerCalendar({
   );
 }
 
-function useOnClickAwayListener(popupElemRef: HTMLElement | null, callback: (e: MouseEvent) => void) {
+export function useOnClickAwayListener(popupElemRef: HTMLElement | null, callback: (e: MouseEvent) => void) {
   const savedCallback = useRef() as React.MutableRefObject<Function>;
   useEffect(() => {
     savedCallback.current = callback;
