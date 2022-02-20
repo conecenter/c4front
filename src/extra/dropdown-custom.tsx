@@ -1,25 +1,21 @@
 import clsx from 'clsx';
-import React, { ReactNode, useEffect, useRef, useState } from "react";
+import React, { ReactNode, useRef, useState } from "react";
 import { ARROW_DOWN_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY } from '../main/keyboard-keys';
 import { usePopupPos } from '../main/popup';
 import { useSync } from '../main/vdom-hooks';
 import { identityAt } from '../main/vdom-util';
 import { PopupPosition } from './common-types';
-import { useExternalKeyboardControls } from './focus-module-interface';
 import { Patch, PatchHeaders, useInputSync } from './input-sync';
-
-declare global {
-	interface HTMLElementEventMap {
-	  enter: CustomEvent,
-	  delete: CustomEvent,
-	  backspace: CustomEvent,
-	  cpaste: CustomEvent,
-	  ccopy: CustomEvent,
-	  ccut: CustomEvent
-	}
-}
-
-type customEventNames = 'enter' | 'delete' | 'backspace' | 'cpaste' | 'ccopy' | 'ccut';
+import { 
+	BACKSPACE_EVENT, 
+	COPY_EVENT, 
+	CUT_EVENT, 
+	DELETE_EVENT, 
+	ENTER_EVENT, 
+	PASTE_EVENT, 
+	TAB_EVENT, 
+	useExternalKeyboardControls 
+} from './focus-module-interface';
 
 interface DropdownProps {
 	key: string,
@@ -98,12 +94,12 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 	}
 
 	const customEventHandlers = {
-		enter: () => setFinalState({ ...currentState, mode: 'input' }),
-		delete: handleCustomDelete,
-		backspace: handleCustomDelete,
-		cpaste: (e: CustomEvent) => setTempState({ inputValue: e.detail, mode: 'input', popupOpen: true }),
-		ccopy: handleClipboardWrite,
-		ccut: handleClipboardWrite
+		[ENTER_EVENT]: () => setFinalState({ ...currentState, mode: 'input' }),
+		[DELETE_EVENT]: handleCustomDelete,
+		[BACKSPACE_EVENT]: handleCustomDelete,
+		[PASTE_EVENT]: (e: CustomEvent) => setTempState({ inputValue: e.detail, mode: 'input', popupOpen: true }),
+		[COPY_EVENT]: handleClipboardWrite,
+		[CUT_EVENT]: handleClipboardWrite
 	};
 
 	useExternalKeyboardControls(dropdownBoxRef, customEventHandlers);
@@ -126,7 +122,7 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 			case ENTER_KEY:
 				if (!popupOpen) {
 					e.stopPropagation();
-					e.currentTarget.dispatchEvent(new CustomEvent("cTab", { bubbles: true }));
+					e.currentTarget.dispatchEvent(new CustomEvent(TAB_EVENT, { bubbles: true }));
 					break;
 				}
 			case ARROW_UP_KEY:
