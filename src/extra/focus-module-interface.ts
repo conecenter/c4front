@@ -47,4 +47,13 @@ function useExternalKeyboardControls(
 	});
 }
 
-export { useExternalKeyboardControls, ENTER_EVENT, DELETE_EVENT, BACKSPACE_EVENT, PASTE_EVENT, COPY_EVENT, CUT_EVENT, TAB_EVENT };
+export {
+	useExternalKeyboardControls, 
+	ENTER_EVENT, 
+	DELETE_EVENT, 
+	BACKSPACE_EVENT, 
+	PASTE_EVENT, 
+	COPY_EVENT, 
+	CUT_EVENT, 
+	TAB_EVENT 
+};

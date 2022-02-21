@@ -4,7 +4,6 @@ import { ARROW_DOWN_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY } from '../main/key
 import { usePopupPos } from '../main/popup';
 import { useSync } from '../main/vdom-hooks';
 import { identityAt } from '../main/vdom-util';
-import { PopupPosition } from './common-types';
 import { Patch, PatchHeaders, useInputSync } from './input-sync';
 import { 
 	BACKSPACE_EVENT, 
@@ -65,7 +64,7 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 
     // Popup positioning
 	const [popupRef,setPopupRef] = useState<HTMLDivElement | null>(null);
-	const [popupPos] = usePopupPos(popupRef) as PopupPosition[];
+	const [popupPos] = usePopupPos(popupRef);
 
 	// Keyboard events sync
 	const keyboardActionIdOf = identityAt('keyboardAction');
