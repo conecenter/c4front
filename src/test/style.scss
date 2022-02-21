@@ -6,6 +6,10 @@
   --color-body: hsl(0, 0%, 100%);
   --textColor-body: hsl(0, 0%, 12.9412%);
   --color-darkPrimaryColor: rgb(176, 162, 116);
+  --color-headerColor: #cfd8dc;
+  --color-dark-headerColor: #b0bec5;
+  --textColor-dark-primaryColor: #000000;
+  --color-light-headerColor: #ECEFF1;
 }
 
 body {
@@ -13,6 +17,19 @@ body {
   background: var(--color-body);
   color: var(--textColor-body);
   overflow-x: hidden;
+}
+
+.buttonEl {
+  button {
+    margin: 0;
+    padding: 0.2em;
+  }
+  img,
+  svg {
+    vertical-align: middle;
+    transition: all 200ms ease 0s;
+    height: 1.2em;
+  }
 }
 
 button {
@@ -32,15 +49,19 @@ button {
   outline: currentcolor none medium;
   outline-offset: -0.1em;
 
-  &:hover {
-    opacity: 0.8;
-  }
+  // &:hover {
+  //   opacity: 0.8;
+  // }
 
   > .text {
     padding: 0 1em;
   }
+  // ????????????????????????????????????????????????
+  &.buttonEl {
+    margin: 0;
+    padding: 0.2em;
+  }
 }
-
 
 //HEADER
 .filterArea {
@@ -74,14 +95,12 @@ button {
   z-index: 1;
 }
 
-
 //GRID
 div.grid {
   border-collapse: collapse;
   --secondary-color: rgb(238, 238, 238);
   border-spacing: 0;
   --highlight-color: #f8f8cb;
-
 
   //TABLE
   > .tableHeadContainer {
@@ -114,13 +133,12 @@ div.grid {
       overflow: visible;
 
       .hoverExpander {
-          background-color: var(--color-primaryColor);
-          position: relative;
-          z-index: 10;
+        background-color: var(--color-primaryColor);
+        position: relative;
+        z-index: 10;
       }
     }
   }
-
 
   //EXPANDER
   > .closedExpander {
@@ -131,7 +149,7 @@ div.grid {
     background-color: grey;
   }
 
-  > div[data-expander='expanded'] {
+  > div[data-expander="expanded"] {
     > img {
       transform: rotate(-180deg);
       transition: transform 0.25s linear;
@@ -161,11 +179,10 @@ div.grid {
     }
   }
 
-  > div[data-expander='passive'] {
+  > div[data-expander="passive"] {
     visibility: hidden;
     position: fixed;
   }
-
 
   .dragElement {
     height: 1.3em;
@@ -197,7 +214,6 @@ div.grid {
   font-weight: normal !important;
 }
 
-
 //ICONS
 .rowIconSize {
   height: 2em;
@@ -213,7 +229,6 @@ div.grid {
   height: 1.2em;
   width: 1.2em;
 }
-
 
 //COLORS
 .headerColor-border {
@@ -256,13 +271,15 @@ div.grid {
 //     transform: skewY(-15deg);
 // }
 
-// Datepicker
-.rotate180deg {
-  transform: rotate(-180deg);
+.popupEl, .popup:not(.popup .popup) {
+  border: 0.05em solid var(--color-headerColor) !important;
+  box-shadow: 0 0 0.3125em var(--color-dark-headerColor);
+  z-index: 10003;
+  background-color: var(--color-body);
 }
 
-.inputBoxWrapper {
-  margin: 0.1px;
+.rotate180deg {
+  transform: rotate(-180deg);
 }
 
 .inputBox {
@@ -316,261 +333,327 @@ div.grid {
     background-repeat: no-repeat;
     transition: all 200ms ease;
   }
-}
 
-.dpCalendar {
-  max-width: 19.5em;
-  text-align: center;
-  border: 1px solid gray;
-  padding: 0.1em;
-  z-index: 1;
-
-  .dpCalendarHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 2.2em;
-    font-size: 1.05em;
-
-    >button {
-      background: no-repeat center url(.\datepicker\arrow-down.svg);
-      transform: rotate(90deg);
-      background-size: 55% 55%;
-
-      &.dpArrowRight {
-        transform: rotate(-90deg);
-      }
-
-      &:hover {
-        background-color: lightgray;
-      }
-    }
-
-    .dpCalendarMonthYear {
+  .dpCalendar {
+    max-width: 19.5em;
+    text-align: center;
+    border: 1px solid gray;
+    padding: 0.1em;
+    z-index: 1;
+  
+    .dpCalendarHeader {
       display: flex;
-
-      .dpCalendarCurrMonth {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 6.5em;
-        min-height: auto;
-        margin: 0 0.7em 0 0;
-        padding: 0.4em 0.2em 0.4em 0.4em;
+      justify-content: space-between;
+      align-items: center;
+      height: 2.2em;
+      font-size: 1.05em;
   
-        &::after {
-          display: block;
-          content: "";
-          width: 0.7em;
-          height: 0.7em;
-          background: no-repeat center url(.\datepicker\arrow-down.svg);
-          background-size: 100% 100%;
-          transition: all 0.15s ease;
+      >button {
+        background: no-repeat center url(.\datepicker\arrow-down.svg);
+        transform: rotate(90deg);
+        background-size: 55% 55%;
+  
+        &.dpArrowRight {
+          transform: rotate(-90deg);
         }
-
-        &.rotateArrow::after {
-          transform: rotate(-180deg);
-        }
-
+  
         &:hover {
-          background: #f3f3f3;
-          color: initial;
+          background-color: lightgray;
         }
       }
   
-      .dpCalendarMonthPopup {
-        text-align: start;
-        background: white;
-        box-shadow: 0 0 2px 2px lightgrey;
+      .dpCalendarMonthYear {
+        display: flex;
   
-        & span {
-          display: block;
-          cursor: default;
-          padding: 0 1em 0.1em 0.4em;
-          font-weight: normal;
+        .dpCalendarMonth {
+          margin: 0 0.7em 0 0;
   
-          &:hover {
-            background: lightgray;
+          button {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 6.5em;
+            min-height: auto;
+            margin: 0;
+            padding: 0.4em 0.2em 0.4em 0.4em;
+      
+            &::after {
+              display: block;
+              content: "";
+              width: 0.7em;
+              height: 0.7em;
+              background: no-repeat center url(.\datepicker\arrow-down.svg);
+              background-size: 100% 100%;
+              transition: all 0.15s ease;
+            }
+            
+  
+            &.rotateArrow::after {
+              transform: rotate(-180deg);
+            }
+  
+            &:hover {
+              background: #f3f3f3;
+              color: initial;
+            }
+          }
+          
+          .popupEl {
+            text-align: start;
+      
+            & span {
+              display: block;
+              cursor: default;
+              padding: 0.12em 1em 0.12em 0.4em;
+              font-weight: normal;
+      
+              &:hover {
+                background: lightgray;
+              }
+            }
+          }
+        }
+
+        .dpCalendarYears {
+          display: flex;
+          padding-left: 0.3em;
+          
+          span {
+            align-self: center;
+            margin-right: 0.5em;
+          }
+  
+          & .dpArrowBtnsCont {
+            border: 1px solid lightgray;
           }
         }
       }
-
-      .dpCalendarYears {
-        display: flex;
-        padding-left: 0.3em;
-        
-        span {
-          align-self: center;
-          margin-right: 0.5em;
-        }
-
-        & .dpArrowBtnsCont {
-          border: 1px solid lightgray;
-        }
-      }
     }
-  }
-
-  .dpArrowBtnsCont {
-
-    button {
-      display: block;
-      margin: 0;
-      padding: 0 6px;
-      min-width: 0.5em;
-      min-height: 0.5em;
-      background: no-repeat center url(.\datepicker\sort-desc.svg);
-      background-size: 0.5em 0.5em;
-      height: 50%;
-
-      &:hover {
-        background-color: lightgray;
-      }
-
-      &.dpArrowBtnUp {
-        transform: rotate(180deg);
-        border-top: 1px solid gray;
-      }
-    }
-  }
-
-  .dpCalendarContainer {
-    display: flex;
-    flex-wrap: wrap;
-    padding-bottom: 0.5em;
-
-    span {
-      padding: 0.3em 0;
-      margin: 0.1em;
-    }
-
-    .dpCalendarWeekDays {
-      display: flex;
-      width: 100%;
-      margin: 0 0 0 12.5%;
-      font-size: 0.8em;
-      color: darkblue;
-
-      span {
-        flex: 1;
-      }
-    }
-
-    .dpCalendarWeekNums {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-around;
-      border-right: 1px solid darkblue;
-      color: darkblue;
-      font-size: 0.9em;
-    }
-
-    .dpCalendarDays {
-      flex: 7;
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      justify-items: center;
-
-      span {
-        width: 100%;
-
-        &.current {
-          color: white;
-          background-color: blue;
-        }
-
-        &.today {
-          border: 1px solid blue;
-        }
-
+  
+    .dpArrowBtnsCont {
+  
+      button {
+        display: block;
+        margin: 0;
+        padding: 0 6px;
+        min-width: 0.5em;
+        min-height: 0.5em;
+        background: no-repeat center url(.\datepicker\sort-desc.svg);
+        background-size: 0.5em 0.5em;
+        height: 50%;
+  
         &:hover {
-          cursor: pointer;
-          background: lightgray;
+          background-color: lightgray;
+        }
+  
+        &.dpArrowBtnUp {
+          transform: rotate(180deg);
+          border-top: 1px solid gray;
         }
       }
-
-      .dayNextMonth, .dayPrevMonth {
-        color: gray;
-      }
     }
-  }
-
-  .dpTimeContainer {
-    display: flex;
-    width: 100%;    
-    border-top: 1px solid lightgray;
-    height: 2.1em;
-
-    > .dpTimeSection {
-      flex-grow: 1;
+  
+    .dpCalendarContainer {
       display: flex;
-
-      > span {
-        flex-grow: 1;
-        align-self: center;
+      flex-wrap: wrap;
+      padding-bottom: 0.5em;
+  
+      span {
+        padding: 0.3em 0;
+        margin: 0.1em;
       }
-
-      .dpArrowBtnsCont {
-        border-left: 1px solid gray;
-        border-right: 1px solid transparent;
+  
+      .dpCalendarWeekDays {
+        display: flex;
+        width: 100%;
+        margin: 0 0 0 12.5%;
+        font-size: 0.8em;
+        color: darkblue;
+  
+        span {
+          flex: 1;
+        }
       }
-
-      &:first-child .dpArrowBtnsCont {
-        border-right: 1px solid gray;
+  
+      .dpCalendarWeekNums {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        border-right: 1px solid darkblue;
+        color: darkblue;
+        font-size: 0.9em;
+      }
+  
+      .dpCalendarDays {
+        flex: 7;
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        justify-items: center;
+  
+        span {
+          width: 100%;
+  
+          &.current {
+            color: white;
+            background-color: blue;
+          }
+  
+          &.today {
+            border: 1px solid blue;
+          }
+  
+          &:hover {
+            cursor: pointer;
+            background: lightgray;
+          }
+        }
+  
+        .dayNextMonth, .dayPrevMonth {
+          color: gray;
+        }
       }
     }
-
-    .dpTimeSeparator {
-      align-self: center;
-      margin: 0 0.4em;
-      font-weight: bold;
-    }    
-  }
-
-  .dpCtrlBtnsCont {
-    display: flex;
-    justify-content: space-around;
-    width: 100%;
-    border-top: 1px solid lightgray;
-    padding: 0.3em 0;
-
-    button {
-      border: 1px solid lightgray;
-      width: 38%;
-      min-width: min-content;
-      padding: 0;
-
-      &:hover {
-        color: white;
-
-        &.dpBtnNow {
-          background: blue;
+  
+    .dpTimeContainer {
+      display: flex;
+      width: 100%;    
+      border-top: 1px solid lightgray;
+      height: 2.1em;
+  
+      > .dpTimeSection {
+        flex-grow: 1;
+        display: flex;
+  
+        > span {
+          flex-grow: 1;
+          align-self: center;
         }
-
-        &.dpBtnClose {
-          background: red;
+  
+        .dpArrowBtnsCont {
+          border-left: 1px solid gray;
+          border-right: 1px solid transparent;
+        }
+  
+        &:first-child .dpArrowBtnsCont {
+          border-right: 1px solid gray;
+        }
+      }
+  
+      .dpTimeSeparator {
+        align-self: center;
+        margin: 0 0.4em;
+        font-weight: bold;
+      }    
+    }
+  
+    .dpCtrlBtnsCont {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      border-top: 1px solid lightgray;
+      padding: 0.3em 0;
+  
+      button {
+        border: 1px solid lightgray;
+        width: 38%;
+        min-width: min-content;
+        padding: 0;
+  
+        &:hover {
+          color: white;
+  
+          &.dpBtnNow {
+            background: blue;
+          }
+  
+          &.dpBtnClose {
+            background: red;
+          }
         }
       }
     }
   }
 }
 
-// Color Picker
+// Dropdown with custom content
+.customDropdownBox {
+  box-sizing: border-box;
+  display: flex;
+  background: var(--color-body);
+  color: var(--textColor-body);
+  border: 0.05em solid var(--color-headerColor);
 
-.inputBox {
-  &.colorPickerRo {
+  &:hover {
+    border-color: var(--color-dark-headerColor);
+  }
+
+  .customContentBox,
+  input {
+    flex-grow: 1;
+    padding: 0.2172em 0.3125em;
+  }
+
+  .customContentBox {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+
+    span {
+      margin: 0 0.2em 0 0;
+
+      &:not(.chipItem) {
+        padding: 0.25em 0;
+      }
+    }
+  }
+
+  &.customDropdownRo {
+    .customContentBox,
+    span {
+      cursor: default;
+    }
+  }
+
+  input {
+    font-size: inherit;
+    font-family: inherit;
+    background-color: inherit;
+    min-width: 0;
+    border: none;
+  }
+
+  button.buttonEl {
+    align-self: flex-start;
+  }
+
+  .dropdownPopup {
+    max-height: 10em;
+    overflow: auto;
+  }
+}
+
+.popupEl {
+  border: 0.05em solid var(--color-headerColor);
+  z-index: 10003;
+  background: var(--color-body);
+  // Color Picker
+
+  .inputBox {
+    &.colorPickerRo {
       border: none;
 
       input {
-          margin: 0;
-          height: 100%;
-          cursor: default;
+        margin: 0;
+        height: 100%;
+        cursor: default;
       }
-  }
+    }
 
-  input.colorPickerChip {
-      color: transparent!important;
+    input.colorPickerChip {
+      color: transparent !important;
       border-radius: 0.28em;
       margin: 0 0.2em;
       height: 78%;
@@ -579,29 +662,30 @@ div.grid {
       background: repeating-linear-gradient(45deg, lightgray 0 8%, white 8% 16%);
       box-shadow: 0px 0px 0px 1px var(--color-headerColor);
       transition: background 0.2s ease-out;
-  }
+    }
 
-  > .colorPickerPopup {
-      z-index: 501;   // to overcome .filterArea z-index
+    > .colorPickerPopup {
+      z-index: 501; // to overcome .filterArea z-index
       border: 1px solid var(--textColor-primaryColor);
 
       .react-colorful__saturation-pointer {
-          width: 8px;
-          height: 8px;
-          border-radius: 2px;
+        width: 8px;
+        height: 8px;
+        border-radius: 2px;
       }
 
       .react-colorful__hue-pointer {
-          width: 14px;
-          border-radius: 0px;
+        width: 14px;
+        border-radius: 0px;
       }
 
       .react-colorful__saturation {
-          border-radius: 0px;
+        border-radius: 0px;
       }
 
       .react-colorful__last-control {
-          border-radius: 0px;
+        border-radius: 0px;
       }
+    }
   }
 }

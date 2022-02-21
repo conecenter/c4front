@@ -2,7 +2,6 @@ import {identityAt} from "../main/vdom-util";
 import {useSync} from "../main/vdom-hooks";
 import {useCallback} from "react";
 
-
 interface PatchHeaders {
     [name: string]: string
 }
