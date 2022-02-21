@@ -123,4 +123,4 @@ function useDatePickerStateSync(
 }
 
 export { useDatePickerStateSync, isInputState, isTimestampState, createTimestampState, createInputState };
-export type { DatePickerState, PopupDate, CalendarDate };
+export type { DatePickerState, PopupDate, CalendarDate, TimestampState, InputState };
