@@ -50,6 +50,11 @@ const prepCheckUpdPopupPos = (element,lrMode) => {
     }
 }
 
+/**
+ * @param {Element | null} element
+ * @param {boolean} [lrMode]
+ * @returns {[{position: 'fixed', top: number, left: number, visibility?: 'hidden', width?: number, minWidth?: number}]}
+ */
 export const usePopupPos = (element,lrMode) => {
     const [position,setPosition] = useState(hiddenPosition)
     const checkUpdPos = useCallback(()=>{

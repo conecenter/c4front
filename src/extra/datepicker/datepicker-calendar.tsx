@@ -4,7 +4,6 @@ import { addMonths, getDate as getDayOfMonth, getDaysInMonth, getWeek, isMonday,
 import { isEmpty, None, nonEmpty, Option, toOption } from '../../main/option';
 import { adjustDate, DateSettings, getDate, getTimestamp, getCalendarDate } from "./date-utils";
 import { usePopupPos } from "../../main/popup";
-import { PopupPosition } from '../common-types';
 import { createTimestampState, DatePickerState, CalendarDate } from "./datepicker-exchange";
 
 interface DatepickerCalendarProps {
@@ -36,10 +35,10 @@ export function DatepickerCalendar({
    * Popup elements positioning
   */ 
   const [popupCalendarRef,setPopupCalendarRef] = useState<HTMLDivElement | null>(null);
-  const [popupCalendarPos] = usePopupPos(popupCalendarRef) as PopupPosition[];
+  const [popupCalendarPos] = usePopupPos(popupCalendarRef);
 
   const [popupMonthRef,setPopupMonthRef] = useState<HTMLDivElement | null>(null);
-  const [popupMonthPos] = usePopupPos(popupMonthRef) as PopupPosition[];
+  const [popupMonthPos] = usePopupPos(popupMonthRef);
 
   /*
    * Months section functionality
