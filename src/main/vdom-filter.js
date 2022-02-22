@@ -49,7 +49,7 @@ const doFitFilters = (filters,resTemplate) => {
     return res
 }
 
-const emPerRow = 2
+const emPerRow = 2.7
 
 const fitFilters = (filters,outerWidth,rowCount,canReduceButtonWidth,isMultilineButtons,lt,rt) => {
     if(filters.length > 0 && rowCount <= 1 && !isMultilineButtons) return null
