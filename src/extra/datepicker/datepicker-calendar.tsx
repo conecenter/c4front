@@ -167,11 +167,12 @@ export function DatepickerCalendar({
    * Now & Close buttons functionality
   */
   const onNowBtnClick = () => {
-    setFinalState(createTimestampState(Date.now(), None));
     // fix for a bug when focus goes to null and popup with datepicker closes
     const findActiveFocusWrapper = (el: HTMLElement) => el.classList.contains("activeFocusWrapper") ? el : null;
     const focEl = findFirstParent(findActiveFocusWrapper)(popupCalendarRef);
-		if (focEl) setTimeout(() => focEl.focus(), 0);
+		if (focEl) focEl.focus();
+    
+    setFinalState(createTimestampState(Date.now(), None));
   }
 
   function onCloseBtnClick() {
