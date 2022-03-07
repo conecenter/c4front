@@ -9,17 +9,14 @@ const hiddenPosition = {position:"fixed",top:0,left:0,visibility:"hidden"}
 
 const rangeSw = (a,r,lim,b) => r < 0 ? a : r <= lim ? r : b
 
-const makePosXY = (left,top) => !isNaN(left) && !isNaN(top) && {
-    left, top, position:"fixed", width: "fit-content", /*?"max-content"*/
-}
+const makePosXY = (left,top) => !isNaN(left) && !isNaN(top) && { left, top }
 const makePosYX = (top,left) => makePosXY(left,top)
 
 const fitTryAlign = ({lim,popupSize,parentFrom:from,parentSize}) => {
     const to = from + parentSize - popupSize
-    return (
-        rangeSw(NaN, from, lim, NaN) || rangeSw(NaN, to, lim, NaN) ||
-        (rangeSw(0, from, lim, lim) + rangeSw(0, to, lim, lim)) / 2
-    )
+    let tryFit = rangeSw(NaN, from, lim, NaN);
+    return !isNaN(tryFit) ? tryFit : !isNaN(tryFit = rangeSw(NaN, to, lim, NaN))
+        ? tryFit : (rangeSw(0, from, lim, lim) + rangeSw(0, to, lim, lim)) / 2
 }
 const fitNonOverlap = ({lim,popupSize,parentFrom,parentSize}) => (
     rangeSw(0, parentFrom + parentSize, lim, rangeSw(NaN, parentFrom - popupSize, lim, lim))
@@ -49,12 +46,15 @@ const prepCheckUpdPopupPos = (element,lrMode) => {
     return was => {
         const isSame =
             Math.abs(was.left-pos.left) < 0.5 && Math.abs(was.top-pos.top) < 0.5
-        return isSame ? was : pos
+        return isSame ? was : { ...pos, position: "fixed", width: "fit-content", minWidth: parentWidth }
     }
 }
 
-const popupParentStyle = {}
-
+/**
+ * @param {Element | null} element
+ * @param {boolean} [lrMode]
+ * @returns {[{position: 'fixed', top: number, left: number, visibility?: 'hidden', width?: number, minWidth?: number}]}
+ */
 export const usePopupPos = (element,lrMode) => {
     const [position,setPosition] = useState(hiddenPosition)
     const checkUpdPos = useCallback(()=>{
@@ -62,7 +62,7 @@ export const usePopupPos = (element,lrMode) => {
     },[element,setPosition,lrMode])
     useLayoutEffect(()=>{ checkUpdPos() },[checkUpdPos])
     useAnimationFrame(element,checkUpdPos)
-    return [position,popupParentStyle]
+    return [position]
 }
 
 ////
