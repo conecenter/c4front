@@ -118,6 +118,7 @@ export function DatepickerCalendar({
         date: +dateValues[0],
         ...timeSettings
     });
+    focusActiveWrapper(popupCalendarRef);
     setFinalState(createTimestampState(getTimestamp(chosenDate, dateSettings), None));
   }
 
@@ -167,11 +168,7 @@ export function DatepickerCalendar({
    * Now & Close buttons functionality
   */
   const onNowBtnClick = () => {
-    // fix for a bug when focus goes to null and popup with datepicker closes
-    const findActiveFocusWrapper = (el: HTMLElement) => el.classList.contains("activeFocusWrapper") ? el : null;
-    const focEl = findFirstParent(findActiveFocusWrapper)(popupCalendarRef);
-		if (focEl) focEl.focus();
-    
+    focusActiveWrapper(popupCalendarRef);    
     setFinalState(createTimestampState(Date.now(), None));
   }
 
@@ -288,4 +285,11 @@ function getArrowBtnsDiv(callback: React.MouseEventHandler) {
             onClick={callback} />) }
       </div>
   );
+}
+
+// fix for a bug when focus goes to null and popup with datepicker closes
+function focusActiveWrapper(popupElement: HTMLDivElement | null) {
+  const findActiveFocusWrapper = (el: HTMLElement) => el.classList.contains("activeFocusWrapper") ? el : null;
+  const focEl = findFirstParent(findActiveFocusWrapper)(popupElement);
+  if (focEl) focEl.focus();
 }
