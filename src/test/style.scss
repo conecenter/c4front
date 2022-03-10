@@ -1,6 +1,8 @@
 @import "reset";
 
 :root {
+  --color-primaryColor: #4DB6AC;
+  --textColor-primaryColor: #000000;
   --color-secondaryColor: rgb(225, 225, 225);
   --light-secondaryColor: hsl(0, 0%, 63.3333%);
   --color-body: hsl(0, 0%, 100%);
@@ -10,6 +12,7 @@
   --color-dark-headerColor: #b0bec5;
   --textColor-dark-primaryColor: #000000;
   --color-light-headerColor: #ECEFF1;
+  --color-dark-primaryColor: #009688;
 }
 
 body {
@@ -61,6 +64,21 @@ button {
     margin: 0;
     padding: 0.2em;
   }
+}
+
+/********************************************************/
+.top-row{
+  position: fixed;
+  z-index: 500;
+  width: 100%;
+}
+
+.hide-on-scroll{
+  z-index: 490;
+}
+
+.fullScreen {
+  height: 100vh;
 }
 
 //HEADER
@@ -687,5 +705,108 @@ div.grid {
         border-radius: 0px;
       }
     }
+  }
+}
+
+/***********************Menu**************************/
+.mainMenuBar{
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100000;
+  border-bottom: 0.15em solid var(--color-dark-primaryColor);
+  background-color: var(--color-primaryColor);
+  color: var(--textColor-primaryColor);
+}
+
+.leftMenuBox {
+  // white-space: nowrap;
+  // background-color: inherit;
+}
+
+.menuSelected {
+  background-color: var(--color-dark-primaryColor) !important;
+  color: var(--textColor-dark-primaryColor) !important;
+}
+
+.mainMenuPopupItem {
+  box-sizing: border-box;
+  position: relative;
+  white-space: nowrap;
+  padding-right: 0.8em;
+  cursor: pointer;
+  outline: none;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  vertical-align: middle;
+}
+
+.mainMenuPopupItem {
+
+  > span > button {
+      > div, > svg, > img {
+          vertical-align: middle;
+          display: inline-block;
+          padding-right: 0.2em;
+      }
+  }
+
+  > svg.rowIconSize {
+      padding: 0.2em 0.2em 0.2em 0.4em;
+  }
+}
+
+.fixMenuHeight{
+  line-height: 1;
+  font-size: 1em;
+  min-height: 2.4em;
+  display: inline-block;
+  width: 1px
+}
+
+.mainMenuElement{
+  display: flex;
+  align-self: center;
+  align-items: center;
+
+  > .mainMenuPopupItem {
+      margin: 0em 1em 0em 0em;
+  }
+}
+
+.mainMenuElement > .shoppingBasket > button{
+  padding: 0;
+  background-color: inherit;
+  line-height: normal;
+  color: inherit;
+  height: 1.6em;
+}
+
+.mainMenuElementIcon {
+  position: absolute;
+  right: 0.1em;
+  transition: transform 0.15s ease 0s;
+}
+
+// .menuDropdownElement {
+//     overflow-x: hidden;
+// }
+
+.menuBurger{
+  background-color: var(--color-primaryColor);
+  outline: "none";
+
+  > div > .mainMenuElement > .mainMenuPopupItem {
+      margin: 0;
+      padding-right: 1.5em;
+
+      > .mainMenuElementIcon {
+          right: 0.35em;
+      }
+  }
+  .mainMenuPopupItem {
+      width: 100%;
   }
 }
