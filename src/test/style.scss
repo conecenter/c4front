@@ -720,9 +720,9 @@ div.grid {
   color: var(--textColor-primaryColor);
 }
 
-.leftMenuBox {
-  // white-space: nowrap;
-  // background-color: inherit;
+.btnBurger {
+  background: url(burger.svg);
+  background-size: 1.6em 1.6em;
 }
 
 .menuSelected {

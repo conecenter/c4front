@@ -1,50 +1,66 @@
-import React, { ReactNode } from "react";
-import { ExpanderArea } from '../main/expander-area';
+import React from "react";
+import { Expander, ExpanderArea } from '../main/expander-area';
 
-interface MainMenuBarProps {
+interface MainMenuBar {
     key: string,
 	identity: Object,
-    leftChildren: MainMenuFolderItem[],
-    centralChildren: ReactNode[],
-    rightChildren: ReactNode[],
-    className: string,
-    logoImg?: string
+    leftChildren: MenuItem[],
+    centralChildren: MenuItem[],
+    rightChildren: MenuItem[],
+    icon: string
 }
 
-interface MainMenuFolderItem {
-    key: string,
-	identity: Object,  // ???
-    name: string,
-    popupLrMode: boolean,  // or menuItemLevel
-    isSelected: boolean,  // = popupOpen
-    children: Array<MainMenuFolderItem | MainMenuExecutableItem | MainMenuItemsGroup>,
-    className?: string
-}
+type MenuItem = MenuFolderItem | MenuExecutableItem | MenuCustomItem;
 
-interface MainMenuExecutableItem {
+interface MenuFolderItem {
     key: string,
 	identity: Object,
     name: string,
-    picture: string,
+    opened: Boolean,
+    current: boolean,
+    icon: string,
+    children: Array<MenuItem | MenuItemsGroup>,
+}
+
+interface MenuExecutableItem {
+    key: string,
+	identity: Object,
+    name: string,
+    opened: Boolean,
+    current: boolean,
+    icon: string,
     isSelected: boolean 
 }
 
-interface MainMenuItemsGroup {
+interface MenuItemsGroup {
     key: string,
-		identity: Object,
-    children: Array<MainMenuExecutableItem | MainMenuFolderItem>
+	identity: Object,
+    current: boolean,
+    children: MenuItem[]
 }
 
+type MenuCustomItem = any;
+
 export function MainMenuBar() {
-    const mainMenuElements = (
-			<>
-				<div key='left-menu' area="lt" className='leftMenuBox' >Hello world!</div>
-				<div key='right-menu' area="rt">Hello world</div>
-			</>
+    const element1 = (
+        <div key='left-menu' area="lt" className='leftMenuBox' expandOrder={1}>Hello world!</div>
     );
+    const element2 = (
+        <div key='right-menu' area="rt" expandOrder={0}>Hello world</div>
+    );
+    
     return (
 			<div key='top-bar' className='mainMenuBar top-row hide-on-scroll'>
-					<ExpanderArea expandTo={[mainMenuElements]} maxLineCount={1} />
+					<ExpanderArea maxLineCount={1} expandTo={[
+                        <Expander key='left-menu' area="lt" expandOrder={0}>
+                            <button key='left-menu' area="lt" className='btnBurger' expandTo={[
+                                {leftChildren.forEach(child => <Expander key={child.key} area='lt'></Expander>)}
+                            ]} />
+                        </Expander>,
+                        <Expander key='right-menu' area="rt" expandOrder={1}>
+                            <div>Helloworld!Helloworld! Hello world! Hello world!</div>
+                        </Expander>
+                    ]} />
 			</div>            
     );
 }
