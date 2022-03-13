@@ -237,8 +237,8 @@ export function DatepickerCalendar({
         </div>}
 
       <div className='dpCtrlBtnsCont'>
-        <button className='dpBtnNow' onClick={onNowBtnClick}>Now</button>
-        <button className='dpBtnClose' onClick={onCloseBtnClick}>Close</button>
+        <button className='dpBtnNow' onClick={onNowBtnClick}>{locale.btnNowText}</button>
+        <button className='dpBtnClose' onClick={onCloseBtnClick}>{locale.btnCloseText}</button>
       </div>
     </div>
   );

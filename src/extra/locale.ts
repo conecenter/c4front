@@ -27,6 +27,8 @@ interface Locale {
     months: Month[]
     dateTimeFormats: DateTimeFormat[]
     defaultDateTimeFormatId: number
+    btnNowText: string,
+    btnCloseText: string
 }
 
 interface TextFormatToken {
@@ -105,6 +107,12 @@ function getExtendedDateTimeFormat(dateTimeFormat: DateTimeFormat): ExtendedDate
     }
 }
 
+const dpBtnNames: {[index: string]: string[] | undefined} = {
+    en: ['Now', 'Close'],
+    ru: ['Сейчас', 'Закрыть'],
+    ukUA: ['Зараз', 'Закрити']
+}
+
 interface ExtendedLocale extends Locale {
     dateTimeFormats: ExtendedDateTimeFormat[]
     defaultDateTimeFormat: ExtendedDateTimeFormat
@@ -120,8 +128,11 @@ function getExtendedLocale(locale: Locale): ExtendedLocale {
     const monthMap = new Map(locale.months.map(month => [month.id, month]))
     const monthFullNameTree = new TrieSearch('fullName')
     monthFullNameTree.addAll(locale.months)
+    const btnNames = dpBtnNames[locale.shortName] || dpBtnNames.en as string[]
     return ({
         ...locale,
+        btnNowText: btnNames[0],
+        btnCloseText: btnNames[1],
         dateTimeFormats: locale.dateTimeFormats.map(getExtendedDateTimeFormat),
         defaultDateTimeFormat: getExtendedDateTimeFormat(<DateTimeFormat>locale.dateTimeFormats.find(value => value.id === locale.defaultDateTimeFormatId)),
         getMonthNameShort(id: number): string {
@@ -177,6 +188,8 @@ class DefaultLocale implements Locale {
         pattern: "dd/MMMM/yyyy"
     }]
     defaultDateTimeFormatId: number = 0
+    btnNowText = 'Now'
+    btnCloseText = 'Close'
 }
 
 const UserLocaleContext: Context<ExtendedLocale> = createContext<ExtendedLocale>(getExtendedLocale(new DefaultLocale()))
