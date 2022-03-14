@@ -1,7 +1,12 @@
-import {CSSProperties, ReactNode} from "react";
-import {FlexibleSizes} from "./flexible-api";
-import {createElement as el} from "react";
-import {DatePickerInputElement} from "../datepicker/datepicker";
+import React, {createElement as el, CSSProperties, ReactNode} from "react";
+import {
+  FLEXIBLE_CELL_CLASSNAME,
+  FLEXIBLE_COLUMN_CLASSNAME,
+  FLEXIBLE_GROUPBOX_CLASSNAME,
+  FLEXIBLE_ROOT_CLASSNAME, FLEXIBLE_ROW_CLASSNAME,
+  FlexibleSizes
+} from "./flexible-api";
+import {provideColumn, provideRow, useFDirectionIsColumn} from "./flexible-direction";
 
 interface FlexibleColumnRootProps {
   key: string,
@@ -17,6 +22,7 @@ function debugBorder(color: string): CSSProperties {
 
 function FlexibleColumnRoot({key, children}: FlexibleColumnRootProps) {
   return el("div", {
+    className: FLEXIBLE_ROOT_CLASSNAME,
     style: {
       width: "100%",
     }
@@ -31,6 +37,7 @@ interface FlexibleColumnProps {
 
 function FlexibleColumn({key, sizes, children}: FlexibleColumnProps) {
   return el("div", {
+    className: FLEXIBLE_COLUMN_CLASSNAME,
     style: {
       display: "flex",
       flexGrow: 1,
@@ -41,7 +48,7 @@ function FlexibleColumn({key, sizes, children}: FlexibleColumnProps) {
       maxHeight: "fit-content",
       ...debugBorder("red"),
     }
-  }, children)
+  }, provideColumn(children))
 }
 
 interface FlexibleGroupboxProps {
@@ -52,6 +59,7 @@ interface FlexibleGroupboxProps {
 
 function FlexibleGroupbox({key, sizes, children}: FlexibleGroupboxProps) {
   return el("div", {
+    className: FLEXIBLE_GROUPBOX_CLASSNAME,
     style: {
       display: "flex",
       flexGrow: 1,
@@ -62,17 +70,25 @@ function FlexibleGroupbox({key, sizes, children}: FlexibleGroupboxProps) {
       maxHeight: "fit-content",
       ...debugBorder("orange"),
     }
-  }, children)
+  }, provideColumn(children))
 }
 
 interface FlexibleRowProps {
   key: string
   sizes: FlexibleSizes
-  children: ReactNode[]
+  leftChildren: ReactNode[]
+  centerChildren: ReactNode[]
+  rightChildren: ReactNode[]
 }
 
-function FlexibleRow({key, sizes, children}: FlexibleRowProps) {
+function addEmptyDiv(children: ReactNode[]) {
+  const childrenArray = React.Children.toArray(children)
+  return childrenArray.length > 0 ? [el("div", {style: {marginLeft: "auto"}}), ...React.Children.toArray(children)] : []
+}
+
+function FlexibleRow({key, sizes, leftChildren, centerChildren, rightChildren}: FlexibleRowProps) {
   return el("div", {
+    className: FLEXIBLE_ROW_CLASSNAME,
     style: {
       display: "flex",
       flexGrow: 1,
@@ -82,7 +98,11 @@ function FlexibleRow({key, sizes, children}: FlexibleRowProps) {
       maxWidth: `${sizes.max}em`,
       ...debugBorder("blue"),
     }
-  }, children)
+  }, provideRow([
+    ...React.Children.toArray(leftChildren),
+    ...addEmptyDiv(centerChildren),
+    ...addEmptyDiv(rightChildren)
+  ]))
 }
 
 interface FlexibleCellProps {
@@ -92,12 +112,20 @@ interface FlexibleCellProps {
 }
 
 function FlexibleCell({key, sizes, children}: FlexibleCellProps) {
+  const parentDirection = useFDirectionIsColumn()
+  const cellStyles = parentDirection ? {
+    minWidth: `${sizes.min}em`,
+    maxWidth: `${sizes.max}em`
+  } : {
+    flexGrow: 1,
+    flexBasis: `${sizes.min}em`,
+    maxWidth: `${sizes.max}em`,
+  }
   return el("div", {
+    className: FLEXIBLE_CELL_CLASSNAME,
     style: {
       display: "inline-block",
-      flexGrow: 1,
-      flexBasis: `${sizes.min}em`,
-      maxWidth: `${sizes.max}em`,
+      ...cellStyles,
       ...debugBorder("green"),
     }
   }, children)

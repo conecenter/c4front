@@ -35,7 +35,9 @@ trait FlexibleElement extends ToChildPair
   @c4el("FlexibleRow") def flexibleRow(
     key: String,
     sizes: FlexibleSize,
-    children: ElList[FlexibleElement]
+    leftChildren: ElList[FlexibleElement],
+    centerChildren: ElList[FlexibleElement] = Nil,
+    rightChildren: ElList[FlexibleElement] = Nil,
   ): FlexibleElement
 
   @c4el("FlexibleCell") def flexibleCell(
