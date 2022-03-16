@@ -1,9 +1,11 @@
-import React, {createElement as el, CSSProperties, ReactNode} from "react";
+import {createElement as el, CSSProperties, ReactNode} from "react";
 import {
   FLEXIBLE_CELL_CLASSNAME,
   FLEXIBLE_COLUMN_CLASSNAME,
   FLEXIBLE_GROUPBOX_CLASSNAME,
-  FLEXIBLE_ROOT_CLASSNAME, FLEXIBLE_ROW_CLASSNAME,
+  FLEXIBLE_ROOT_CLASSNAME,
+  FLEXIBLE_ROW_CLASSNAME,
+  FlexibleAlign,
   FlexibleSizes
 } from "./flexible-api";
 import {provideColumn, provideRow, useFDirectionIsColumn} from "./flexible-direction";
@@ -32,6 +34,7 @@ function FlexibleColumnRoot({key, children}: FlexibleColumnRootProps) {
 interface FlexibleColumnProps {
   key: string
   sizes: FlexibleSizes
+  align: FlexibleAlign
   children: ReactNode[]
 }
 
@@ -44,7 +47,7 @@ function FlexibleColumn({key, sizes, children}: FlexibleColumnProps) {
       flexDirection: "column",
       flexBasis: `${sizes.min}em`,
       minWidth: `${sizes.min}em`,
-      maxWidth: `${sizes.max}em`,
+      maxWidth: sizes.max ? `${sizes.max}em` : undefined,
       maxHeight: "fit-content",
       ...debugBorder("red"),
     }
@@ -54,6 +57,7 @@ function FlexibleColumn({key, sizes, children}: FlexibleColumnProps) {
 interface FlexibleGroupboxProps {
   key: string
   sizes: FlexibleSizes
+  align: FlexibleAlign
   children: ReactNode[]
 }
 
@@ -66,7 +70,7 @@ function FlexibleGroupbox({key, sizes, children}: FlexibleGroupboxProps) {
       flexDirection: "column",
       flexBasis: `${sizes.min}em`,
       minWidth: `${sizes.min}em`,
-      maxWidth: `${sizes.max}em`,
+      maxWidth: sizes.max ? `${sizes.max}em` : undefined,
       maxHeight: "fit-content",
       ...debugBorder("orange"),
     }
@@ -76,17 +80,11 @@ function FlexibleGroupbox({key, sizes, children}: FlexibleGroupboxProps) {
 interface FlexibleRowProps {
   key: string
   sizes: FlexibleSizes
-  leftChildren: ReactNode[]
-  centerChildren: ReactNode[]
-  rightChildren: ReactNode[]
+  align: FlexibleAlign
+  children: ReactNode[]
 }
 
-function addEmptyDiv(children: ReactNode[]) {
-  const childrenArray = React.Children.toArray(children)
-  return childrenArray.length > 0 ? [el("div", {style: {marginLeft: "auto"}}), ...React.Children.toArray(children)] : []
-}
-
-function FlexibleRow({key, sizes, leftChildren, centerChildren, rightChildren}: FlexibleRowProps) {
+function FlexibleRow({key, sizes, children}: FlexibleRowProps) {
   return el("div", {
     className: FLEXIBLE_ROW_CLASSNAME,
     style: {
@@ -95,19 +93,16 @@ function FlexibleRow({key, sizes, leftChildren, centerChildren, rightChildren}: 
       flexDirection: "row",
       flexWrap: "wrap",
       minWidth: `${sizes.min}em`,
-      maxWidth: `${sizes.max}em`,
+      maxWidth: sizes.max ? `${sizes.max}em` : undefined,
       ...debugBorder("blue"),
     }
-  }, provideRow([
-    ...React.Children.toArray(leftChildren),
-    ...addEmptyDiv(centerChildren),
-    ...addEmptyDiv(rightChildren)
-  ]))
+  }, provideRow(children))
 }
 
 interface FlexibleCellProps {
   key: string
   sizes: FlexibleSizes
+  align: FlexibleAlign
   children: ReactNode[]
 }
 
@@ -115,11 +110,11 @@ function FlexibleCell({key, sizes, children}: FlexibleCellProps) {
   const parentDirection = useFDirectionIsColumn()
   const cellStyles = parentDirection ? {
     minWidth: `${sizes.min}em`,
-    maxWidth: `${sizes.max}em`
+    maxWidth: sizes.max ? `${sizes.max}em` : undefined,
   } : {
     flexGrow: 1,
     flexBasis: `${sizes.min}em`,
-    maxWidth: `${sizes.max}em`,
+    maxWidth: sizes.max ? `${sizes.max}em` : undefined,
   }
   return el("div", {
     className: FLEXIBLE_CELL_CLASSNAME,
