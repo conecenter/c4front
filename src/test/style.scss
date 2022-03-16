@@ -405,7 +405,6 @@ div.grid {
               transition: all 0.15s ease;
             }
             
-  
             &.rotateArrow::after {
               transform: rotate(-180deg);
             }
@@ -710,103 +709,154 @@ div.grid {
 
 /***********************Menu**************************/
 .mainMenuBar{
-  width: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 100000;
-  border-bottom: 0.15em solid var(--color-dark-primaryColor);
-  background-color: var(--color-primaryColor);
-  color: var(--textColor-primaryColor);
-}
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100000;
+    border-bottom: 0.15em solid var(--color-dark-primaryColor);
+    background-color: var(--color-primaryColor);
+    color: var(--textColor-primaryColor);
 
-.btnBurger {
-  background: url(burger.svg);
-  background-size: 1.6em 1.6em;
-}
+    // replace .mainMenuContainer in 2020
+    .leftMenuBox {
+      display: flex;
+      // white-space: nowrap;
+      // background-color: inherit;
 
-.menuSelected {
-  background-color: var(--color-dark-primaryColor) !important;
-  color: var(--textColor-dark-primaryColor) !important;
-}
+      // replace .menu-popup>div:first-child in 2020
+      >.menuItem {  // .topLevelMenuItem ??
+        max-width: 20em;
+        margin: 0 1em 0 0;  // 2018
+        color: var(--textColor-primaryColor);
 
-.mainMenuPopupItem {
-  box-sizing: border-box;
-  position: relative;
-  white-space: nowrap;
-  padding-right: 0.8em;
-  cursor: pointer;
-  outline: none;
-  display: flex;
-  align-items: center;
-  height: 100%;
-  vertical-align: middle;
-}
-
-.mainMenuPopupItem {
-
-  > span > button {
-      > div, > svg, > img {
-          vertical-align: middle;
-          display: inline-block;
-          padding-right: 0.2em;
+        >span {
+          text-overflow: ellipsis;
+          overflow: hidden;
+          margin-left: 0.2em;
+        }
       }
+    }
+
+    // .folderMenu - used in 2020 for > .rowFlexContainer > .mainMenuElement > :not(.folderMenu) {...
+
+  .btnBurger {
+    background: url(burger.svg);
+    background-size: 1.6em 1.6em;
   }
 
-  > svg.rowIconSize {
-      padding: 0.2em 0.2em 0.2em 0.4em;
+  // .mainMenuElement
+  .menuItem {
+    display: flex;
+    align-items: center;
+    min-height: 2em;
+    height: 100%;
+    white-space: nowrap;
+    cursor: pointer;
+    margin-right: 1em;  // 2018
+
+    >span {
+      padding-right: 0.8em; // 2018
+      // padding: 0 1.8em 0 1em;  // 2020
+    }
   }
-}
 
-.fixMenuHeight{
-  line-height: 1;
-  font-size: 1em;
-  min-height: 2.4em;
-  display: inline-block;
-  width: 1px
-}
-
-.mainMenuElement{
-  display: flex;
-  align-self: center;
-  align-items: center;
-
-  > .mainMenuPopupItem {
-      margin: 0em 1em 0em 0em;
+  // .mainMenuElementIcon
+  .menuFolderIcon {
+    transition: transform 0.15s ease 0s;
+    height: 1em;
   }
-}
 
-.mainMenuElement > .shoppingBasket > button{
-  padding: 0;
-  background-color: inherit;
-  line-height: normal;
-  color: inherit;
-  height: 1.6em;
-}
+  // .textLineSize {
+  //   height: 1em;
+  // }
 
-.mainMenuElementIcon {
-  position: absolute;
-  right: 0.1em;
-  transition: transform 0.15s ease 0s;
-}
-
-// .menuDropdownElement {
-//     overflow-x: hidden;
-// }
-
-.menuBurger{
-  background-color: var(--color-primaryColor);
-  outline: "none";
-
-  > div > .mainMenuElement > .mainMenuPopupItem {
-      margin: 0;
-      padding-right: 1.5em;
-
-      > .mainMenuElementIcon {
-          right: 0.35em;
-      }
+  .menuPopupBox {
+    min-width: 13.5em;
+    color: var(--textColor-body);
+    // transition: all 0.15s
+    // transform-origin: 50% 0%;
   }
+  /* 2020:
+  .mainMenuPopupContainer -> .menuPopupBox {
+    + min-width: 13.5em;
+    + box-shadow: 0px 2px 50px rgb(47 46 79 / 75%);
+    + z-index: 10002;
+    // transform-origin: 50% 0% 0px;
+    + border: 0; // 2020
+    + color: var(--textColor-body);
+    + background-color: var(--color-body);
+    - position: absolute;
+    - left: 0px;
+    - top: 100%;
+  }  */
+
+  .menuSelected {
+    background-color: var(--color-dark-primaryColor) !important;
+    color: var(--textColor-dark-primaryColor) !important;
+  }
+
+  // .mainMenuPopupItem {
+  //   box-sizing: border-box;
+  //   position: relative;
+  //   white-space: nowrap;
+  //   padding-right: 0.8em;
+  //   cursor: pointer;
+  //   outline: none;
+  //   display: flex;
+  //   align-items: center;
+  //   height: 100%;
+  //   vertical-align: middle;
+  // }
+
   .mainMenuPopupItem {
-      width: 100%;
+
+    > span > button {
+        > div, > svg, > img {
+            vertical-align: middle;
+            display: inline-block;
+            padding-right: 0.2em;
+        }
+    }
+
+    > svg.rowIconSize {
+        padding: 0.2em 0.2em 0.2em 0.4em;
+    }
+  }
+
+  // .fixMenuHeight{
+  //   line-height: 1;
+  //   font-size: 1em;
+  //   min-height: 2.4em;
+  //   display: inline-block;
+  //   width: 1px
+  // }
+
+  // .mainMenuElement
+  .mainMenuElement > .shoppingBasket > button{
+    padding: 0;
+    background-color: inherit;
+    line-height: normal;
+    color: inherit;
+    height: 1.6em;
+  }
+
+  .menuBurger{
+    background-color: var(--color-primaryColor);
+    outline: "none";
+
+    // .mainMenuElement
+    > div > .menuItem > .mainMenuPopupItem {
+        margin: 0;
+        padding-right: 1.5em;
+
+        // .mainMenuElementIcon
+        > .menuFolderIcon {
+            right: 0.35em;
+        }
+    }
+    .mainMenuPopupItem {
+        width: 100%;
+    }
   }
 }

@@ -1,16 +1,17 @@
-import React from "react";
+import React, { ReactNode, FunctionComponentElement, useState, ReactElement } from "react";
 import { Expander, ExpanderArea } from '../main/expander-area';
+import { usePopupPos } from '../main/popup';
 
 interface MainMenuBar {
     key: string,
 	identity: Object,
-    leftChildren: MenuItem[],
-    centralChildren: MenuItem[],
-    rightChildren: MenuItem[],
-    icon: string
+    leftChildren: ReactElement<MenuItem>[],
+    centralChildren?: MenuItem[],
+    rightChildren?: MenuItem[],
+    icon?: string
 }
 
-type MenuItem = MenuFolderItem | MenuExecutableItem | MenuCustomItem;
+type MenuItem = MenuFolderItem | MenuExecutableItem // | MenuCustomItem;
 
 interface MenuFolderItem {
     key: string,
@@ -19,7 +20,7 @@ interface MenuFolderItem {
     opened: Boolean,
     current: boolean,
     icon: string,
-    children: Array<MenuItem | MenuItemsGroup>,
+    children?: ReactElement<MenuItem | MenuItemsGroup>[],
 }
 
 interface MenuExecutableItem {
@@ -36,45 +37,63 @@ interface MenuItemsGroup {
     key: string,
 	identity: Object,
     current: boolean,
-    children: MenuItem[]
+    children: ReactElement<MenuItem>[]
 }
 
 type MenuCustomItem = any;
 
-export function MainMenuBar() {
-    const element1 = (
-        <div key='left-menu' area="lt" className='leftMenuBox' expandOrder={1}>Hello world!</div>
-    );
-    const element2 = (
-        <div key='right-menu' area="rt" expandOrder={0}>Hello world</div>
-    );
-    
+interface MenuPopupElement {
+    children?: ReactElement<MenuItem | MenuItemsGroup>[]
+}
+
+function MainMenuBar({ leftChildren }: MainMenuBar) {   
     return (
 			<div key='top-bar' className='mainMenuBar top-row hide-on-scroll'>
 					<ExpanderArea maxLineCount={1} expandTo={[
-                        <Expander key='left-menu' area="lt" expandOrder={0}>
-                            <button key='left-menu' area="lt" className='btnBurger' expandTo={[
-                                {leftChildren.forEach(child => <Expander key={child.key} area='lt'></Expander>)}
-                            ]} />
+                        <Expander key='left-menu' area="lt" expandOrder={0} expandTo={[
+                            <Expander area="lt">
+                                <div className='leftMenuBox'>
+                                    {leftChildren}
+                                </div>
+                            </Expander>
+                        ]}>
+                            <button key='left-menu' className='btnBurger' />
                         </Expander>,
                         <Expander key='right-menu' area="rt" expandOrder={1}>
-                            <div>Helloworld!Helloworld! Hello world! Hello world!</div>
+                            <div>Hello world!</div>
+                            <div>Hello world!</div>
+                            <div>Hello world!</div>
+                            <div>Hello world!</div>
                         </Expander>
                     ]} />
 			</div>            
     );
 }
 
-/*
-$("div", {
-    key: "top-bar",
-    tabIndex: "1"
-}, [
-    $("div", {
-        key: "left",
-    }, state.isBurger ? menuBurger : left),
-    $("div", { key: "right", style: { alignSelf: "center" } }, right)
-])
-*/
+function MenuFolderItem({name, icon, children}: MenuFolderItem) {
+    const [popupOpen, setPopupOpen] = useState(false);
+    return (
+        <div className='menuItem' tabIndex={1} onClick={() => setPopupOpen(!popupOpen)}>
+            {icon && <img src={icon} />}
+            <span>{name}</span>
+            <img src='..\test\datepicker\arrow-down.svg' className='menuFolderIcon' alt='arrow-down-icon' />
+            {popupOpen &&
+                <MenuPopupElement>{children}</MenuPopupElement>}
+        </div>
+    );
+}
+
+function MenuPopupElement({children}: MenuPopupElement) {
+    const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
+    const [popupPos] = usePopupPos(popupElement);
+    return (
+        <div ref={setPopupElement} className='menuPopupBox popupEl' style={popupPos} >
+            {children}
+        </div>
+    );
+}
 
 // "data-path": props.path - where used?
+// change img urls
+
+export { MainMenuBar, MenuFolderItem };

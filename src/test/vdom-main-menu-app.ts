@@ -1,12 +1,96 @@
 import ReactDOM from "react-dom";
 import { createElement as $ } from "react";
 import { createSyncProviders } from "../main/vdom-hooks";
-import { MainMenuBar } from '../extra/main-menu-bar';
+import { MainMenuBar, MenuFolderItem } from '../extra/main-menu-bar';
 
 function App() {
     const child = $(MainMenuBar, {
         key: "TEST",
-        identity: {parent: "test"}
+        identity: {parent: "test"},
+        leftChildren: [
+            $(MenuFolderItem, {
+                key: 'menuFolderItem-1',
+                identity: {parent: 'mainMenuBar'},
+                name: 'Warehouse/Terminal',
+                opened: false,
+                current: false,
+                icon: '',
+                children: [
+                    $(MenuFolderItem, {
+                        key: 'menuFolderItem-11',
+                        identity: {parent: 'menuFolderItem-1'},
+                        name: 'Placement/Locations',
+                        opened: false,
+                        current: false,
+                        icon: ''
+                    }),
+                    $(MenuFolderItem, {
+                        key: 'menuFolderItem-12',
+                        identity: {parent: 'menuFolderItem-1'},
+                        name: 'Cargo',
+                        opened: false,
+                        current: false,
+                        icon: ''
+                    }),
+                    $(MenuFolderItem, {
+                        key: 'menuFolderItem-13',
+                        identity: {parent: 'menuFolderItem-1'},
+                        name: 'Service',
+                        opened: false,
+                        current: false,
+                        icon: ''
+                    }),
+                    $(MenuFolderItem, {
+                        key: 'menuFolderItem-14',
+                        identity: {parent: 'menuFolderItem-1'},
+                        name: 'Document Flow',
+                        opened: false,
+                        current: false,
+                        icon: ''
+                    })
+                ]
+            }),
+            $(MenuFolderItem, {
+                key: 'menuFolderItem-2',
+                identity: {parent: 'mainMenuBar'},
+                name: 'Registers',
+                opened: false,
+                current: false,
+                icon: ''
+            }),
+            $(MenuFolderItem, {
+                key: 'menuFolderItem-3',
+                identity: {parent: 'mainMenuBar'},
+                name: 'Reports',
+                opened: false,
+                current: false,
+                icon: ''
+            }),
+            $(MenuFolderItem, {
+                key: 'menuFolderItem-4',
+                identity: {parent: 'mainMenuBar'},
+                name: 'Configuration',
+                opened: false,
+                current: false,
+                icon: ''
+            }),
+            $(MenuFolderItem, {
+                key: 'menuFolderItem-5',
+                identity: {parent: 'mainMenuBar'},
+                name: 'Administrator',
+                opened: false,
+                current: false,
+                icon: ''
+            }),
+            $(MenuFolderItem, {
+                key: 'menuFolderItem-6',
+                identity: {parent: 'mainMenuBar'},
+                name: 'Developer',
+                opened: false,
+                current: false,
+                icon: ''
+            })
+        ],
         // state: {
         //     inputValue: '45 LEGB [45 9 6]',
         //     mode: 'content',
