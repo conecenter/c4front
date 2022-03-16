@@ -5,14 +5,17 @@ import ee.cone.c4ui.FrontTypes.Em
 import ee.cone.c4vdom.Types._
 import ee.cone.c4vdom._
 
-@c4tagSwitch("FrontApp") trait FlexibleSize extends ToJson
+@c4tagSwitch("FrontApp") trait FlexibleSize extends ToJson {
+  def min: Em
+  def max: Option[Em]
+}
 
 trait FlexibleElement extends ToChildPair
 
 @c4tags("FrontApp") trait FlexibleElementsTags {
   @c4val def flexibleSizes(
     min: Em,
-    max: Em
+    max: Option[Em] = None,
   ): FlexibleSize
 
   @c4el("FlexibleColumnRoot") def flexibleColumnRoot(
@@ -35,9 +38,7 @@ trait FlexibleElement extends ToChildPair
   @c4el("FlexibleRow") def flexibleRow(
     key: String,
     sizes: FlexibleSize,
-    leftChildren: ElList[FlexibleElement],
-    centerChildren: ElList[FlexibleElement] = Nil,
-    rightChildren: ElList[FlexibleElement] = Nil,
+    children: ElList[FlexibleElement],
   ): FlexibleElement
 
   @c4el("FlexibleCell") def flexibleCell(
