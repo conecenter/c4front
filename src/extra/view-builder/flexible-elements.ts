@@ -1,12 +1,13 @@
-import {createElement as el, CSSProperties, ReactNode} from "react";
+import React, {createElement as el, CSSProperties, HTMLAttributes, ReactNode} from "react";
 import {
+  alignSelfStyle,
   FLEXIBLE_CELL_CLASSNAME,
   FLEXIBLE_COLUMN_CLASSNAME,
   FLEXIBLE_GROUPBOX_CLASSNAME,
   FLEXIBLE_ROOT_CLASSNAME,
   FLEXIBLE_ROW_CLASSNAME,
   FlexibleAlign,
-  FlexibleSizes
+  FlexibleSizes, isFill
 } from "./flexible-api";
 import {provideColumn, provideRow, useFDirectionIsColumn} from "./flexible-direction";
 
@@ -17,7 +18,7 @@ interface FlexibleColumnRootProps {
 
 function debugBorder(color: string): CSSProperties {
   return {
-    border: "5px dashed",
+    border: "2px dashed",
     borderColor: color,
   }
 }
@@ -77,26 +78,77 @@ function FlexibleGroupbox({key, sizes, children}: FlexibleGroupboxProps) {
   }, provideColumn(children))
 }
 
+interface FlexibleChildAlign {
+  props: {
+    align: FlexibleAlign
+  }
+}
+
 interface FlexibleRowProps {
   key: string
   sizes: FlexibleSizes
   align: FlexibleAlign
-  children: ReactNode[]
+  children: (ReactNode & FlexibleChildAlign)[]
 }
 
-function FlexibleRow({key, sizes, children}: FlexibleRowProps) {
-  return el("div", {
+function correctNext(prev: FlexibleAlign, next: FlexibleAlign): boolean {
+  switch (prev) {
+    case "l":
+      return true
+    case "c":
+      return next !== "l"
+    case "r":
+      return next !== "l" && next !== "c"
+    default:
+      return true
+  }
+}
+
+const spacer = el("div", {style: {marginLeft: "auto", marginRight: "auto"}})
+
+function separateChildren(children: (ReactNode & FlexibleChildAlign)[]): React.ReactNode[][] {
+  const childrenArray = React.Children.toArray(children) as (ReactNode & FlexibleChildAlign)[]
+  const newChildren = [[]] as ReactNode[][]
+  let currentAlign: FlexibleAlign = "l"
+  let currentInd = 0
+  for (const elem of childrenArray) {
+    const newAlign = elem.props.align
+    if (currentAlign === newAlign || newAlign === 'f')
+      newChildren[currentInd].push(elem)
+    else {
+      if (correctNext(currentAlign, newAlign))
+        newChildren[currentInd].push(spacer, elem)
+      else {
+        currentInd++
+        newChildren.push([elem])
+      }
+      currentAlign = newAlign
+    }
+  }
+  return newChildren
+}
+
+function wrapInRow(key: string, props: HTMLAttributes<HTMLDivElement>, children: ReactNode[]) {
+  return el("div", props, children)
+}
+
+function FlexibleRow({key, sizes, align, children}: FlexibleRowProps) {
+  const separated = separateChildren(children)
+  const props: HTMLAttributes<HTMLDivElement> = {
     className: FLEXIBLE_ROW_CLASSNAME,
     style: {
       display: "flex",
-      flexGrow: 1,
       flexDirection: "row",
       flexWrap: "wrap",
       minWidth: `${sizes.min}em`,
-      maxWidth: sizes.max ? `${sizes.max}em` : undefined,
+      maxWidth: sizes.max && !isFill(align) ? `${sizes.max}em` : undefined,
+      ...alignSelfStyle(align),
       ...debugBorder("blue"),
     }
-  }, provideRow(children))
+  }
+  return provideRow(
+    separated.map((list, ind) => wrapInRow(`${key}-${ind}`, props, list))
+  )
 }
 
 interface FlexibleCellProps {
@@ -106,11 +158,12 @@ interface FlexibleCellProps {
   children: ReactNode[]
 }
 
-function FlexibleCell({key, sizes, children}: FlexibleCellProps) {
-  const parentDirection = useFDirectionIsColumn()
-  const cellStyles = parentDirection ? {
+function FlexibleCell({key, sizes, align, children}: FlexibleCellProps) {
+  const insideColumn = useFDirectionIsColumn()
+  const cellStyles = insideColumn ? {
     minWidth: `${sizes.min}em`,
     maxWidth: sizes.max ? `${sizes.max}em` : undefined,
+    ...alignSelfStyle(align),
   } : {
     flexGrow: 1,
     flexBasis: `${sizes.min}em`,

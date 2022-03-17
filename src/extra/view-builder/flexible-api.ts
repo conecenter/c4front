@@ -1,3 +1,5 @@
+import {CSSProperties} from "react";
+
 export interface FlexibleSizes {
   min: number,
   max?: number
@@ -10,7 +12,11 @@ const FLEXIBLE_ROW_CLASSNAME = "flexibleRow"
 const FLEXIBLE_CELL_CLASSNAME = "flexibleCell"
 
 type FlexibleAlign = 'l' | 'c' | 'r' | 'f'
-const ifFill = (align: FlexibleAlign): align is 'f' => align === 'f'
+const isFill = (align: FlexibleAlign): align is 'f' => align === 'f'
+const alignSelfStyle = (align: FlexibleAlign): CSSProperties =>
+  align === 'c' ? {alignSelf: "center"} :
+    align === 'r' ? {alignSelf: "flex-end"} :
+      {}
 
 export {
   FLEXIBLE_ROOT_CLASSNAME,
@@ -18,7 +24,8 @@ export {
   FLEXIBLE_GROUPBOX_CLASSNAME,
   FLEXIBLE_ROW_CLASSNAME,
   FLEXIBLE_CELL_CLASSNAME,
-  ifFill,
+  isFill,
+  alignSelfStyle,
 }
 
 export type {FlexibleAlign}
