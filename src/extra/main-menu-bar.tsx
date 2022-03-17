@@ -1,6 +1,7 @@
-import React, { ReactNode, FunctionComponentElement, useState, ReactElement } from "react";
+import React, { useState, ReactElement, useCallback } from "react";
 import { Expander, ExpanderArea } from '../main/expander-area';
 import { usePopupPos } from '../main/popup';
+import { useSync } from '../main/vdom-hooks';
 
 interface MainMenuBar {
     key: string,
@@ -17,7 +18,7 @@ interface MenuFolderItem {
     key: string,
 	identity: Object,
     name: string,
-    opened: Boolean,
+    opened: boolean,
     current: boolean,
     icon: string,
     children?: ReactElement<MenuItem | MenuItemsGroup>[],
@@ -27,10 +28,9 @@ interface MenuExecutableItem {
     key: string,
 	identity: Object,
     name: string,
-    opened: Boolean,
+    opened: boolean,
     current: boolean,
-    icon: string,
-    isSelected: boolean 
+    icon: string
 }
 
 interface MenuItemsGroup {
@@ -93,7 +93,52 @@ function MenuPopupElement({children}: MenuPopupElement) {
     );
 }
 
-// "data-path": props.path - where used?
-// change img urls
+
+interface Patch {
+    headers: PatchHeaders,
+    skipByPath: boolean,
+    retry: boolean,
+    defer: boolean
+}
+
+interface PatchHeaders {
+    'x-r-opened': string,
+    'x-r-current': string
+}
+
+interface MenuItemState {
+    opened: boolean,
+    current: boolean
+}
+
+function useMenuItemSync(
+    identity: Object,
+    receiverName: string,
+    serverState: MenuItemState,
+    patchToState: (p: Patch) => MenuItemState,
+    serverToState: (s: MenuItemState) => MenuItemState,
+    stateToPatch: (s: MenuItemState) => Patch
+) {
+    const [patches, enqueuePatch] = useSync(receiverId(receiverName)(identity));
+    const patch: Patch = patches.slice(-1)[0];
+    const currentState: MenuItemState = patch ? patchToState(patch) : serverState;
+    const setFinalState = useCallback((state: MenuItemState) => enqueuePatch(stateToPatch(state), [enqueuePatch]));
+    return { currentState, setFinalState };
+}
+
+function patchToState({ headers }: Patch): MenuItemState {
+	return {
+		opened: !!headers['x-r-opened'],
+        current: !!headers['x-r-current']
+	};
+}
+
+function stateToPatch({opened, current}: MenuItemState): Patch {
+	const headers = {
+		'x-r-opened': opened ? '1' : '',
+        'x-r-current': current ? '1' : ''
+	};
+	return { headers, skipByPath: true, retry: true, defer: false };
+}
 
 export { MainMenuBar, MenuFolderItem };
