@@ -56,4 +56,14 @@ trait FlexibleElement extends ToChildPair
     align: FlexibleAlign,
     children: ViewRes
   ): FlexibleElement
+
+  @c4el("FlexibleLabeled") def flexibleLabeled(
+    key: String,
+    sizes: FlexibleSize,
+    align: FlexibleAlign,
+    label: String,
+    children: ViewRes,
+    labelChildren: ViewRes = Nil,
+    horizontal: Boolean = false,
+  ): FlexibleElement
 }

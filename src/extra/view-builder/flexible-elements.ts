@@ -3,6 +3,9 @@ import {
   FLEXIBLE_CELL_CLASSNAME,
   FLEXIBLE_COLUMN_CLASSNAME,
   FLEXIBLE_GROUPBOX_CLASSNAME,
+  FLEXIBLE_LABELED_CHILD_CLASSNAME,
+  FLEXIBLE_LABELED_CLASSNAME,
+  FLEXIBLE_LABELED_LABEL_CLASSNAME,
   FLEXIBLE_ROOT_CLASSNAME,
   FLEXIBLE_ROW_CLASSNAME,
   FlexibleAlign,
@@ -16,7 +19,7 @@ interface FlexibleColumnRootProps {
 
 function debugBorder(color: string): CSSProperties {
   return {
-    border: "2px dashed",
+    border: "2px solid",
     borderColor: color,
   }
 }
@@ -164,4 +167,47 @@ function FlexibleCell({key, sizes, children}: FlexibleCellProps) {
   }, children)
 }
 
-export const flexibleComponents = {FlexibleColumnRoot, FlexibleColumn, FlexibleGroupbox, FlexibleRow, FlexibleCell}
+interface FlexibleLabeledProps {
+  key: string
+  sizes: FlexibleSizes
+  label: string
+  labelChildren: ReactNode[]
+  children: ReactNode[]
+  horizontal?: boolean
+}
+
+function FlexibleLabeled({sizes, label, labelChildren, children, horizontal}: FlexibleLabeledProps) {
+  return el("div", {
+      className: FLEXIBLE_LABELED_CLASSNAME,
+      style: {
+        display: "flex",
+        flexDirection: horizontal ? "row" : "column",
+        flexGrow: 1,
+        flexBasis: `${sizes.min}em`,
+        maxWidth: sizes.max ? `${sizes.max}em` : undefined,
+        ...debugBorder("yellow"),
+      }
+    },
+    el("label", {
+      className: FLEXIBLE_LABELED_LABEL_CLASSNAME,
+      style: {
+        fontSize: "0.8em",
+        display: "flex",
+        flexDirection: "row",
+        flexWrap: "nowrap",
+        alignItems: "center"
+      }
+    }, el("span", {}, label), labelChildren),
+    el("div", {
+      className: FLEXIBLE_LABELED_CHILD_CLASSNAME,
+      style: {
+        display: "flex",
+        flexDirection: "row",
+        flexWrap: "nowrap",
+        alignItems: "center"
+      }
+    }, children)
+  )
+}
+
+export const flexibleComponents = {FlexibleColumnRoot, FlexibleColumn, FlexibleGroupbox, FlexibleRow, FlexibleCell, FlexibleLabeled}
