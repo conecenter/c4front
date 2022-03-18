@@ -2,6 +2,7 @@ import React, { useState, ReactElement, useCallback } from "react";
 import { Expander, ExpanderArea } from '../main/expander-area';
 import { usePopupPos } from '../main/popup';
 import { useSync } from '../main/vdom-hooks';
+import { identityAt } from '../main/vdom-util';
 
 interface MainMenuBar {
     key: string,
@@ -9,7 +10,13 @@ interface MainMenuBar {
     leftChildren: ReactElement<MenuItem>[],
     centralChildren?: MenuItem[],
     rightChildren?: MenuItem[],
-    icon?: string
+    state: MenuItemState,
+    icon?: string    
+}
+
+interface MenuItemState {
+    opened: boolean,
+    current?: boolean
 }
 
 type MenuItem = MenuFolderItem | MenuExecutableItem // | MenuCustomItem;
@@ -18,25 +25,22 @@ interface MenuFolderItem {
     key: string,
 	identity: Object,
     name: string,
-    opened: boolean,
-    current: boolean,
     icon: string,
     children?: ReactElement<MenuItem | MenuItemsGroup>[],
+    state: MenuItemState
 }
 
 interface MenuExecutableItem {
     key: string,
 	identity: Object,
     name: string,
-    opened: boolean,
-    current: boolean,
+    state: MenuItemState,
     icon: string
 }
 
 interface MenuItemsGroup {
     key: string,
 	identity: Object,
-    current: boolean,
     children: ReactElement<MenuItem>[]
 }
 
@@ -70,14 +74,15 @@ function MainMenuBar({ leftChildren }: MainMenuBar) {
     );
 }
 
-function MenuFolderItem({name, icon, children}: MenuFolderItem) {
-    const [popupOpen, setPopupOpen] = useState(false);
+function MenuFolderItem({identity, name, state, icon, children}: MenuFolderItem) {
+    const {currentState, setFinalState} = useMenuItemSync(identity, 'receiver', state);
+    const { opened, current } = currentState;
     return (
-        <div className='menuItem' tabIndex={1} onClick={() => setPopupOpen(!popupOpen)}>
+        <div className='menuItem' tabIndex={1} onClick={() => setFinalState({ opened: !currentState.opened, current })}>
             {icon && <img src={icon} />}
             <span>{name}</span>
             <img src='..\test\datepicker\arrow-down.svg' className='menuFolderIcon' alt='arrow-down-icon' />
-            {popupOpen &&
+            {opened &&
                 <MenuPopupElement>{children}</MenuPopupElement>}
         </div>
     );
@@ -106,23 +111,17 @@ interface PatchHeaders {
     'x-r-current': string
 }
 
-interface MenuItemState {
-    opened: boolean,
-    current: boolean
-}
+const receiverId = (name: string) => identityAt(name);
 
 function useMenuItemSync(
     identity: Object,
     receiverName: string,
     serverState: MenuItemState,
-    patchToState: (p: Patch) => MenuItemState,
-    serverToState: (s: MenuItemState) => MenuItemState,
-    stateToPatch: (s: MenuItemState) => Patch
 ) {
-    const [patches, enqueuePatch] = useSync(receiverId(receiverName)(identity));
+    const [patches, enqueuePatch] = useSync(receiverId(receiverName)(identity)) as [Patch[], (patch: Patch) => void];
     const patch: Patch = patches.slice(-1)[0];
     const currentState: MenuItemState = patch ? patchToState(patch) : serverState;
-    const setFinalState = useCallback((state: MenuItemState) => enqueuePatch(stateToPatch(state), [enqueuePatch]));
+    const setFinalState = useCallback((state: MenuItemState) => enqueuePatch(stateToPatch(state)), [enqueuePatch]);
     return { currentState, setFinalState };
 }
 

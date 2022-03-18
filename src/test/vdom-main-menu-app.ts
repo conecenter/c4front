@@ -7,45 +7,56 @@ function App() {
     const child = $(MainMenuBar, {
         key: "TEST",
         identity: {parent: "test"},
+        state: { opened: false },
         leftChildren: [
             $(MenuFolderItem, {
                 key: 'menuFolderItem-1',
                 identity: {parent: 'mainMenuBar'},
                 name: 'Warehouse/Terminal',
-                opened: false,
-                current: false,
+                state: {
+                    opened: false,
+                    current: false
+                },
                 icon: '',
                 children: [
                     $(MenuFolderItem, {
                         key: 'menuFolderItem-11',
                         identity: {parent: 'menuFolderItem-1'},
                         name: 'Placement/Locations',
-                        opened: false,
-                        current: false,
+                        state: {
+                            opened: false,
+                            current: false
+                        },
                         icon: ''
                     }),
                     $(MenuFolderItem, {
                         key: 'menuFolderItem-12',
                         identity: {parent: 'menuFolderItem-1'},
                         name: 'Cargo',
-                        opened: false,
-                        current: false,
+                        state: {
+                            opened: false,
+                            current: false
+                        },
                         icon: ''
                     }),
                     $(MenuFolderItem, {
                         key: 'menuFolderItem-13',
                         identity: {parent: 'menuFolderItem-1'},
                         name: 'Service',
-                        opened: false,
-                        current: false,
+                        state: {
+                            opened: false,
+                            current: false
+                        },
                         icon: ''
                     }),
                     $(MenuFolderItem, {
                         key: 'menuFolderItem-14',
                         identity: {parent: 'menuFolderItem-1'},
                         name: 'Document Flow',
-                        opened: false,
-                        current: false,
+                        state: {
+                            opened: false,
+                            current: false
+                        },
                         icon: ''
                     })
                 ]
@@ -54,40 +65,50 @@ function App() {
                 key: 'menuFolderItem-2',
                 identity: {parent: 'mainMenuBar'},
                 name: 'Registers',
-                opened: false,
-                current: false,
+                state: {
+                    opened: false,
+                    current: false
+                },
                 icon: ''
             }),
             $(MenuFolderItem, {
                 key: 'menuFolderItem-3',
                 identity: {parent: 'mainMenuBar'},
                 name: 'Reports',
-                opened: false,
-                current: false,
+                state: {
+                    opened: false,
+                    current: false
+                },
                 icon: ''
             }),
             $(MenuFolderItem, {
                 key: 'menuFolderItem-4',
                 identity: {parent: 'mainMenuBar'},
                 name: 'Configuration',
-                opened: false,
-                current: false,
+                state: {
+                    opened: false,
+                    current: false
+                },
                 icon: ''
             }),
             $(MenuFolderItem, {
                 key: 'menuFolderItem-5',
                 identity: {parent: 'mainMenuBar'},
                 name: 'Administrator',
-                opened: false,
-                current: false,
+                state: {
+                    opened: false,
+                    current: false
+                },
                 icon: ''
             }),
             $(MenuFolderItem, {
                 key: 'menuFolderItem-6',
                 identity: {parent: 'mainMenuBar'},
                 name: 'Developer',
-                opened: false,
-                current: false,
+                state: {
+                    opened: false,
+                    current: false
+                },
                 icon: ''
             })
         ],
@@ -111,7 +132,7 @@ function App() {
         // popupClassname: 'popupClassname'
     });
     const sender = {
-        enqueue: (identity: any, patch: any) => console.log(patch)
+        enqueue: (identity: any, patch: any) => console.log(patch, identity)
     };
     const ack: boolean | null = null;
 
