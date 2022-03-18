@@ -1,15 +1,13 @@
 import React, {createElement as el, CSSProperties, HTMLAttributes, ReactNode} from "react";
 import {
-  alignSelfStyle,
   FLEXIBLE_CELL_CLASSNAME,
   FLEXIBLE_COLUMN_CLASSNAME,
   FLEXIBLE_GROUPBOX_CLASSNAME,
   FLEXIBLE_ROOT_CLASSNAME,
   FLEXIBLE_ROW_CLASSNAME,
   FlexibleAlign,
-  FlexibleSizes, isFill
+  FlexibleSizes
 } from "./flexible-api";
-import {provideColumn, provideRow, useFDirectionIsColumn} from "./flexible-direction";
 
 interface FlexibleColumnRootProps {
   key: string,
@@ -52,7 +50,7 @@ function FlexibleColumn({key, sizes, children}: FlexibleColumnProps) {
       maxHeight: "fit-content",
       ...debugBorder("red"),
     }
-  }, provideColumn(children))
+  }, children)
 }
 
 interface FlexibleGroupboxProps {
@@ -75,7 +73,7 @@ function FlexibleGroupbox({key, sizes, children}: FlexibleGroupboxProps) {
       maxHeight: "fit-content",
       ...debugBorder("orange"),
     }
-  }, provideColumn(children))
+  }, children)
 }
 
 interface FlexibleChildAlign {
@@ -87,7 +85,6 @@ interface FlexibleChildAlign {
 interface FlexibleRowProps {
   key: string
   sizes: FlexibleSizes
-  align: FlexibleAlign
   children: (ReactNode & FlexibleChildAlign)[]
 }
 
@@ -132,7 +129,7 @@ function wrapInRow(key: string, props: HTMLAttributes<HTMLDivElement>, children:
   return el("div", props, children)
 }
 
-function FlexibleRow({key, sizes, align, children}: FlexibleRowProps) {
+function FlexibleRow({key, sizes, children}: FlexibleRowProps) {
   const separated = separateChildren(children)
   const props: HTMLAttributes<HTMLDivElement> = {
     className: FLEXIBLE_ROW_CLASSNAME,
@@ -141,39 +138,27 @@ function FlexibleRow({key, sizes, align, children}: FlexibleRowProps) {
       flexDirection: "row",
       flexWrap: "wrap",
       minWidth: `${sizes.min}em`,
-      maxWidth: sizes.max && !isFill(align) ? `${sizes.max}em` : undefined,
-      ...alignSelfStyle(align),
+      maxWidth: sizes.max ? `${sizes.max}em` : undefined,
       ...debugBorder("blue"),
     }
   }
-  return provideRow(
-    separated.map((list, ind) => wrapInRow(`${key}-${ind}`, props, list))
-  )
+  return separated.map((list, ind) => wrapInRow(`${key}-${ind}`, props, list))
 }
 
 interface FlexibleCellProps {
   key: string
   sizes: FlexibleSizes
-  align: FlexibleAlign
   children: ReactNode[]
 }
 
-function FlexibleCell({key, sizes, align, children}: FlexibleCellProps) {
-  const insideColumn = useFDirectionIsColumn()
-  const cellStyles = insideColumn ? {
-    minWidth: `${sizes.min}em`,
-    maxWidth: sizes.max ? `${sizes.max}em` : undefined,
-    ...alignSelfStyle(align),
-  } : {
-    flexGrow: 1,
-    flexBasis: `${sizes.min}em`,
-    maxWidth: sizes.max ? `${sizes.max}em` : undefined,
-  }
+function FlexibleCell({key, sizes, children}: FlexibleCellProps) {
   return el("div", {
     className: FLEXIBLE_CELL_CLASSNAME,
     style: {
       display: "inline-block",
-      ...cellStyles,
+      flexGrow: 1,
+      flexBasis: `${sizes.min}em`,
+      maxWidth: sizes.max ? `${sizes.max}em` : undefined,
       ...debugBorder("green"),
     }
   }, children)

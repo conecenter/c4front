@@ -17,5 +17,3 @@ function provideRow(children: ReactNode[]) {
 function useFDirectionIsColumn() {
   return useContext(FlexibleDirectionContext) === F_COLUMN
 }
-
-export {provideColumn, provideRow, useFDirectionIsColumn}
