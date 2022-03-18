@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom";
 import { createElement as $ } from "react";
-import { createSyncProviders } from "../main/vdom-hooks";
-import { MainMenuBar, MenuFolderItem } from '../extra/main-menu-bar';
+import { createSyncProviders } from "../../main/vdom-hooks";
+import { MainMenuBar, MenuFolderItem, MenuExecutableItem } from '../../extra/main-menu-bar';
 
 function App() {
     const child = $(MainMenuBar, {
@@ -13,6 +13,98 @@ function App() {
                 key: 'menuFolderItem-1',
                 identity: {parent: 'mainMenuBar'},
                 name: 'Warehouse/Terminal',
+                state: {
+                    opened: false,
+                    current: false
+                },
+                icon: '',
+                children: [
+                    $(MenuExecutableItem, {
+                        key: 'menuExecutableItem-1',
+                        identity: {parent: 'menuFolderItem-1'},
+                        name: 'Main Console',
+                        state: {
+                            opened: false,
+                            current: false
+                        },
+                        icon: '../main-menu/main_console.svg'
+                    }),
+                    $(MenuExecutableItem, {
+                        key: 'menuExecutableItem-2',
+                        identity: {parent: 'menuFolderItem-1'},
+                        name: 'Temperature Control',
+                        state: {
+                            opened: false,
+                            current: false
+                        },
+                        icon: '../main-menu/thermometer.svg'
+                    }),
+                    $(MenuExecutableItem, {
+                        key: 'menuExecutableItem-3',
+                        identity: {parent: 'menuFolderItem-1'},
+                        name: 'Activity Dashboard',
+                        state: {
+                            opened: false,
+                            current: false
+                        },
+                        icon: '../main-menu/dashboard.svg'
+                    }),
+                    $(MenuExecutableItem, {
+                        key: 'menuExecutableItem-4',
+                        identity: {parent: 'menuFolderItem-1'},
+                        name: 'Railway Processing',
+                        state: {
+                            opened: false,
+                            current: false
+                        },
+                        icon: '../main-menu/train.svg'
+                    }),
+                    $(MenuExecutableItem, {
+                        key: 'menuExecutableItem-5',
+                        identity: {parent: 'menuFolderItem-1'},
+                        name: 'Units on Hold',
+                        state: {
+                            opened: false,
+                            current: false
+                        },
+                        icon: ''
+                    }),
+                    $(MenuFolderItem, {
+                        key: 'menuFolderItem-1',
+                        identity: {parent: 'menuFolderItem-1'},
+                        name: 'Reports about finances',
+                        state: {
+                            opened: false,
+                            current: false
+                        },
+                        icon: ''
+                    }),
+                ]
+            }),
+            $(MenuFolderItem, {
+                key: 'menuFolderItem-2',
+                identity: {parent: 'mainMenuBar'},
+                name: 'Registers',
+                state: {
+                    opened: false,
+                    current: false
+                },
+                icon: ''
+            }),
+            $(MenuFolderItem, {
+                key: 'menuFolderItem-3',
+                identity: {parent: 'mainMenuBar'},
+                name: 'Reports',
+                state: {
+                    opened: false,
+                    current: false
+                },
+                icon: ''
+            }),
+            $(MenuFolderItem, {
+                key: 'menuFolderItem-4',
+                identity: {parent: 'mainMenuBar'},
+                name: 'Configuration',
                 state: {
                     opened: false,
                     current: false
@@ -60,36 +152,6 @@ function App() {
                         icon: ''
                     })
                 ]
-            }),
-            $(MenuFolderItem, {
-                key: 'menuFolderItem-2',
-                identity: {parent: 'mainMenuBar'},
-                name: 'Registers',
-                state: {
-                    opened: false,
-                    current: false
-                },
-                icon: ''
-            }),
-            $(MenuFolderItem, {
-                key: 'menuFolderItem-3',
-                identity: {parent: 'mainMenuBar'},
-                name: 'Reports',
-                state: {
-                    opened: false,
-                    current: false
-                },
-                icon: ''
-            }),
-            $(MenuFolderItem, {
-                key: 'menuFolderItem-4',
-                identity: {parent: 'mainMenuBar'},
-                name: 'Configuration',
-                state: {
-                    opened: false,
-                    current: false
-                },
-                icon: ''
             }),
             $(MenuFolderItem, {
                 key: 'menuFolderItem-5',

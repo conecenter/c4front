@@ -1,4 +1,5 @@
-import React, { useState, ReactElement, useCallback } from "react";
+import React, { useState, ReactElement, useCallback, ReactNode } from "react";
+import clsx from 'clsx';
 import { Expander, ExpanderArea } from '../main/expander-area';
 import { usePopupPos } from '../main/popup';
 import { useSync } from '../main/vdom-hooks';
@@ -19,7 +20,7 @@ interface MenuItemState {
     current?: boolean
 }
 
-type MenuItem = MenuFolderItem | MenuExecutableItem // | MenuCustomItem;
+type MenuItem = MenuFolderItem | MenuExecutableItem | MenuCustomItem;
 
 interface MenuFolderItem {
     key: string,
@@ -38,13 +39,18 @@ interface MenuExecutableItem {
     icon: string
 }
 
+interface MenuCustomItem {
+    key: string,
+	identity: Object,
+    children: ReactNode[],
+    clickable?: boolean // обрабатывать клики?
+}
+
 interface MenuItemsGroup {
     key: string,
 	identity: Object,
     children: ReactElement<MenuItem>[]
 }
-
-type MenuCustomItem = any;
 
 interface MenuPopupElement {
     children?: ReactElement<MenuItem | MenuItemsGroup>[]
@@ -77,13 +83,34 @@ function MainMenuBar({ leftChildren }: MainMenuBar) {
 function MenuFolderItem({identity, name, state, icon, children}: MenuFolderItem) {
     const {currentState, setFinalState} = useMenuItemSync(identity, 'receiver', state);
     const { opened, current } = currentState;
+
+    function handleBlur(e: React.FocusEvent) {
+		if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) return;
+		setFinalState({ opened: false, current });
+	}
+
     return (
-        <div className='menuItem' tabIndex={1} onClick={() => setFinalState({ opened: !currentState.opened, current })}>
-            {icon && <img src={icon} />}
+        <div 
+            className={clsx('menuItem', !icon && 'noIcon')} 
+            tabIndex={1}
+            onBlur={handleBlur}
+            onClick={() => setFinalState({ opened: !currentState.opened, current })}>
+            {icon && <img src={icon} className='rowIconSize' />}
             <span>{name}</span>
-            <img src='..\test\datepicker\arrow-down.svg' className='menuFolderIcon' alt='arrow-down-icon' />
+            <img src='..\datepicker\arrow-down.svg' className='menuFolderIcon' alt='arrow-down-icon' />
             {opened &&
                 <MenuPopupElement>{children}</MenuPopupElement>}
+        </div>
+    );
+}
+
+function MenuExecutableItem({identity, name, state, icon}: MenuExecutableItem) {
+    const {currentState, setFinalState} = useMenuItemSync(identity, 'receiver', state);
+    const { opened, current } = currentState;
+    return (
+        <div className={clsx('menuItem', !icon && 'noIcon')} tabIndex={1} onClick={() => setFinalState({ opened: !currentState.opened, current })}>
+            {icon && <img src={icon} className='rowIconSize'/>}
+            <span>{name}</span>
         </div>
     );
 }
@@ -92,7 +119,7 @@ function MenuPopupElement({children}: MenuPopupElement) {
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
     const [popupPos] = usePopupPos(popupElement);
     return (
-        <div ref={setPopupElement} className='menuPopupBox popupEl' style={popupPos} >
+        <div ref={setPopupElement} className='menuPopupBox popupEl' style={popupPos} onClick={(e) => e.stopPropagation()}>
             {children}
         </div>
     );
@@ -140,4 +167,4 @@ function stateToPatch({opened, current}: MenuItemState): Patch {
 	return { headers, skipByPath: true, retry: true, defer: false };
 }
 
-export { MainMenuBar, MenuFolderItem };
+export { MainMenuBar, MenuFolderItem, MenuExecutableItem };

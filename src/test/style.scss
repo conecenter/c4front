@@ -718,6 +718,33 @@ div.grid {
     background-color: var(--color-primaryColor);
     color: var(--textColor-primaryColor);
 
+    > div {
+      height: 2.5em!important;
+    }
+
+    // .mainMenuElement
+  .menuItem {
+    display: flex;
+    align-items: center;
+    min-height: 2.4em;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &.noIcon {
+      padding-left: 2.8em;
+    }
+
+    >span {
+      margin-right: 1em; // 2018
+      // padding: 0 1.8em 0 1em;  // 2020
+      flex-grow: 1;
+    }
+
+    > img.rowIconSize {
+      margin: 0 0.4em;
+    }
+  }
+
     // replace .mainMenuContainer in 2020
     .leftMenuBox {
       display: flex;
@@ -725,10 +752,12 @@ div.grid {
       // background-color: inherit;
 
       // replace .menu-popup>div:first-child in 2020
-      >.menuItem {  // .topLevelMenuItem ??
+      > .menuItem {  // .topLevelMenuItem ??
         max-width: 20em;
         margin: 0 1em 0 0;  // 2018
+        padding: 0;
         color: var(--textColor-primaryColor);
+        height: 100%;
 
         >span {
           text-overflow: ellipsis;
@@ -741,30 +770,17 @@ div.grid {
     // .folderMenu - used in 2020 for > .rowFlexContainer > .mainMenuElement > :not(.folderMenu) {...
 
   .btnBurger {
-    background: url(burger.svg);
+    background: url(./main-menu/burger.svg);
     background-size: 1.6em 1.6em;
   }
 
-  // .mainMenuElement
-  .menuItem {
-    display: flex;
-    align-items: center;
-    min-height: 2em;
-    height: 100%;
-    white-space: nowrap;
-    cursor: pointer;
-    margin-right: 1em;  // 2018
-
-    >span {
-      padding-right: 0.8em; // 2018
-      // padding: 0 1.8em 0 1em;  // 2020
-    }
-  }
+  
 
   // .mainMenuElementIcon
   .menuFolderIcon {
     transition: transform 0.15s ease 0s;
     height: 1em;
+    margin-right: 0.2em;
   }
 
   // .textLineSize {
@@ -772,7 +788,7 @@ div.grid {
   // }
 
   .menuPopupBox {
-    min-width: 13.5em;
+    min-width: 13.5em!important;
     color: var(--textColor-body);
     // transition: all 0.15s
     // transform-origin: 50% 0%;
