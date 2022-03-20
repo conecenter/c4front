@@ -1,9 +1,8 @@
-import React, { useState, ReactElement, useCallback, ReactNode, useRef, useEffect } from "react";
+import React, { useState, ReactElement, ReactNode, useRef, useEffect } from "react";
 import clsx from 'clsx';
 import { Expander, ExpanderArea } from '../main/expander-area';
 import { usePopupPos } from '../main/popup';
-import { useSync } from '../main/vdom-hooks';
-import { identityAt } from '../main/vdom-util';
+import { Patch, PatchHeaders, useInputSync } from './input-sync';
 
 interface MainMenuBar {
     key: string,
@@ -16,8 +15,7 @@ interface MainMenuBar {
 }
 
 interface MenuItemState {
-    opened: boolean,
-    current?: boolean
+    opened: boolean
 }
 
 type MenuItem = MenuFolderItem | MenuExecutableItem | MenuCustomItem;
@@ -26,17 +24,19 @@ interface MenuFolderItem {
     key: string,
 	identity: Object,
     name: string,
-    icon: string,
-    children?: ReactElement<MenuItem | MenuItemsGroup>[],
-    state: MenuItemState
+    current: boolean,
+    state: MenuItemState,
+    icon?: string,
+    children?: ReactElement<MenuItem | MenuItemsGroup>[]
 }
 
 interface MenuExecutableItem {
     key: string,
 	identity: Object,
     name: string,
+    current: boolean,
     state: MenuItemState,
-    icon: string
+    icon?: string
 }
 
 interface MenuCustomItem {
@@ -61,7 +61,7 @@ function MainMenuBar({ leftChildren }: MainMenuBar) {
     return (
 			<div key='top-bar' className='mainMenuBar top-row hide-on-scroll'>
 					<ExpanderArea maxLineCount={1} expandTo={[
-                        <Expander key='left-menu' area="lt" expandOrder={0} expandTo={[
+                        <Expander key='left-menu' area="lt" expandOrder={1} expandTo={[
                             <Expander area="lt">
                                 <div className='leftMenuBox'>
                                     {leftChildren}
@@ -70,10 +70,16 @@ function MainMenuBar({ leftChildren }: MainMenuBar) {
                         ]}>
                             <button key='left-menu' className='btnBurger' />
                         </Expander>,
-                        <Expander key='right-menu' area="rt" expandOrder={1}>
-                            <div>Hello world!</div>
-                            <div>Hello world!</div>
-                            <div>Hello world!</div>
+                        <Expander key='right-menu' area="rt" expandOrder={0} expandTo={[
+                            <Expander key='right-menu-expanded' area='rt'>
+                                <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+                                    <div>Hello world!</div>
+                                    <div>Hello world!</div>
+                                    <div>Hello world!</div>
+                                    <div>Hello world!</div>
+                                </div>
+                            </Expander>
+                        ]}>
                             <div>Hello world!</div>
                         </Expander>
                     ]} />
@@ -81,26 +87,24 @@ function MainMenuBar({ leftChildren }: MainMenuBar) {
     );
 }
 
-const isPopupChild = (element: HTMLElement | null) => {
-    const parent = element && element.parentElement;
-    return parent && parent.classList.contains('popupEl');
-}
-
 function MenuFolderItem({identity, name, state, icon, children}: MenuFolderItem) {
-    const {currentState, setFinalState} = useMenuItemSync(identity, 'receiver', state);
-    const { opened, current } = currentState;
+    const {
+        currentState, 
+        setFinalState
+    } = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
+    const {opened} = currentState;
 
     const [popupLrMode, setPopupLrMode] = useState(false);
 
     const menuFolderRef = useRef<HTMLDivElement>(null);
-
+    
     useEffect(() => {
         if (isPopupChild(menuFolderRef.current)) setPopupLrMode(true);
     });
 
     function handleBlur(e: React.FocusEvent) {
 		if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) return;
-		setFinalState({ opened: false, current });
+		setFinalState({ opened: false });
 	}
 
     return (
@@ -109,7 +113,7 @@ function MenuFolderItem({identity, name, state, icon, children}: MenuFolderItem)
             className={clsx('menuItem', !icon && 'noIcon', opened && 'menuFolderOpened')} 
             tabIndex={1}
             onBlur={handleBlur}
-            onClick={() => setFinalState({ opened: !currentState.opened, current })}
+            onClick={() => setFinalState({ opened: !currentState.opened })}
         >
             {icon && <img src={icon} className='rowIconSize' />}
             <span>{name}</span>
@@ -125,10 +129,17 @@ function MenuFolderItem({identity, name, state, icon, children}: MenuFolderItem)
 }
 
 function MenuExecutableItem({identity, name, state, icon}: MenuExecutableItem) {
-    const {currentState, setFinalState} = useMenuItemSync(identity, 'receiver', state);
-    const { opened, current } = currentState;
+    const {
+        currentState, 
+        setFinalState
+    } = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
+
     return (
-        <div className={clsx('menuItem', !icon && 'noIcon')} tabIndex={1} onClick={() => setFinalState({ opened: !currentState.opened, current })}>
+        <div 
+            className={clsx('menuItem', !icon && 'noIcon')} 
+            tabIndex={1} 
+            onClick={() => setFinalState({ opened: true })}
+        >
             {icon && <img src={icon} className='rowIconSize'/>}
             <span>{name}</span>
         </div>
@@ -140,52 +151,29 @@ function MenuPopupElement({popupLrMode, children}: MenuPopupElement) {
     const [popupPos] = usePopupPos(popupElement, popupLrMode);
 
     return (
-        <div ref={setPopupElement} className='menuPopupBox popupEl' style={popupPos} onClick={(e) => e.stopPropagation()}>
+        <div 
+            ref={setPopupElement} 
+            className='menuPopupBox popupEl' 
+            style={popupPos} 
+            onClick={(e) => e.stopPropagation()}>
             {children}
         </div>
     );
 }
 
-
-interface Patch {
-    headers: PatchHeaders,
-    skipByPath: boolean,
-    retry: boolean,
-    defer: boolean
+function isPopupChild(element: HTMLElement | null) {
+    const parent = element && element.parentElement;
+    return parent && parent.classList.contains('popupEl');
 }
 
-interface PatchHeaders {
-    'x-r-opened': string,
-    'x-r-current': string
+function patchToState(patch: Patch): MenuItemState {
+    const headers = patch.headers as PatchHeaders;
+	return { opened: !!headers['x-r-opened'] };
 }
 
-const receiverId = (name: string) => identityAt(name);
-
-function useMenuItemSync(
-    identity: Object,
-    receiverName: string,
-    serverState: MenuItemState,
-) {
-    const [patches, enqueuePatch] = useSync(receiverId(receiverName)(identity)) as [Patch[], (patch: Patch) => void];
-    const patch: Patch = patches.slice(-1)[0];
-    const currentState: MenuItemState = patch ? patchToState(patch) : serverState;
-    const setFinalState = useCallback((state: MenuItemState) => enqueuePatch(stateToPatch(state)), [enqueuePatch]);
-    return { currentState, setFinalState };
-}
-
-function patchToState({ headers }: Patch): MenuItemState {
-	return {
-		opened: !!headers['x-r-opened'],
-        current: !!headers['x-r-current']
-	};
-}
-
-function stateToPatch({opened, current}: MenuItemState): Patch {
-	const headers = {
-		'x-r-opened': opened ? '1' : '',
-        'x-r-current': current ? '1' : ''
-	};
-	return { headers, skipByPath: true, retry: true, defer: false };
+function stateToPatch({ opened }: MenuItemState): Patch {
+	const headers = { 'x-r-opened': opened ? '1' : '' };
+	return { value: '', headers };
 }
 
 export { MainMenuBar, MenuFolderItem, MenuExecutableItem };
