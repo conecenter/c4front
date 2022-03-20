@@ -734,14 +734,26 @@ div.grid {
       padding-left: 2.8em;
     }
 
-    >span {
+    > span {
       margin-right: 1em; // 2018
       // padding: 0 1.8em 0 1em;  // 2020
       flex-grow: 1;
+      text-overflow: ellipsis;
+      overflow: hidden;
     }
 
     > img.rowIconSize {
       margin: 0 0.4em;
+    }
+
+    .popupEl {
+      .menuFolderIcon {
+        transform: rotate(-90deg);
+      }
+
+      .menuFolderOpened .menuFolderIcon {
+        transform: rotate(-270deg);
+      }
     }
   }
 
@@ -760,9 +772,11 @@ div.grid {
         height: 100%;
 
         >span {
-          text-overflow: ellipsis;
-          overflow: hidden;
           margin-left: 0.2em;
+        }
+
+        &.menuFolderOpened > .menuFolderIcon {
+          transform: rotate(-180deg);
         }
       }
     }
@@ -773,8 +787,6 @@ div.grid {
     background: url(./main-menu/burger.svg);
     background-size: 1.6em 1.6em;
   }
-
-  
 
   // .mainMenuElementIcon
   .menuFolderIcon {
@@ -792,6 +804,10 @@ div.grid {
     color: var(--textColor-body);
     // transition: all 0.15s
     // transform-origin: 50% 0%;
+
+    .menuItem:first-child > .menuPopupBox {
+      transform: translateY(-1px);
+    }
   }
   /* 2020:
   .mainMenuPopupContainer -> .menuPopupBox {

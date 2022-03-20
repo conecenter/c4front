@@ -1,4 +1,4 @@
-import React, { useState, ReactElement, useCallback, ReactNode } from "react";
+import React, { useState, ReactElement, useCallback, ReactNode, useRef, useEffect } from "react";
 import clsx from 'clsx';
 import { Expander, ExpanderArea } from '../main/expander-area';
 import { usePopupPos } from '../main/popup';
@@ -53,6 +53,7 @@ interface MenuItemsGroup {
 }
 
 interface MenuPopupElement {
+    popupLrMode: boolean,
     children?: ReactElement<MenuItem | MenuItemsGroup>[]
 }
 
@@ -80,9 +81,22 @@ function MainMenuBar({ leftChildren }: MainMenuBar) {
     );
 }
 
+const isPopupChild = (element: HTMLElement | null) => {
+    const parent = element && element.parentElement;
+    return parent && parent.classList.contains('popupEl');
+}
+
 function MenuFolderItem({identity, name, state, icon, children}: MenuFolderItem) {
     const {currentState, setFinalState} = useMenuItemSync(identity, 'receiver', state);
     const { opened, current } = currentState;
+
+    const [popupLrMode, setPopupLrMode] = useState(false);
+
+    const menuFolderRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (isPopupChild(menuFolderRef.current)) setPopupLrMode(true);
+    });
 
     function handleBlur(e: React.FocusEvent) {
 		if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) return;
@@ -91,15 +105,21 @@ function MenuFolderItem({identity, name, state, icon, children}: MenuFolderItem)
 
     return (
         <div 
-            className={clsx('menuItem', !icon && 'noIcon')} 
+            ref={menuFolderRef}
+            className={clsx('menuItem', !icon && 'noIcon', opened && 'menuFolderOpened')} 
             tabIndex={1}
             onBlur={handleBlur}
-            onClick={() => setFinalState({ opened: !currentState.opened, current })}>
+            onClick={() => setFinalState({ opened: !currentState.opened, current })}
+        >
             {icon && <img src={icon} className='rowIconSize' />}
             <span>{name}</span>
-            <img src='..\datepicker\arrow-down.svg' className='menuFolderIcon' alt='arrow-down-icon' />
+            <img 
+                src='..\datepicker\arrow-down.svg' 
+                className='menuFolderIcon'
+                alt='arrow-down-icon' />
+
             {opened &&
-                <MenuPopupElement>{children}</MenuPopupElement>}
+                <MenuPopupElement popupLrMode={popupLrMode}>{children}</MenuPopupElement>}
         </div>
     );
 }
@@ -115,9 +135,10 @@ function MenuExecutableItem({identity, name, state, icon}: MenuExecutableItem) {
     );
 }
 
-function MenuPopupElement({children}: MenuPopupElement) {
+function MenuPopupElement({popupLrMode, children}: MenuPopupElement) {
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
-    const [popupPos] = usePopupPos(popupElement);
+    const [popupPos] = usePopupPos(popupElement, popupLrMode);
+
     return (
         <div ref={setPopupElement} className='menuPopupBox popupEl' style={popupPos} onClick={(e) => e.stopPropagation()}>
             {children}

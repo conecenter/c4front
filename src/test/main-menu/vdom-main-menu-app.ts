@@ -114,12 +114,44 @@ function App() {
                     $(MenuFolderItem, {
                         key: 'menuFolderItem-11',
                         identity: {parent: 'menuFolderItem-1'},
-                        name: 'Placement/Locations',
+                        name: 'Placement / Locations',
                         state: {
                             opened: false,
                             current: false
                         },
-                        icon: ''
+                        icon: '',
+                        children: [
+                            $(MenuExecutableItem, {
+                                key: 'menuExecutableItem-1',
+                                identity: {parent: 'menuFolderItem-11'},
+                                name: 'Locations',
+                                state: {
+                                    opened: false,
+                                    current: false
+                                },
+                                icon: ''
+                            }),
+                            $(MenuExecutableItem, {
+                                key: 'menuExecutableItem-2',
+                                identity: {parent: 'menuFolderItem-11'},
+                                name: 'Topologies',
+                                state: {
+                                    opened: false,
+                                    current: false
+                                },
+                                icon: '../main-menu/area.svg'
+                            }),
+                            $(MenuExecutableItem, {
+                                key: 'menuExecutableItem-3',
+                                identity: {parent: 'menuFolderItem-11'},
+                                name: 'Storage Spaces',
+                                state: {
+                                    opened: false,
+                                    current: false
+                                },
+                                icon: '../main-menu/storage_space.svg'
+                            })
+                        ]
                     }),
                     $(MenuFolderItem, {
                         key: 'menuFolderItem-12',
@@ -171,7 +203,69 @@ function App() {
                     opened: false,
                     current: false
                 },
-                icon: ''
+                icon: '',
+                children: [
+                    $(MenuExecutableItem, {
+                        key: 'menuExecutableItem-1',
+                        identity: {parent: 'menuFolderItem-1'},
+                        name: 'Main Console',
+                        state: {
+                            opened: false,
+                            current: false
+                        },
+                        icon: '../main-menu/main_console.svg'
+                    }),
+                    $(MenuExecutableItem, {
+                        key: 'menuExecutableItem-2',
+                        identity: {parent: 'menuFolderItem-1'},
+                        name: 'Temperature Control',
+                        state: {
+                            opened: false,
+                            current: false
+                        },
+                        icon: '../main-menu/thermometer.svg'
+                    }),
+                    $(MenuExecutableItem, {
+                        key: 'menuExecutableItem-3',
+                        identity: {parent: 'menuFolderItem-1'},
+                        name: 'Activity Dashboard',
+                        state: {
+                            opened: false,
+                            current: false
+                        },
+                        icon: '../main-menu/dashboard.svg'
+                    }),
+                    $(MenuExecutableItem, {
+                        key: 'menuExecutableItem-4',
+                        identity: {parent: 'menuFolderItem-1'},
+                        name: 'Railway Processing',
+                        state: {
+                            opened: false,
+                            current: false
+                        },
+                        icon: '../main-menu/train.svg'
+                    }),
+                    $(MenuExecutableItem, {
+                        key: 'menuExecutableItem-5',
+                        identity: {parent: 'menuFolderItem-1'},
+                        name: 'Units on Hold',
+                        state: {
+                            opened: false,
+                            current: false
+                        },
+                        icon: ''
+                    }),
+                    $(MenuFolderItem, {
+                        key: 'menuFolderItem-1',
+                        identity: {parent: 'menuFolderItem-1'},
+                        name: 'Reports about finances',
+                        state: {
+                            opened: false,
+                            current: false
+                        },
+                        icon: ''
+                    }),
+                ]
             })
         ],
         // state: {
