@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom";
 import { createElement as $ } from "react";
 import { createSyncProviders } from "../../main/vdom-hooks";
-import { MainMenuBar, MenuFolderItem, MenuExecutableItem } from '../../extra/main-menu-bar';
+import { MainMenuBar, MenuFolderItem, MenuExecutableItem, MenuItemsGroup } from '../../extra/main-menu-bar';
 
 function App() {
     const child = $(MainMenuBar, {
@@ -32,30 +32,36 @@ function App() {
                         state: { opened: false },
                         icon: '../main-menu/thermometer.svg'
                     }),
-                    $(MenuExecutableItem, {
-                        key: 'menuExecutableItem-3',
+                    $(MenuItemsGroup, {
+                        key: 'menuItemsGroup1',
                         identity: {parent: 'menuFolderItem-1'},
-                        name: 'Activity Dashboard',
-                        current: false,
-                        state: { opened: false },
-                        icon: '../main-menu/dashboard.svg'
-                    }),
-                    $(MenuExecutableItem, {
-                        key: 'menuExecutableItem-4',
-                        identity: {parent: 'menuFolderItem-1'},
-                        name: 'Railway Processing',
-                        current: false,
-                        state: { opened: false },
-                        icon: '../main-menu/train.svg'
-                    }),
-                    $(MenuExecutableItem, {
-                        key: 'menuExecutableItem-5',
-                        identity: {parent: 'menuFolderItem-1'},
-                        name: 'Units on Hold',
-                        current: false,
-                        state: { opened: false },
-                        icon: ''
-                    }),
+                        children: [
+                            $(MenuExecutableItem, {
+                                key: 'menuExecutableItem-3',
+                                identity: {parent: 'menuFolderItem-1'},
+                                name: 'Activity Dashboard',
+                                current: false,
+                                state: { opened: false },
+                                icon: '../main-menu/dashboard.svg'
+                            }),
+                            $(MenuExecutableItem, {
+                                key: 'menuExecutableItem-4',
+                                identity: {parent: 'menuFolderItem-1'},
+                                name: 'Railway Processing',
+                                current: false,
+                                state: { opened: false },
+                                icon: '../main-menu/train.svg'
+                            }),
+                            $(MenuExecutableItem, {
+                                key: 'menuExecutableItem-5',
+                                identity: {parent: 'menuFolderItem-1'},
+                                name: 'Units on Hold',
+                                current: false,
+                                state: { opened: false },
+                                icon: ''
+                            }),
+                        ]
+                    }),                    
                     $(MenuFolderItem, {
                         key: 'menuFolderItem-1',
                         identity: {parent: 'menuFolderItem-1'},

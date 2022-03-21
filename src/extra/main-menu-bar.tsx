@@ -161,6 +161,17 @@ function MenuPopupElement({popupLrMode, children}: MenuPopupElement) {
     );
 }
 
+function MenuItemsGroup({children}: MenuItemsGroup) {
+    return (
+        <>
+            <hr/>{children}<hr/>
+        </>
+    );
+}
+
+/*
+ * Server sync functionality
+*/
 function isPopupChild(element: HTMLElement | null) {
     const parent = element && element.parentElement;
     return parent && parent.classList.contains('popupEl');
@@ -176,4 +187,4 @@ function stateToPatch({ opened }: MenuItemState): Patch {
 	return { value: '', headers };
 }
 
-export { MainMenuBar, MenuFolderItem, MenuExecutableItem };
+export { MainMenuBar, MenuFolderItem, MenuExecutableItem, MenuItemsGroup };
