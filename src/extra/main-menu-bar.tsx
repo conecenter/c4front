@@ -57,7 +57,17 @@ interface MenuPopupElement {
     children?: ReactElement<MenuItem | MenuItemsGroup>[]
 }
 
-function MainMenuBar({ leftChildren }: MainMenuBar) {   
+interface BurgerButton {
+    opened: boolean,
+    handleClick: () => void
+}
+
+function MainMenuBar({ identity, state, leftChildren }: MainMenuBar) {
+    const {
+        currentState, 
+        setFinalState
+    } = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
+    const {opened} = currentState;
     return (
 			<div key='top-bar' className='mainMenuBar top-row hide-on-scroll'>
 					<ExpanderArea maxLineCount={1} expandTo={[
@@ -68,7 +78,11 @@ function MainMenuBar({ leftChildren }: MainMenuBar) {
                                 </div>
                             </Expander>
                         ]}>
-                            <button key='left-menu' className='btnBurger' />
+                            <div className='menuBurgerBox' onBlur={(e) => handleMenuBlur(e, setFinalState)}>
+                                <BurgerButton opened={opened} handleClick={() => setFinalState({opened: !opened})} />
+                                {opened && 
+                                    <MenuPopupElement popupLrMode={false} children={leftChildren}/>}
+                            </div>
                         </Expander>,
                         <Expander key='right-menu' area="rt" expandOrder={0} expandTo={[
                             <Expander key='right-menu-expanded' area='rt'>
@@ -87,6 +101,28 @@ function MainMenuBar({ leftChildren }: MainMenuBar) {
     );
 }
 
+function BurgerButton({ opened, handleClick }: BurgerButton) {
+    return (
+        <button 
+            key='left-menu' 
+            className='btnBurger' 
+            onClick={handleClick} >
+            <svg xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 32 32">
+                <line strokeLinecap="round" x1="2" x2="30" strokeWidth="4"
+                    y1={opened ? '16' : '9'}                
+                    y2={opened ? '16' : '9'}                
+                    style={opened ? { transform: "rotate(-45deg)" } : {}} />
+                <line strokeLinecap="round" x1="2" y1="17" x2="30" y2="17" strokeWidth="4" 
+                    style={opened ? { opacity: "0" } : {}} />
+                <line strokeLinecap="round" x1="2" x2="30" strokeWidth="4"
+                    y1={opened ? '16' : '25'}
+                    y2={opened ? '16' : '25'}                
+                    style={opened ? { transform: "rotate(45deg)" } : {}} />
+            </svg>
+        </button>
+    );
+}
+
 function MenuFolderItem({identity, name, state, icon, children}: MenuFolderItem) {
     const {
         currentState, 
@@ -102,17 +138,12 @@ function MenuFolderItem({identity, name, state, icon, children}: MenuFolderItem)
         if (isPopupChild(menuFolderRef.current)) setPopupLrMode(true);
     });
 
-    function handleBlur(e: React.FocusEvent) {
-		if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) return;
-		setFinalState({ opened: false });
-	}
-
     return (
         <div 
             ref={menuFolderRef}
             className={clsx('menuItem', !icon && 'noIcon', opened && 'menuFolderOpened')} 
             tabIndex={1}
-            onBlur={handleBlur}
+            onBlur={(e) => handleMenuBlur(e, setFinalState)}
             onClick={() => setFinalState({ opened: !currentState.opened })}
         >
             {icon && <img src={icon} className='rowIconSize' />}
@@ -169,13 +200,17 @@ function MenuItemsGroup({children}: MenuItemsGroup) {
     );
 }
 
-/*
- * Server sync functionality
-*/
+function handleMenuBlur(e: React.FocusEvent, setFinalState: (s: MenuItemState) => void) {
+    if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) return;
+    setFinalState({ opened: false });
+}
+
 function isPopupChild(element: HTMLElement | null) {
     const parent = element && element.parentElement;
     return parent && parent.classList.contains('popupEl');
 }
+
+// Server sync functionality
 
 function patchToState(patch: Patch): MenuItemState {
     const headers = patch.headers as PatchHeaders;

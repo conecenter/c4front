@@ -722,8 +722,12 @@ div.grid {
     background-color: var(--color-primaryColor);
     color: var(--textColor-primaryColor);
 
-    > div {
+    > div[data-width-key="container"] {
       height: 2.5em!important;
+
+      >div[data-width-key="left-menu"] {
+        height: 100%;
+      }
     }
 
     // .mainMenuElement
@@ -755,30 +759,51 @@ div.grid {
         background-color: var(--color-light-primaryColor);
         color: var(--textColor-light-primaryColor)!important;
       }
+    }
+  }
 
-      .menuFolderIcon {
-        transform: rotate(-90deg);
-      }
+  .menuPopupBox {
+    .menuFolderIcon {
+      transform: rotate(-90deg);
+    }
 
-      .menuFolderOpened .menuFolderIcon {
-        transform: rotate(-270deg);
-      }
+    .menuFolderOpened > .menuFolderIcon {
+      transform: rotate(-270deg);
     }
   }
 
     // replace .mainMenuContainer in 2020
-    .leftMenuBox {
+    .leftMenuBox, 
+    .menuBurgerBox  {
       display: flex;
-      // white-space: nowrap;
-      // background-color: inherit;
+      align-items: center;
+      height: 100%;
+      // white-space: nowrap;   
+      
+      >.menuPopupBox {
+        background: var(--color-primaryColor);
+        border: none!important;
+        box-shadow: none!important;
+
+        >.menuItem {
+          padding: 0 0.2em;
+        }
+      }
+
+      >.menuItem {
+        margin-right: 1em;
+        padding: 0;
+
+        &.menuFolderOpened > .menuFolderIcon {
+          transform: rotate(-180deg);
+        }
+      }
 
       // replace .menu-popup>div:first-child in 2020
-      > .menuItem {  // .topLevelMenuItem ??
+      > .menuItem,  // .topLevelMenuItem ??
+      > .menuPopupBox >.menuItem {
         max-width: 20em;
-        margin: 0 1em 0 0;  // 2018
-        padding: 0;
         color: var(--textColor-primaryColor);
-        height: 100%;
 
         &:hover {
           background-color: var(--color-light-secondaryColor);
@@ -787,19 +812,24 @@ div.grid {
 
         >span {
           margin-left: 0.2em;
-        }
-
-        &.menuFolderOpened > .menuFolderIcon {
-          transform: rotate(-180deg);
-        }
+        }        
       }
     }
 
     // .folderMenu - used in 2020 for > .rowFlexContainer > .mainMenuElement > :not(.folderMenu) {...
 
   .btnBurger {
-    background: url(./main-menu/burger.svg);
-    background-size: 1.6em 1.6em;
+    margin: 0 0 0 0.5em;
+
+    > svg {
+      width: 1.5em;
+      stroke: var(--textColor-primaryColor);
+      
+      > line {
+        transition: all 100ms; 
+        transform-origin: center;
+      }
+    }
   }
 
   // .mainMenuElementIcon
@@ -891,24 +921,5 @@ div.grid {
     line-height: normal;
     color: inherit;
     height: 1.6em;
-  }
-
-  .menuBurger{
-    background-color: var(--color-primaryColor);
-    outline: "none";
-
-    // .mainMenuElement
-    > div > .menuItem > .mainMenuPopupItem {
-        margin: 0;
-        padding-right: 1.5em;
-
-        // .mainMenuElementIcon
-        > .menuFolderIcon {
-            right: 0.35em;
-        }
-    }
-    .mainMenuPopupItem {
-        width: 100%;
-    }
   }
 }
