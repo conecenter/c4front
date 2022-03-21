@@ -742,6 +742,11 @@ div.grid {
       padding-left: 2.8em;
     }
 
+    &.isCurrent {
+      color: var(--textColor-primaryColor);
+      background-color: var(--color-primaryColor);
+    }
+
     > span {
       margin-right: 1em; // 2018
       // padding: 0 1.8em 0 1em;  // 2020
@@ -808,6 +813,11 @@ div.grid {
         &:hover {
           background-color: var(--color-light-secondaryColor);
           color: var(--textColor-light-secondaryColor)!important;
+        }
+
+        &.isCurrent {
+          background-color: var(--color-dark-primaryColor);// !important;
+          color: var(--textColor-dark-primaryColor); // !important;
         }
 
         >span {

@@ -168,7 +168,7 @@ function App() {
                 key: 'menuFolderItem-6',
                 identity: {parent: 'mainMenuBar'},
                 name: 'Developer',
-                current: false,
+                current: true,
                 state: { opened: false },
                 icon: '',
                 children: [
@@ -184,7 +184,7 @@ function App() {
                         key: 'menuExecutableItem-2',
                         identity: {parent: 'menuFolderItem-1'},
                         name: 'Temperature Control',
-                        current: false,
+                        current: true,
                         state: { opened: false },
                         icon: '../main-menu/thermometer.svg'
                     }),

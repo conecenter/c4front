@@ -123,12 +123,12 @@ function BurgerButton({ opened, handleClick }: BurgerButton) {
     );
 }
 
-function MenuFolderItem({identity, name, state, icon, children}: MenuFolderItem) {
+function MenuFolderItem({identity, name, current, state, icon, children}: MenuFolderItem) {
     const {
         currentState, 
         setFinalState
     } = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
-    const {opened} = currentState;
+    const { opened } = currentState;
 
     const [popupLrMode, setPopupLrMode] = useState(false);
 
@@ -141,7 +141,7 @@ function MenuFolderItem({identity, name, state, icon, children}: MenuFolderItem)
     return (
         <div 
             ref={menuFolderRef}
-            className={clsx('menuItem', !icon && 'noIcon', opened && 'menuFolderOpened')} 
+            className={clsx('menuItem', !icon && 'noIcon', opened && 'menuFolderOpened', current && 'isCurrent')}
             tabIndex={1}
             onBlur={(e) => handleMenuBlur(e, setFinalState)}
             onClick={() => setFinalState({ opened: !currentState.opened })}
@@ -159,15 +159,12 @@ function MenuFolderItem({identity, name, state, icon, children}: MenuFolderItem)
     );
 }
 
-function MenuExecutableItem({identity, name, state, icon}: MenuExecutableItem) {
-    const {
-        currentState, 
-        setFinalState
-    } = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
+function MenuExecutableItem({identity, name, current, state, icon}: MenuExecutableItem) {
+    const { setFinalState } = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
 
     return (
         <div 
-            className={clsx('menuItem', !icon && 'noIcon')} 
+            className={clsx('menuItem', !icon && 'noIcon', current && 'isCurrent')} 
             tabIndex={1} 
             onClick={() => setFinalState({ opened: true })}
         >
