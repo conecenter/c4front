@@ -712,23 +712,20 @@ div.grid {
 }
 
 /***********************Menu**************************/
-.mainMenuBar{
-    width: 100%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 100000;
-    border-bottom: 0.15em solid var(--color-dark-primaryColor);
-    background-color: var(--color-primaryColor);
-    color: var(--textColor-primaryColor);
+.mainMenuBar {
+  position: fixed!important;
+  height: 2.5em!important;
+  width: 100%;    
+  top: 0;
+  left: 0;
+  z-index: 100000;
+  border-bottom: 0.15em solid var(--color-dark-primaryColor);
+  background-color: var(--color-primaryColor);
+  color: var(--textColor-primaryColor);      
 
-    > div[data-width-key="container"] {
-      height: 2.5em!important;
-
-      >div[data-width-key="left-menu"] {
-        height: 100%;
-      }
-    }
+  > div {
+    height: 100%;
+  }
 
     // .mainMenuElement
   .menuItem {
@@ -737,6 +734,11 @@ div.grid {
     min-height: 2.4em;
     white-space: nowrap;
     cursor: pointer;
+
+    &:hover {
+      background-color: var(--color-light-primaryColor);
+      color: var(--textColor-light-primaryColor)!important;
+    }
 
     &.noIcon {
       padding-left: 2.8em;
@@ -758,13 +760,6 @@ div.grid {
     > img.rowIconSize {
       margin: 0 0.4em;
     }
-
-    .menuPopupBox {
-      .menuItem:hover {
-        background-color: var(--color-light-primaryColor);
-        color: var(--textColor-light-primaryColor)!important;
-      }
-    }
   }
 
   .menuPopupBox {
@@ -778,17 +773,15 @@ div.grid {
   }
 
     // replace .mainMenuContainer in 2020
-    .leftMenuBox, 
-    .menuBurgerBox  {
+    .leftMenuBox, .menuBurgerBox  {
       display: flex;
-      align-items: center;
       height: 100%;
-      // white-space: nowrap;   
       
       >.menuPopupBox {
         background: var(--color-primaryColor);
         border: none!important;
         box-shadow: none!important;
+        margin-top: 0.15em;
 
         >.menuItem {
           padding: 0 0.2em;
@@ -802,6 +795,10 @@ div.grid {
         &.menuFolderOpened > .menuFolderIcon {
           transform: rotate(-180deg);
         }
+
+        .menuPopupBox {
+          margin-top: 0.05em;
+        }
       }
 
       // replace .menu-popup>div:first-child in 2020
@@ -810,10 +807,10 @@ div.grid {
         max-width: 20em;
         color: var(--textColor-primaryColor);
 
-        &:hover {
-          background-color: var(--color-light-secondaryColor);
-          color: var(--textColor-light-secondaryColor)!important;
-        }
+        // &:hover {
+        //   background-color: var(--color-light-secondaryColor);
+        //   color: var(--textColor-light-secondaryColor)!important;
+        // }
 
         &.isCurrent {
           background-color: var(--color-dark-primaryColor);// !important;
@@ -849,18 +846,12 @@ div.grid {
     margin-right: 0.2em;
   }
 
-  // .textLineSize {
-  //   height: 1em;
-  // }
-
   .menuPopupBox {
     min-width: 13.5em!important;
     color: var(--textColor-body);
-    // transition: all 0.15s
-    // transform-origin: 50% 0%;
 
     .menuItem:first-child > .menuPopupBox {
-      transform: translateY(-1px);
+      margin-top: -1px;
     }
 
     hr {
@@ -901,20 +892,24 @@ div.grid {
   //   vertical-align: middle;
   // }
 
-  .mainMenuPopupItem {
-
-    > span > button {
-        > div, > svg, > img {
-            vertical-align: middle;
-            display: inline-block;
-            padding-right: 0.2em;
-        }
-    }
-
-    > svg.rowIconSize {
-        padding: 0.2em 0.2em 0.2em 0.4em;
-    }
+  .rightMenuBox {
+    display: flex;
   }
+
+  // .mainMenuPopupItem {
+
+  //   > span > button {
+  //       > div, > svg, > img {
+  //           vertical-align: middle;
+  //           display: inline-block;
+  //           padding-right: 0.2em;
+  //       }
+  //   }
+
+  //   > svg.rowIconSize {
+  //       padding: 0.2em 0.2em 0.2em 0.4em;
+  //   }
+  // }
 
   // .fixMenuHeight{
   //   line-height: 1;

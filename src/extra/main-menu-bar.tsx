@@ -42,8 +42,7 @@ interface MenuExecutableItem {
 interface MenuCustomItem {
     key: string,
 	identity: Object,
-    children: ReactNode[],
-    clickable?: boolean // обрабатывать клики?
+    children?: ReactNode[]
 }
 
 interface MenuItemsGroup {
@@ -69,35 +68,29 @@ function MainMenuBar({ identity, state, leftChildren }: MainMenuBar) {
     } = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
     const {opened} = currentState;
     return (
-			<div key='top-bar' className='mainMenuBar top-row hide-on-scroll'>
-					<ExpanderArea maxLineCount={1} expandTo={[
-                        <Expander key='left-menu' area="lt" expandOrder={1} expandTo={[
-                            <Expander area="lt">
-                                <div className='leftMenuBox'>
-                                    {leftChildren}
-                                </div>
-                            </Expander>
-                        ]}>
-                            <div className='menuBurgerBox' onBlur={(e) => handleMenuBlur(e, setFinalState)}>
-                                <BurgerButton opened={opened} handleClick={() => setFinalState({opened: !opened})} />
-                                {opened && 
-                                    <MenuPopupElement popupLrMode={false} children={leftChildren}/>}
-                            </div>
-                        </Expander>,
-                        <Expander key='right-menu' area="rt" expandOrder={0} expandTo={[
-                            <Expander key='right-menu-expanded' area='rt'>
-                                <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-                                    <div>Hello world!</div>
-                                    <div>Hello world!</div>
-                                    <div>Hello world!</div>
-                                    <div>Hello world!</div>
-                                </div>
-                            </Expander>
-                        ]}>
-                            <div>Hello world!</div>
-                        </Expander>
-                    ]} />
-			</div>            
+        <ExpanderArea key='top-bar' className='mainMenuBar top-row hide-on-scroll' maxLineCount={1} expandTo={[
+            <Expander key='left-menu' area="lt" expandOrder={1} expandTo={[
+                <Expander key='left-menu-expanded' className='leftMenuBox' area="lt">
+                    {leftChildren}
+                </Expander>
+            ]}>
+                <div className='menuBurgerBox' onBlur={(e) => handleMenuBlur(e, setFinalState)} >
+                    <BurgerButton opened={opened} handleClick={() => setFinalState({opened: !opened})} />
+                    {opened && 
+                        <MenuPopupElement popupLrMode={false} children={leftChildren} />}
+                </div>
+            </Expander>,
+            <Expander key='right-menu' area="rt" expandOrder={0} expandTo={[
+                <Expander key='right-menu-expanded' className='rightMenuBox' area='rt'>
+                    <div>Hello world!</div>
+                    <div>Hello world!</div>
+                    <div>Hello world!</div>
+                    <div>Hello world!</div>
+                </Expander>
+            ]}>
+                <div>Hello world!</div>
+            </Expander>
+        ]} />          
     );
 }
 

@@ -63,12 +63,38 @@ function App() {
                         ]
                     }),                    
                     $(MenuFolderItem, {
-                        key: 'menuFolderItem-1',
+                        key: 'menuFolderItem-18',
                         identity: {parent: 'menuFolderItem-1'},
                         name: 'Reports about finances',
                         current: false,
                         state: { opened: false },
-                        icon: ''
+                        icon: '',
+                        children: [
+                            $(MenuExecutableItem, {
+                                key: 'menuExecutableItem-18',
+                                identity: {parent: 'menuFolderItem-18'},
+                                name: 'Main Console',
+                                current: false,
+                                state: { opened: false },
+                                icon: '../main-menu/main_console.svg'
+                            }),
+                            $(MenuExecutableItem, {
+                                key: 'menuExecutableItem-28',
+                                identity: {parent: 'menuFolderItem-18'},
+                                name: 'Topologies',
+                                current: false,
+                                state: { opened: false },
+                                icon: '../main-menu/area.svg'
+                            }),
+                            $(MenuExecutableItem, {
+                                key: 'menuExecutableItem-38',
+                                identity: {parent: 'menuFolderItem-18'},
+                                name: 'Units on Hold',
+                                current: false,
+                                state: { opened: false },
+                                icon: ''
+                            })
+                        ]
                     }),
                 ]
             }),
@@ -162,7 +188,67 @@ function App() {
                 name: 'Administrator',
                 current: false,
                 state: { opened: false },
-                icon: ''
+                icon: '',
+                children: [
+                    $(MenuFolderItem, {
+                        key: 'menuFolderItem-11',
+                        identity: {parent: 'menuFolderItem-1'},
+                        name: 'Placement / Locations',
+                        current: false,
+                        state: { opened: false },
+                        icon: '',
+                        children: [
+                            $(MenuExecutableItem, {
+                                key: 'menuExecutableItem-1',
+                                identity: {parent: 'menuFolderItem-11'},
+                                name: 'Locations',
+                                current: false,
+                                state: { opened: false },
+                                icon: ''
+                            }),
+                            $(MenuExecutableItem, {
+                                key: 'menuExecutableItem-2',
+                                identity: {parent: 'menuFolderItem-11'},
+                                name: 'Topologies',
+                                current: false,
+                                state: { opened: false },
+                                icon: '../main-menu/area.svg'
+                            }),
+                            $(MenuExecutableItem, {
+                                key: 'menuExecutableItem-3',
+                                identity: {parent: 'menuFolderItem-11'},
+                                name: 'Storage Spaces',
+                                current: false,
+                                state: { opened: false },
+                                icon: '../main-menu/storage_space.svg'
+                            })
+                        ]
+                    }),
+                    $(MenuFolderItem, {
+                        key: 'menuFolderItem-12',
+                        identity: {parent: 'menuFolderItem-1'},
+                        name: 'Cargo',
+                        current: false,
+                        state: { opened: false },
+                        icon: ''
+                    }),
+                    $(MenuFolderItem, {
+                        key: 'menuFolderItem-13',
+                        identity: {parent: 'menuFolderItem-1'},
+                        name: 'Service',
+                        current: false,
+                        state: { opened: false },
+                        icon: ''
+                    }),
+                    $(MenuFolderItem, {
+                        key: 'menuFolderItem-14',
+                        identity: {parent: 'menuFolderItem-1'},
+                        name: 'Document Flow',
+                        current: false,
+                        state: { opened: false },
+                        icon: ''
+                    })
+                ]
             }),
             $(MenuFolderItem, {
                 key: 'menuFolderItem-6',
