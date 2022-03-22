@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom";
 import { createElement as $ } from "react";
 import { createSyncProviders } from "../../main/vdom-hooks";
-import { MainMenuBar, MenuFolderItem, MenuExecutableItem, MenuItemsGroup } from '../../extra/main-menu-bar';
+import { MainMenuBar, MenuFolderItem, MenuExecutableItem, MenuItemsGroup, MenuCustomItem } from '../../extra/main-menu-bar';
 
 function App() {
     const child = $(MainMenuBar, {
@@ -306,6 +306,117 @@ function App() {
                         state: { opened: false },
                         icon: ''
                     }),
+                ]
+            })
+        ],
+        rightChildren: [
+            $(MenuCustomItem, {
+                key: 'menuCustomItem-1',
+                identity: {parent: 'mainMenuBar'},
+                children: [
+                    $('div', {key: 1}, '18:26:05')
+                ]
+            }),
+            $(MenuCustomItem, {
+                key: 'menuCustomItem-2',
+                identity: {parent: 'mainMenuBar'},
+                children: [
+                    $('button', {key: 2}, [
+                        $('img', {key: 3, src: '../main-menu/tooltip.svg', className: 'rowIconSize'})
+                    ])
+                ]
+            }),
+            $(MenuFolderItem, {
+                key: 'menuFolderItem-21',
+                identity: {parent: 'mainMenuBar'},
+                name: 'EN',
+                current: false,
+                state: { opened: false },
+                icon: '',
+                children: [
+                    $(MenuExecutableItem, {
+                        key: 'menuExecutableItem-21',
+                        identity: {parent: 'menuFolderItem-21'},
+                        name: 'GER',
+                        current: false,
+                        state: { opened: false }
+                    }),
+                    $(MenuExecutableItem, {
+                        key: 'menuExecutableItem-22',
+                        identity: {parent: 'menuFolderItem-21'},
+                        name: 'DK',
+                        current: false,
+                        state: { opened: false }
+                    }),
+                    $(MenuExecutableItem, {
+                        key: 'menuExecutableItem-23',
+                        identity: {parent: 'menuFolderItem-21'},
+                        name: 'HUN',
+                        current: false,
+                        state: { opened: false }
+                    }),
+                    $(MenuExecutableItem, {
+                        key: 'menuExecutableItem-24',
+                        identity: {parent: 'menuFolderItem-21'},
+                        name: 'EN',
+                        current: false,
+                        state: { opened: false }
+                    }),
+                    $(MenuExecutableItem, {
+                        key: 'menuExecutableItem-25',
+                        identity: {parent: 'menuFolderItem-21'},
+                        name: 'SVK',
+                        current: false,
+                        state: { opened: false }
+                    })
+                ]
+            }),
+            $(MenuFolderItem, {
+                key: 'menuFolderItem-22',
+                identity: {parent: 'mainMenuBar'},
+                name: 'developer',
+                current: false,
+                state: { opened: false },
+                icon: '',
+                children: [
+                    $(MenuFolderItem, {
+                        key: 'menuFolderItem-221',
+                        identity: {parent: 'menuFolderItem-22'},
+                        name: 'Role, Switch to',
+                        current: false,
+                        state: { opened: false },
+                        icon: ''
+                    }),
+                    $(MenuFolderItem, {
+                        key: 'menuFolderItem-222',
+                        identity: {parent: 'menuFolderItem-22'},
+                        name: 'Active Role',
+                        current: false,
+                        state: { opened: false },
+                        icon: '../main-menu/roles.svg'
+                    }),
+                    $(MenuExecutableItem, {
+                        key: 'menuExecutableItem-221',
+                        identity: {parent: 'menuFolderItem-22'},
+                        name: 'Profile Settings',
+                        current: false,
+                        state: { opened: false },
+                        icon: '../main-menu/profile.svg'
+                    }),
+                    $(MenuExecutableItem, {
+                        key: 'menuExecutableItem-222',
+                        identity: {parent: 'menuFolderItem-22'},
+                        name: 'Tooltips',
+                        current: false,
+                        state: { opened: false }
+                    }),
+                    $(MenuExecutableItem, {
+                        key: 'menuExecutableItem-222',
+                        identity: {parent: 'menuFolderItem-22'},
+                        name: 'Log out',
+                        current: false,
+                        state: { opened: false }
+                    })
                 ]
             })
         ]

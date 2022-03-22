@@ -7,11 +7,10 @@ import { Patch, PatchHeaders, useInputSync } from './input-sync';
 interface MainMenuBar {
     key: string,
 	identity: Object,
-    leftChildren: ReactElement<MenuItem>[],
-    centralChildren?: MenuItem[],
-    rightChildren?: MenuItem[],
     state: MenuItemState,
     icon?: string    
+    leftChildren: ReactElement<MenuItem>[],
+    rightChildren?: ReactElement<MenuItem>[],
 }
 
 interface MenuItemState {
@@ -61,7 +60,7 @@ interface BurgerButton {
     handleClick: () => void
 }
 
-function MainMenuBar({ identity, state, leftChildren }: MainMenuBar) {
+function MainMenuBar({ identity, state, leftChildren, rightChildren }: MainMenuBar) {
     const {
         currentState, 
         setFinalState
@@ -82,13 +81,15 @@ function MainMenuBar({ identity, state, leftChildren }: MainMenuBar) {
             </Expander>,
             <Expander key='right-menu' area="rt" expandOrder={0} expandTo={[
                 <Expander key='right-menu-expanded' className='rightMenuBox' area='rt'>
-                    <div>Hello world!</div>
-                    <div>Hello world!</div>
-                    <div>Hello world!</div>
-                    <div>Hello world!</div>
+                    {rightChildren}
                 </Expander>
             ]}>
-                <div>Hello world!</div>
+                <MenuFolderItem 
+                    key='menuFolderItem-21' 
+                    identity={{parent: 'mainMenuBar'}} 
+                    name='DEV' 
+                    current={false} 
+                    state={{ opened: false }} />
             </Expander>
         ]} />          
     );
@@ -167,6 +168,14 @@ function MenuExecutableItem({identity, name, current, state, icon}: MenuExecutab
     );
 }
 
+function MenuCustomItem({children}: MenuCustomItem) {
+    return (
+        <div className='menuItem'>
+            {children}
+        </div>
+    );
+}
+
 function MenuPopupElement({popupLrMode, children}: MenuPopupElement) {
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
     const [popupPos] = usePopupPos(popupElement, popupLrMode);
@@ -212,4 +221,4 @@ function stateToPatch({ opened }: MenuItemState): Patch {
 	return { value: '', headers };
 }
 
-export { MainMenuBar, MenuFolderItem, MenuExecutableItem, MenuItemsGroup };
+export { MainMenuBar, MenuFolderItem, MenuExecutableItem, MenuCustomItem, MenuItemsGroup };
