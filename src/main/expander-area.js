@@ -1,5 +1,5 @@
 
-import {createElement as $,useState,useLayoutEffect,useCallback,useMemo,useRef} from "react"
+import {useState,useCallback,useMemo} from "react"
 import {em} from "./vdom-util.js"
 import {useEventListener,extractedUse} from "../main/vdom-hooks.js"
 import {getFontSize,useWidths} from "../main/sizes.js"
@@ -128,6 +128,11 @@ export function ExpanderArea({expandTo,maxLineCount,className}){
     // useLogDep("changed "+maxLineCount,theAreaElement,childWidths,expandTo,outerWidth,childWidths,checkLineCount,vpHeight)
     return res
 }
+
+/**
+ * @param {{ children: ReactNode | ReactNode[], area?: string, expandOrder?: number, className?: string, expandTo?: ReactNode[] }} props
+ * @returns { ReactNode | ReactNode[] } children
+ */
 export function Expander({children}){ return children }
 
 export const components = {ExpanderArea,Expander}

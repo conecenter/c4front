@@ -749,6 +749,10 @@ div.grid {
       background-color: var(--color-primaryColor);
     }
 
+    &.executeAnim {
+      animation: executeAnimation 0.4s ease-out infinite alternate;
+    }
+
     > span {
       margin-right: 1em; // 2018
       // padding: 0 1.8em 0 1em;  // 2020
@@ -922,5 +926,10 @@ div.grid {
     line-height: normal;
     color: inherit;
     height: 1.6em;
+  }
+
+  @keyframes executeAnimation {
+    0% { opacity: 1; }
+    100% { opacity: 0.5; }
   }
 }

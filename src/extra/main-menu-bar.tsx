@@ -11,6 +11,7 @@ interface MainMenuBar {
     icon?: string    
     leftChildren: ReactElement<MenuItem>[],
     rightChildren?: ReactElement<MenuItem>[],
+    rightChildrenFolder?: ReactElement<MenuFolderItem>
 }
 
 interface MenuItemState {
@@ -138,7 +139,7 @@ function MenuFolderItem({identity, name, current, state, icon, children}: MenuFo
             className={clsx('menuItem', !icon && 'noIcon', opened && 'menuFolderOpened', current && 'isCurrent')}
             tabIndex={1}
             onBlur={(e) => handleMenuBlur(e, setFinalState)}
-            onClick={() => setFinalState({ opened: !currentState.opened })}
+            onClick={() => setFinalState({ opened: !opened })}
         >
             {icon && <img src={icon} className='rowIconSize' />}
             <span>{name}</span>
@@ -154,11 +155,15 @@ function MenuFolderItem({identity, name, current, state, icon, children}: MenuFo
 }
 
 function MenuExecutableItem({identity, name, current, state, icon}: MenuExecutableItem) {
-    const { setFinalState } = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
-
+    const {
+        currentState,
+        setFinalState 
+    } = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
+    const { opened } = currentState;
+    
     return (
         <div 
-            className={clsx('menuItem', !icon && 'noIcon', current && 'isCurrent')} 
+            className={clsx('menuItem', !icon && 'noIcon', current && 'isCurrent', opened && 'executeAnim')}
             tabIndex={1} 
             onClick={() => setFinalState({ opened: true })}
         >
