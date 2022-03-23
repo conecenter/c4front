@@ -1,7 +1,8 @@
 import ReactDOM from "react-dom";
 import { createElement as $ } from "react";
 import { createSyncProviders } from "../../main/vdom-hooks";
-import { MainMenuBar, MenuFolderItem, MenuExecutableItem, MenuItemsGroup, MenuCustomItem } from '../../extra/main-menu-bar';
+import { MainMenuBar, MenuFolderItem } from '../../extra/main-menu/main-menu-bar';
+import { MenuExecutableItem, MenuItemsGroup, MenuCustomItem } from '../../extra/main-menu/main-menu-items';
 
 function App() {
     const child = $(MainMenuBar, {
