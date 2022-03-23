@@ -18,29 +18,38 @@ interface MenuItemState {
     opened: boolean
 }
 
-function MainMenuBar({ identity, state, leftChildren, rightChildren }: MainMenuBar) {
+function MainMenuBar({ identity, state, icon, leftChildren, rightChildren }: MainMenuBar) {
     const {
         currentState: { opened }, 
         setFinalState
     } = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
 
+    const leftMenuWithLogo = !icon ? undefined : (
+            <Expander key='left-menu-logo' className='leftMenuBox' area="lt">
+                <div className='menuItem'>
+                    <img className='menuLogo' src={icon} alt='menu-logo'/>    
+                </div>                   
+                {leftChildren}
+            </Expander>
+    );
+
     return (
         <ExpanderArea key='top-bar' className='mainMenuBar top-row hide-on-scroll' maxLineCount={1} expandTo={[
-            <Expander key='left-menu' area="lt" expandOrder={1} expandTo={[
-                <Expander key='left-menu-expanded' className='leftMenuBox' area="lt">
+            <Expander key='left-menu' area="lt" expandOrder={1} expandTo={
+                <Expander key='left-menu-expanded' className='leftMenuBox' area="lt" expandTo={leftMenuWithLogo}>
                     {leftChildren}
                 </Expander>
-            ]}>
+            }>
                 <BurgerMenu opened={opened} setFinalState={setFinalState}>
                     {leftChildren}
                 </BurgerMenu>
             </Expander>,
             
-            <Expander key='right-menu' area="rt" expandOrder={0} expandTo={[
+            <Expander key='right-menu' area="rt" expandOrder={0} expandTo={
                 <Expander key='right-menu-expanded' className='rightMenuBox' area='rt'>
                     {rightChildren}
                 </Expander>
-            ]}>
+            }>
                 <MenuFolderItem 
                     key='menuFolderItem-21' 
                     identity={{parent: 'mainMenuBar'}} 

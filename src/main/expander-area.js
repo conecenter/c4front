@@ -130,7 +130,7 @@ export function ExpanderArea({expandTo,maxLineCount,className}){
 }
 
 /**
- * @param {{ children: ReactNode | ReactNode[], area?: string, expandOrder?: number, className?: string, expandTo?: ReactNode[] }} props
+ * @param {{ children: ReactNode | ReactNode[], area?: string, expandOrder?: number, className?: string, expandTo?: ReactNode | ReactNode[] }} props
  * @returns { ReactNode | ReactNode[] } children
  */
 export function Expander({children}){ return children }
