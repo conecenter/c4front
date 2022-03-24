@@ -55,8 +55,8 @@ function Observed({observer,...props}){
     return createElement("div",{...props,ref})
 }
 
-const useAddPos = extractedUse(observer => (key,pos,children) => createElement(Observed,{
-    key, [keyAttrName]: key, observer, children,
+const useAddPos = extractedUse((observer) => (key,pos,children,className) => createElement(Observed,{
+    key, [keyAttrName]: key, observer, children, className,
     style: {
         position: "absolute", boxSizing: "border-box",
         top: em(pos?pos.top:0), left: em(pos?pos.left:0),
@@ -83,9 +83,9 @@ const widthsFromElement = (keep,element) => {
 
 const containerKeyAttrValue = "container"
 
-const useAddContainer = extractedUse((ref,keyAttrValue)=>(height,children)=>{
+const useAddContainer = extractedUse((ref,keyAttrValue)=>(height,children,className)=>{
     const style = { position: "relative", height }
-    return createElement("div",{ style, ref, [keyAttrName]:containerKeyAttrValue, children })
+    return createElement("div",{ style, ref, className, [keyAttrName]:containerKeyAttrValue, children })
 },useMemo)
 
 export const useWidths = nextRef => {

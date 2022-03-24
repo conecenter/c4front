@@ -1,8 +1,14 @@
 @import "reset";
 
 :root {
+  --color-primaryColor: #4DB6AC;
+  --textColor-primaryColor: #000000;
+  --color-light-primaryColor: #B2DFDB;
+  --textColor-light-primaryColor: #000000;
   --color-secondaryColor: rgb(225, 225, 225);
   --light-secondaryColor: hsl(0, 0%, 63.3333%);
+  --color-light-secondaryColor: #FFECB3;
+  --textColor-light-secondaryColor: #000000;
   --color-body: hsl(0, 0%, 100%);
   --textColor-body: hsl(0, 0%, 12.9412%);
   --color-darkPrimaryColor: rgb(176, 162, 116);
@@ -10,6 +16,7 @@
   --color-dark-headerColor: #b0bec5;
   --textColor-dark-primaryColor: #000000;
   --color-light-headerColor: #ECEFF1;
+  --color-dark-primaryColor: #009688;
 }
 
 body {
@@ -61,6 +68,21 @@ button {
     margin: 0;
     padding: 0.2em;
   }
+}
+
+/********************************************************/
+.top-row, .topRow {
+  position: fixed;
+  z-index: 500;
+  width: 100%;
+}
+
+.hide-on-scroll, .hideOnScroll {
+  z-index: 490;
+}
+
+.fullScreen {
+  height: 100vh;
 }
 
 //HEADER
@@ -387,7 +409,6 @@ div.grid {
               transition: all 0.15s ease;
             }
             
-  
             &.rotateArrow::after {
               transform: rotate(-180deg);
             }
@@ -687,5 +708,227 @@ div.grid {
         border-radius: 0px;
       }
     }
+  }
+}
+
+/***********************Menu**************************/
+.mainMenuBar {
+  position: fixed!important;
+  height: 2.5em!important;
+  width: 100%;    
+  top: 0;
+  left: 0;
+  z-index: 100000;
+  border-bottom: 0.15em solid var(--color-dark-primaryColor);
+  background-color: var(--color-primaryColor);
+  color: var(--textColor-primaryColor);      
+
+  > div {
+    height: 100%;
+  }
+
+  // .mainMenuElement
+  .menuItem {
+    display: flex;
+    align-items: center;
+    min-height: 2.4em;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--color-light-primaryColor);
+      color: var(--textColor-light-primaryColor)!important;
+    }
+
+    &.noIcon {
+      padding-left: 2.8em;
+    }
+
+    &.isCurrent {
+      color: var(--textColor-primaryColor);
+      background-color: var(--color-primaryColor);
+    }
+
+    &.executeAnim {
+      animation: executeAnimation 0.4s ease-out infinite alternate;
+
+      @keyframes executeAnimation {
+        0% { opacity: 1; }
+        100% { opacity: 0.5; }
+      }
+    }
+
+    // .mainMenuElementIcon
+    .menuFolderIcon {
+      transition: transform 0.15s ease 0s;
+      height: 1em;
+      margin-right: 0.2em;
+    }
+    
+    > span {
+      margin-right: 1em; // 2018
+      // padding: 0 1.8em 0 1em;  // 2020
+      flex-grow: 1;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    > img.rowIconSize {
+      margin: 0 0.4em;
+    }
+
+    > .menuLogo {
+      width: 18em;
+      cursor: default;
+    }
+  }
+
+  .menuPopupBox {
+    min-width: 13.5em!important;
+    color: var(--textColor-body);
+
+    .menuFolderIcon {
+      transform: rotate(-90deg);
+    }
+
+    .menuFolderOpened > .menuFolderIcon {
+      transform: rotate(-270deg);
+    }    
+
+    .menuItem:first-child > .menuPopupBox {
+      margin-top: -1px;
+    }
+
+    hr {
+      height: 0.05em;
+      background-color: var(--color-dark-primaryColor);
+      margin: 0 0.3em;
+    }
+  }
+
+  // replace .mainMenuContainer in 2020
+  .leftMenuBox, .rightMenuBox, .menuBurgerBox  {
+    display: flex;
+    height: 100%;
+    
+    > .menuPopupBox {
+      background: var(--color-primaryColor);
+      border: none!important;
+      box-shadow: none!important;
+      margin-top: 0.15em;
+
+      >.menuItem {
+        padding: 0 0.2em;
+      }
+    }
+
+    > .menuItem {
+      margin-right: 1em;
+      padding: 0;
+
+      &.menuFolderOpened > .menuFolderIcon {
+        transform: rotate(-180deg);
+      }
+
+      .menuPopupBox {
+        margin-top: 0.07em;
+      }
+    }
+
+    // replace .menu-popup>div:first-child in 2020
+    > .menuItem,  // .topLevelMenuItem
+    > .menuPopupBox >.menuItem {
+      max-width: 20em;
+      color: var(--textColor-primaryColor);
+
+      &.isCurrent {
+        background-color: var(--color-dark-primaryColor);// !important;
+        color: var(--textColor-dark-primaryColor); // !important;
+      }
+
+      >span {
+        margin-left: 0.2em;
+      }        
+    }
+  }
+
+  // .folderMenu - used in 2020 for > .rowFlexContainer > .mainMenuElement > :not(.folderMenu) {...
+
+  .btnBurger {
+    margin: 0 0 0 0.5em;
+
+    > svg {
+      width: 1.5em;
+      stroke: var(--textColor-primaryColor);
+      
+      > line {
+        transition: all 100ms; 
+        transform-origin: center;
+      }
+    }
+  }
+
+  /* 2020:
+  .mainMenuPopupContainer -> .menuPopupBox {
+    + min-width: 13.5em;
+    + box-shadow: 0px 2px 50px rgb(47 46 79 / 75%);
+    + z-index: 10002;
+    // transform-origin: 50% 0% 0px;
+    + border: 0; // 2020
+    + color: var(--textColor-body);
+    + background-color: var(--color-body);
+    - position: absolute;
+    - left: 0px;
+    - top: 100%;
+  }  */
+
+  // .menuSelected {
+  //   background-color: var(--color-dark-primaryColor) !important;
+  //   color: var(--textColor-dark-primaryColor) !important;
+  // }
+
+  // .mainMenuPopupItem {
+  //   box-sizing: border-box;
+  //   position: relative;
+  //   white-space: nowrap;
+  //   padding-right: 0.8em;
+  //   cursor: pointer;
+  //   outline: none;
+  //   display: flex;
+  //   align-items: center;
+  //   height: 100%;
+  //   vertical-align: middle;
+  // }
+
+  // .mainMenuPopupItem {
+
+  //   > span > button {
+  //       > div, > svg, > img {
+  //           vertical-align: middle;
+  //           display: inline-block;
+  //           padding-right: 0.2em;
+  //       }
+  //   }
+
+  //   > svg.rowIconSize {
+  //       padding: 0.2em 0.2em 0.2em 0.4em;
+  //   }
+  // }
+
+  // .fixMenuHeight{
+  //   line-height: 1;
+  //   font-size: 1em;
+  //   min-height: 2.4em;
+  //   display: inline-block;
+  //   width: 1px
+  // }
+
+  // .mainMenuElement
+  .mainMenuElement > .shoppingBasket > button{
+    padding: 0;
+    background-color: inherit;
+    line-height: normal;
+    color: inherit;
+    height: 1.6em;
   }
 }
