@@ -17,7 +17,7 @@ trait FlexibleElement extends ToChildPair
 @c4tags("FrontApp") trait FlexibleElementsTags {
   @c4val def flexibleSizes(
     min: Em,
-    max: Option[Em] = None,
+    max: Option[Em],
   ): FlexibleSize
 
   @c4val("l") def left: FlexibleAlign
