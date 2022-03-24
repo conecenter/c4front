@@ -34,8 +34,8 @@ function MainMenuBar({ identity, state, icon, leftChildren, rightChildren }: Mai
     );
 
     return (
-        <ExpanderArea key='top-bar' className='mainMenuBar top-row hide-on-scroll' maxLineCount={1} expandTo={[
-            <Expander key='left-menu' area="lt" expandOrder={1} expandTo={
+        <ExpanderArea key='top-bar' className='mainMenuBar topRow hideOnScroll' maxLineCount={1} expandTo={[
+            <Expander key='left-menu' area="lt" expandOrder={0} expandTo={
                 <Expander key='left-menu-expanded' className='leftMenuBox' area="lt" expandTo={leftMenuWithLogo}>
                     {leftChildren}
                 </Expander>
@@ -45,17 +45,18 @@ function MainMenuBar({ identity, state, icon, leftChildren, rightChildren }: Mai
                 </BurgerMenu>
             </Expander>,
             
-            <Expander key='right-menu' area="rt" expandOrder={0} expandTo={
+            <Expander key='right-menu' area="rt" expandOrder={1} expandTo={
                 <Expander key='right-menu-expanded' className='rightMenuBox' area='rt'>
                     {rightChildren}
                 </Expander>
             }>
-                <MenuFolderItem 
+                <MenuFolderItem
                     key='menuFolderItem-21' 
                     identity={{parent: 'mainMenuBar'}} 
                     name='DEV' 
                     current={false} 
-                    state={{ opened: false }} />
+                    state={{ opened: false }}
+                    children={rightChildren} />
             </Expander>
         ]} />          
     );
