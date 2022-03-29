@@ -852,6 +852,10 @@ div.grid {
     }
   }
 
+  .leftMenuBox.hiddenIcons > .menuItem > img.rowIconSize {
+    display: none;
+  }
+
   // .folderMenu - used in 2020 for > .rowFlexContainer > .mainMenuElement > :not(.folderMenu) {...
 
   .btnBurger {

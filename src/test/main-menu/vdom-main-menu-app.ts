@@ -9,6 +9,7 @@ function App() {
         key: "TEST",
         identity: {parent: "test"},
         state: { opened: false },
+        icon: '../main-menu/HHLA_PLT_Italy.svg',
         leftChildren: [
             $(MenuFolderItem, {
                 key: 'menuFolderItem-1',
@@ -16,6 +17,7 @@ function App() {
                 name: 'Warehouse/Terminal',
                 current: false,
                 state: { opened: false },
+                icon: '../main-menu/main_console.svg',
                 children: [
                     $(MenuExecutableItem, {
                         key: 'menuExecutableItem-1',
@@ -105,7 +107,7 @@ function App() {
                 name: 'Registers',
                 current: false,
                 state: { opened: false },
-                icon: ''
+                icon: '../main-menu/thermometer.svg'
             }),
             $(MenuFolderItem, {
                 key: 'menuFolderItem-3',
@@ -121,7 +123,7 @@ function App() {
                 name: 'Configuration',
                 current: false,
                 state: { opened: false },
-                icon: '',
+                icon: '../main-menu/train.svg',
                 children: [
                     $(MenuFolderItem, {
                         key: 'menuFolderItem-11',

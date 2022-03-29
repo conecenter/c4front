@@ -25,27 +25,37 @@ function MainMenuBar({ identity, state, icon, leftChildren, rightChildren }: Mai
     } = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
 
     const leftMenuWithLogo = !icon ? undefined : (
-            <Expander key='left-menu-logo' className='leftMenuBox' area="lt">
-                <div className='menuItem'>
-                    <img className='menuLogo' src={icon} alt='menu-logo'/>    
-                </div>                   
-                {leftChildren}
-            </Expander>
+        <Expander key='left-menu-with-logo' className='leftMenuBox' area="lt">
+            <div className='menuItem'>
+                <img className='menuLogo' src={icon} alt='menu-logo'/>    
+            </div>                 
+            {leftChildren}
+        </Expander>
+    );
+
+    const leftMenuWithIcons = (
+        <Expander key='left-menu-with-icons' className='leftMenuBox' area="lt" expandTo={leftMenuWithLogo}>                
+            {leftChildren}
+        </Expander>
+    );
+
+    const leftMenuExpanded = (
+        <Expander key='left-menu-expanded' 
+                  className='leftMenuBox hiddenIcons' 
+                  area="lt" 
+                  expandOrder={2} 
+                  expandTo={leftMenuWithIcons}>
+            {leftChildren}
+        </Expander>
     );
 
     return (
         <ExpanderArea key='top-bar' className='mainMenuBar topRow hideOnScroll' maxLineCount={1} expandTo={[
-            <Expander key='left-menu' area="lt" expandOrder={0} expandTo={
-                <Expander key='left-menu-expanded' className='leftMenuBox' area="lt" expandTo={leftMenuWithLogo}>
-                    {leftChildren}
-                </Expander>
-            }>
-                <BurgerMenu opened={opened} setFinalState={setFinalState}>
-                    {leftChildren}
-                </BurgerMenu>
+            <Expander key='left-menu-compressed' area="lt" expandOrder={0} expandTo={leftMenuExpanded}>
+                <BurgerMenu opened={opened} setFinalState={setFinalState} children={leftChildren} />
             </Expander>,
             
-            <Expander key='right-menu' area="rt" expandOrder={1} expandTo={
+            <Expander key='right-menu-compressed' area="rt" expandOrder={1} expandTo={
                 <Expander key='right-menu-expanded' className='rightMenuBox' area='rt'>
                     {rightChildren}
                 </Expander>
