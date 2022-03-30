@@ -2,7 +2,14 @@ import React, { ReactElement } from "react";
 import { Expander, ExpanderArea } from '../../main/expander-area';
 import { useInputSync } from '../input-sync';
 import { handleMenuBlur, patchToState, stateToPatch } from './main-menu-utils';
-import { MenuFolderItem, MenuItem, MenuPopupElement } from './main-menu-items';
+import {
+    MenuCustomItem,
+    MenuExecutableItem,
+    MenuFolderItem,
+    MenuItem,
+    MenuItemsGroup,
+    MenuPopupElement
+} from './main-menu-items';
 
 interface MainMenuBar {
     key: string,
@@ -98,3 +105,5 @@ function BurgerMenu({ opened, setFinalState, children }: BurgerMenu) {
 
 export { MainMenuBar, MenuFolderItem };
 export type { MenuItemState };
+
+export const mainMenuComponents = {MainMenuBar, MenuFolderItem, MenuExecutableItem, MenuCustomItem, MenuItemsGroup}
