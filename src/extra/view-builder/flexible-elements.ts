@@ -12,11 +12,6 @@ import {
   FlexibleSizes
 } from "./flexible-api";
 
-interface FlexibleColumnRootProps {
-  key: string,
-  children: ReactNode[]
-}
-
 function debugBorder(color: string): CSSProperties {
   return {
     border: "2px solid",
@@ -24,7 +19,12 @@ function debugBorder(color: string): CSSProperties {
   }
 }
 
-function FlexibleColumnRoot({key, children}: FlexibleColumnRootProps) {
+interface FlexibleColumnRoot {
+  key: string,
+  children: ReactNode[]
+}
+
+function FlexibleColumnRoot({key, children}: FlexibleColumnRoot) {
   return el("div", {
     className: FLEXIBLE_ROOT_CLASSNAME,
     style: {
@@ -33,14 +33,14 @@ function FlexibleColumnRoot({key, children}: FlexibleColumnRootProps) {
   }, children)
 }
 
-interface FlexibleColumnProps {
+interface FlexibleColumn {
   key: string
   sizes: FlexibleSizes
   align: FlexibleAlign
   children: ReactNode[]
 }
 
-function FlexibleColumn({key, sizes, children}: FlexibleColumnProps) {
+function FlexibleColumn({key, sizes, children}: FlexibleColumn) {
   return el("div", {
     className: FLEXIBLE_COLUMN_CLASSNAME,
     style: {
@@ -56,14 +56,14 @@ function FlexibleColumn({key, sizes, children}: FlexibleColumnProps) {
   }, children)
 }
 
-interface FlexibleGroupboxProps {
+interface FlexibleGroupbox {
   key: string
   sizes: FlexibleSizes
   align: FlexibleAlign
   children: ReactNode[]
 }
 
-function FlexibleGroupbox({key, sizes, children}: FlexibleGroupboxProps) {
+function FlexibleGroupbox({key, sizes, children}: FlexibleGroupbox) {
   return el("div", {
     className: FLEXIBLE_GROUPBOX_CLASSNAME,
     style: {
@@ -85,7 +85,7 @@ interface FlexibleChildAlign {
   }
 }
 
-interface FlexibleRowProps {
+interface FlexibleRow {
   key: string
   sizes: FlexibleSizes
   children: (ReactNode & FlexibleChildAlign)[]
@@ -132,7 +132,7 @@ function wrapInRow(key: string, props: HTMLAttributes<HTMLDivElement>, children:
   return el("div", props, children)
 }
 
-function FlexibleRow({key, sizes, children}: FlexibleRowProps) {
+function FlexibleRow({key, sizes, children}: FlexibleRow) {
   const separated = separateChildren(children)
   const props: HTMLAttributes<HTMLDivElement> = {
     className: FLEXIBLE_ROW_CLASSNAME,
@@ -148,13 +148,13 @@ function FlexibleRow({key, sizes, children}: FlexibleRowProps) {
   return separated.map((list, ind) => wrapInRow(`${key}-${ind}`, props, list))
 }
 
-interface FlexibleCellProps {
+interface FlexibleCell {
   key: string
   sizes: FlexibleSizes
   children: ReactNode[]
 }
 
-function FlexibleCell({key, sizes, children}: FlexibleCellProps) {
+function FlexibleCell({key, sizes, children}: FlexibleCell) {
   return el("div", {
     className: FLEXIBLE_CELL_CLASSNAME,
     style: {
