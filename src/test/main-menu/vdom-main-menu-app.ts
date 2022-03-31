@@ -2,7 +2,8 @@ import ReactDOM from "react-dom";
 import { createElement as $ } from "react";
 import { createSyncProviders } from "../../main/vdom-hooks";
 import { MainMenuBar, MenuFolderItem } from '../../extra/main-menu/main-menu-bar';
-import { MenuExecutableItem, MenuItemsGroup, MenuCustomItem } from '../../extra/main-menu/main-menu-items';
+import { MenuExecutableItem, MenuItemsGroup, MenuCustomItem, MenuUserItem } from '../../extra/main-menu/main-menu-items';
+import { DateTimeClock } from '../../extra/date-time-clock';
 
 function App() {
     const child = $(MainMenuBar, {
@@ -314,19 +315,24 @@ function App() {
         ],
         rightChildren: [
             $(MenuCustomItem, {
-                key: 'menuCustomItem-1',
-                identity: {parent: 'mainMenuBar'},
-                children: [
-                    $('div', {key: 1}, '18:26:05')
-                ]
-            }),
-            $(MenuCustomItem, {
                 key: 'menuCustomItem-2',
                 identity: {parent: 'mainMenuBar'},
                 children: [
                     $('button', {key: 2}, [
                         $('img', {key: 3, src: '../main-menu/tooltip.svg', className: 'rowIconSize'})
                     ])
+                ]
+            }),
+            $(MenuCustomItem, {
+                key: 'menuCustomItem-1',
+                identity: {parent: 'mainMenuBar'},
+                children: [
+                    $(DateTimeClock, {
+                        key: 'DateTimeClock',
+                        identity: {parent: 'menuCustomItem-1'},
+                        serverTime: '1648628097000',
+                        dateTimeFormatId: '0'
+                    })
                 ]
             }),
             $(MenuFolderItem, {
@@ -374,10 +380,11 @@ function App() {
                     })
                 ]
             }),
-            $(MenuFolderItem, {
+            $(MenuUserItem, {
                 key: 'menuFolderItem-22',
                 identity: {parent: 'mainMenuBar'},
-                name: 'developer',
+                shortName: 'DEV',
+                longName: 'developer',
                 current: false,
                 state: { opened: false },
                 icon: '',
@@ -414,7 +421,7 @@ function App() {
                         state: { opened: false }
                     }),
                     $(MenuExecutableItem, {
-                        key: 'menuExecutableItem-222',
+                        key: 'menuExecutableItem-223',
                         identity: {parent: 'menuFolderItem-22'},
                         name: 'Log out',
                         current: false,

@@ -852,8 +852,18 @@ div.grid {
     }
   }
 
-  .leftMenuBox.hiddenIcons > .menuItem > img.rowIconSize {
+  .leftMenuBox.hiddenIcons > .menuItem > img.rowIconSize:first-child {
     display: none;
+  }
+
+  .rightMenuBox {
+    &:not(.rightMenuCompressed) .shortName {
+      display: none;
+    }
+
+    &.rightMenuCompressed .longName {
+      display: none;
+    }
   }
 
   // .folderMenu - used in 2020 for > .rowFlexContainer > .mainMenuElement > :not(.folderMenu) {...
