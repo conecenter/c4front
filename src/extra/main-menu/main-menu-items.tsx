@@ -5,7 +5,7 @@ import { useInputSync } from '../input-sync'
 import { MenuItemState } from './main-menu-bar';
 import { handleMenuBlur, patchToState, stateToPatch } from './main-menu-utils'
 
-type MenuItem = MenuFolderItem | MenuExecutableItem | MenuCustomItem;
+type MenuItem = MenuFolderItem | MenuExecutableItem | MenuCustomItem | MenuUserItem;
 
 interface MenuFolderItem {
     key: string,

@@ -22,14 +22,14 @@ export function DateTimeClock({ identity, serverTime, dateTimeFormatId }: DateTi
 
     const locale = useUserLocale();
     const pattern = useMemo(() => {
-        const dateTimeFormat = locale.dateTimeFormats.find(format => format.id === +dateTimeFormatId);
-        return dateTimeFormat ? dateTimeFormat.pattern : 'dd-MM-yyyy HH:mm:ss';
+        const dateFormat = locale.dateTimeFormats.find(format => format.id === +dateTimeFormatId);
+        return `${dateFormat ? dateFormat.pattern : 'dd-MM-yyyy'}|HH:mm:ss`;
     }, [locale]);
 
     const localDate = new Date(timestamp);
     const serverDateString = formatInTimeZone(localDate, locale.timezoneId, pattern);
     
-    const [date, time] = serverDateString.split(' ');
+    const [date, time] = serverDateString.split('|');
 
     // Time sync with server
 	const timeSyncIdOf = identityAt('timeSync');
@@ -50,7 +50,7 @@ export function DateTimeClock({ identity, serverTime, dateTimeFormatId }: DateTi
     }, []);
 
     return (
-        <div>
+        <div className='dateTimeClock'>
             <span className='dateDisplay'>{date} </span>
             <span>{time}</span>
         </div>

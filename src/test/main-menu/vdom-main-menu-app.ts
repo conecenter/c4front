@@ -323,17 +323,11 @@ function App() {
                     ])
                 ]
             }),
-            $(MenuCustomItem, {
-                key: 'menuCustomItem-1',
-                identity: {parent: 'mainMenuBar'},
-                children: [
-                    $(DateTimeClock, {
-                        key: 'DateTimeClock',
-                        identity: {parent: 'menuCustomItem-1'},
-                        serverTime: '1648628097000',
-                        dateTimeFormatId: '0'
-                    })
-                ]
+            $(DateTimeClock, {
+                key: 'DateTimeClock',
+                identity: {parent: 'menuCustomItem-1'},
+                serverTime: '1648628097000',
+                dateTimeFormatId: '1'
             }),
             $(MenuFolderItem, {
                 key: 'menuFolderItem-21',
@@ -381,7 +375,7 @@ function App() {
                 ]
             }),
             $(MenuUserItem, {
-                key: 'menuFolderItem-22',
+                key: 'menuUserItem-22',
                 identity: {parent: 'mainMenuBar'},
                 shortName: 'DEV',
                 longName: 'developer',

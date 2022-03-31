@@ -784,7 +784,7 @@ div.grid {
   }
 
   .menuPopupBox {
-    min-width: 13.5em!important;
+    min-width: 13.5em;
     color: var(--textColor-body);
 
     .menuFolderIcon {
@@ -861,8 +861,21 @@ div.grid {
       display: none;
     }
 
-    &.rightMenuCompressed .longName {
-      display: none;
+    &.rightMenuCompressed {
+      .longName, .dateDisplay {
+        display: none;
+      }
+    }
+
+    .dateTimeClock {
+      display: flex;
+      align-items: center;
+      margin-right: 1em;
+      cursor: default;
+
+      .dateDisplay {
+        padding-right: 0.3em;
+      }
     }
   }
 
@@ -876,7 +889,7 @@ div.grid {
       stroke: var(--textColor-primaryColor);
       
       > line {
-        transition: all 100ms; 
+        transition: transform 100ms; 
         transform-origin: center;
       }
     }
