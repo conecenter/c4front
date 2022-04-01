@@ -3,7 +3,7 @@ import { createElement as $ } from "react";
 import { createSyncProviders } from "../../main/vdom-hooks";
 import { MainMenuBar, MenuFolderItem } from '../../extra/main-menu/main-menu-bar';
 import { MenuExecutableItem, MenuItemsGroup, MenuCustomItem, MenuUserItem } from '../../extra/main-menu/main-menu-items';
-import { DateTimeClock } from '../../extra/date-time-clock';
+import { MainMenuClock } from '../../extra/main-menu/main-menu-clock';
 
 function App() {
     const child = $(MainMenuBar, {
@@ -65,7 +65,7 @@ function App() {
                                 icon: ''
                             }),
                         ]
-                    }),                    
+                    }),
                     $(MenuFolderItem, {
                         key: 'menuFolderItem-18',
                         identity: {parent: 'menuFolderItem-1'},
@@ -323,11 +323,11 @@ function App() {
                     ])
                 ]
             }),
-            $(DateTimeClock, {
+            $(MainMenuClock, {
                 key: 'DateTimeClock',
                 identity: {parent: 'menuCustomItem-1'},
                 serverTime: '1648628097000',
-                dateTimeFormatId: '1'
+                timestampFormatId: 1
             }),
             $(MenuFolderItem, {
                 key: 'menuFolderItem-21',

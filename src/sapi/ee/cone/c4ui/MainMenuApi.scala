@@ -24,6 +24,8 @@ trait MenuItemsGroup extends MenuInnerItem
 
 trait MenuUserItem extends MenuItem
 
+trait MainMenuClock extends MenuItem
+
 @c4tags("FrontApp") trait MainMenuTags[C] {
   @c4el("MainMenuBar") def menuBar(
     key: String,
@@ -76,4 +78,10 @@ trait MenuUserItem extends MenuItem
     icon: Option[String] = None,
     children: ElList[MenuInnerItem],
   ): MenuUserItem
+
+  @c4el("MainMenuClock") def mainMenuClock(
+    key: String,
+    serverTime: String,
+    timestampFormatId: Int
+  ): MainMenuClock
 }

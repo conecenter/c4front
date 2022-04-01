@@ -1,7 +1,9 @@
 import React, {ReactElement} from "react";
+import clsx from 'clsx';
 import {Expander, ExpanderArea} from '../../main/expander-area';
 import {useInputSync} from '../input-sync';
 import {handleMenuBlur, patchToState, stateToPatch} from './main-menu-utils';
+import {MainMenuClock} from './main-menu-clock';
 import {
   MenuCustomItem,
   MenuExecutableItem,
@@ -10,8 +12,7 @@ import {
   MenuPopupElement,
   MenuUserItem
 } from './main-menu-items';
-import {DateTimeClock} from '../date-time-clock';
-import clsx from 'clsx';
+
 
 interface MainMenuBar {
   key: string,
@@ -93,7 +94,7 @@ function getRightMenuCompressed(rightChildren: ReactElement<MenuItem>[]) {
   const menuUserItem = rightChildren.find(child => child.type === MenuUserItem) as ReactElement<MenuUserItem> | undefined;
   if (!menuUserItem) return null;
   const rightChildrenFiltered = rightChildren
-      .filter((child: JSX.Element) => ![MenuUserItem, DateTimeClock].includes(child.type));
+      .filter((child: JSX.Element) => ![MenuUserItem, MainMenuClock].includes(child.type));
   return React.cloneElement(menuUserItem, {}, React.Children.toArray(menuUserItem.props.children).concat(rightChildrenFiltered));
 }
 
@@ -134,4 +135,4 @@ function BurgerMenu({opened, setFinalState, children}: BurgerMenu) {
 export {MainMenuBar, MenuFolderItem};
 export type {MenuItemState};
 
-export const mainMenuComponents = {MainMenuBar, MenuFolderItem, MenuExecutableItem, MenuCustomItem, MenuItemsGroup, MenuUserItem}
+export const mainMenuComponents = {MainMenuBar, MenuFolderItem, MenuExecutableItem, MenuCustomItem, MenuItemsGroup, MenuUserItem, MainMenuClock}
