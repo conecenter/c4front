@@ -44,7 +44,7 @@ function MainMenuBar({ identity, state, icon, leftChildren, rightChildren }: Mai
         <Expander key='left-menu-expanded' 
                   className='leftMenuBox hiddenIcons' 
                   area="lt" 
-                  expandOrder={2} 
+                  expandOrder={3} 
                   expandTo={leftMenuWithIcons}>
             {leftChildren}
         </Expander>
@@ -60,7 +60,7 @@ function MainMenuBar({ identity, state, icon, leftChildren, rightChildren }: Mai
         : null;
 
     const rightMenuExpanded = (
-        <Expander key='right-menu-reduced' className='rightMenuBox rightMenuCompressed' area='rt' expandTo={
+        <Expander key='right-menu-reduced' className='rightMenuBox rightMenuCompressed' expandOrder={2} area='rt' expandTo={
             <Expander key='right-menu-expanded' className='rightMenuBox' area='rt'>
                 {rightChildren}
             </Expander>
@@ -71,7 +71,7 @@ function MainMenuBar({ identity, state, icon, leftChildren, rightChildren }: Mai
 
     return (
         <ExpanderArea key='top-bar' className='mainMenuBar topRow hideOnScroll' maxLineCount={1} expandTo={[
-            <Expander key='left-menu-compressed' area="lt" expandOrder={0} expandTo={leftMenuExpanded}>
+            <Expander key='left-menu-compressed' area="lt" expandOrder={1} expandTo={leftMenuExpanded}>
                 <BurgerMenu opened={opened} setFinalState={setFinalState} children={leftChildren} />
             </Expander>,
             
@@ -79,7 +79,7 @@ function MainMenuBar({ identity, state, icon, leftChildren, rightChildren }: Mai
                 key='right-menu-compressed' 
                 className='rightMenuBox rightMenuCompressed' 
                 area="rt" 
-                expandOrder={1} 
+                expandOrder={0} 
                 expandTo={rightMenuExpanded}>
                 {rightMenuCompressed}
             </Expander>
