@@ -144,7 +144,7 @@ interface MenuUserItem {
     current: boolean,
     state: MenuItemState,
     icon?: string,
-    children?: ReactElement<MenuItem | MenuItemsGroup>[]
+    children: ReactElement<MenuItem | MenuItemsGroup>[]
 }
 
 function MenuUserItem({identity, shortName, longName, current, state, icon, children}: MenuUserItem) {

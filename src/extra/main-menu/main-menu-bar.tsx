@@ -3,6 +3,7 @@ import { Expander, ExpanderArea } from '../../main/expander-area';
 import { useInputSync } from '../input-sync';
 import { handleMenuBlur, patchToState, stateToPatch } from './main-menu-utils';
 import { MenuFolderItem, MenuItem, MenuPopupElement, MenuUserItem } from './main-menu-items';
+import { DateTimeClock } from '../date-time-clock';
 
 interface MainMenuBar {
     key: string,
@@ -17,12 +18,13 @@ interface MenuItemState {
     opened: boolean
 }
 
-function MainMenuBar({ identity, state, icon, leftChildren, rightChildren }: MainMenuBar) {
+function MainMenuBar({ identity, state, icon, leftChildren, rightChildren }: MainMenuBar) {    
     const {
         currentState: { opened }, 
         setFinalState
     } = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
 
+    // Left part of main menu
     const leftMenuWithLogo = !icon ? undefined : (
         <Expander key='left-menu-with-logo' className='leftMenuBox' area="lt">
             <div className='menuItem'>
@@ -48,15 +50,24 @@ function MainMenuBar({ identity, state, icon, leftChildren, rightChildren }: Mai
         </Expander>
     );
 
-    // MenuUserItem.type = (<Component />).type
-    const filteredRightChildren = rightChildren?.map(child => {
-        if (child.type === MenuUserItem) return child;
-        return null;
-    })
-    console.log(React.cloneElement(filteredRightChildren[3]!, { children: rightChildren }))
+    // Right part of main menu
+    const menuUserItem = rightChildren.find(child => child.type === MenuUserItem) as ReactElement<MenuUserItem>;
+    const rightChildrenFiltered = rightChildren
+        .filter((child: JSX.Element) => ![MenuUserItem, DateTimeClock].includes(child.type));
 
-    const filter = rightChildren?.filter(child => child.type === MenuUserItem)
-    console.log(filter)
+    const rightMenuCompressed = menuUserItem 
+        ? React.cloneElement(menuUserItem, {}, menuUserItem.props.children.concat(rightChildrenFiltered))
+        : null;
+
+    const rightMenuExpanded = (
+        <Expander key='right-menu-reduced' className='rightMenuBox rightMenuCompressed' area='rt' expandTo={
+            <Expander key='right-menu-expanded' className='rightMenuBox' area='rt'>
+                {rightChildren}
+            </Expander>
+        }>
+            {rightChildren}
+        </Expander>
+    );
 
     return (
         <ExpanderArea key='top-bar' className='mainMenuBar topRow hideOnScroll' maxLineCount={1} expandTo={[
@@ -64,23 +75,18 @@ function MainMenuBar({ identity, state, icon, leftChildren, rightChildren }: Mai
                 <BurgerMenu opened={opened} setFinalState={setFinalState} children={leftChildren} />
             </Expander>,
             
-            <Expander key='right-menu-compressed' className='rightMenuBox rightMenuCompressed' area="rt" expandOrder={1} expandTo={
-                <Expander key='right-menu-expanded' className='rightMenuBox' area='rt'>
-                    {rightChildren}
-                </Expander>
-            }>
-                {/* {React.cloneElement(filteredRightChildren[3]!, { children: rightChildren, current: true })} */}
-                <MenuFolderItem
-                    key='menuFolderItem-21' 
-                    identity={{parent: 'mainMenuBar'}} 
-                    name='DEV' 
-                    current={false} 
-                    state={{ opened: false }}
-                    children={rightChildren} />
+            <Expander 
+                key='right-menu-compressed' 
+                className='rightMenuBox rightMenuCompressed' 
+                area="rt" 
+                expandOrder={1} 
+                expandTo={rightMenuExpanded}>
+                {rightMenuCompressed}
             </Expander>
         ]} />
     );
 }
+
 
 interface BurgerMenu {
     opened: boolean,
