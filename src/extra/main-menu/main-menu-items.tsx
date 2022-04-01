@@ -5,6 +5,8 @@ import { useInputSync } from '../input-sync'
 import { MenuItemState } from './main-menu-bar';
 import { handleMenuBlur, patchToState, stateToPatch } from './main-menu-utils'
 
+const ARROW_DOWN_URL = '/mod/main/ee/cone/core/ui/c4view/arrow-down.svg';
+
 type MenuItem = MenuFolderItem | MenuExecutableItem | MenuCustomItem | MenuUserItem;
 
 interface MenuFolderItem {
@@ -41,7 +43,7 @@ function MenuFolderItem({identity, name, current, state, icon, children}: MenuFo
             {icon && <img src={icon} className='rowIconSize' />}
             <span>{name}</span>
             <img 
-                src='..\datepicker\arrow-down.svg' 
+                src={ARROW_DOWN_URL} 
                 className='menuFolderIcon'
                 alt='arrow-down-icon' />
 
@@ -172,7 +174,7 @@ function MenuUserItem({identity, shortName, longName, current, state, icon, chil
             <span className='longName'>{longName}</span>
             <span className='shortName'>{shortName}</span>
             <img 
-                src='..\datepicker\arrow-down.svg' 
+                src={ARROW_DOWN_URL}
                 className='menuFolderIcon'
                 alt='arrow-down-icon' />
 

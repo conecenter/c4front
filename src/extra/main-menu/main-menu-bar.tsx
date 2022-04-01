@@ -11,7 +11,7 @@ interface MainMenuBar {
     state: MenuItemState,
     icon?: string    
     leftChildren: ReactElement<MenuItem>[],
-    rightChildren: ReactElement<MenuItem>[]
+    rightChildren?: ReactElement<MenuItem>[]
 }
 
 interface MenuItemState {
@@ -51,13 +51,17 @@ function MainMenuBar({ identity, state, icon, leftChildren, rightChildren }: Mai
     );
 
     // Right part of main menu
-    const menuUserItem = rightChildren.find(child => child.type === MenuUserItem) as ReactElement<MenuUserItem>;
-    const rightChildrenFiltered = rightChildren
-        .filter((child: JSX.Element) => ![MenuUserItem, DateTimeClock].includes(child.type));
+    function getRightMenuCompressed() {
+        if (!rightChildren) return null;
+        const menuUserItem = rightChildren.find(child => child.type === MenuUserItem) as ReactElement<MenuUserItem>;
+        const rightChildrenFiltered = rightChildren
+            .filter((child: JSX.Element) => ![MenuUserItem, DateTimeClock].includes(child.type));
+        return menuUserItem 
+            ? React.cloneElement(menuUserItem, {}, menuUserItem.props.children.concat(rightChildrenFiltered!))
+            : null;
+    }
 
-    const rightMenuCompressed = menuUserItem 
-        ? React.cloneElement(menuUserItem, {}, menuUserItem.props.children.concat(rightChildrenFiltered))
-        : null;
+    const rightMenuCompressed = getRightMenuCompressed();
 
     const rightMenuExpanded = (
         <Expander key='right-menu-reduced' className='rightMenuBox rightMenuCompressed' expandOrder={2} area='rt' expandTo={
@@ -125,4 +129,4 @@ function BurgerMenu({ opened, setFinalState, children }: BurgerMenu) {
 export { MainMenuBar, MenuFolderItem };
 export type { MenuItemState };
 
-export const mainMenuComponents = {MainMenuBar, MenuFolderItem, MenuExecutableItem, MenuCustomItem, MenuItemsGroup}
+export const mainMenuComponents = { MainMenuBar, MenuFolderItem }
