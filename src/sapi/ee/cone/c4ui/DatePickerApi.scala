@@ -21,7 +21,7 @@ trait DatePicker extends ToChildPair
     receiver: Receiver[C],
     userTimezoneId: String = "",
     deferredSend: Boolean = false,
-    children: ChildPairList[OfDiv] = Nil,
+    children: ViewRes = Nil,
   ): DatePicker
 
   @c4val("timestamp-state") def timeStampState(
@@ -40,7 +40,7 @@ trait DatePicker extends ToChildPair
   @c4el("UserLocaleProvider") def localeProvider(
     key: String,
     locale: Locale,
-    children: ChildPairList[OfDiv] = Nil,
+    children: ViewRes = Nil,
   ): ToChildPair
 
   @c4val def locale(

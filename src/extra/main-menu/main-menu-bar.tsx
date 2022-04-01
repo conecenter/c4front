@@ -124,3 +124,5 @@ function BurgerMenu({ opened, setFinalState, children }: BurgerMenu) {
 
 export { MainMenuBar, MenuFolderItem };
 export type { MenuItemState };
+
+export const mainMenuComponents = {MainMenuBar, MenuFolderItem, MenuExecutableItem, MenuCustomItem, MenuItemsGroup}
