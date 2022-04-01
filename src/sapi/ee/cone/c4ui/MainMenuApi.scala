@@ -22,6 +22,8 @@ trait MenuCustomItem extends MenuItem
 
 trait MenuItemsGroup extends MenuInnerItem
 
+trait MenuUserItem extends MenuItem
+
 @c4tags("FrontApp") trait MainMenuTags[C] {
   @c4el("MainMenuBar") def menuBar(
     key: String,
@@ -64,4 +66,14 @@ trait MenuItemsGroup extends MenuInnerItem
     key: String,
     children: ElList[MenuItem],
   ): MenuItemsGroup
+
+  @c4el("MenuUserItem") def menuUserItem(
+    key: String,
+    shortName: String,
+    longName: String,
+    current: Boolean,
+    state: MenuItemState,
+    icon: Option[String] = None,
+    children: ElList[MenuInnerItem],
+  ): MenuUserItem
 }
