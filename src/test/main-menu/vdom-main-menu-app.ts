@@ -2,13 +2,15 @@ import ReactDOM from "react-dom";
 import { createElement as $ } from "react";
 import { createSyncProviders } from "../../main/vdom-hooks";
 import { MainMenuBar, MenuFolderItem } from '../../extra/main-menu/main-menu-bar';
-import { MenuExecutableItem, MenuItemsGroup, MenuCustomItem } from '../../extra/main-menu/main-menu-items';
+import { MenuExecutableItem, MenuItemsGroup, MenuCustomItem, MenuUserItem } from '../../extra/main-menu/main-menu-items';
+import { DateTimeClock } from '../../extra/date-time-clock';
 
 function App() {
     const child = $(MainMenuBar, {
         key: "TEST",
         identity: {parent: "test"},
         state: { opened: false },
+        icon: '../main-menu/HHLA_PLT_Italy.svg',
         leftChildren: [
             $(MenuFolderItem, {
                 key: 'menuFolderItem-1',
@@ -16,6 +18,7 @@ function App() {
                 name: 'Warehouse/Terminal',
                 current: false,
                 state: { opened: false },
+                icon: '../main-menu/main_console.svg',
                 children: [
                     $(MenuExecutableItem, {
                         key: 'menuExecutableItem-1',
@@ -105,7 +108,7 @@ function App() {
                 name: 'Registers',
                 current: false,
                 state: { opened: false },
-                icon: ''
+                icon: '../main-menu/thermometer.svg'
             }),
             $(MenuFolderItem, {
                 key: 'menuFolderItem-3',
@@ -121,7 +124,7 @@ function App() {
                 name: 'Configuration',
                 current: false,
                 state: { opened: false },
-                icon: '',
+                icon: '../main-menu/train.svg',
                 children: [
                     $(MenuFolderItem, {
                         key: 'menuFolderItem-11',
@@ -312,13 +315,6 @@ function App() {
         ],
         rightChildren: [
             $(MenuCustomItem, {
-                key: 'menuCustomItem-1',
-                identity: {parent: 'mainMenuBar'},
-                children: [
-                    $('div', {key: 1}, '18:26:05')
-                ]
-            }),
-            $(MenuCustomItem, {
                 key: 'menuCustomItem-2',
                 identity: {parent: 'mainMenuBar'},
                 children: [
@@ -326,6 +322,12 @@ function App() {
                         $('img', {key: 3, src: '../main-menu/tooltip.svg', className: 'rowIconSize'})
                     ])
                 ]
+            }),
+            $(DateTimeClock, {
+                key: 'DateTimeClock',
+                identity: {parent: 'menuCustomItem-1'},
+                serverTime: '1648628097000',
+                dateTimeFormatId: '1'
             }),
             $(MenuFolderItem, {
                 key: 'menuFolderItem-21',
@@ -372,10 +374,11 @@ function App() {
                     })
                 ]
             }),
-            $(MenuFolderItem, {
-                key: 'menuFolderItem-22',
+            $(MenuUserItem, {
+                key: 'menuUserItem-22',
                 identity: {parent: 'mainMenuBar'},
-                name: 'developer',
+                shortName: 'DEV',
+                longName: 'developer',
                 current: false,
                 state: { opened: false },
                 icon: '',
@@ -412,7 +415,7 @@ function App() {
                         state: { opened: false }
                     }),
                     $(MenuExecutableItem, {
-                        key: 'menuExecutableItem-222',
+                        key: 'menuExecutableItem-223',
                         identity: {parent: 'menuFolderItem-22'},
                         name: 'Log out',
                         current: false,

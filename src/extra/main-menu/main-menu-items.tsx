@@ -5,7 +5,7 @@ import { useInputSync } from '../input-sync'
 import { MenuItemState } from './main-menu-bar';
 import { handleMenuBlur, patchToState, stateToPatch } from './main-menu-utils'
 
-type MenuItem = MenuFolderItem | MenuExecutableItem | MenuCustomItem;
+type MenuItem = MenuFolderItem | MenuExecutableItem | MenuCustomItem | MenuUserItem;
 
 interface MenuFolderItem {
     key: string,
@@ -135,5 +135,52 @@ function MenuItemsGroup({children}: MenuItemsGroup) {
     );
 }
 
-export { MenuFolderItem, MenuExecutableItem, MenuCustomItem, MenuItemsGroup, MenuPopupElement };
+
+interface MenuUserItem {
+    key: string,
+	identity: Object,
+    shortName: string,
+    longName: string,
+    current: boolean,
+    state: MenuItemState,
+    icon?: string,
+    children: ReactElement<MenuItem | MenuItemsGroup>[]
+}
+
+function MenuUserItem({identity, shortName, longName, current, state, icon, children}: MenuUserItem) {
+    const {
+        currentState: { opened }, 
+        setFinalState
+    } = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
+
+    const [popupLrMode, setPopupLrMode] = useState(false);
+    const menuFolderRef = useRef<HTMLDivElement>(null);
+    
+    useEffect(() => {
+        if (isPopupChild(menuFolderRef.current)) setPopupLrMode(true);
+    });
+
+    return (
+        <div 
+            ref={menuFolderRef}
+            className={clsx('menuItem', !icon && 'noIcon', opened && 'menuFolderOpened', current && 'isCurrent')}
+            tabIndex={1}
+            onBlur={(e) => handleMenuBlur(e, setFinalState)}
+            onClick={() => setFinalState({ opened: !opened })}
+        >
+            {icon && <img src={icon} className='rowIconSize' />}
+            <span className='longName'>{longName}</span>
+            <span className='shortName'>{shortName}</span>
+            <img 
+                src='..\datepicker\arrow-down.svg' 
+                className='menuFolderIcon'
+                alt='arrow-down-icon' />
+
+            {opened &&
+                <MenuPopupElement popupLrMode={popupLrMode}>{children}</MenuPopupElement>}
+        </div>
+    );
+}
+
+export { MenuFolderItem, MenuExecutableItem, MenuCustomItem, MenuItemsGroup, MenuPopupElement, MenuUserItem };
 export type { MenuItem };
