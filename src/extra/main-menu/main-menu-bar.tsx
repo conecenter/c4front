@@ -64,7 +64,7 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
 			const rightChildrenFiltered = rightChildren
 					.filter((child: JSX.Element) => ![MenuUserItem, DateTimeClock].includes(child.type));
 			return menuUserItem 
-					? React.cloneElement(menuUserItem, {}, menuUserItem.props.children.concat(rightChildrenFiltered!))
+					? React.cloneElement(menuUserItem, {}, React.Children.toArray(menuUserItem.props.children).concat(rightChildrenFiltered))
 					: null;
 	}
 
@@ -137,4 +137,4 @@ function BurgerMenu({opened, setFinalState, children}: BurgerMenu) {
 export {MainMenuBar, MenuFolderItem};
 export type {MenuItemState};
 
-export const mainMenuComponents = {MainMenuBar, MenuFolderItem, MenuExecutableItem, MenuCustomItem, MenuItemsGroup}
+export const mainMenuComponents = {MainMenuBar, MenuFolderItem, MenuExecutableItem, MenuCustomItem, MenuItemsGroup, MenuUserItem}
