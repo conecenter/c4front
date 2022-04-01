@@ -11,21 +11,23 @@ import {
   MenuUserItem
 } from './main-menu-items';
 import {DateTimeClock} from '../date-time-clock';
+import clsx from 'clsx';
 
 interface MainMenuBar {
-    key: string,
-	identity: Object,
-    state: MenuItemState,
-    icon?: string    
-    leftChildren: ReactElement<MenuItem>[],
-    rightChildren?: ReactElement<MenuItem>[]
+  key: string,
+  identity: Object,
+  state: MenuItemState,
+  hasOpened?: boolean,
+  icon?: string    
+  leftChildren: ReactElement<MenuItem>[],
+  rightChildren?: ReactElement<MenuItem>[]
 }
 
 interface MenuItemState {
   opened: boolean
 }
 
-function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainMenuBar) {
+function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChildren}: MainMenuBar) {
   const {
     currentState: {opened},
     setFinalState
@@ -58,17 +60,7 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
   );
 
 	// Right part of main menu
-	function getRightMenuCompressed() {
-			if (!rightChildren) return null;
-			const menuUserItem = rightChildren.find(child => child.type === MenuUserItem) as ReactElement<MenuUserItem>;
-			const rightChildrenFiltered = rightChildren
-					.filter((child: JSX.Element) => ![MenuUserItem, DateTimeClock].includes(child.type));
-			return menuUserItem 
-					? React.cloneElement(menuUserItem, {}, React.Children.toArray(menuUserItem.props.children).concat(rightChildrenFiltered))
-					: null;
-	}
-
-	const rightMenuCompressed = getRightMenuCompressed();
+	const rightMenuCompressed = rightChildren ? getRightMenuCompressed(rightChildren) : null;
 
   const rightMenuExpanded = (
     <Expander key='right-menu-reduced' className='rightMenuBox rightMenuCompressed' expandOrder={2} area='rt' expandTo={
@@ -81,21 +73,28 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
   );
 
   return (
-    <ExpanderArea key='top-bar' className='mainMenuBar topRow hideOnScroll' maxLineCount={1} expandTo={[
+    <ExpanderArea key='top-bar' className={clsx('mainMenuBar topRow', hasOpened && 'hideOnScroll')} maxLineCount={1} expandTo={[
       <Expander key='left-menu-compressed' area="lt" expandOrder={1} expandTo={leftMenuExpanded}>
         <BurgerMenu opened={opened} setFinalState={setFinalState} children={leftChildren}/>
       </Expander>,
 
-      <Expander
-        key='right-menu-compressed'
-        className='rightMenuBox rightMenuCompressed'
-        area="rt"
-        expandOrder={0}
-        expandTo={rightMenuExpanded}>
+      <Expander key='right-menu-compressed'
+                className='rightMenuBox rightMenuCompressed'
+                area="rt"
+                expandOrder={0}
+                expandTo={rightMenuExpanded}>
         {rightMenuCompressed}
       </Expander>
     ]}/>
   );
+}
+
+function getRightMenuCompressed(rightChildren: ReactElement<MenuItem>[]) {
+  const menuUserItem = rightChildren.find(child => child.type === MenuUserItem) as ReactElement<MenuUserItem> | undefined;
+  if (!menuUserItem) return null;
+  const rightChildrenFiltered = rightChildren
+      .filter((child: JSX.Element) => ![MenuUserItem, DateTimeClock].includes(child.type));
+  return React.cloneElement(menuUserItem, {}, React.Children.toArray(menuUserItem.props.children).concat(rightChildrenFiltered));
 }
 
 
@@ -108,11 +107,9 @@ interface BurgerMenu {
 function BurgerMenu({opened, setFinalState, children}: BurgerMenu) {
   return (
     <div className='menuBurgerBox' onBlur={(e) => handleMenuBlur(e, setFinalState)}>
-      <button
-        key='left-menu'
-        className='btnBurger'
-        onClick={() => setFinalState({opened: !opened})}
-      >
+      <button key='left-menu'
+              className='btnBurger'
+              onClick={() => setFinalState({opened: !opened})} >
         <svg xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" version="1.1"
              viewBox="0 0 32 32">
           <line strokeLinecap="round" x1="2" x2="30" strokeWidth="4"
