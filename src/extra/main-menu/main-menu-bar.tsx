@@ -10,15 +10,15 @@ import {
   MenuPopupElement,
   MenuUserItem
 } from './main-menu-items';
-import {DateTimeClock} from '../date-time-clock';
+import {MainMenuClock} from './main-menu-clock';
 
 interface MainMenuBar {
-    key: string,
-	identity: Object,
-    state: MenuItemState,
-    icon?: string    
-    leftChildren: ReactElement<MenuItem>[],
-    rightChildren?: ReactElement<MenuItem>[]
+  key: string,
+  identity: Object,
+  state: MenuItemState,
+  icon?: string
+  leftChildren: ReactElement<MenuItem>[],
+  rightChildren?: ReactElement<MenuItem>[]
 }
 
 interface MenuItemState {
@@ -57,18 +57,18 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
     </Expander>
   );
 
-	// Right part of main menu
-	function getRightMenuCompressed() {
-			if (!rightChildren) return null;
-			const menuUserItem = rightChildren.find(child => child.type === MenuUserItem) as ReactElement<MenuUserItem>;
-			const rightChildrenFiltered = rightChildren
-					.filter((child: JSX.Element) => ![MenuUserItem, DateTimeClock].includes(child.type));
-			return menuUserItem 
-					? React.cloneElement(menuUserItem, {}, React.Children.toArray(menuUserItem.props.children).concat(rightChildrenFiltered))
-					: null;
-	}
+  // Right part of main menu
+  function getRightMenuCompressed() {
+    if (!rightChildren) return null;
+    const menuUserItem = rightChildren.find(child => child.type === MenuUserItem) as ReactElement<MenuUserItem>;
+    const rightChildrenFiltered = rightChildren
+      .filter((child: JSX.Element) => ![MenuUserItem, MainMenuClock].includes(child.type));
+    return menuUserItem
+      ? React.cloneElement(menuUserItem, {}, React.Children.toArray(menuUserItem.props.children).concat(rightChildrenFiltered))
+      : null;
+  }
 
-	const rightMenuCompressed = getRightMenuCompressed();
+  const rightMenuCompressed = getRightMenuCompressed();
 
   const rightMenuExpanded = (
     <Expander key='right-menu-reduced' className='rightMenuBox rightMenuCompressed' expandOrder={2} area='rt' expandTo={
@@ -137,4 +137,4 @@ function BurgerMenu({opened, setFinalState, children}: BurgerMenu) {
 export {MainMenuBar, MenuFolderItem};
 export type {MenuItemState};
 
-export const mainMenuComponents = {MainMenuBar, MenuFolderItem, MenuExecutableItem, MenuCustomItem, MenuItemsGroup, MenuUserItem}
+export const mainMenuComponents = {MainMenuBar, MenuFolderItem, MenuExecutableItem, MenuCustomItem, MenuItemsGroup, MenuUserItem, MainMenuClock}
