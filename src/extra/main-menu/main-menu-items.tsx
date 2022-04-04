@@ -90,12 +90,12 @@ function MenuExecutableItem({identity, name, current, state, icon}: MenuExecutab
 interface MenuCustomItem {
     key: string,
 	identity: Object,
-    children?: ReactNode[]
+    children?: ReactNode | ReactNode[]
 }
 
 function MenuCustomItem({children}: MenuCustomItem) {
     return (
-        <div className='menuItem'>
+        <div className='menuCustomItem'>
             {children}
         </div>
     );

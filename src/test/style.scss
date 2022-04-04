@@ -714,7 +714,7 @@ div.grid {
 /***********************Menu**************************/
 .mainMenuBar {
   position: fixed!important;
-  height: 2.5em!important;
+  height: 2.7em!important;
   width: 100%;    
   top: 0;
   left: 0;
@@ -736,51 +736,58 @@ div.grid {
     cursor: pointer;
 
     &:hover {
-      background-color: var(--color-light-primaryColor);
-      color: var(--textColor-light-primaryColor)!important;
+        background-color: var(--color-light-primaryColor);
+        color: var(--textColor-light-primaryColor) !important;
     }
 
     &.noIcon {
-      padding-left: 2.8em;
+        padding-left: 2.8em;
     }
 
     &.isCurrent {
-      color: var(--textColor-primaryColor);
-      background-color: var(--color-primaryColor);
+        color: var(--textColor-primaryColor);
+        background-color: var(--color-primaryColor);
     }
 
     &.executeAnim {
-      animation: executeAnimation 0.4s ease-out infinite alternate;
+        animation: executeAnimation 0.4s ease-out infinite alternate;
 
-      @keyframes executeAnimation {
-        0% { opacity: 1; }
-        100% { opacity: 0.5; }
-      }
+        @keyframes executeAnimation {
+            0% { opacity: 1 }
+            100% { opacity: 0.5 }
+        }
     }
 
     // .mainMenuElementIcon
     .menuFolderIcon {
-      transition: transform 0.15s ease 0s;
-      height: 1em;
-      margin-right: 0.2em;
+        transition: transform 0.15s ease 0s;
+        height: 1em;
+        margin-right: 0.2em;
     }
-    
+
     > span {
-      margin-right: 1em; // 2018
-      // padding: 0 1.8em 0 1em;  // 2020
-      flex-grow: 1;
-      text-overflow: ellipsis;
-      overflow: hidden;
+        margin-right: 1em; // 2018
+        // padding: 0 1.8em 0 1em;  // 2020
+        flex-grow: 1;
+        text-overflow: ellipsis;
+        overflow: hidden;
     }
 
     > img.rowIconSize {
-      margin: 0 0.4em;
+        margin: 0 0.4em;
     }
+  }
 
-    > .menuLogo {
-      width: 18em;
-      cursor: default;
-    }
+  .menuCustomItem {
+    display: flex;
+    align-items: center;
+    margin-right: 1em;
+    cursor: default;
+  }
+
+  .menuLogo > img {
+    max-width: 18em;
+    max-height: 100%;
   }
 
   .menuPopupBox {
@@ -850,31 +857,25 @@ div.grid {
         margin-left: 0.2em;
       }        
     }
-  }
 
-  .leftMenuBox.hiddenIcons > .menuItem > img.rowIconSize:first-child {
-    display: none;
+    &.hiddenIcons > .menuItem > img.rowIconSize:first-child {
+      display: none;
+    }
   }
 
   .rightMenuBox {
+    .dateTimeClock > .dateDisplay {
+      padding-right: 0.3em;
+    }
+
     &:not(.rightMenuCompressed) .shortName {
       display: none;
     }
 
     &.rightMenuCompressed {
-      .longName, .dateDisplay {
+      .longName,
+      .dateTimeClock > .dateDisplay {
         display: none;
-      }
-    }
-
-    .dateTimeClock {
-      display: flex;
-      align-items: center;
-      margin-right: 1em;
-      cursor: default;
-
-      .dateDisplay {
-        padding-right: 0.3em;
       }
     }
   }

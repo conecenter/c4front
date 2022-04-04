@@ -37,8 +37,8 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
   // Left part of main menu
   const leftMenuWithLogo = !icon ? undefined : (
     <Expander key='left-menu-with-logo' className='leftMenuBox' area="lt">
-      <div className='menuItem'>
-        <img className='menuLogo' src={icon} alt='menu-logo'/>
+      <div className='menuCustomItem menuLogo'>
+        <img src={icon} alt='menu-logo'/>
       </div>
       {leftChildren}
     </Expander>

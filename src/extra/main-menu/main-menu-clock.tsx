@@ -56,8 +56,8 @@ export function MainMenuClock({identity, serverTime, timestampFormatId}: MainMen
   }, []);
 
   return (
-    <div className='dateTimeClock'>
-      <span className='dateDisplay'>{date} </span>
+    <div className='menuCustomItem dateTimeClock'>
+      <span className='dateDisplay'>{date}</span>
       <span>{time}</span>
     </div>
   );
