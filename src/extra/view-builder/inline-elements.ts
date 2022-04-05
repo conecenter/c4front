@@ -1,28 +1,44 @@
 import {createElement as el, ReactNode} from "react";
 import {ColorDef, colorToProps} from "./common-api";
+import {useClickSyncOpt} from "../exchange/click-sync";
+import clsx from "clsx";
+import {CLICKED_CLASSNAME, INLINE_BUTTON_CLASSNAME, INLINE_CHIP_CLASSNAME} from "./css-classes";
 
 interface InlineButton {
-    key: string
-    color: ColorDef
-    children: ReactNode[]
+  key: string,
+  identity: Object
+  receiver: boolean
+  color: ColorDef
+  children: ReactNode[]
+
 }
 
-function InlineButton({key, color, children}: InlineButton) {
-    return el("button", {
-        ...colorToProps(color)
-    }, children)
+function InlineButton({key, identity, receiver, color, children}: InlineButton) {
+  const {clicked, onClick} = useClickSyncOpt(identity, "receiver", receiver)
+  const {style, className} = colorToProps(color)
+  return el("button", {
+    style,
+    onClick,
+    className: clsx(className, INLINE_BUTTON_CLASSNAME, clicked && CLICKED_CLASSNAME)
+  }, children)
 }
 
 interface InlineChip {
-    key: string
-    color: ColorDef
-    children: ReactNode[]
+  key: string
+  identity: Object
+  receiver: boolean
+  color: ColorDef
+  children: ReactNode[]
 }
 
-function InlineChip({key, color, children}: InlineButton) {
-    return el("button", {
-        ...colorToProps(color)
-    }, children)
+function InlineChip({key, identity, receiver, color, children}: InlineButton) {
+  const {clicked, onClick} = useClickSyncOpt(identity, "receiver", receiver)
+  const {style, className} = colorToProps(color)
+  return el("button", {
+    style,
+    onClick,
+    className: clsx(className, INLINE_CHIP_CLASSNAME, clicked && CLICKED_CLASSNAME)
+  }, children)
 }
 
 

@@ -1,5 +1,9 @@
 import React, {createElement as el, CSSProperties, HTMLAttributes, ReactNode} from "react";
 import {
+  FlexibleAlign,
+  FlexibleSizes
+} from "./flexible-api";
+import {
   FLEXIBLE_CELL_CLASSNAME,
   FLEXIBLE_COLUMN_CLASSNAME,
   FLEXIBLE_GROUPBOX_CLASSNAME,
@@ -7,10 +11,8 @@ import {
   FLEXIBLE_LABELED_CLASSNAME,
   FLEXIBLE_LABELED_LABEL_CLASSNAME,
   FLEXIBLE_ROOT_CLASSNAME,
-  FLEXIBLE_ROW_CLASSNAME,
-  FlexibleAlign,
-  FlexibleSizes
-} from "./flexible-api";
+  FLEXIBLE_ROW_CLASSNAME
+} from "./css-classes";
 
 function debugBorder(color: string): CSSProperties {
   return {

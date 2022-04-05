@@ -1,8 +1,8 @@
-import React, { useState } from "react"
-import { Patch, useInputSync } from "./input-sync";
-import { HexColorPicker, HexColorInput } from "react-colorful";
-import { usePopupPos } from "../main/popup";
-import { ENTER_KEY } from "../main/keyboard-keys";
+import React, {useState} from "react"
+import {Patch, useInputSync} from "./exchange/input-sync";
+import {HexColorInput, HexColorPicker} from "react-colorful";
+import {usePopupPos} from "../main/popup";
+import {ENTER_KEY} from "../main/keyboard-keys";
 
 interface ColorPickerProps {
 	identity: Object,
@@ -11,7 +11,7 @@ interface ColorPickerProps {
 }
 
 export function ColorPicker({identity, value, ro}: ColorPickerProps) {
-	
+
 	const { currentState, setTempState, setFinalState } = useInputSync<string, string>(
 		identity,
 		'receiver',
@@ -55,7 +55,7 @@ export function ColorPicker({identity, value, ro}: ColorPickerProps) {
 	}
 
 	return (
-		<div 
+		<div
 			className={`inputBox${ro ? ' colorPickerRo' : ''}`}
 			onFocus={() => setActive(true)}
 			onBlur={handleBlur} >
@@ -65,7 +65,7 @@ export function ColorPicker({identity, value, ro}: ColorPickerProps) {
 					className={active? undefined : 'colorPickerChip'}
 					style={active? undefined : {background: currentState}}
 					color={currentState}
-					onChange={setTempState} 
+					onChange={setTempState}
 					onInput={handleInput}
 					onKeyDown={handleKeyDown}
 					onFocus={handleInputFocus}
@@ -73,7 +73,7 @@ export function ColorPicker({identity, value, ro}: ColorPickerProps) {
 					prefixed />
 			</div>
 
-			{active && 
+			{active &&
 				<div ref={setPopupRef} className='colorPickerPopup' tabIndex={-1} style={popupPos} >
 					<HexColorPicker color={currentState} onChange={setTempState} />
 				</div>}

@@ -1,7 +1,7 @@
 import React, {ReactElement, useContext} from "react";
 import clsx from 'clsx';
 import {Expander, ExpanderArea} from '../../main/expander-area';
-import {useInputSync} from '../input-sync';
+import {useInputSync} from '../exchange/input-sync';
 import {handleMenuBlur, patchToState, stateToPatch} from './main-menu-utils';
 import {MainMenuClock} from './main-menu-clock';
 import {
@@ -21,7 +21,7 @@ interface MainMenuBar {
   identity: Object,
   state: MenuItemState,
   hasOpened?: boolean,
-  icon?: string    
+  icon?: string
   leftChildren: ReactElement<MenuItem>[],
   rightChildren?: ReactElement<MenuItem>[]
 }

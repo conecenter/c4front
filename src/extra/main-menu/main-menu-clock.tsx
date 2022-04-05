@@ -2,7 +2,7 @@ import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {formatInTimeZone} from 'date-fns-tz'
 import {identityAt} from '../../main/vdom-util';
 import {useSync} from '../../main/vdom-hooks';
-import {Patch} from '../input-sync';
+import {Patch} from '../exchange/input-sync';
 import {useUserLocale} from '../locale';
 
 interface MainMenuClock {

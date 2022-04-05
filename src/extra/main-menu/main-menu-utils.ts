@@ -1,4 +1,4 @@
-import { Patch, PatchHeaders } from '../input-sync';
+import { Patch, PatchHeaders } from '../exchange/input-sync';
 import { MenuItemState } from './main-menu-bar';
 
 // Server sync functionality

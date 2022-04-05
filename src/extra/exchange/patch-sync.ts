@@ -7,7 +7,7 @@ interface PatchHeaders {
 }
 
 interface Patch {
-    headers: PatchHeaders
+    headers?: PatchHeaders
     value: string
 }
 
@@ -73,4 +73,4 @@ function usePatchSync<ServerState, State, StateChange>(
 }
 
 export {usePatchSync}
-export type {Patch, PatchHeaders}
+export type {Patch, PatchHeaders, }

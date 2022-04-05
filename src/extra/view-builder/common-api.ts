@@ -1,4 +1,4 @@
-import {HTMLAttributes} from "react";
+import {CSSProperties, HTMLAttributes} from "react";
 
 interface ColorDef {
     tp: "p" | "r"
@@ -13,7 +13,12 @@ interface RawColor extends ColorDef {
     textColor: string
 }
 
-export function colorToProps<T>(color: ColorDef): HTMLAttributes<T> {
+interface ColorProps {
+    className?: string
+    style?: CSSProperties
+}
+
+export function colorToProps<T>(color: ColorDef): ColorProps {
     switch (color.tp) {
         case "p":
             return {

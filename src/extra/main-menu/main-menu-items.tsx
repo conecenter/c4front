@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import React, { ReactElement, ReactNode, useEffect, useRef, useState } from 'react'
 import { usePopupPos } from '../../main/popup';
-import { useInputSync } from '../input-sync'
+import { useInputSync } from '../exchange/input-sync'
 import { MenuItemState } from './main-menu-bar';
 import { handleMenuBlur, patchToState, stateToPatch } from './main-menu-utils'
 
@@ -21,19 +21,19 @@ interface MenuFolderItem {
 
 function MenuFolderItem({identity, name, current, state, icon, children}: MenuFolderItem) {
     const {
-        currentState: { opened }, 
+        currentState: { opened },
         setFinalState
     } = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
 
     const [popupLrMode, setPopupLrMode] = useState(false);
     const menuFolderRef = useRef<HTMLDivElement>(null);
-    
+
     useEffect(() => {
         if (isPopupChild(menuFolderRef.current)) setPopupLrMode(true);
     });
 
     return (
-        <div 
+        <div
             ref={menuFolderRef}
             className={clsx('menuItem', opened && 'menuFolderOpened', current && 'isCurrent')}
             tabIndex={1}
@@ -42,8 +42,8 @@ function MenuFolderItem({identity, name, current, state, icon, children}: MenuFo
         >
             {icon && <img src={icon} className='rowIconSize' />}
             <span>{name}</span>
-            <img 
-                src={ARROW_DOWN_URL} 
+            <img
+                src={ARROW_DOWN_URL}
                 className='menuFolderIcon'
                 alt='arrow-down-icon' />
 
@@ -71,13 +71,13 @@ interface MenuExecutableItem {
 function MenuExecutableItem({identity, name, current, state, icon}: MenuExecutableItem) {
     const {
         currentState: { opened },
-        setFinalState 
+        setFinalState
     } = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
 
     return (
-        <div 
+        <div
             className={clsx('menuItem', current && 'isCurrent', opened && 'executeAnim')}
-            tabIndex={1} 
+            tabIndex={1}
             onClick={() => setFinalState({ opened: true })}
         >
             {icon && <img src={icon} className='rowIconSize'/>}
@@ -112,10 +112,10 @@ function MenuPopupElement({popupLrMode, children}: MenuPopupElement) {
     const [popupPos] = usePopupPos(popupElement, popupLrMode);
 
     return (
-        <div 
-            ref={setPopupElement} 
-            className='menuPopupBox popupEl' 
-            style={popupPos} 
+        <div
+            ref={setPopupElement}
+            className='menuPopupBox popupEl'
+            style={popupPos}
             onClick={(e) => e.stopPropagation()}>
             {children}
         </div>
@@ -151,19 +151,19 @@ interface MenuUserItem {
 
 function MenuUserItem({identity, shortName, longName, current, state, icon, children}: MenuUserItem) {
     const {
-        currentState: { opened }, 
+        currentState: { opened },
         setFinalState
     } = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
 
     const [popupLrMode, setPopupLrMode] = useState(false);
     const menuFolderRef = useRef<HTMLDivElement>(null);
-    
+
     useEffect(() => {
         if (isPopupChild(menuFolderRef.current)) setPopupLrMode(true);
     });
 
     return (
-        <div 
+        <div
             ref={menuFolderRef}
             className={clsx('menuItem', opened && 'menuFolderOpened', current && 'isCurrent')}
             tabIndex={1}
@@ -173,7 +173,7 @@ function MenuUserItem({identity, shortName, longName, current, state, icon, chil
             {icon && <img src={icon} className='rowIconSize' />}
             <span className='longName'>{longName}</span>
             <span className='shortName'>{shortName}</span>
-            <img 
+            <img
                 src={ARROW_DOWN_URL}
                 className='menuFolderIcon'
                 alt='arrow-down-icon' />

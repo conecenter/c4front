@@ -4,16 +4,16 @@ import { ARROW_DOWN_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY } from '../main/key
 import { usePopupPos } from '../main/popup';
 import { useSync } from '../main/vdom-hooks';
 import { identityAt } from '../main/vdom-util';
-import { Patch, PatchHeaders, useInputSync } from './input-sync';
-import { 
-	BACKSPACE_EVENT, 
-	COPY_EVENT, 
-	CUT_EVENT, 
-	DELETE_EVENT, 
-	ENTER_EVENT, 
-	PASTE_EVENT, 
-	TAB_EVENT, 
-	useExternalKeyboardControls 
+import { Patch, PatchHeaders, useInputSync } from './exchange/input-sync';
+import {
+	BACKSPACE_EVENT,
+	COPY_EVENT,
+	CUT_EVENT,
+	DELETE_EVENT,
+	ENTER_EVENT,
+	PASTE_EVENT,
+	TAB_EVENT,
+	useExternalKeyboardControls
 } from './focus-module-interface';
 
 interface DropdownProps {
@@ -51,9 +51,9 @@ const isChip = (item: Content): item is Chip => (item as Chip).bgColor !== undef
 
 export function DropdownCustom({ identity, state, content, popupChildren, ro, popupClassname, children }: DropdownProps) {
 	const {
-		currentState, 
-		setTempState, 
-		setFinalState 
+		currentState,
+		setTempState,
+		setFinalState
 	} = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
 
 	const { inputValue, mode, popupOpen } = currentState;
@@ -75,7 +75,7 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 	// Interaction with FocusModule (c4e\client\src\extra\focus-module.js) - Excel-style keyboard controls
 	function handleCustomDelete(e: CustomEvent) {
 		const printableKey = (e.detail && e.detail.key) as string | null;
-		setTempState({ 
+		setTempState({
 			inputValue: (printableKey && printableKey !== 'Backspace') ? printableKey : '',
 			mode: 'input',
 			popupOpen: true
@@ -133,9 +133,9 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 				break;
 			case ESCAPE_KEY:
 				if (mode === 'content' && popupOpen) setFinalState({ ...currentState, popupOpen: false });
-				else if (mode === 'input') setFinalState({ 
+				else if (mode === 'input') setFinalState({
 					inputValue: stableInputValue.current,
-					popupOpen: false, 
+					popupOpen: false,
 					mode: inputValue === stableInputValue.current ? 'content' : 'input'
 				});
 		}
@@ -143,7 +143,7 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 
 	// Custom content JSX
 	const customContent = content.map((item, i) =>
-		<span 
+		<span
 			className={isChip(item) ? 'chipItem' : undefined}
 			style={{ backgroundColor: (item as Chip).bgColor, color: (item as Chip).textColor }}
 			key={item.text + i}>
@@ -160,46 +160,46 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 	}
 
   	return (
-		<div 
-			className='customDropdownBox' 
+		<div
+			className='customDropdownBox'
 			tabIndex={1}
 			ref={dropdownBoxRef}
 			onBlur={handleBlur}
 			onKeyDown={handleBoxKeyDown} >
 
-			{mode === 'content' && 
-				<div 
-					className="customContentBox" 
+			{mode === 'content' &&
+				<div
+					className="customContentBox"
 					tabIndex={-1}
 					onFocus={() => {setFinalState({ ...currentState, mode: 'input' })}}>
 					{customContent}
 				</div>}
 
 			{mode === 'input' &&
-				<input 
-					type='text' 
-					value={inputValue} 
-					autoFocus 
+				<input
+					type='text'
+					value={inputValue}
+					autoFocus
 					onChange={(e) => setTempState({ inputValue: e.target.value, mode: 'input', popupOpen: true })} />}
 
-			<button 
-				type='button' 
-				className='buttonEl' 
-				tabIndex={-1} 
-				onClick={() => setFinalState({ ...currentState, popupOpen: !popupOpen })} 
+			<button
+				type='button'
+				className='buttonEl'
+				tabIndex={-1}
+				onClick={() => setFinalState({ ...currentState, popupOpen: !popupOpen })}
 				onKeyDown={(e) => e.preventDefault()} >
-				<img 
-					className={popupOpen ? 'rotate180deg' : undefined} 
+				<img
+					className={popupOpen ? 'rotate180deg' : undefined}
 					src='/mod/main/ee/cone/core/ui/c4view/arrow-down.svg'
 					alt='arrow-down-icon' />
 			</button>
 
 			{children}
 
-			{popupOpen && 
-				<div 
-					ref={setPopupRef} 
-					className={clsx('popupEl', 'dropdownPopup', popupClassname)} 
+			{popupOpen &&
+				<div
+					ref={setPopupRef}
+					className={clsx('popupEl', 'dropdownPopup', popupClassname)}
 					style={popupPos} >
 					{popupChildren}
 				</div>}
