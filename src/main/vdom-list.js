@@ -253,7 +253,8 @@ const getAllChildren = ({children,rows,cols,hasHiddenCols,hideElementsForHiddenC
                 style: { flexBasis: `${col.width.min}em` },
                 className: "inputLike",
                 children: cell.props.children,
-            }))
+            })),
+            'data-expanded-cell': ''
         })
         return $(NoCaptionContext.Provider,{value:false, key:`${rowKey}-expanded`},res)
     })
