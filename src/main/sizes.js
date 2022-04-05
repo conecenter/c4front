@@ -83,9 +83,9 @@ const widthsFromElement = (keep,element) => {
 
 const containerKeyAttrValue = "container"
 
-const useAddContainer = extractedUse((ref,keyAttrValue)=>(height,children,className)=>{
-    const style = { position: "relative", height }
-    return createElement("div",{ style, ref, className, [keyAttrName]:containerKeyAttrValue, children })
+const useAddContainer = extractedUse((ref,keyAttrValue)=>(height,children, props={})=>{
+    const style = { position: "relative", height, ...props.style }
+    return createElement("div",{ ref, [keyAttrName]:containerKeyAttrValue, ...props, style, children })
 },useMemo)
 
 export const useWidths = nextRef => {

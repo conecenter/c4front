@@ -1,4 +1,4 @@
-import React, {ReactElement} from "react";
+import React, {ReactElement, useContext} from "react";
 import clsx from 'clsx';
 import {Expander, ExpanderArea} from '../../main/expander-area';
 import {useInputSync} from '../input-sync';
@@ -12,7 +12,9 @@ import {
   MenuPopupElement,
   MenuUserItem
 } from './main-menu-items';
+import { ScrollInfoContext } from '../scroll-info-context';
 
+const DATA_PATH = 'main-menu-bar';
 
 interface MainMenuBar {
   key: string,
@@ -34,7 +36,9 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
     setFinalState
   } = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
 
-  // Left part of main menu
+  const scrollPos = useContext(ScrollInfoContext);
+
+  // Left part of menu
   const leftMenuWithLogo = !icon ? undefined : (
     <Expander key='left-menu-with-logo' className='leftMenuBox' area="lt">
       <div className='menuCustomItem menuLogo'>
@@ -60,7 +64,7 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
     </Expander>
   );
 
-	// Right part of main menu
+	// Right part of menu
 	const rightMenuCompressed = rightChildren ? getRightMenuCompressed(rightChildren) : null;
 
   const rightMenuExpanded = (
@@ -74,7 +78,14 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
   );
 
   return (
-    <ExpanderArea key='top-bar' className={clsx('mainMenuBar topRow', !hasOpened && 'hideOnScroll')} maxLineCount={1} expandTo={[
+    <ExpanderArea key='top-bar' 
+                  maxLineCount={1}
+                  props={{ 
+                    className: clsx('mainMenuBar topRow', !hasOpened && 'hideOnScroll'),
+                    style: { top: scrollPos.elementsStyles.get(DATA_PATH) },
+                    'data-path': DATA_PATH,
+                  }}
+                  expandTo={[
       <Expander key='left-menu-compressed' area="lt" expandOrder={1} expandTo={leftMenuExpanded}>
         <BurgerMenu opened={opened} setFinalState={setFinalState} children={leftChildren}/>
       </Expander>,

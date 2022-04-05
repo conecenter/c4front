@@ -85,7 +85,7 @@ const useViewportHeightIntEm = () => {
 const deep = body => state => body(deep(body))(state)
 //loop(next=>st=>{ console.log(st); if(st<10) next(st+1)})(0)
 
-const useMemoFitAll = extractedUse((expandTo,childWidths,addPos,outerWidth,addContainer,checkLineCount,className) => {
+const useMemoFitAll = extractedUse((expandTo,childWidths,addPos,outerWidth,addContainer,checkLineCount,props) => {
     const setup = items => items.map(item=>({
         key: item.key, sideName: item.props.area, width: childWidths[item.key]
     })).filter(item=>item.width)
@@ -104,7 +104,7 @@ const useMemoFitAll = extractedUse((expandTo,childWidths,addPos,outerWidth,addCo
     const btnPosByKey = getPositions(fitted)
     const height = em(lineToEm(fitted.lineCount))
     const children = getAllExpanded(expandTo).map(c=>addPos(c.key,btnPosByKey[c.key],c.props.children,c.props.className))
-    return addContainer(height,children,className)
+    return addContainer(height,children,props)
 },useMemo)
 
 /*
@@ -116,14 +116,14 @@ const useLogDep = (hint,...depList) => {
 }
 */
 
-export function ExpanderArea({expandTo,maxLineCount,className}){
+export function ExpanderArea({expandTo,maxLineCount,props}){
     const [theAreaElement,setAreaElement] = useState(null)
     const [vpHeight,vpRef] = useViewportHeightIntEm()
     const [childWidths,addPos,outerWidth,addContainer] = useWidths(maxLineCount ? null : vpRef)
     const checkLineCountVP = useCallback(lineCount => lineToEm(lineCount) * 4 <= vpHeight, [vpHeight])
     const checkLineCountVal = useCallback(lineCount => lineCount <= maxLineCount, [maxLineCount])
     const checkLineCount = maxLineCount ? checkLineCountVal : checkLineCountVP
-    const res = useMemoFitAll(expandTo,childWidths,addPos,outerWidth,addContainer,checkLineCount,className)
+    const res = useMemoFitAll(expandTo,childWidths,addPos,outerWidth,addContainer,checkLineCount,props)
     // console.log("render "+maxLineCount)
     // useLogDep("changed "+maxLineCount,theAreaElement,childWidths,expandTo,outerWidth,childWidths,checkLineCount,vpHeight)
     return res
