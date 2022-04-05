@@ -35,7 +35,7 @@ function MenuFolderItem({identity, name, current, state, icon, children}: MenuFo
     return (
         <div 
             ref={menuFolderRef}
-            className={clsx('menuItem', !icon && 'noIcon', opened && 'menuFolderOpened', current && 'isCurrent')}
+            className={clsx('menuItem', opened && 'menuFolderOpened', current && 'isCurrent')}
             tabIndex={1}
             onBlur={(e) => handleMenuBlur(e, setFinalState)}
             onClick={() => setFinalState({ opened: !opened })}
@@ -76,7 +76,7 @@ function MenuExecutableItem({identity, name, current, state, icon}: MenuExecutab
 
     return (
         <div 
-            className={clsx('menuItem', !icon && 'noIcon', current && 'isCurrent', opened && 'executeAnim')}
+            className={clsx('menuItem', current && 'isCurrent', opened && 'executeAnim')}
             tabIndex={1} 
             onClick={() => setFinalState({ opened: true })}
         >
@@ -165,7 +165,7 @@ function MenuUserItem({identity, shortName, longName, current, state, icon, chil
     return (
         <div 
             ref={menuFolderRef}
-            className={clsx('menuItem', !icon && 'noIcon', opened && 'menuFolderOpened', current && 'isCurrent')}
+            className={clsx('menuItem', opened && 'menuFolderOpened', current && 'isCurrent')}
             tabIndex={1}
             onBlur={(e) => handleMenuBlur(e, setFinalState)}
             onClick={() => setFinalState({ opened: !opened })}

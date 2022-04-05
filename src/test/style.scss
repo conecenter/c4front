@@ -713,9 +713,9 @@ div.grid {
 
 /***********************Menu**************************/
 .mainMenuBar {
-  position: fixed!important;
-  height: 2.7em!important;
-  width: 100%;    
+  position: fixed !important;
+  height: 2.7em !important;
+  width: 100%;   
   top: 0;
   left: 0;
   z-index: 100000;
@@ -724,10 +724,10 @@ div.grid {
   color: var(--textColor-primaryColor);      
 
   > div {
+    display: flex;
     height: 100%;
   }
 
-  // .mainMenuElement
   .menuItem {
     display: flex;
     align-items: center;
@@ -735,53 +735,52 @@ div.grid {
     white-space: nowrap;
     cursor: pointer;
 
-    &:hover {
-        background-color: var(--color-light-primaryColor);
-        color: var(--textColor-light-primaryColor) !important;
-    }
-
-    &.noIcon {
-        padding-left: 2.8em;
-    }
-
     &.isCurrent {
-        color: var(--textColor-primaryColor);
-        background-color: var(--color-primaryColor);
+      color: var(--textColor-primaryColor);
+      background-color: var(--color-primaryColor);
+    }
+
+    &:hover {
+      background-color: var(--color-light-primaryColor);
+      color: var(--textColor-light-primaryColor);
     }
 
     &.executeAnim {
-        animation: executeAnimation 0.4s ease-out infinite alternate;
+      animation: executeAnimation 0.4s ease-out infinite alternate;
 
-        @keyframes executeAnimation {
-            0% { opacity: 1 }
-            100% { opacity: 0.5 }
-        }
+      @keyframes executeAnimation {
+          0% { opacity: 1 }
+          100% { opacity: 0.5 }
+      }
     }
 
-    // .mainMenuElementIcon
     .menuFolderIcon {
-        transition: transform 0.15s ease 0s;
-        height: 1em;
-        margin-right: 0.2em;
+      transition: transform 0.15s ease 0s;
+      height: 1em;
+      margin-right: 0.5em;
     }
 
     > span {
-        margin-right: 1em; // 2018
-        // padding: 0 1.8em 0 1em;  // 2020
-        flex-grow: 1;
-        text-overflow: ellipsis;
-        overflow: hidden;
+      padding: 0 0.5em;
+      // padding: 0 1.8em 0 1em;  // 2020
+      flex-grow: 1;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    > span:first-child {
+      margin-left: 2.5em;
     }
 
     > img.rowIconSize {
-        margin: 0 0.4em;
+        margin-left: 0.5em;
     }
   }
 
   .menuCustomItem {
     display: flex;
     align-items: center;
-    margin-right: 1em;
+    margin: 0 0.5em;
     cursor: default;
   }
 
@@ -791,11 +790,12 @@ div.grid {
   }
 
   .menuPopupBox {
-    min-width: 13.5em;
+    min-width: 13.5em !important;
     color: var(--textColor-body);
 
     .menuFolderIcon {
       transform: rotate(-90deg);
+      margin-right: 0.1em;
     }
 
     .menuFolderOpened > .menuFolderIcon {
@@ -807,32 +807,15 @@ div.grid {
     }
 
     hr {
-      height: 0.05em;
       background-color: var(--color-dark-primaryColor);
+      height: 0.05em;      
       margin: 0 0.3em;
     }
   }
 
-  // replace .mainMenuContainer in 2020
-  .leftMenuBox, .rightMenuBox, .menuBurgerBox  {
-    display: flex;
-    height: 100%;
-    
-    > .menuPopupBox {
-      background: var(--color-primaryColor);
-      border: none!important;
-      box-shadow: none!important;
-      margin-top: 0.15em;
-
-      >.menuItem {
-        padding: 0 0.2em;
-      }
-    }
-
-    > .menuItem {
-      margin-right: 1em;
-      padding: 0;
-
+  // top level menu items
+  .leftMenuBox, .rightMenuBox  {
+    > .menuItem {      
       &.menuFolderOpened > .menuFolderIcon {
         transform: rotate(-180deg);
       }
@@ -840,22 +823,21 @@ div.grid {
       .menuPopupBox {
         margin-top: 0.07em;
       }
+
+      > span:first-child {
+        margin-left: 0;
+      }
     }
 
-    // replace .menu-popup>div:first-child in 2020
-    > .menuItem,  // .topLevelMenuItem
+    > .menuItem,
     > .menuPopupBox >.menuItem {
       max-width: 20em;
       color: var(--textColor-primaryColor);
 
-      &.isCurrent {
-        background-color: var(--color-dark-primaryColor);// !important;
-        color: var(--textColor-dark-primaryColor); // !important;
+      &.isCurrent:not(:hover) {
+        background-color: var(--color-dark-primaryColor);
+        color: var(--textColor-dark-primaryColor);
       }
-
-      >span {
-        margin-left: 0.2em;
-      }        
     }
 
     &.hiddenIcons > .menuItem > img.rowIconSize:first-child {
@@ -880,7 +862,16 @@ div.grid {
     }
   }
 
-  // .folderMenu - used in 2020 for > .rowFlexContainer > .mainMenuElement > :not(.folderMenu) {...
+  .menuBurgerBox  {
+    display: flex;
+
+    > .menuPopupBox {
+      background: var(--color-primaryColor);
+      border: none!important;
+      box-shadow: none!important;
+      margin-top: 0.15em;
+    }
+  }
 
   .btnBurger {
     margin: 0 0 0 0.5em;
@@ -895,61 +886,6 @@ div.grid {
       }
     }
   }
-
-  /* 2020:
-  .mainMenuPopupContainer -> .menuPopupBox {
-    + min-width: 13.5em;
-    + box-shadow: 0px 2px 50px rgb(47 46 79 / 75%);
-    + z-index: 10002;
-    // transform-origin: 50% 0% 0px;
-    + border: 0; // 2020
-    + color: var(--textColor-body);
-    + background-color: var(--color-body);
-    - position: absolute;
-    - left: 0px;
-    - top: 100%;
-  }  */
-
-  // .menuSelected {
-  //   background-color: var(--color-dark-primaryColor) !important;
-  //   color: var(--textColor-dark-primaryColor) !important;
-  // }
-
-  // .mainMenuPopupItem {
-  //   box-sizing: border-box;
-  //   position: relative;
-  //   white-space: nowrap;
-  //   padding-right: 0.8em;
-  //   cursor: pointer;
-  //   outline: none;
-  //   display: flex;
-  //   align-items: center;
-  //   height: 100%;
-  //   vertical-align: middle;
-  // }
-
-  // .mainMenuPopupItem {
-
-  //   > span > button {
-  //       > div, > svg, > img {
-  //           vertical-align: middle;
-  //           display: inline-block;
-  //           padding-right: 0.2em;
-  //       }
-  //   }
-
-  //   > svg.rowIconSize {
-  //       padding: 0.2em 0.2em 0.2em 0.4em;
-  //   }
-  // }
-
-  // .fixMenuHeight{
-  //   line-height: 1;
-  //   font-size: 1em;
-  //   min-height: 2.4em;
-  //   display: inline-block;
-  //   width: 1px
-  // }
 
   // .mainMenuElement
   .mainMenuElement > .shoppingBasket > button{

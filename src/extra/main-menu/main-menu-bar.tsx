@@ -74,7 +74,7 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
   );
 
   return (
-    <ExpanderArea key='top-bar' className={clsx('mainMenuBar topRow', hasOpened && 'hideOnScroll')} maxLineCount={1} expandTo={[
+    <ExpanderArea key='top-bar' className={clsx('mainMenuBar topRow', !hasOpened && 'hideOnScroll')} maxLineCount={1} expandTo={[
       <Expander key='left-menu-compressed' area="lt" expandOrder={1} expandTo={leftMenuExpanded}>
         <BurgerMenu opened={opened} setFinalState={setFinalState} children={leftChildren}/>
       </Expander>,
