@@ -123,13 +123,11 @@ function MenuPopupElement({popupLrMode, children}: MenuPopupElement) {
     );
 }
 
-function hasIconProp(child: ReactElement<MenuItem | MenuItemsGroup>): string | undefined {
+function hasIconProp(child: JSX.Element): string | undefined {
     if (child.type === MenuItemsGroup) {
-        // @ts-ignore
         return child.props.children.some(hasIconProp);
-    }
-    // @ts-ignore
-    return child.props.icon;  
+    }    
+    return child.props.icon;
 }
 
 
