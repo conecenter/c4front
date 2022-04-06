@@ -111,15 +111,25 @@ function MenuPopupElement({popupLrMode, children}: MenuPopupElement) {
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
     const [popupPos] = usePopupPos(popupElement, popupLrMode);
 
+    const hasIcon = children ? children.some(hasIconProp) : false;
+
     return (
-        <div
-            ref={setPopupElement}
-            className='menuPopupBox popupEl'
-            style={popupPos}
-            onClick={(e) => e.stopPropagation()}>
+        <div ref={setPopupElement}
+             className={clsx('menuPopupBox popupEl', hasIcon && 'hasIcons')}
+             style={popupPos}
+             onClick={(e) => e.stopPropagation()}>
             {children}
         </div>
     );
+}
+
+function hasIconProp(child: ReactElement<MenuItem | MenuItemsGroup>): string | undefined {
+    if (child.type === MenuItemsGroup) {
+        // @ts-ignore
+        return child.props.children.some(hasIconProp);
+    }
+    // @ts-ignore
+    return child.props.icon;  
 }
 
 

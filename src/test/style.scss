@@ -768,10 +768,6 @@ div.grid {
       overflow: hidden;
     }
 
-    > span:first-child {
-      margin-left: 2.5em;
-    }
-
     > img.rowIconSize {
         margin-left: 0.5em;
     }
@@ -782,6 +778,14 @@ div.grid {
     align-items: center;
     margin: 0 0.5em;
     cursor: default;
+
+    > .shoppingBasket > button {
+      padding: 0;
+      background-color: inherit;
+      line-height: normal;
+      color: inherit;
+      height: 1.6em;
+    }
   }
 
   .menuLogo > img {
@@ -792,6 +796,10 @@ div.grid {
   .menuPopupBox {
     min-width: 13.5em !important;
     color: var(--textColor-body);
+
+    &.hasIcons > .menuItem > span:first-child {
+      margin-left: 2.5em;
+   }
 
     .menuFolderIcon {
       transform: rotate(-90deg);
@@ -808,8 +816,15 @@ div.grid {
 
     hr {
       background-color: var(--color-dark-primaryColor);
-      height: 0.05em;      
+      height: 0.06em;
       margin: 0 0.3em;
+      border: none;
+    }
+
+    hr + hr,
+    hr:first-child,
+    hr:last-child {
+      display: none;
     }
   }
 
@@ -822,10 +837,6 @@ div.grid {
 
       .menuPopupBox {
         margin-top: 0.07em;
-      }
-
-      > span:first-child {
-        margin-left: 0;
       }
     }
 
@@ -885,14 +896,5 @@ div.grid {
         transform-origin: center;
       }
     }
-  }
-
-  // .mainMenuElement
-  .mainMenuElement > .shoppingBasket > button{
-    padding: 0;
-    background-color: inherit;
-    line-height: normal;
-    color: inherit;
-    height: 1.6em;
   }
 }
