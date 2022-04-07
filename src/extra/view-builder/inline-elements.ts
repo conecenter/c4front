@@ -34,7 +34,7 @@ interface InlineChip {
 function InlineChip({key, identity, receiver, color, children}: InlineButton) {
   const {clicked, onClick} = useClickSyncOpt(identity, "receiver", receiver)
   const {style, className} = colorToProps(color)
-  return el("button", {
+  return el("div", {
     style,
     onClick,
     className: clsx(className, INLINE_CHIP_CLASSNAME, clicked && CLICKED_CLASSNAME)

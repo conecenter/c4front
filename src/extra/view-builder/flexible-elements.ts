@@ -14,13 +14,6 @@ import {
   FLEXIBLE_ROW_CLASSNAME
 } from "./css-classes";
 
-function debugBorder(color: string): CSSProperties {
-  return {
-    border: "2px solid",
-    borderColor: color,
-  }
-}
-
 interface FlexibleColumnRoot {
   key: string,
   children: ReactNode[]
@@ -46,14 +39,9 @@ function FlexibleColumn({key, sizes, children}: FlexibleColumn) {
   return el("div", {
     className: FLEXIBLE_COLUMN_CLASSNAME,
     style: {
-      display: "flex",
-      flexGrow: 1,
-      flexDirection: "column",
       flexBasis: `${sizes.min}em`,
       minWidth: `${sizes.min}em`,
       maxWidth: sizes.max ? `${sizes.max}em` : undefined,
-      maxHeight: "fit-content",
-      ...debugBorder("red"),
     }
   }, children)
 }
@@ -69,14 +57,9 @@ function FlexibleGroupbox({key, sizes, children}: FlexibleGroupbox) {
   return el("div", {
     className: FLEXIBLE_GROUPBOX_CLASSNAME,
     style: {
-      display: "flex",
-      flexGrow: 1,
-      flexDirection: "column",
       flexBasis: `${sizes.min}em`,
       minWidth: `${sizes.min}em`,
       maxWidth: sizes.max ? `${sizes.max}em` : undefined,
-      maxHeight: "fit-content",
-      ...debugBorder("orange"),
     }
   }, children)
 }
@@ -139,12 +122,8 @@ function FlexibleRow({key, sizes, children}: FlexibleRow) {
   const props: HTMLAttributes<HTMLDivElement> = {
     className: FLEXIBLE_ROW_CLASSNAME,
     style: {
-      display: "flex",
-      flexDirection: "row",
-      flexWrap: "wrap",
       minWidth: `${sizes.min}em`,
       maxWidth: sizes.max ? `${sizes.max}em` : undefined,
-      ...debugBorder("blue"),
     }
   }
   return separated.map((list, ind) => wrapInRow(`${key}-${ind}`, props, list))
@@ -160,11 +139,8 @@ function FlexibleCell({key, sizes, children}: FlexibleCell) {
   return el("div", {
     className: FLEXIBLE_CELL_CLASSNAME,
     style: {
-      display: "inline-block",
-      flexGrow: 1,
       flexBasis: `${sizes.min}em`,
       maxWidth: sizes.max ? `${sizes.max}em` : undefined,
-      ...debugBorder("green"),
     }
   }, children)
 }
@@ -182,32 +158,16 @@ function FlexibleLabeled({sizes, label, labelChildren, children, horizontal}: Fl
   return el("div", {
       className: FLEXIBLE_LABELED_CLASSNAME,
       style: {
-        display: "flex",
         flexDirection: horizontal ? "row" : "column",
-        flexGrow: 1,
         flexBasis: `${sizes.min}em`,
         maxWidth: sizes.max ? `${sizes.max}em` : undefined,
-        ...debugBorder("yellow"),
       }
     },
     el("label", {
       className: FLEXIBLE_LABELED_LABEL_CLASSNAME,
-      style: {
-        fontSize: "0.8em",
-        display: "flex",
-        flexDirection: "row",
-        flexWrap: "nowrap",
-        alignItems: "center"
-      }
     }, el("span", {}, label), labelChildren),
     el("div", {
       className: FLEXIBLE_LABELED_CHILD_CLASSNAME,
-      style: {
-        display: "flex",
-        flexDirection: "row",
-        flexWrap: "nowrap",
-        alignItems: "center"
-      }
     }, children)
   )
 }
