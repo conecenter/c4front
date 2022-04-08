@@ -3,6 +3,7 @@ import { identityAt } from "../../main/vdom-util";
 import { DatePickerServerState } from "./datepicker";
 import { DateSettings, getCalendarDate, getDate } from "./date-utils";
 import { mapOption, None, nonEmpty, Option } from "../../main/option";
+import { Patch, PatchHeaders } from '../exchange/patch-sync';
 
 interface CalendarDate { year: number; month: number }
 
@@ -85,21 +86,6 @@ function patchToState(patch: Patch): DatePickerState {
         : createInputState(patch.value, tempTimestamp, popupDate);
 }
 
-interface PatchHeaders {
-    'x-r-changing'?: string,
-    'x-r-type': string,
-    'x-r-temp-timestamp'?: string,
-    'x-r-popup'?: string,
-}
-
-interface Patch {
-    headers: PatchHeaders,
-    value: string,
-    skipByPath: boolean,
-    retry: boolean,
-    defer: boolean,
-}
-
 interface DatePickerSyncState {
     currentState: DatePickerState
     setTempState: (state: DatePickerState) => void
@@ -122,5 +108,83 @@ function useDatePickerStateSync(
     return {currentState: currentState, setTempState: onChange, setFinalState: onBlur};
 }
 
-export { useDatePickerStateSync, isInputState, isTimestampState, createTimestampState, createInputState };
+
+
+type DatepickerChange = DateChange | PopupChange;
+
+interface DateChange {
+    tp: 'dateChange',
+    dpState: TimestampState | InputState
+}
+
+interface PopupChange {
+    tp: 'popupChange',
+    popupDate: PopupDate
+}
+
+function changeToPatch(ch: DatepickerChange): Patch {
+    return {
+        value: ch.tp,
+        headers: getHeaders(ch)
+    };
+}
+
+function getHeaders(ch: DatepickerChange): PatchHeaders {
+    switch (ch.tp) {
+        case "dateChange":
+            const headers: PatchHeaders = isInputState(ch.dpState) 
+                ? { 
+                    "x-r-input-value": ch.dpState.inputValue, 
+                    ...ch.dpState.tempTimestamp ? {'x-r-temp-timestamp':  String(ch.dpState.tempTimestamp)} : {}
+                }
+                : { 'x-r-timestamp': String(ch.dpState.timestamp) };
+            return { 
+                "x-r-type": ch.dpState.tp,
+                ...headers
+            };
+        case "popupChange":
+            return { "x-r-popup": JSON.stringify(ch.popupDate) };
+        default:
+            return {};
+    }
+}
+
+function patchToChange(patch: Patch): DatepickerChange {
+    const headers = patch.headers;
+    switch (patch.value) {
+        case 'dateChange':
+            const tpState = headers["x-r-type"];
+            const tempTimestamp = headers['x-r-temp-timestamp'] ? parseInt(headers['x-r-temp-timestamp']) : undefined;
+            return {
+                tp: 'dateChange',
+                dpState: isTimestampStateType(tpState) 
+                    ? createTimestampState(parseInt(headers['x-r-timestamp']))
+                    : createInputState(headers["x-r-input-value"], tempTimestamp)
+            };
+        case 'popupChange':
+            return {
+                tp: 'popupChange',
+                popupDate: JSON.parse(headers['x-r-popup'])
+            };
+    }
+}
+
+// interface DateChange {
+//     tp: 'dateChange',
+//     dpState: TimestampState | InputState
+// }
+
+function applyChange(prevState: DatePickerState, ch: DatepickerChange): DatePickerState {
+    switch (ch.tp) {
+        case "dateChange":
+            return update(prev, {[ch.to]: {$push: find(ch.draggedItemId, prev.fields)}})
+        case "remove":
+            // @ts-ignore
+            return update(prev, {[ch.from]: {$filterOut: ch.draggedItemId}})
+        default:
+            return prevState
+    }
+}
+
+export { useDatePickerStateSync, isInputState, isTimestampState, createTimestampState, createInputState, serverStateToState, changeToPatch, patchToChange, applyChange };
 export type { DatePickerState, PopupDate, CalendarDate, TimestampState, InputState };

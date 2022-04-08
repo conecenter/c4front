@@ -1,6 +1,6 @@
 import React, {ReactNode, useMemo, useRef} from "react";
 import {getDateTimeFormat, useUserLocale} from "../locale";
-import {createInputState, DatePickerState, useDatePickerStateSync} from "./datepicker-exchange";
+import {applyChange, changeToPatch, createInputState, DatePickerState, patchToChange, serverStateToState, useDatePickerStateSync} from "./datepicker-exchange";
 import {DateSettings, formatDate, getDate, parseStringToDate} from "./date-utils";
 import {getOrElse, mapOption, None, nonEmpty, Option} from "../../main/option";
 import {useSelectionEditableInput} from "./selection-control";
@@ -14,6 +14,7 @@ import {
 	getOnPopupToggle, 
 	getOnInputBoxBlur
 } from "./datepicker-actions";
+import { usePatchSync } from '../exchange/patch-sync';
 
 type DatePickerServerState = TimestampServerState | InputServerState
 
@@ -54,11 +55,21 @@ export function DatePickerInputElement({
 	const timezoneId = userTimezoneId ? userTimezoneId : locale.timezoneId
 	const timestampFormat = getDateTimeFormat(timestampFormatId, locale)
 	const dateSettings: DateSettings = {timestampFormat: timestampFormat, locale: locale, timezoneId: timezoneId}
-	const {
-		currentState,
-		setTempState,
-		setFinalState
-	} = useDatePickerStateSync(identity, state, dateSettings, deferredSend || false)
+	// const {
+	// 	currentState,
+	// 	setTempState,
+	// 	setFinalState
+	// } = useDatePickerStateSync(identity, state, dateSettings, deferredSend || false)
+	const { currentState, sendTempChange, sendFinalChange } = usePatchSync(
+        identity,
+        'receiver',
+        state,
+        !!deferredSend,
+        serverStateToState,
+        changeToPatch,
+        patchToChange,
+        applyChange
+    );
 
 	const memoInputValue = useRef('')
 
