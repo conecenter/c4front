@@ -77,11 +77,13 @@ trait MainMenuClock extends MenuItem
     state: MenuItemState,
     icon: Option[String] = None,
     children: ElList[MenuInnerItem],
+    receiver: Receiver[C],
   ): MenuUserItem
 
   @c4el("MainMenuClock") def mainMenuClock(
     key: String,
     serverTime: String,
-    timestampFormatId: Int
+    timestampFormatId: Int,
+    receiver: Receiver[C],
   ): MainMenuClock
 }
