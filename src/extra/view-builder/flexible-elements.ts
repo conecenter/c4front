@@ -4,15 +4,17 @@ import {
   FlexibleSizes
 } from "./flexible-api";
 import {
+  FLEXIBLE_ACCENTED_GROUPBOX_CLASSNAME,
   FLEXIBLE_CELL_CLASSNAME,
   FLEXIBLE_COLUMN_CLASSNAME,
-  FLEXIBLE_GROUPBOX_CLASSNAME,
+  FLEXIBLE_GROUPBOX_CLASSNAME, FLEXIBLE_GROUPBOX_CLASSNAME_LABEL,
   FLEXIBLE_LABELED_CHILD_CLASSNAME,
   FLEXIBLE_LABELED_CLASSNAME,
   FLEXIBLE_LABELED_LABEL_CLASSNAME,
   FLEXIBLE_ROOT_CLASSNAME,
   FLEXIBLE_ROW_CLASSNAME
 } from "./css-classes";
+import clsx from "clsx";
 
 interface FlexibleColumnRoot {
   key: string,
@@ -46,22 +48,35 @@ function FlexibleColumn({key, sizes, children}: FlexibleColumn) {
   }, children)
 }
 
+type GroupboxDisplayMode = 'accent'
+
 interface FlexibleGroupbox {
   key: string
+  label?: string
+  displayMode?: GroupboxDisplayMode
   sizes: FlexibleSizes
   align: FlexibleAlign
   children: ReactNode[]
 }
 
-function FlexibleGroupbox({key, sizes, children}: FlexibleGroupbox) {
+function createLabel(label: string | undefined, children: ReactNode[]) {
+  return label ? [
+      el("span", {className: FLEXIBLE_GROUPBOX_CLASSNAME_LABEL}, label),
+      ...React.Children.toArray(children)
+    ] :
+    children
+}
+
+function FlexibleGroupbox({key, label, displayMode, sizes, children}: FlexibleGroupbox) {
+
   return el("div", {
-    className: FLEXIBLE_GROUPBOX_CLASSNAME,
+    className: clsx(FLEXIBLE_GROUPBOX_CLASSNAME, displayMode === 'accent' && FLEXIBLE_ACCENTED_GROUPBOX_CLASSNAME),
     style: {
       flexBasis: `${sizes.min}em`,
       minWidth: `${sizes.min}em`,
       maxWidth: sizes.max ? `${sizes.max}em` : undefined,
     }
-  }, children)
+  }, createLabel(label, children))
 }
 
 interface FlexibleChildAlign {

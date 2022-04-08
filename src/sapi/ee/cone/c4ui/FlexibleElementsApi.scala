@@ -12,6 +12,8 @@ import ee.cone.c4vdom._
 
 @c4tagSwitch("FrontApp") trait FlexibleAlign extends ToJson
 
+@c4tagSwitch("FrontApp") trait FlexibleGroupboxDisplay extends ToJson
+
 trait FlexibleElement extends ToChildPair
 
 @c4tags("FrontApp") trait FlexibleElementsTags {
@@ -37,11 +39,15 @@ trait FlexibleElement extends ToChildPair
     children: ElList[FlexibleElement]
   ): FlexibleElement
 
+  @c4val("accent") def groupboxAccented: FlexibleGroupboxDisplay
+
   @c4el("FlexibleGroupbox") def flexibleGroupbox(
     key: String,
     sizes: FlexibleSize,
     align: FlexibleAlign,
-    children: ElList[FlexibleElement]
+    children: ElList[FlexibleElement],
+    label: Option[String] = None,
+    displayStyle: Option[FlexibleGroupboxDisplay] = None
   ): FlexibleElement
 
   @c4el("FlexibleRow") def flexibleRow(
