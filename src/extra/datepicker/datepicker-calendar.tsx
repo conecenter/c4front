@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import { useUserLocale } from "../locale";
 import { addMonths, getDate as getDayOfMonth, getDaysInMonth, getWeek, isMonday, set, startOfWeek } from "date-fns";
-import { isEmpty, None, nonEmpty, Option, toOption } from '../../main/option';
-import { adjustDate, DateSettings, getDate, getTimestamp, getCalendarDate } from "./date-utils";
+import { isEmpty, nonEmpty, Option, toOption } from '../../main/option';
+import { adjustDate, DateSettings, getDate, getTimestamp, getPopupDate } from "./date-utils";
 import { usePopupPos } from "../../main/popup";
-import { createTimestampState, DatePickerState, CalendarDate } from "./datepicker-exchange";
+import { createPopupChange, createTimestampChange, DatepickerChange, DatePickerState, PopupDate } from "./datepicker-exchange";
 import { findFirstParent } from '../../main/vdom-util';
 
 interface DatepickerCalendarProps {
   currentState: DatePickerState,
   currentDateOpt: Option<Date>,
   dateSettings: DateSettings,
-  setFinalState: (state: DatePickerState) => void,
+  sendFinalChange: (ch: DatepickerChange) => void,
   inputRef: React.MutableRefObject<HTMLInputElement | null>
 }
 
@@ -21,11 +21,11 @@ export function DatepickerCalendar({
   currentState,
   currentDateOpt,
   dateSettings,
-  setFinalState,
+  sendFinalChange,
   inputRef
 }: DatepickerCalendarProps) {
 
-  const popupDate = currentState.popupDate as CalendarDate;
+  const popupDate = currentState.popupDate as PopupDate;
   const { year, month } = popupDate;
 
   const pageDate = new Date(year, month);
@@ -51,7 +51,7 @@ export function DatepickerCalendar({
     const change = e.currentTarget.dataset.change;
     if (change) {
       const newDate = addMonths(new Date(year, month), Number(change));
-      setFinalState({...currentState, popupDate: getCalendarDate(newDate) });
+      sendFinalChange(createPopupChange(getPopupDate(newDate)));
     }
   }
 
@@ -63,7 +63,7 @@ export function DatepickerCalendar({
 
   function onMonthChoice(e: React.MouseEvent<HTMLButtonElement>) {
     const newMonth = e.currentTarget.dataset.month;
-    if (newMonth) setFinalState({ ...currentState, popupDate: { year, month: +newMonth } });
+    if (newMonth) sendFinalChange(createPopupChange({ year, month: Number(newMonth) }));
   }
 
   /*
@@ -73,7 +73,7 @@ export function DatepickerCalendar({
 
   function onCalendarYearChange(e: React.MouseEvent<HTMLButtonElement>) {
     const change = e.currentTarget.dataset.change;
-    if (change) setFinalState({...currentState, popupDate: { month, year: year + Number(change) } });
+    if (change) sendFinalChange(createPopupChange({ month, year: year + Number(change) }));
   }
 
   /*
@@ -86,7 +86,7 @@ export function DatepickerCalendar({
     const endIndex = getDaysInMonth(firstWeekStart);
     return getSpanList(
       createArray(startIndex, endIndex),
-      getCalendarDate(firstWeekStart),
+      getPopupDate(firstWeekStart),
       dateSettings,
       currentDateOpt,
       'dayPrevMonth'
@@ -99,11 +99,13 @@ export function DatepickerCalendar({
   const nextMonth = addMonths(pageDate, 1);
   const daysNextMonth = getSpanList(
     createArray(1, numDaysNextMonth), 
-    getCalendarDate(nextMonth),
+    getPopupDate(nextMonth),
     dateSettings,
     currentDateOpt,
     'dayNextMonth'
   );
+
+  const closePopup = () => sendFinalChange(createPopupChange(null)); 
 
   function onDateChoice(e: React.MouseEvent) {
     if (!(e.target instanceof HTMLSpanElement && e.target.dataset.date)) return;
@@ -119,7 +121,8 @@ export function DatepickerCalendar({
         ...timeSettings
     });
     focusActiveWrapper(popupCalendarRef);
-    setFinalState(createTimestampState(getTimestamp(chosenDate, dateSettings), None));
+    sendFinalChange(createTimestampChange(getTimestamp(chosenDate, dateSettings)));
+    closePopup();
   }
 
   /*
@@ -158,9 +161,9 @@ export function DatepickerCalendar({
       if (!e.currentTarget.dataset.change) return;
       if (nonEmpty(currentDateOpt)) {
           const adjustedDate = adjustDate(currentDateOpt, symbol, +e.currentTarget.dataset.change, true);
-          setFinalState(createTimestampState(getTimestamp(adjustedDate, dateSettings)));
+          sendFinalChange(createTimestampChange(getTimestamp(adjustedDate, dateSettings)));
       } 
-      else setFinalState(createTimestampState(Date.now()));
+      else sendFinalChange(createTimestampChange(Date.now()));
     }
   }
 
@@ -169,7 +172,8 @@ export function DatepickerCalendar({
   */
   const onNowBtnClick = () => {
     focusActiveWrapper(popupCalendarRef);    
-    setFinalState(createTimestampState(Date.now(), None));
+    sendFinalChange(createTimestampChange(Date.now()));
+    closePopup();
   }
 
   function onCloseBtnClick() {
@@ -177,7 +181,7 @@ export function DatepickerCalendar({
       inputRef.current.focus();
       inputRef.current.setSelectionRange(100, 100);
     }
-    setFinalState({ ...currentState, popupDate: None });
+    closePopup();
   }
 
   return (
@@ -254,7 +258,7 @@ function getSpan(value: number | string, className?: string, dataset?: string) {
 
 function getSpanList(
     array: number[], 
-    dataset: CalendarDate, 
+    dataset: PopupDate, 
     dateSettings: DateSettings, 
     currentDateOpt: Option<Date>, 
     className?: string

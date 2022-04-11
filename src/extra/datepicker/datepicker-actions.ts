@@ -1,14 +1,14 @@
-import {DateSettings, incrementDate, parseStringToDate, getDate, getCalendarDate} from "./date-utils";
+import {DateSettings, incrementDate, parseStringToDate, getDate, getPopupDate} from "./date-utils";
 import {getOrElse, mapOption, None, nonEmpty, Option} from "../../main/option";
 import React, {ChangeEvent, KeyboardEvent} from "react";
 import { ARROW_DOWN_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY } from "../../main/keyboard-keys";
 import {
-    createInputState,
-    createTimestampState,
+    createInputChange,
+    createPopupChange,
+    createTimestampChange,
+    DatepickerChange,
     DatePickerState,
-    InputState,
-    isInputState,
-    TimestampState
+    isTimestampState,
 } from "./datepicker-exchange";
 
 function updateAndSendDate(
@@ -29,8 +29,16 @@ function updateAndSendDate(
     onTimestampChange(timestamp)
 }
 
-const onTimestampChangeAction = (setState: (state: DatePickerState) => void) => (timestamp: number): void => {
-    setState(createTimestampState(timestamp))
+const onTimestampChangeAction = (
+    currentState: DatePickerState, 
+    dateSettings: DateSettings, 
+    sendChange: (ch: DatepickerChange) => void
+    ) => (timestamp: number): void => {
+    sendChange(createTimestampChange(timestamp))
+    if (currentState.popupDate) {
+        const newPopupDate = mapOption(getDate(timestamp, dateSettings), getPopupDate);
+        if (nonEmpty(newPopupDate)) sendChange(createPopupChange(newPopupDate));
+    }
 };
 
 function getOnKeyDown(
@@ -40,7 +48,7 @@ function getOnKeyDown(
     memoInputValue: React.MutableRefObject<string>,
     onTimestampChange: (timestamp: number) => void,
     setSelection: (from: number, to: number) => void,
-    setFinalState: (state: DatePickerState) => void
+    sendFinalChange: (ch: DatepickerChange) => void
     ): (event: KeyboardEvent<HTMLInputElement>) => void {
     return (e: React.KeyboardEvent<HTMLInputElement>) => {
         switch (e.key) {
@@ -70,13 +78,13 @@ function getOnKeyDown(
                 break;
             case ESCAPE_KEY:
                 const inputVal = memoInputValue.current;
-                setFinalState(
-                    getOrElse<TimestampState | InputState>(
+                sendFinalChange(
+                    getOrElse(
                         mapOption(
                             parseStringToDate(inputVal, dateSettings),
-                            timestamp => createTimestampState(timestamp)
+                            timestamp => createTimestampChange(timestamp)
                         ),
-                        createInputState(inputVal)
+                        createInputChange(inputVal)
                     )
                 );
                 const target = e.currentTarget;
@@ -85,16 +93,16 @@ function getOnKeyDown(
     }
 }
 
-function getOnChange(dateSettings: DateSettings, setState: (state: DatePickerState) => void): (event: ChangeEvent<HTMLInputElement>) => void {
+function getOnChange(dateSettings: DateSettings, sendChange: (ch: DatepickerChange) => void): (event: ChangeEvent<HTMLInputElement>) => void {
     return (event: React.ChangeEvent<HTMLInputElement>) => {
         const inputValue = event.target.value;
-        setState(
+        sendChange(
             getOrElse(
                 mapOption(
                     parseStringToDate(inputValue, dateSettings),
-                    timestamp => createInputState(inputValue, timestamp)
+                    timestamp => createInputChange(inputValue, timestamp)
                 ),
-                createInputState(inputValue)
+                createInputChange(inputValue)
             )
         );
     };
@@ -103,24 +111,26 @@ function getOnChange(dateSettings: DateSettings, setState: (state: DatePickerSta
 function getOnBlur(
     currentState: DatePickerState, 
     memoInputValue: React.MutableRefObject<string>, 
-    setState: (state: DatePickerState) => void,
-    inputBoxRef: React.MutableRefObject<HTMLDivElement | null>) {
+    sendFinalChange: (ch: DatepickerChange) => void,
+    inputBoxRef: React.MutableRefObject<HTMLDivElement | null>,
+    dateSettings: DateSettings) {
     return (e: React.FocusEvent<HTMLDivElement>) => {
-        e.stopPropagation();
-        const popupDate = (inputBoxRef.current && inputBoxRef.current.contains(e.relatedTarget as Node | null))
-            ? undefined : None;
-        if (isInputState(currentState)) {
-            if (currentState.tempTimestamp) return setState(createTimestampState(currentState.tempTimestamp, popupDate));
-            memoInputValue.current = currentState.inputValue;
-        }
-        setState({...currentState, popupDate });        
+        if (isTimestampState(currentState)) return;
+        const { tempTimestamp, popupDate, inputValue } = currentState;
+        if (tempTimestamp) {
+            sendFinalChange(createTimestampChange(tempTimestamp));
+            if ((inputBoxRef.current && inputBoxRef.current.contains(e.relatedTarget as Node | null)) && popupDate) {
+                const newPopupDate = mapOption(getDate(tempTimestamp, dateSettings), getPopupDate);
+                if (nonEmpty(newPopupDate)) sendFinalChange(createPopupChange(newPopupDate));
+            }
+        } else memoInputValue.current = inputValue;
     }
 }
 
-function getOnInputBoxBlur(currentState: DatePickerState, setFinalState: (state: DatePickerState) => void) {
+function getOnInputBoxBlur(currentState: DatePickerState, sendFinalChange: (change: DatepickerChange) => void) {
     return (e: React.FocusEvent<HTMLDivElement>) => {
-        if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) return;
-        setFinalState({...currentState, popupDate: None });
+        if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget) || !currentState.popupDate) return;
+        sendFinalChange(createPopupChange(null));
     }
 }
 
@@ -128,12 +138,12 @@ function getOnPopupToggle(
     currentDateOpt: Option<Date>, 
     currentState: DatePickerState,
     dateSettings: DateSettings, 
-    setState: (state: DatePickerState) => void) {
+    sendFinalChange: (ch: DatepickerChange) => void) {
     return () => {
         const dateToShow = currentState.popupDate 
             ? None : getOrElse(currentDateOpt, getDate(Date.now(), dateSettings));
-        const popupDate = mapOption(dateToShow, getCalendarDate);
-        setState({ ...currentState, popupDate });
+        const popupDate = getOrElse(mapOption(dateToShow, getPopupDate), null);
+        sendFinalChange(createPopupChange(popupDate));
     }
 }
 
