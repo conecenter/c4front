@@ -84,6 +84,6 @@ trait MainMenuClock extends MenuItem
     key: String,
     serverTime: String,
     timestampFormatId: Int,
-    receiver: Receiver[C],
+    timeSync: Receiver[C],
   ): MainMenuClock
 }
