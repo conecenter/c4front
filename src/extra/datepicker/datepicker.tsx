@@ -5,7 +5,15 @@ import {getOrElse, mapOption, None, nonEmpty, Option} from "../../main/option";
 import {useSelectionEditableInput} from "./selection-control";
 import {DatepickerCalendar} from "./datepicker-calendar";
 import { usePatchSync } from '../exchange/patch-sync';
-import {useExternalKeyboardControls} from '../focus-module-interface';
+import {
+	BACKSPACE_EVENT, 
+	COPY_EVENT, 
+	CUT_EVENT, 
+	DELETE_EVENT, 
+	ENTER_EVENT, 
+	PASTE_EVENT, 
+	useExternalKeyboardControls
+} from '../focus-module-interface';
 import {
 	applyChange, 
 	changeToPatch, 
@@ -88,12 +96,12 @@ export function DatePickerInputElement({
 
 	// Interaction with FocusModule (c4e\client\src\extra\focus-module.js) - Excel-style keyboard controls
 	const keyboardEventHandlers = {
-		enter: handleCustomEnter,
-		delete: handleCustomDelete,
-		backspace: handleCustomDelete,
-		cpaste: handleCustomPaste,
-		ccopy: handleClipboardWrite,
-		ccut: handleClipboardWrite
+		[ENTER_EVENT]: handleCustomEnter,
+		[DELETE_EVENT]: handleCustomDelete,
+		[BACKSPACE_EVENT]: handleCustomDelete,
+		[PASTE_EVENT]: handleCustomPaste,
+		[COPY_EVENT]: handleClipboardWrite,
+		[CUT_EVENT]: handleClipboardWrite
 	};
 
 	function handleCustomEnter(e: CustomEvent) {
