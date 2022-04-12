@@ -95,7 +95,7 @@ function getHeaders(ch: DatepickerChange): PatchHeaders {
 }
 
 function patchToChange(patch: Patch): DatepickerChange {
-    const headers = patch.headers;
+    const headers = patch.headers as PatchHeaders;
     switch (patch.value) {
         case 'dateChange':
             const tpState = headers["x-r-type"];

@@ -237,12 +237,13 @@ function changeToPatch(change: DropdownChange): Patch {
 	return { value: '', headers };
 }
 
-function patchToChange({ headers }: Patch): DropdownChange {
+function patchToChange(patch: Patch): DropdownChange {
+	const headers = patch.headers as DropdownPatchHeaders;
 	const { 
 		'x-r-inputValue': inputValue, 
 		'x-r-mode': mode, 
 		'x-r-popupOpen': popupOpenString 
-	}: DropdownPatchHeaders = headers;
+	}: DropdownPatchHeaders = headers!;
 	return {
 		...('x-r-inputValue' in headers && { inputValue }),
 		...(mode && { mode }),
