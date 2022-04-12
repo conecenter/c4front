@@ -19,6 +19,8 @@ const GRID_CLASS_NAMES = {
     CELL: "tableCellContainer headerColor-border",
 }
 
+const GRIDCELL_COLSPAN_ALL = 'gridcell-colspan-all'
+
 //// col hiding
 
 const partitionVisibleCols = (cols, outerWidth) => {
@@ -91,7 +93,7 @@ const hideExpander = hasHiddenCols => hasHiddenCols ? (l => l) : (l => l.filter(
 //// main
 
 const getGridRow = ({ rowKey, rowKeyMod }) => CSS.escape(rowKey + (rowKeyMod || ''))
-const getGridCol = ({ colKey }) => CSS.escape(colKey)
+const getGridCol = ({ colKey }) => colKey === GRIDCELL_COLSPAN_ALL ? spanAll : CSS.escape(colKey)
 
 const spanAll = "1 / -1"
 
@@ -251,7 +253,8 @@ const getAllChildren = ({children,rows,cols,hasHiddenCols,hideElementsForHiddenC
                 style: { flexBasis: `${col.width.min}em` },
                 className: "inputLike",
                 children: cell.props.children,
-            }))
+            })),
+            'data-expanded-cell': ''
         })
         return $(NoCaptionContext.Provider,{value:false, key:`${rowKey}-expanded`},res)
     })

@@ -1,11 +1,27 @@
 import React, {ReactNode, useMemo, useRef} from "react";
 import {getDateTimeFormat, useUserLocale} from "../locale";
-import {createInputState, DatePickerState, useDatePickerStateSync} from "./datepicker-exchange";
 import {DateSettings, formatDate, getDate, parseStringToDate} from "./date-utils";
 import {getOrElse, mapOption, None, nonEmpty, Option} from "../../main/option";
 import {useSelectionEditableInput} from "./selection-control";
 import {DatepickerCalendar} from "./datepicker-calendar";
-import {useExternalKeyboardControls} from '../focus-module-interface';
+import { usePatchSync } from '../exchange/patch-sync';
+import {
+	BACKSPACE_EVENT, 
+	COPY_EVENT, 
+	CUT_EVENT, 
+	DELETE_EVENT, 
+	ENTER_EVENT, 
+	PASTE_EVENT, 
+	useExternalKeyboardControls
+} from '../focus-module-interface';
+import {
+	applyChange, 
+	changeToPatch, 
+	createInputChange, 
+	DatePickerState, 
+	patchToChange, 
+	serverStateToState
+} from "./datepicker-exchange";
 import {
 	getOnBlur, 
 	getOnChange,
@@ -15,11 +31,8 @@ import {
 	getOnInputBoxBlur
 } from "./datepicker-actions";
 
-type DatePickerServerState = TimestampServerState | InputServerState
 
-interface PopupServerState {
-	popupDate?: string | undefined
-}
+type DatePickerServerState = TimestampServerState | InputServerState
 
 interface InputServerState extends PopupServerState {
 	tp: 'input-state',
@@ -30,6 +43,10 @@ interface InputServerState extends PopupServerState {
 interface TimestampServerState extends PopupServerState {
 	tp: 'timestamp-state',
 	timestamp: string
+}
+
+interface PopupServerState {
+	popupDate?: string
 }
 
 interface DatePickerProps {
@@ -54,11 +71,17 @@ export function DatePickerInputElement({
 	const timezoneId = userTimezoneId ? userTimezoneId : locale.timezoneId
 	const timestampFormat = getDateTimeFormat(timestampFormatId, locale)
 	const dateSettings: DateSettings = {timestampFormat: timestampFormat, locale: locale, timezoneId: timezoneId}
-	const {
-		currentState,
-		setTempState,
-		setFinalState
-	} = useDatePickerStateSync(identity, state, dateSettings, deferredSend || false)
+
+	const { currentState, sendTempChange, sendFinalChange } = usePatchSync(
+        identity,
+        'receiver',
+        state,
+        !!deferredSend,
+        serverStateToState,
+        changeToPatch,
+        patchToChange,
+        applyChange
+    );
 
 	const memoInputValue = useRef('')
 
@@ -73,12 +96,12 @@ export function DatePickerInputElement({
 
 	// Interaction with FocusModule (c4e\client\src\extra\focus-module.js) - Excel-style keyboard controls
 	const keyboardEventHandlers = {
-		enter: handleCustomEnter,
-		delete: handleCustomDelete,
-		backspace: handleCustomDelete,
-		cpaste: handleCustomPaste,
-		ccopy: handleClipboardWrite,
-		ccut: handleClipboardWrite
+		[ENTER_EVENT]: handleCustomEnter,
+		[DELETE_EVENT]: handleCustomDelete,
+		[BACKSPACE_EVENT]: handleCustomDelete,
+		[PASTE_EVENT]: handleCustomPaste,
+		[COPY_EVENT]: handleClipboardWrite,
+		[CUT_EVENT]: handleClipboardWrite
 	};
 
 	function handleCustomEnter(e: CustomEvent) {
@@ -91,7 +114,7 @@ export function DatePickerInputElement({
 
 	function handleCustomDelete(e: CustomEvent) {
 		if (isFocusedInside(inputBoxRef.current)) return;
-		setTempState(createInputState(''));
+		sendTempChange(createInputChange(''));
 		(e.currentTarget as HTMLInputElement).focus();
 	}
 
@@ -105,7 +128,7 @@ export function DatePickerInputElement({
 				input.setSelectionRange(0, input.value.length);
 				input.focus();
 			} else {
-				setFinalState(createInputState(''));
+				sendFinalChange(createInputChange(''));
 				memoInputValue.current = '';
 			}
 		} catch(err) {
@@ -116,10 +139,10 @@ export function DatePickerInputElement({
 	function handleCustomPaste(e: CustomEvent) {
 		if (isFocusedInside(inputBoxRef.current)) return;
 		const inputVal = e.detail;
-		setFinalState(
+		sendFinalChange(
 			getOrElse(
-				mapOption(parseStringToDate(inputVal, dateSettings), timestamp => createInputState(inputVal, timestamp)),
-				createInputState(inputVal)
+				mapOption(parseStringToDate(inputVal, dateSettings), timestamp => createInputChange(inputVal, timestamp)),
+				createInputChange(inputVal)
 			)
 		);
 		memoInputValue.current = inputVal;
@@ -128,39 +151,36 @@ export function DatePickerInputElement({
 	useExternalKeyboardControls(inputRef, keyboardEventHandlers);
 
 	const setSelection: (from: number, to: number) => void = useSelectionEditableInput(inputRef)
-	const onTimestampChange: (timestamp: number) => void = onTimestampChangeAction(setTempState)
-	const onInputBlur = getOnBlur(currentState, memoInputValue, setFinalState, inputBoxRef)
-	const onInputBoxBlur = getOnInputBoxBlur(currentState, setFinalState)
-	const onChange = getOnChange(dateSettings, setTempState)
-	const onPopupToggle = getOnPopupToggle(currentDateOpt, currentState, dateSettings, setFinalState)
+	const onTimestampChange: (timestamp: number) => void = onTimestampChangeAction(currentState, dateSettings, sendTempChange)
+	const onInputBlur = getOnBlur(currentState, memoInputValue, sendFinalChange, inputBoxRef, dateSettings)
+	const onInputBoxBlur = getOnInputBoxBlur(currentState, sendFinalChange)
+	const onChange = getOnChange(dateSettings, sendTempChange)
+	const onPopupToggle = getOnPopupToggle(currentDateOpt, currentState, dateSettings, sendFinalChange)
 	const onKeyDown = getOnKeyDown(
-		currentDateOpt, 
-		dateFormat, 
-		dateSettings, 
-		memoInputValue, 
-		onTimestampChange, 
-		setSelection, 
-		setFinalState
-	)	
+		currentDateOpt,
+		dateFormat,
+		dateSettings,
+		memoInputValue,
+		onTimestampChange,
+		setSelection,
+		sendFinalChange
+	)
 
   	return (
 		<div ref={inputBoxRef} className="inputBox" onBlur={onInputBoxBlur} >
 			<div className="inputSubBox">
 				<input ref={inputRef} value={inputValue} onChange={onChange} onKeyDown={onKeyDown} onBlur={onInputBlur} />
 			</div>
+
 			<button 
 				type='button' 
 				className={`${currentState.popupDate ? 'rotate180deg ' : ''}btnCalendar`} 
 				onClick={onPopupToggle} />
+
 			{children}
-			{currentState.popupDate && 
-				<DatepickerCalendar {...{
-					currentState, 
-					currentDateOpt, 
-					dateSettings, 
-					setFinalState, 
-					inputRef
-				}} />}
+
+			{currentState.popupDate &&
+				<DatepickerCalendar { ...{currentState, currentDateOpt, dateSettings, sendFinalChange, inputRef} } />}
 		</div>
 
 	);

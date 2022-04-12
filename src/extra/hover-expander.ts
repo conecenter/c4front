@@ -1,4 +1,5 @@
 import { createElement as el, MouseEvent, ReactNode, useState } from "react";
+import clsx from 'clsx';
 
 interface HoverExpanderProps {
     children: ReactNode[]
@@ -24,7 +25,7 @@ export function HoverExpander({ children }: HoverExpanderProps) {
 
     return el("div",
         {
-            className: className,
+            className: clsx('hoverExpanderPassive', className),
             onMouseEnter: (event: MouseEvent<Element>) => setHovered(event.currentTarget),
             onMouseLeave: () => setHovered(null),
             style: inlineStyle

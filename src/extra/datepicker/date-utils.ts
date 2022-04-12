@@ -27,6 +27,7 @@ import {
     setYear
 } from "date-fns";
 import {DateFormatToken, ExtendedDateTimeFormat, ExtendedLocale, FormatToken, isDateFormatToken} from "../locale";
+import { PopupDate } from './datepicker-exchange';
 
 interface DateSettings {
     timezoneId: string,
@@ -368,9 +369,9 @@ function incrementDate(
     return {timestamp: getTimestamp(adjustedDate, dateSettings), startPosition, endPosition}
 }
 
-function getCalendarDate(date: Date) {
+function getPopupDate(date: Date): PopupDate {
     return { year: date.getFullYear(), month: date.getMonth() };
   }
 
-export {incrementDate, formatDate, getDate, parseStringToDate, getTimestamp, adjustDate, getCalendarDate}
+export {incrementDate, formatDate, getDate, parseStringToDate, getTimestamp, adjustDate, getPopupDate}
 export type {DateSettings}
