@@ -119,7 +119,7 @@ function getOnBlur(
         const { tempTimestamp, popupDate, inputValue } = currentState;
         if (tempTimestamp) {
             sendFinalChange(createTimestampChange(tempTimestamp));
-            if ((inputBoxRef.current && inputBoxRef.current.contains(e.relatedTarget as Node | null)) && popupDate) {
+            if (popupDate && (inputBoxRef.current && inputBoxRef.current.contains(e.relatedTarget as Node | null))) {
                 const newPopupDate = mapOption(getDate(tempTimestamp, dateSettings), getPopupDate);
                 if (nonEmpty(newPopupDate)) sendFinalChange(createPopupChange(newPopupDate));
             }
