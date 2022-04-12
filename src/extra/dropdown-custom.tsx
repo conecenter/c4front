@@ -4,7 +4,7 @@ import { ARROW_DOWN_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY } from '../main/key
 import { usePopupPos } from '../main/popup';
 import { useSync } from '../main/vdom-hooks';
 import { identityAt } from '../main/vdom-util';
-import { Patch, PatchHeaders, useInputSync } from './input-sync';
+import { usePatchSync, Patch } from './exchange/patch-sync';
 import { 
 	BACKSPACE_EVENT, 
 	COPY_EVENT, 
@@ -50,11 +50,16 @@ interface Text {
 const isChip = (item: Content): item is Chip => (item as Chip).bgColor !== undefined;
 
 export function DropdownCustom({ identity, state, content, popupChildren, ro, popupClassname, children }: DropdownProps) {
-	const {
-		currentState, 
-		setTempState, 
-		setFinalState 
-	} = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
+	const { currentState, sendTempChange, sendFinalChange } = usePatchSync<DropdownState, DropdownState, DropdownChange>(
+        identity,
+        'receiver',
+        state,
+        false,
+        s => s,
+        changeToPatch,
+        patchToChange,
+        applyChange
+    );
 
 	const { inputValue, mode, popupOpen } = currentState;
 
@@ -75,7 +80,7 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 	// Interaction with FocusModule (c4e\client\src\extra\focus-module.js) - Excel-style keyboard controls
 	function handleCustomDelete(e: CustomEvent) {
 		const printableKey = (e.detail && e.detail.key) as string | null;
-		setTempState({ 
+		sendTempChange({
 			inputValue: (printableKey && printableKey !== 'Backspace') ? printableKey : '',
 			mode: 'input',
 			popupOpen: true
@@ -86,17 +91,17 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 		// On Firefox writing to the clipboard is blocked (available only from user-initiated event callbacks)
 		try {
 			await navigator.clipboard.writeText(inputValue);
-			if (e.type === 'ccut') setFinalState({ ...currentState, inputValue: '' });
+			if (e.type === 'ccut') sendFinalChange({ inputValue: '' });
 		} catch(err) {
 			console.log(err);
 		}
 	}
 
 	const customEventHandlers = {
-		[ENTER_EVENT]: () => setFinalState({ ...currentState, mode: 'input' }),
+		[ENTER_EVENT]: () => sendFinalChange({ mode: 'input' }),
 		[DELETE_EVENT]: handleCustomDelete,
 		[BACKSPACE_EVENT]: handleCustomDelete,
-		[PASTE_EVENT]: (e: CustomEvent) => setTempState({ inputValue: e.detail, mode: 'input', popupOpen: true }),
+		[PASTE_EVENT]: (e: CustomEvent) => sendTempChange({ inputValue: e.detail, mode: 'input', popupOpen: true }),
 		[COPY_EVENT]: handleClipboardWrite,
 		[CUT_EVENT]: handleClipboardWrite
 	};
@@ -107,7 +112,7 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 	function handleBlur(e: React.FocusEvent) {
 		if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) return;
 		stableInputValue.current = inputValue;
-		setFinalState({ inputValue, mode: 'content', popupOpen: false });
+		sendFinalChange({ mode: 'content', popupOpen: false });
 	}
 
 	function handleBoxKeyDown(e: React.KeyboardEvent) {
@@ -115,7 +120,7 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 			case ARROW_DOWN_KEY:
 				if (!popupOpen) {
 					e.stopPropagation();
-					setFinalState({ ...currentState, popupOpen: true });
+					sendFinalChange({ popupOpen: true });
 					break;
 				}
 			case ENTER_KEY:
@@ -128,12 +133,13 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 				if (popupOpen) {
 					e.stopPropagation();
 					e.preventDefault();
+					//@ts-ignore
 					enqueueKeyboardActionPatch({value: e.key});
 				}
 				break;
 			case ESCAPE_KEY:
-				if (mode === 'content' && popupOpen) setFinalState({ ...currentState, popupOpen: false });
-				else if (mode === 'input') setFinalState({ 
+				if (mode === 'content' && popupOpen) sendFinalChange({ popupOpen: false });
+				else if (mode === 'input') sendFinalChange({ 
 					inputValue: stableInputValue.current,
 					popupOpen: false, 
 					mode: inputValue === stableInputValue.current ? 'content' : 'input'
@@ -171,7 +177,7 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 				<div 
 					className="customContentBox" 
 					tabIndex={-1}
-					onFocus={() => {setFinalState({ ...currentState, mode: 'input' })}}>
+					onFocus={() => {sendFinalChange({ mode: 'input' })}}>
 					{customContent}
 				</div>}
 
@@ -180,16 +186,17 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 					type='text' 
 					value={inputValue} 
 					autoFocus 
-					onChange={(e) => setTempState({ inputValue: e.target.value, mode: 'input', popupOpen: true })} />}
+					onChange={(e) => sendFinalChange({inputValue: e.target.value, ...(!popupOpen && {popupOpen: true})})}
+				/>}
 
 			<button 
 				type='button' 
 				className='buttonEl' 
 				tabIndex={-1} 
-				onClick={() => setFinalState({ ...currentState, popupOpen: !popupOpen })} 
+				onClick={() => sendFinalChange({ popupOpen: !popupOpen })} 
 				onKeyDown={(e) => e.preventDefault()} >
 				<img 
-					className={popupOpen ? 'rotate180deg' : undefined} 
+					className={clsx(popupOpen && 'rotate180deg')} 
 					src='/mod/main/ee/cone/core/ui/c4view/arrow-down.svg'
 					alt='arrow-down-icon' />
 			</button>
@@ -207,19 +214,42 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 	);
 }
 
-function stateToPatch({inputValue, mode, popupOpen}: DropdownState): Patch {
-	const headers = {
-		'x-r-mode': mode,
-		...(popupOpen && {'x-r-popupOpen': '1'})
-	};
-	return { value: inputValue, headers };
+// Server sync functionality
+interface DropdownChange {
+    inputValue?: string,
+	mode?: Mode,
+	popupOpen?: boolean
 }
 
-function patchToState(patch: Patch): DropdownState {
-	const headers = patch.headers as PatchHeaders;
-	return {
-		inputValue: patch.value,
-		mode: headers['x-r-mode'] as Mode,
-		popupOpen: !!headers['x-r-popupOpen']
+interface DropdownPatchHeaders {
+	'x-r-inputValue'?: string,
+	'x-r-mode'?: Mode,
+	'x-r-popupOpen'?: string
+}
+
+function changeToPatch(change: DropdownChange): Patch {
+	const { inputValue, mode, popupOpen } = change;
+	const headers = {
+		...('inputValue' in change && {'x-r-inputValue': inputValue}),
+		...(mode && {'x-r-mode': mode}),
+		...('popupOpen' in change && {'x-r-popupOpen': popupOpen ? '1' : ''})
 	};
+	return { value: '', headers };
+}
+
+function patchToChange({ headers }: Patch): DropdownChange {
+	const { 
+		'x-r-inputValue': inputValue, 
+		'x-r-mode': mode, 
+		'x-r-popupOpen': popupOpenString 
+	}: DropdownPatchHeaders = headers;
+	return {
+		...('x-r-inputValue' in headers && { inputValue }),
+		...(mode && { mode }),
+		...('x-r-popupOpen' in headers && {popupOpen: !!popupOpenString})
+	};
+}
+
+function applyChange(prevState: DropdownState, ch: DropdownChange): DropdownState {
+	return { ...prevState, ...ch };
 }
