@@ -18,7 +18,7 @@ interface MainMenuClock {
   timestampFormatId: number
 }
 
-const SYNC_INTERVAL = 10000;
+const SYNC_INTERVAL = 600000;
 
 const calcOffset = (timestamp: number) => timestamp - Date.now();
 
