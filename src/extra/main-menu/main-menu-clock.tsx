@@ -4,6 +4,12 @@ import {identityAt} from '../../main/vdom-util';
 import {useSync} from '../../main/vdom-hooks';
 import {Patch} from '../exchange/input-sync';
 import {useUserLocale} from '../locale';
+import {bg, de, da, et, enGB, lt, pl, ro, ru, uk, it} from 'date-fns/locale';
+
+interface IntlLocales {
+  [name: string]: Locale
+}
+const INTL_LOCALES: IntlLocales = { bg, de, daDK: da, et, en: enGB, lt, pl, rmRO: ro, ru, ukUA: uk, it };
 
 interface MainMenuClock {
   key: string,
@@ -12,7 +18,7 @@ interface MainMenuClock {
   timestampFormatId: number
 }
 
-const SYNC_INTERVAL = 600000;
+const SYNC_INTERVAL = 10000;
 
 const calcOffset = (timestamp: number) => timestamp - Date.now();
 
@@ -27,7 +33,12 @@ export function MainMenuClock({identity, serverTime, timestampFormatId}: MainMen
   }, [locale]);
 
   const localDate = new Date(timestamp);
-  const serverDateString = formatInTimeZone(localDate, locale.timezoneId, pattern);
+  const serverDateString = formatInTimeZone(
+    localDate, 
+    locale.timezoneId, 
+    pattern, 
+    { locale: INTL_LOCALES[locale.shortName] }
+  );
 
   const [date, time] = serverDateString.split('|');
 
