@@ -54,6 +54,7 @@ function getOnKeyDown(
         switch (e.key) {
             case ENTER_KEY:
                 e.stopPropagation();
+                // focusActiveWrapper(e.currentTarget);
                 e.currentTarget.dispatchEvent(new CustomEvent("cTab", { bubbles: true }));
                 break;
             case ARROW_UP_KEY:
@@ -115,7 +116,7 @@ function getOnBlur(
     inputBoxRef: React.MutableRefObject<HTMLDivElement | null>,
     dateSettings: DateSettings) {
     return (e: React.FocusEvent<HTMLDivElement>) => {
-        if (isTimestampState(currentState)) return;
+        if (isTimestampState(currentState)) return sendFinalChange(createTimestampChange(currentState.timestamp));
         const { tempTimestamp, popupDate, inputValue } = currentState;
         if (tempTimestamp) {
             sendFinalChange(createTimestampChange(tempTimestamp));
@@ -123,7 +124,10 @@ function getOnBlur(
                 const newPopupDate = mapOption(getDate(tempTimestamp, dateSettings), getPopupDate);
                 if (nonEmpty(newPopupDate)) sendFinalChange(createPopupChange(newPopupDate));
             }
-        } else memoInputValue.current = inputValue;
+        } else {
+            sendFinalChange(createInputChange(inputValue));
+            memoInputValue.current = inputValue;
+        }
     }
 }
 
