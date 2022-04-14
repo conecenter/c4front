@@ -39,7 +39,7 @@ function stateToSendPatch(patch: Patch, changing: boolean, deferredSend: boolean
     return {
         value: patch.value,
         headers: headers,
-        skipByPath: true,
+        skipByPath: changing,
         retry: true,
         defer: deferredSend
     }
