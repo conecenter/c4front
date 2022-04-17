@@ -120,9 +120,9 @@ export function DatepickerCalendar({
         date: +dateValues[0],
         ...timeSettings
     });
-    focusActiveWrapper(popupCalendarRef);
+    const focusChanged = focusActiveWrapper(popupCalendarRef);
     sendFinalChange(createTimestampChange(getTimestamp(chosenDate, dateSettings)));
-    closePopup();
+    if (!focusChanged) closePopup();
   }
 
   /*
@@ -295,5 +295,8 @@ function getArrowBtnsDiv(callback: React.MouseEventHandler) {
 function focusActiveWrapper(popupElement: HTMLDivElement | null) {
   const findActiveFocusWrapper = (el: HTMLElement) => el.classList.contains("activeFocusWrapper") ? el : null;
   const focEl = findFirstParent(findActiveFocusWrapper)(popupElement);
-  if (focEl) focEl.focus();
+  if (focEl) {
+    focEl.focus();
+    return true;
+  }
 }
