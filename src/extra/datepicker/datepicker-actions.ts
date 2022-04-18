@@ -54,8 +54,9 @@ function getOnKeyDown(
         switch (e.key) {
             case ENTER_KEY:
                 e.stopPropagation();
-                // focusActiveWrapper(e.currentTarget);
-                e.currentTarget.dispatchEvent(new CustomEvent("cTab", { bubbles: true }));
+                // Async "cTab" event dispatch to fix edit icon blinking
+                const currTarget = e.currentTarget;
+                setTimeout(() => currTarget.dispatchEvent(new CustomEvent("cTab", { bubbles: true })), 0);
                 break;
             case ARROW_UP_KEY:
             case ARROW_DOWN_KEY:
