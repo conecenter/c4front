@@ -21,35 +21,33 @@ interface MainMenuClock {
 const SYNC_INTERVAL = 600000;
 
 const calcOffset = (timestamp: number) => timestamp - Date.now();
+const getInitialState = (offset: number) => Math.abs(offset) < 1000 ? (Date.now() + offset) : null;
 
 export function MainMenuClock({identity, serverTime, timestampFormatId}: MainMenuClock) {
   const localOffsetRef = useRef(calcOffset(Number(serverTime)));
-  const [timestamp, setTimestamp] = useState(Number(serverTime));
-
+  const [timestamp, setTimestamp] = useState<number | null>(getInitialState(localOffsetRef.current));
+  
   const locale = useUserLocale();
   const pattern = useMemo(() => {
     const dateFormat = locale.dateTimeFormats.find(format => format.id === timestampFormatId);
     return `${dateFormat ? dateFormat.pattern : 'dd-MM-yyyy'}|HH:mm:ss`;
   }, [locale]);
 
-  const localDate = new Date(timestamp);
-  const serverDateString = formatInTimeZone(
-    localDate, 
-    locale.timezoneId, 
-    pattern, 
-    { locale: INTL_LOCALES[locale.shortName] }
-  );
+  const formattedDate = timestamp !== null 
+    ? formatInTimeZone(new Date(timestamp), locale.timezoneId, pattern, {locale: INTL_LOCALES[locale.shortName]})
+    : '|';
 
-  const [date, time] = serverDateString.split('|');
+  const [date, time] = formattedDate.split('|');
 
   // Time sync with server
   const timeSyncIdOf = identityAt('timeSync');
   const [_, enqueueTimeSyncPatch] = useSync(timeSyncIdOf(identity)) as [Patch[], (patch: Patch) => void];
 
+  const syncWithServer = () => enqueueTimeSyncPatch({value: '1'});
+
   useEffect(() => {
-    const id = setInterval(() => {
-      enqueueTimeSyncPatch({value: '1'})
-    }, SYNC_INTERVAL);
+    syncWithServer();
+    const id = setInterval(syncWithServer, SYNC_INTERVAL);
     return () => clearInterval(id);
   }, []);
 
@@ -60,9 +58,8 @@ export function MainMenuClock({identity, serverTime, timestampFormatId}: MainMen
 
   // Clock ticking functionality
   useEffect(() => {
-    const id = setInterval(() => {
-      setTimestamp(Date.now() + localOffsetRef.current)
-    }, 1000);
+    const tick = () => setTimestamp(Date.now() + localOffsetRef.current);
+    const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, []);
 
