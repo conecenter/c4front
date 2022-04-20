@@ -341,36 +341,31 @@ function App() {
                         key: 'menuExecutableItem-21',
                         identity: {parent: 'menuFolderItem-21'},
                         name: 'GER',
-                        current: false,
-                        state: { opened: false }
+                        current: false
                     }),
                     $(MenuExecutableItem, {
                         key: 'menuExecutableItem-22',
                         identity: {parent: 'menuFolderItem-21'},
                         name: 'DK',
-                        current: false,
-                        state: { opened: false }
+                        current: false
                     }),
                     $(MenuExecutableItem, {
                         key: 'menuExecutableItem-23',
                         identity: {parent: 'menuFolderItem-21'},
                         name: 'HUN',
-                        current: false,
-                        state: { opened: false }
+                        current: false
                     }),
                     $(MenuExecutableItem, {
                         key: 'menuExecutableItem-24',
                         identity: {parent: 'menuFolderItem-21'},
                         name: 'EN',
-                        current: false,
-                        state: { opened: false }
+                        current: false
                     }),
                     $(MenuExecutableItem, {
                         key: 'menuExecutableItem-25',
                         identity: {parent: 'menuFolderItem-21'},
                         name: 'SVK',
-                        current: false,
-                        state: { opened: false }
+                        current: false
                     })
                 ]
             }),
@@ -404,22 +399,19 @@ function App() {
                         identity: {parent: 'menuFolderItem-22'},
                         name: 'Profile Settings',
                         current: false,
-                        state: { opened: false },
                         icon: '../main-menu/profile.svg'
                     }),
                     $(MenuExecutableItem, {
                         key: 'menuExecutableItem-222',
                         identity: {parent: 'menuFolderItem-22'},
                         name: 'Tooltips',
-                        current: false,
-                        state: { opened: false }
+                        current: false
                     }),
                     $(MenuExecutableItem, {
                         key: 'menuExecutableItem-223',
                         identity: {parent: 'menuFolderItem-22'},
                         name: 'Log out',
-                        current: false,
-                        state: { opened: false }
+                        current: false
                     })
                 ]
             })

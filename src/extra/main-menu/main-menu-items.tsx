@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import React, { ReactElement, ReactNode, useEffect, useRef, useState } from 'react'
 import { usePopupPos } from '../../main/popup';
+import { useClickSync } from '../exchange/click-sync';
 import { useInputSync } from '../exchange/input-sync'
 import { MenuItemState } from './main-menu-bar';
 import { handleMenuBlur, patchToState, stateToPatch } from './main-menu-utils'
@@ -64,22 +65,15 @@ interface MenuExecutableItem {
 	identity: Object,
     name: string,
     current: boolean,
-    state: MenuItemState,
     icon?: string
 }
 
-function MenuExecutableItem({identity, name, current, state, icon}: MenuExecutableItem) {
-    const {
-        currentState: { opened },
-        setFinalState
-    } = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
-
+function MenuExecutableItem({identity, name, current, icon}: MenuExecutableItem) {
+    const { clicked, onClick } = useClickSync(identity, 'receiver');
     return (
-        <div
-            className={clsx('menuItem', current && 'isCurrent', opened && 'executeAnim')}
-            tabIndex={1}
-            onClick={() => setFinalState({ opened: true })}
-        >
+        <div className={clsx('menuItem', current && 'isCurrent', clicked && 'executeAnim')}
+             tabIndex={1}
+             onClick={onClick} >
             {icon && <img src={icon} className='rowIconSize'/>}
             <span>{name}</span>
         </div>
