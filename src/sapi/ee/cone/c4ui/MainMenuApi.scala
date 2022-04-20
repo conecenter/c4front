@@ -54,7 +54,7 @@ trait MainMenuClock extends MenuItem
     key: String,
     name: String,
     current: Boolean,
-    state: MenuItemState,
+//    state: MenuItemState,
     icon: Option[String] = None,
     receiver: Receiver[C],
   ): MenuExecutableItem
