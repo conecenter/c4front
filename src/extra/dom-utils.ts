@@ -34,7 +34,7 @@ function calcDistance(from: LineSegmentCoords, to: LineSegmentCoords, coneAngle:
     }
 }
 
-function findClosestNode(baseElement: Element, selector: string, direction: string, coneAngle = CONE_ANGLE) {
+function findClosestNode(baseElement: Element, nodes: Element[], direction: string, coneAngle = CONE_ANGLE) {
     if (!baseElement) return;
     const base = baseElement.getBoundingClientRect();
     const from = {
@@ -42,7 +42,6 @@ function findClosestNode(baseElement: Element, selector: string, direction: stri
         x0: 0,
         x1: ['up', 'down'].includes(direction) ? base.width : base.height
     }
-    const nodes = Array.from(baseElement.ownerDocument.querySelectorAll(selector));
     const closestNode = nodes.reduce((closest: { node: Element, distance: number } | null, current: Element) => {
         const curr = current.getBoundingClientRect();
         let to;
