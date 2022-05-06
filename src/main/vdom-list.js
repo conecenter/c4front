@@ -1,9 +1,11 @@
-import {cloneElement, createElement as $, useCallback, useEffect, useLayoutEffect, useMemo, useState} from "react"
+import {cloneElement, createElement as $, useCallback, useEffect, useMemo, useState} from "react"
 
 import {findFirstParent, identityAt, never, sortedWith} from "./vdom-util.js"
 import {NoCaptionContext, useEventListener, useSync} from "./vdom-hooks.js"
 import {useWidth,useMergeRef} from "./sizes.js"
 import {useGridDrag} from "./grid-drag.js"
+import {getPath, useFocusControl} from "../extra/focus-control.ts"
+import clsx from 'clsx'
 
 const dragRowIdOf = identityAt('dragRow')
 const dragColIdOf = identityAt('dragCol')
@@ -103,8 +105,11 @@ export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, expand
     const style = { ...props.style, gridRow, gridColumn }
     const expanderProps = expanding==="expander" ? { 'data-expander': expander || 'passive' } : {}
     const argClassNamesStr = argClassNames ? argClassNames.join(" ") : ""
-    const className = noDefCellClass ? argClassNamesStr : `${argClassNamesStr} ${GRID_CLASS_NAMES.CELL}`
-    return $("div", { ...props, ...expanderProps, 'data-col-key': colKey, 'data-row-key': rowKey, "data-drag-handle": dragHandle, style, className }, children)
+    const path = getPath(identity);
+    const focusClassName = useFocusControl(path);
+    const className = clsx(argClassNamesStr, !noDefCellClass && GRID_CLASS_NAMES.CELL, focusClassName);
+    // const className = noDefCellClass ? argClassNamesStr : `${argClassNamesStr} ${GRID_CLASS_NAMES.CELL}`
+    return $("div", { ...props, ...expanderProps, 'data-col-key': colKey, 'data-row-key': rowKey, "data-drag-handle": dragHandle, "data-path": path, tabIndex: '1', style, className }, children)
 }
 
 const colKeysOf = children => children.map(c => c.colKey)

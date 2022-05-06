@@ -10,13 +10,9 @@ interface Identity {
 
 function useFocusControl(path: string) {
     const currentPath = useContext(PathContext);
-
-    // const path = useMemo(() => getPath(identity), []);
-
     const currentlyFocused = currentPath && path && currentPath === path;
-
+    
     const className = clsx('focusWrapper', currentlyFocused && 'activeFocusWrapper');
-
     return className;
 }
 
@@ -30,4 +26,4 @@ function getPath(identity: Identity) {
     return path;
 }
 
-export { PathContext, useFocusControl };
+export { PathContext, useFocusControl, getPath };
