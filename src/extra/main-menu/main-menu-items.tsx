@@ -127,7 +127,7 @@ function hasIconProp(child: JSX.Element): string | undefined {
 
 interface MenuItemsGroup {
     key: string,
-	identity: Object,
+	identity?: Object,
     children: ReactElement<MenuItem>[]
 }
 

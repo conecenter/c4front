@@ -104,9 +104,21 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
 function getRightMenuCompressed(rightChildren: ReactElement<MenuItem>[]) {
   const menuUserItem = rightChildren.find(child => child.type === MenuUserItem) as ReactElement<MenuUserItem> | undefined;
   if (!menuUserItem) return null;
+
   const rightChildrenFiltered = rightChildren
-      .filter((child: JSX.Element) => ![MenuUserItem, MainMenuClock].includes(child.type));
-  return React.cloneElement(menuUserItem, {}, React.Children.toArray(menuUserItem.props.children).concat(rightChildrenFiltered));
+     .filter((child: JSX.Element) => ![MenuUserItem, MainMenuClock].includes(child.type));
+  const rightChildrenGroup = (
+    <MenuItemsGroup key=':right-children-compressed'>
+      {rightChildrenFiltered}
+    </MenuItemsGroup>
+  );
+
+  const menuUserChildren = React.Children.toArray(menuUserItem.props.children);
+  const logOutIndex = menuUserChildren.findIndex(child => (child as React.ReactElement).props.name === 'Log out');
+  const insertIndex = logOutIndex < 0 ? menuUserChildren.length : logOutIndex;
+  menuUserChildren.splice(insertIndex, 0, rightChildrenGroup)
+
+  return React.cloneElement(menuUserItem, {}, menuUserChildren);
 }
 
 
