@@ -106,10 +106,10 @@ export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, expand
     const expanderProps = expanding==="expander" ? { 'data-expander': expander || 'passive' } : {}
     const argClassNamesStr = argClassNames ? argClassNames.join(" ") : ""
     const path = getPath(identity);
-    const focusClassName = useFocusControl(path);
-    const className = clsx(argClassNamesStr, !noDefCellClass && GRID_CLASS_NAMES.CELL, focusClassName);
+    const { focusClass, focusHtml } = useFocusControl(path);
+    const className = clsx(argClassNamesStr, !noDefCellClass && GRID_CLASS_NAMES.CELL, focusClass);
     // const className = noDefCellClass ? argClassNamesStr : `${argClassNamesStr} ${GRID_CLASS_NAMES.CELL}`
-    return $("div", { ...props, ...expanderProps, 'data-col-key': colKey, 'data-row-key': rowKey, "data-drag-handle": dragHandle, "data-path": path, tabIndex: '1', style, className }, children)
+    return $("div", { ...props, ...expanderProps, 'data-col-key': colKey, 'data-row-key': rowKey, "data-drag-handle": dragHandle, ...focusHtml, style, className }, children)
 }
 
 const colKeysOf = children => children.map(c => c.colKey)
