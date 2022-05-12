@@ -28,7 +28,7 @@ interface LabeledElement {
 }
 
 function LabeledElement({ path, label, labelChildren, children }: LabeledElement) {
-    const showCaption = !!useContext(NoCaptionContext);
+    const showCaption = !useContext(NoCaptionContext);
 
     const { focusClass, focusHtml }: FocusControlObj = showCaption? useFocusControl(path) : {};
 
@@ -48,4 +48,4 @@ function LabeledElement({ path, label, labelChildren, children }: LabeledElement
     );
 }
 
-export { LabeledElement }
+export { LabeledElement, LabeledInput }
