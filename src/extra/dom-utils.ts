@@ -1,4 +1,4 @@
-const CONE_ANGLE = 0.52;  // 30 deg
+const CONE_ANGLE = 0.52;  // 0.52rad ~ 30deg
 const DIRECTION_BONUS = 0.5;
 
 function inRange(num: number, range: number[], inclusive = false) {
@@ -43,6 +43,7 @@ function findClosestNode(baseElement: Element, nodes: Element[], direction: stri
         x1: ['up', 'down'].includes(direction) ? base.width : base.height
     }
     const closestNode = nodes.reduce((closest: { node: Element, distance: number } | null, current: Element) => {
+        if (current === baseElement) return closest;
         const curr = current.getBoundingClientRect();
         let to;
         // take corresponding side of each node and bring to coordinate system with baseElement side as x-axis base with x0 == 0

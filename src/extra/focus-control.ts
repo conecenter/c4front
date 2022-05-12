@@ -1,19 +1,29 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useContext } from 'react';
 import clsx from 'clsx';
 
 const PathContext = React.createContext("path");
 
+interface FocusControlObj {
+    focusClass?: string,
+    focusHtml?: { 'data-path': string, tabIndex: number }
+}
+
+function isCurrentlyFocused(path: string | undefined) {
+    const currentPath = useContext(PathContext);
+    return currentPath && path && currentPath === path;
+}    
+
+function useFocusControl(path: string | undefined): FocusControlObj {
+    if (!path) return {};
+    const focusClass = clsx('focusWrapper', isCurrentlyFocused(path) && 'activeFocusWrapper');
+    const focusHtml = { 'data-path': path, tabIndex: 1 };
+    return { focusClass, focusHtml }
+}
+
+
 interface Identity {
     key?: string
     parent?: Identity,
-}
-
-function useFocusControl(path: string) {
-    const currentPath = useContext(PathContext);
-    const currentlyFocused = currentPath && path && currentPath === path;
-    
-    const className = clsx('focusWrapper', currentlyFocused && 'activeFocusWrapper');
-    return className;
 }
 
 function getPath(identity: Identity) {
@@ -26,4 +36,6 @@ function getPath(identity: Identity) {
     return path;
 }
 
+
+export type { FocusControlObj };
 export { PathContext, useFocusControl, getPath };
