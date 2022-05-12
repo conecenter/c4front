@@ -99,13 +99,13 @@ const getGridCol = ({ colKey }) => colKey === GRIDCELL_COLSPAN_ALL ? spanAll : C
 
 const spanAll = "1 / -1"
 
-export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, expanding, expander, dragHandle, noDefCellClass, classNames: argClassNames, gridRow: argGridRow, gridColumn: argGridColumn, ...props }) {
+export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, expanding, expander, dragHandle, noDefCellClass, classNames: argClassNames, gridRow: argGridRow, gridColumn: argGridColumn, path, ...props }) {
     const gridRow = argGridRow || getGridRow({ rowKey, rowKeyMod })
     const gridColumn = argGridColumn || getGridCol({ colKey })
     const style = { ...props.style, gridRow, gridColumn }
     const expanderProps = expanding==="expander" ? { 'data-expander': expander || 'passive' } : {}
     const argClassNamesStr = argClassNames ? argClassNames.join(" ") : ""
-    const path = getPath(identity);
+//    const path = getPath(identity);
     const { focusClass, focusHtml } = useFocusControl(path);
     const className = clsx(argClassNamesStr, !noDefCellClass && GRID_CLASS_NAMES.CELL, focusClass);
     // const className = noDefCellClass ? argClassNamesStr : `${argClassNamesStr} ${GRID_CLASS_NAMES.CELL}`
