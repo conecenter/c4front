@@ -21,6 +21,17 @@ function useFocusControl(path: string | undefined): FocusControlObj {
 }
 
 
+interface FocusableProps {
+    path?: string,
+    children: (obj: FocusControlObj) => React.ReactNode
+}
+
+const Focusable = ({path, children}: FocusableProps) => {
+    const focusProps = useFocusControl(path);
+    return children(focusProps);
+}
+
+
 interface Identity {
     key?: string
     parent?: Identity,
@@ -38,4 +49,4 @@ function getPath(identity: Identity) {
 
 
 export type { FocusControlObj };
-export { PathContext, useFocusControl, getPath };
+export { PathContext, useFocusControl, Focusable, getPath };
