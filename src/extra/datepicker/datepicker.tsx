@@ -30,6 +30,8 @@ import {
 	getOnPopupToggle, 
 	getOnInputBoxBlur
 } from "./datepicker-actions";
+import { useFocusControl } from '../focus-control';
+import clsx from 'clsx';
 
 
 type DatePickerServerState = TimestampServerState | InputServerState
@@ -55,7 +57,8 @@ interface DatePickerProps {
 	state: DatePickerServerState
 	timestampFormatId: number
 	userTimezoneId?: string
-	deferredSend?: boolean
+	deferredSend?: boolean,
+	path?: string,
 	children?: ReactNode[]
 }
 
@@ -65,6 +68,7 @@ export function DatePickerInputElement({
 		timestampFormatId,
 		userTimezoneId,
 		deferredSend,
+		path,
 		children
 }: DatePickerProps) {
 	const locale = useUserLocale()
@@ -166,8 +170,10 @@ export function DatePickerInputElement({
 		sendFinalChange
 	)
 
+	const { focusClass, focusHtml } = useFocusControl(path);
+
   	return (
-		<div ref={inputBoxRef} className="inputBox" onBlur={onInputBoxBlur} >
+		<div ref={inputBoxRef} className={clsx("inputBox", focusClass)} {...focusHtml} onBlur={onInputBoxBlur} >
 			<div className="inputSubBox">
 				<input ref={inputRef} value={inputValue} onChange={onChange} onKeyDown={onKeyDown} onBlur={onInputBlur} />
 			</div>
