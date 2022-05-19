@@ -32,15 +32,15 @@ function FlexibleColumnRoot({key, children}: FlexibleColumnRoot) {
 
 interface FlexibleColumn {
   key: string
-  sizes: FlexibleSizes
+  sizes?: FlexibleSizes
   align: FlexibleAlign
   children: ReactNode[]
 }
 
-function FlexibleColumn({key, sizes, children}: FlexibleColumn) {
+function FlexibleColumn({sizes, children}: FlexibleColumn) {
   return el("div", {
     className: FLEXIBLE_COLUMN_CLASSNAME,
-    style: {
+    style: sizes && {
       flexBasis: `${sizes.min}em`,
       minWidth: `${sizes.min}em`,
       maxWidth: sizes.max ? `${sizes.max}em` : undefined,
@@ -81,13 +81,13 @@ function FlexibleGroupbox({key, label, displayMode, sizes, children}: FlexibleGr
 
 interface FlexibleChildAlign {
   props: {
-    align: FlexibleAlign
+    align?: FlexibleAlign
   }
 }
 
 interface FlexibleRow {
   key: string
-  sizes: FlexibleSizes
+  sizes?: FlexibleSizes
   children: (ReactNode & FlexibleChildAlign)[]
 }
 
@@ -112,7 +112,7 @@ function separateChildren(children: (ReactNode & FlexibleChildAlign)[]): React.R
   let currentAlign: FlexibleAlign = "l"
   let currentInd = 0
   for (const elem of childrenArray) {
-    const newAlign = elem.props.align
+    const newAlign = elem.props.align || 'f'
     if (currentAlign === newAlign || newAlign === 'f')
       newChildren[currentInd].push(elem)
     else {
@@ -125,18 +125,19 @@ function separateChildren(children: (ReactNode & FlexibleChildAlign)[]): React.R
       currentAlign = newAlign
     }
   }
+  if (currentAlign === 'c') newChildren[currentInd].push(spacer)
   return newChildren
 }
 
 function wrapInRow(key: string, props: HTMLAttributes<HTMLDivElement>, children: ReactNode[]) {
-  return el("div", props, children)
+  return el("div", {key, ...props}, children)
 }
 
 function FlexibleRow({key, sizes, children}: FlexibleRow) {
   const separated = separateChildren(children)
   const props: HTMLAttributes<HTMLDivElement> = {
     className: FLEXIBLE_ROW_CLASSNAME,
-    style: {
+    style: sizes && {
       minWidth: `${sizes.min}em`,
       maxWidth: sizes.max ? `${sizes.max}em` : undefined,
     }
@@ -146,14 +147,14 @@ function FlexibleRow({key, sizes, children}: FlexibleRow) {
 
 interface FlexibleCell {
   key: string
-  sizes: FlexibleSizes
+  sizes?: FlexibleSizes
   children: ReactNode[]
 }
 
 function FlexibleCell({key, sizes, children}: FlexibleCell) {
   return el("div", {
     className: FLEXIBLE_CELL_CLASSNAME,
-    style: {
+    style: sizes && {
       flexBasis: `${sizes.min}em`,
       maxWidth: sizes.max ? `${sizes.max}em` : undefined,
     }
