@@ -147,16 +147,21 @@ function FlexibleRow({key, sizes, children}: FlexibleRow) {
 
 interface FlexibleCell {
   key: string
+  align?: FlexibleAlign
   sizes?: FlexibleSizes
+  grow?: number
   children: ReactNode[]
 }
 
-function FlexibleCell({key, sizes, children}: FlexibleCell) {
+function FlexibleCell({key, sizes, grow, children}: FlexibleCell) {
   return el("div", {
     className: FLEXIBLE_CELL_CLASSNAME,
-    style: sizes && {
-      flexBasis: `${sizes.min}em`,
-      maxWidth: sizes.max ? `${sizes.max}em` : undefined,
+    style: {
+      flexGrow: grow,
+      ...sizes && {
+        flexBasis: `${sizes.min}em`,
+        maxWidth: sizes.max ? `${sizes.max}em` : undefined
+      }
     }
   }, children)
 }
