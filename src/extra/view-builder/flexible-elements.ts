@@ -1,4 +1,4 @@
-import React, {createElement as el, CSSProperties, HTMLAttributes, ReactNode} from "react";
+import React, {createElement as el, HTMLAttributes, ReactNode} from "react";
 import {
   FlexibleAlign,
   FlexibleSizes
@@ -15,6 +15,7 @@ import {
   FLEXIBLE_ROW_CLASSNAME
 } from "./css-classes";
 import clsx from "clsx";
+import { NoCaptionContext } from '../../main/vdom-hooks';
 
 interface FlexibleColumnRoot {
   key: string,
@@ -90,6 +91,7 @@ interface FlexibleChildAlign {
 interface FlexibleRow {
   key: string
   sizes?: FlexibleSizes
+  noCaption?: boolean
   className?: string  // TODO: remove on the next step
   children: (ReactNode & FlexibleChildAlign)[]
 }
@@ -136,7 +138,7 @@ function wrapInRow(key: string, props: HTMLAttributes<HTMLDivElement>, children:
   return el("div", {key, ...props}, children)
 }
 
-function FlexibleRow({key, sizes, className, children}: FlexibleRow) {
+function FlexibleRow({key, sizes, className, noCaption, children}: FlexibleRow) {
   const separated = separateChildren(children)
   const props: HTMLAttributes<HTMLDivElement> = {
     className: clsx(FLEXIBLE_ROW_CLASSNAME, className),
@@ -145,7 +147,19 @@ function FlexibleRow({key, sizes, className, children}: FlexibleRow) {
       maxWidth: sizes.max ? `${sizes.max}em` : undefined,
     }
   }
-  return separated.map((list, ind) => wrapInRow(`${key}-${ind}`, props, list))
+  const rowChildren = separated.map((list, ind) => wrapInRow(`${key}-${ind}`, props, list))
+  return noCaption ? el(NoCaptionContext.Provider, {value: true}, rowChildren) : rowChildren
+}
+
+interface ThinFlexibleRow {
+  key: string
+  sizes?: FlexibleSizes
+  className?: string  // TODO: remove on the next step
+  children: (ReactNode & FlexibleChildAlign)[]
+}
+
+function ThinFlexibleRow({key, sizes, className, children}: ThinFlexibleRow) {
+  return el('FlexibleRow', {key, sizes, className, noCaption: true}, children)
 }
 
 interface FlexibleCell {
