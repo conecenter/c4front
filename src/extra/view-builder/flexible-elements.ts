@@ -33,13 +33,15 @@ function FlexibleColumnRoot({key, children}: FlexibleColumnRoot) {
 interface FlexibleColumn {
   key: string
   sizes?: FlexibleSizes
-  align: FlexibleAlign
+  className?: string  // TODO: remove on the next step
+  align?: FlexibleAlign
   children: ReactNode[]
 }
 
-function FlexibleColumn({sizes, children}: FlexibleColumn) {
+function FlexibleColumn({key, sizes, className, children}: FlexibleColumn) {
   return el("div", {
-    className: FLEXIBLE_COLUMN_CLASSNAME,
+    key,
+    className: clsx(FLEXIBLE_COLUMN_CLASSNAME, className),
     style: sizes && {
       flexBasis: `${sizes.min}em`,
       minWidth: `${sizes.min}em`,
@@ -88,6 +90,7 @@ interface FlexibleChildAlign {
 interface FlexibleRow {
   key: string
   sizes?: FlexibleSizes
+  className?: string  // TODO: remove on the next step
   children: (ReactNode & FlexibleChildAlign)[]
 }
 
@@ -133,10 +136,10 @@ function wrapInRow(key: string, props: HTMLAttributes<HTMLDivElement>, children:
   return el("div", {key, ...props}, children)
 }
 
-function FlexibleRow({key, sizes, children}: FlexibleRow) {
+function FlexibleRow({key, sizes, className, children}: FlexibleRow) {
   const separated = separateChildren(children)
   const props: HTMLAttributes<HTMLDivElement> = {
-    className: FLEXIBLE_ROW_CLASSNAME,
+    className: clsx(FLEXIBLE_ROW_CLASSNAME, className),
     style: sizes && {
       minWidth: `${sizes.min}em`,
       maxWidth: sizes.max ? `${sizes.max}em` : undefined,
@@ -149,15 +152,17 @@ interface FlexibleCell {
   key: string
   align?: FlexibleAlign
   sizes?: FlexibleSizes
-  grow?: number
+  grow?: boolean  // TODO: remove after sizes implementation
+  className?: string  // TODO: remove on the next step
   children: ReactNode[]
 }
 
-function FlexibleCell({key, sizes, grow, children}: FlexibleCell) {
+function FlexibleCell({key, sizes, grow, className, children}: FlexibleCell) {
   return el("div", {
-    className: FLEXIBLE_CELL_CLASSNAME,
+    key,
+    className: clsx(FLEXIBLE_CELL_CLASSNAME, className),
     style: {
-      flexGrow: grow,
+      flexGrow: grow ? '1' : undefined,
       ...sizes && {
         flexBasis: `${sizes.min}em`,
         maxWidth: sizes.max ? `${sizes.max}em` : undefined
