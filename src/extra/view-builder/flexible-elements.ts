@@ -91,7 +91,6 @@ interface FlexibleChildAlign {
 interface FlexibleRow {
   key: string
   sizes?: FlexibleSizes
-  noCaption?: boolean
   className?: string  // TODO: remove on the next step
   children: (ReactNode & FlexibleChildAlign)[]
 }
@@ -138,7 +137,7 @@ function wrapInRow(key: string, props: HTMLAttributes<HTMLDivElement>, children:
   return el("div", {key, ...props}, children)
 }
 
-function FlexibleRow({key, sizes, className, noCaption, children}: FlexibleRow) {
+function FlexibleRow({key, sizes, className, children}: FlexibleRow) {
   const separated = separateChildren(children)
   const props: HTMLAttributes<HTMLDivElement> = {
     className: clsx(FLEXIBLE_ROW_CLASSNAME, className),
@@ -147,19 +146,15 @@ function FlexibleRow({key, sizes, className, noCaption, children}: FlexibleRow) 
       maxWidth: sizes.max ? `${sizes.max}em` : undefined,
     }
   }
-  const rowChildren = separated.map((list, ind) => wrapInRow(`${key}-${ind}`, props, list))
-  return noCaption ? el(NoCaptionContext.Provider, {value: true}, rowChildren) : rowChildren
+  return separated.map((list, ind) => wrapInRow(`${key}-${ind}`, props, list))
 }
 
-interface ThinFlexibleRow {
-  key: string
-  sizes?: FlexibleSizes
-  className?: string  // TODO: remove on the next step
-  children: (ReactNode & FlexibleChildAlign)[]
-}
-
-function ThinFlexibleRow({key, sizes, className, children}: ThinFlexibleRow) {
-  return el('FlexibleRow', {key, sizes, className, noCaption: true}, children)
+function ThinFlexibleRow({key, sizes, className, children}: FlexibleRow) {
+  return el(
+    NoCaptionContext.Provider, 
+    {value: true},
+    el('FlexibleRow', {key, sizes, className}, children)
+  )
 }
 
 interface FlexibleCell {
@@ -212,4 +207,4 @@ function FlexibleLabeled({sizes, label, labelChildren, children, horizontal}: Fl
   )
 }
 
-export const flexibleComponents = {FlexibleColumnRoot, FlexibleColumn, FlexibleGroupbox, FlexibleRow, FlexibleCell, FlexibleLabeled}
+export const flexibleComponents = {FlexibleColumnRoot, FlexibleColumn, FlexibleGroupbox, FlexibleRow, ThinFlexibleRow, FlexibleCell, FlexibleLabeled}
