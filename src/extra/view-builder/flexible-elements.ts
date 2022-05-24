@@ -138,7 +138,6 @@ function wrapInRow(key: string, props: HTMLAttributes<HTMLDivElement>, children:
 }
 
 function FlexibleRow({key, sizes, className, children}: FlexibleRow) {
-  const separated = separateChildren(children)
   const props: HTMLAttributes<HTMLDivElement> = {
     className: clsx(FLEXIBLE_ROW_CLASSNAME, className),
     style: sizes && {
@@ -146,15 +145,16 @@ function FlexibleRow({key, sizes, className, children}: FlexibleRow) {
       maxWidth: sizes.max ? `${sizes.max}em` : undefined,
     }
   }
-  return separated.map((list, ind) => wrapInRow(`${key}-${ind}`, props, list))
+  const separated = separateChildren(children).map((list, ind) => wrapInRow(`${key}-${ind}`, props, list)) 
+  return el(React.Fragment, null, separated)
 }
 
-function ThinFlexibleRow({key, sizes, className, children}: FlexibleRow) {
+function ThinFlexibleRow(props: FlexibleRow) {
   return el(
-    NoCaptionContext.Provider, 
-    {value: true},
-    el('FlexibleRow', {key, sizes, className}, children)
-  )
+      NoCaptionContext.Provider,
+      {value: true},
+      el(FlexibleRow, props)
+  );
 }
 
 interface FlexibleCell {
