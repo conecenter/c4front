@@ -14,6 +14,8 @@ import ee.cone.c4vdom._
 
 @c4tagSwitch("FrontApp") trait FlexibleGroupboxDisplay extends ToJson
 
+@c4tagSwitch("FrontApp") trait FlexibleChildAlign extends ToJson
+
 trait FlexibleElement extends ToChildPair
 
 @c4tags("FrontApp") trait FlexibleElementsTags {
@@ -34,9 +36,10 @@ trait FlexibleElement extends ToChildPair
 
   @c4el("FlexibleColumn") def flexibleColumn(
     key: String,
-    sizes: FlexibleSize,
-    align: FlexibleAlign,
-    children: ElList[FlexibleElement]
+    sizes: Option[FlexibleSize],
+    align: Option[FlexibleAlign],
+    children: ViewRes,
+    className: Option[String] = None,
   ): FlexibleElement
 
   @c4val("accent") def groupboxAccented: FlexibleGroupboxDisplay
@@ -52,15 +55,22 @@ trait FlexibleElement extends ToChildPair
 
   @c4el("FlexibleRow") def flexibleRow(
     key: String,
-    sizes: FlexibleSize,
-    children: ElList[FlexibleElement],
+    sizes: Option[FlexibleSize],
+    children: ViewRes,
+    className: Option[String] = None,
   ): FlexibleElement
+
+  @c4val("FlexibleChildAlign") def flexibleChildAlign(
+    align: Option[FlexibleAlign],
+  ): FlexibleChildAlign
 
   @c4el("FlexibleCell") def flexibleCell(
     key: String,
-    sizes: FlexibleSize,
-    align: FlexibleAlign,
-    children: ViewRes
+    sizes: Option[FlexibleSize],
+    grow: Option[Boolean],
+    align: Option[FlexibleAlign],
+    children: ViewRes,
+    className: Option[String] = None,
   ): FlexibleElement
 
   @c4el("FlexibleLabeled") def flexibleLabeled(
