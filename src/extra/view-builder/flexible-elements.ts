@@ -1,8 +1,5 @@
 import React, {createElement as el, HTMLAttributes, ReactNode} from "react";
-import {
-  FlexibleAlign,
-  FlexibleSizes
-} from "./flexible-api";
+import {FlexibleAlign, FlexibleSizes} from "./flexible-api";
 import {
   FLEXIBLE_ACCENTED_GROUPBOX_CLASSNAME,
   FLEXIBLE_CELL_CLASSNAME,
@@ -71,7 +68,6 @@ function createLabel(label: string | undefined, children: ReactNode[]) {
 }
 
 function FlexibleGroupbox({key, label, displayMode, sizes, children}: FlexibleGroupbox) {
-
   return el("div", {
     className: clsx(FLEXIBLE_GROUPBOX_CLASSNAME, displayMode === 'accent' && FLEXIBLE_ACCENTED_GROUPBOX_CLASSNAME),
     style: {
