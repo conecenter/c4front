@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import React, { useContext, ReactNode } from 'react';
-import { NoCaptionContext } from '../main/vdom-hooks';
+import { HorizontalCaptionContext, NoCaptionContext } from '../main/vdom-hooks';
 import { useFocusControl, FocusControlObj } from './focus-control';
 
 interface LabeledInput {
@@ -29,10 +29,11 @@ interface LabeledElement {
 
 function LabeledElement({ path, label, labelChildren, children }: LabeledElement) {
     const showCaption = !useContext(NoCaptionContext);
-
     const { focusClass, focusHtml }: FocusControlObj = showCaption? useFocusControl(path) : {};
 
-    const className = clsx('labeledElement', focusClass);
+    const isHorizontalCaption = useContext(HorizontalCaptionContext);
+
+    const className = clsx('labeledElement', focusClass, isHorizontalCaption && 'horizontalCaption');
 
     return (
         <div className={className} {...focusHtml} >
