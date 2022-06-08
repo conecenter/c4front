@@ -40,7 +40,7 @@ trait MainMenuClock extends MenuItem
     opened: Boolean
   ): MenuItemState
 
-  @c4el("MenuFolderItem") def menuFolderItem(
+  @c4elPath("MenuFolderItem") def menuFolderItem(
     key: String,
     name: String,
     current: Boolean,
@@ -50,7 +50,7 @@ trait MainMenuClock extends MenuItem
     receiver: Receiver[C],
   ): MenuFolderItem
 
-  @c4el("MenuExecutableItem") def menuExecutableItem(
+  @c4elPath("MenuExecutableItem") def menuExecutableItem(
     key: String,
     name: String,
     current: Boolean,
@@ -59,7 +59,7 @@ trait MainMenuClock extends MenuItem
     receiver: Receiver[C],
   ): MenuExecutableItem
 
-  @c4el("MenuCustomItem") def menuCustomItem(
+  @c4elPath("MenuCustomItem") def menuCustomItem(
     key: String,
     children: ViewRes,
   ): MenuCustomItem
@@ -69,7 +69,7 @@ trait MainMenuClock extends MenuItem
     children: ElList[MenuItem],
   ): MenuItemsGroup
 
-  @c4el("MenuUserItem") def menuUserItem(
+  @c4elPath("MenuUserItem") def menuUserItem(
     key: String,
     shortName: String,
     longName: String,

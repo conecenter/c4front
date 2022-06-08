@@ -23,7 +23,7 @@ const SYNC_INTERVAL = 600000;
 const calcOffset = (timestamp: number) => timestamp - Date.now();
 const getInitialState = (offset: number) => Math.abs(offset) < 1000 ? (Date.now() + offset) : null;
 
-export function MainMenuClock({identity, serverTime, timestampFormatId}: MainMenuClock) {
+function MainMenuClock({identity, serverTime, timestampFormatId}: MainMenuClock) {
   const localOffsetRef = useRef(calcOffset(Number(serverTime)));
   const [timestamp, setTimestamp] = useState<number | null>(getInitialState(localOffsetRef.current));
   
@@ -70,3 +70,5 @@ export function MainMenuClock({identity, serverTime, timestampFormatId}: MainMen
     </div>
   );
 }
+
+export { MainMenuClock };

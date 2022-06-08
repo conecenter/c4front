@@ -1,10 +1,10 @@
 import clsx from 'clsx';
-import React, { ReactElement, ReactNode, useEffect, useRef, useState } from 'react'
+import React, { ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
 import { usePopupPos } from '../../main/popup';
 import { useClickSync } from '../exchange/click-sync';
-import { useInputSync } from '../exchange/input-sync'
+import { useInputSync } from '../exchange/input-sync';
 import { MenuItemState } from './main-menu-bar';
-import { handleMenuBlur, patchToState, stateToPatch } from './main-menu-utils'
+import { handleMenuBlur, patchToState, stateToPatch } from './main-menu-utils';
 
 const ARROW_DOWN_URL = '/mod/main/ee/cone/core/ui/c4view/arrow-down.svg';
 
@@ -16,11 +16,12 @@ interface MenuFolderItem {
     name: string,
     current: boolean,
     state: MenuItemState,
+    path?: string,
     icon?: string,
     children?: ReactElement<MenuItem | MenuItemsGroup>[]
 }
 
-function MenuFolderItem({identity, name, current, state, icon, children}: MenuFolderItem) {
+function MenuFolderItem({identity, name, current, state, icon, path, children}: MenuFolderItem) {
     const {
         currentState: { opened },
         setFinalState
@@ -38,6 +39,7 @@ function MenuFolderItem({identity, name, current, state, icon, children}: MenuFo
             ref={menuFolderRef}
             className={clsx('menuItem', opened && 'menuFolderOpened', current && 'isCurrent')}
             tabIndex={1}
+            data-path={path}
             onBlur={(e) => handleMenuBlur(e, setFinalState)}
             onClick={() => setFinalState({ opened: !opened })}
         >
@@ -65,14 +67,16 @@ interface MenuExecutableItem {
 	identity: Object,
     name: string,
     current: boolean,
+    path?: string,
     icon?: string
 }
 
-function MenuExecutableItem({identity, name, current, icon}: MenuExecutableItem) {
+function MenuExecutableItem({identity, name, current, path, icon}: MenuExecutableItem) {
     const { clicked, onClick } = useClickSync(identity, 'receiver');
     return (
         <div className={clsx('menuItem', current && 'isCurrent', clicked && 'executeAnim')}
              tabIndex={1}
+             data-path={path}
              onClick={onClick} >
             {icon && <img src={icon} className='rowIconSize'/>}
             <span>{name}</span>
@@ -84,12 +88,13 @@ function MenuExecutableItem({identity, name, current, icon}: MenuExecutableItem)
 interface MenuCustomItem {
     key: string,
 	identity: Object,
-    children?: ReactNode | ReactNode[]
+    path?: string,
+    children?: ReactNode
 }
 
-function MenuCustomItem({children}: MenuCustomItem) {
+function MenuCustomItem({path, children}: MenuCustomItem) {
     return (
-        <div className='menuCustomItem'>
+        <div className='menuCustomItem' tabIndex={1} data-path={path}>
             {children}
         </div>
     );
@@ -147,11 +152,12 @@ interface MenuUserItem {
     longName: string,
     current: boolean,
     state: MenuItemState,
+    path?: string,
     icon?: string,
     children: ReactElement<MenuItem | MenuItemsGroup>[]
 }
 
-function MenuUserItem({identity, shortName, longName, current, state, icon, children}: MenuUserItem) {
+function MenuUserItem({identity, shortName, longName, current, state, path, icon, children}: MenuUserItem) {
     const {
         currentState: { opened },
         setFinalState
@@ -169,6 +175,7 @@ function MenuUserItem({identity, shortName, longName, current, state, icon, chil
             ref={menuFolderRef}
             className={clsx('menuItem', opened && 'menuFolderOpened', current && 'isCurrent')}
             tabIndex={1}
+            data-path={path}
             onBlur={(e) => handleMenuBlur(e, setFinalState)}
             onClick={() => setFinalState({ opened: !opened })}
         >

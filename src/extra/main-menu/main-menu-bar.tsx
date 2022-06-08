@@ -1,4 +1,4 @@
-import React, {ReactElement, useContext} from "react";
+import React, {ForwardedRef, ReactElement, useContext, useEffect, useState} from "react";
 import clsx from 'clsx';
 import {Expander, ExpanderArea} from '../../main/expander-area';
 import {useInputSync} from '../exchange/input-sync';
@@ -13,8 +13,44 @@ import {
   MenuUserItem
 } from './main-menu-items';
 import { ScrollInfoContext } from '../scroll-info-context';
+import { M_KEY } from "../../main/keyboard-keys";
 
 const DATA_PATH = 'main-menu-bar';
+
+
+interface BurgerMenu {
+  opened: boolean,
+  setFinalState: (s: MenuItemState) => void,
+  children: ReactElement<MenuItem>[]
+}
+
+const BurgerMenu = React.forwardRef(({opened, setFinalState, children}: BurgerMenu, domRef: ForwardedRef<HTMLDivElement>) => {
+  return (
+    <div ref={domRef} className='menuBurgerBox' onBlur={(e) => handleMenuBlur(e, setFinalState)}>
+      <button key='left-menu'
+              className='btnBurger'
+              onClick={() => setFinalState({opened: !opened})} >
+        <svg xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" version="1.1"
+             viewBox="0 0 32 32">
+          <line strokeLinecap="round" x1="2" x2="30" strokeWidth="4"
+                y1={opened ? '16' : '9'}
+                y2={opened ? '16' : '9'}
+                style={opened ? {transform: "rotate(-45deg)"} : {}}/>
+          <line strokeLinecap="round" x1="2" y1="17" x2="30" y2="17" strokeWidth="4"
+                style={opened ? {opacity: "0"} : {}}/>
+          <line strokeLinecap="round" x1="2" x2="30" strokeWidth="4"
+                y1={opened ? '16' : '25'}
+                y2={opened ? '16' : '25'}
+                style={opened ? {transform: "rotate(45deg)"} : {}}/>
+        </svg>
+      </button>
+
+      {opened &&
+          <MenuPopupElement popupLrMode={false} children={children}/>}
+    </div>
+  )
+});
+
 
 interface MainMenuBar {
   key: string,
@@ -23,7 +59,7 @@ interface MainMenuBar {
   hasOpened?: boolean,
   icon?: string
   leftChildren: ReactElement<MenuItem>[],
-  rightChildren?: ReactElement<MenuItem>[]
+  rightChildren?: ReactElement<MenuItem | MainMenuClock>[]
 }
 
 interface MenuItemState {
@@ -35,6 +71,8 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
     currentState: {opened},
     setFinalState
   } = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
+
+  const domRef = React.useRef<HTMLInputElement>(null);
 
   const scrollPos = useContext(ScrollInfoContext);
 
@@ -77,6 +115,53 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
     </Expander>
   );
 
+  const [focusControl, setFocusControl] = useState(false);
+  const [indexFocused, setIndexFocused] = useState(0);  // useRef??
+
+  useEffect(() => {
+    const doc =  domRef.current ? domRef.current.ownerDocument : null;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!doc) return;
+      if ((e.ctrlKey || e.altKey) && e.key === M_KEY) {
+        // focus first top-level item
+        const firstFocusablePath = leftChildren[indexFocused].props.path;
+        const firstFocusableItems: NodeListOf<HTMLElement> = doc.querySelectorAll(`[data-path='${firstFocusablePath}']`);
+        firstFocusableItems.forEach(item => item.focus());
+        setFocusControl(true);
+        // if (state.isBurger) openBurger(e)
+      }
+    }
+    if (doc) {
+      const window = doc.defaultView;
+      window?.addEventListener("keydown", onKeyDown);
+      return () => window?.removeEventListener("keydown", onKeyDown);
+    }
+  }, []); // ???
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (focusControl) {
+      e.stopPropagation();
+      let nextFocused;
+      switch(e.key) {
+        case 'ArrowRight':
+          nextFocused = leftChildren.length <= indexFocused + 1 ? 0 : indexFocused + 1;
+          break;
+        case 'ArrowLeft':
+          nextFocused = indexFocused === 0 ? leftChildren.length - 1 : indexFocused - 1;
+      }
+      if (nextFocused !== undefined) setIndexFocused(nextFocused);
+    }
+  }
+
+  useEffect(() => {
+    const doc =  domRef.current ? domRef.current.ownerDocument : null;
+    if (doc) {
+      const nextFocusablePath = leftChildren[indexFocused].props.path;
+      const nextFocusableItems: NodeListOf<HTMLElement> = doc.querySelectorAll(`[data-path='${nextFocusablePath}']`);
+      nextFocusableItems.forEach(item => item.focus());
+    }
+  }, [indexFocused])
+
   return (
     <ExpanderArea key='top-bar' 
                   maxLineCount={1}
@@ -84,10 +169,11 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
                     className: clsx('mainMenuBar topRow', !hasOpened && 'hideOnScroll'),
                     style: { top: scrollPos.elementsStyles.get(DATA_PATH) },
                     'data-path': DATA_PATH,
+                    onKeyDown: handleKeyDown
                   }}
                   expandTo={[
       <Expander key='left-menu-compressed' area="lt" expandOrder={1} expandTo={leftMenuExpanded}>
-        <BurgerMenu opened={opened} setFinalState={setFinalState} children={leftChildren}/>
+        <BurgerMenu ref={domRef} opened={opened} setFinalState={setFinalState} children={leftChildren}/>
       </Expander>,
 
       <Expander key='right-menu-compressed'
@@ -119,40 +205,6 @@ function getRightMenuCompressed(rightChildren: ReactElement<MenuItem>[]) {
   menuUserChildren.splice(insertIndex, 0, rightChildrenGroup)
 
   return React.cloneElement(menuUserItem, {}, menuUserChildren);
-}
-
-
-interface BurgerMenu {
-  opened: boolean,
-  setFinalState: (s: MenuItemState) => void,
-  children: ReactElement<MenuItem>[]
-}
-
-function BurgerMenu({opened, setFinalState, children}: BurgerMenu) {
-  return (
-    <div className='menuBurgerBox' onBlur={(e) => handleMenuBlur(e, setFinalState)}>
-      <button key='left-menu'
-              className='btnBurger'
-              onClick={() => setFinalState({opened: !opened})} >
-        <svg xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" version="1.1"
-             viewBox="0 0 32 32">
-          <line strokeLinecap="round" x1="2" x2="30" strokeWidth="4"
-                y1={opened ? '16' : '9'}
-                y2={opened ? '16' : '9'}
-                style={opened ? {transform: "rotate(-45deg)"} : {}}/>
-          <line strokeLinecap="round" x1="2" y1="17" x2="30" y2="17" strokeWidth="4"
-                style={opened ? {opacity: "0"} : {}}/>
-          <line strokeLinecap="round" x1="2" x2="30" strokeWidth="4"
-                y1={opened ? '16' : '25'}
-                y2={opened ? '16' : '25'}
-                style={opened ? {transform: "rotate(45deg)"} : {}}/>
-        </svg>
-      </button>
-
-      {opened &&
-          <MenuPopupElement popupLrMode={false} children={children}/>}
-    </div>
-  );
 }
 
 export {MainMenuBar, MenuFolderItem};
