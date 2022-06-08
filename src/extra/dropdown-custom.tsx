@@ -230,7 +230,7 @@ interface DropdownPatchHeaders {
 function changeToPatch(change: DropdownChange): Patch {
 	const { inputValue, mode, popupOpen } = change;
 	const headers = {
-		...('inputValue' in change && {'x-r-inputValue': inputValue}),
+		...(inputValue !== undefined && {'x-r-inputValue': inputValue}),
 		...(mode && {'x-r-mode': mode}),
 		...('popupOpen' in change && {'x-r-popupOpen': popupOpen ? '1' : ''})
 	};

@@ -25,7 +25,6 @@ function App() {
                         identity: {parent: 'menuFolderItem-1'},
                         name: 'Main Console',
                         current: false,
-                        state: { opened: false },
                         icon: '../main-menu/main_console.svg'
                     }),
                     $(MenuExecutableItem, {
@@ -33,7 +32,6 @@ function App() {
                         identity: {parent: 'menuFolderItem-1'},
                         name: 'Temperature Control',
                         current: false,
-                        state: { opened: false },
                         icon: '../main-menu/thermometer.svg'
                     }),
                     $(MenuItemsGroup, {
@@ -45,7 +43,6 @@ function App() {
                                 identity: {parent: 'menuFolderItem-1'},
                                 name: 'Activity Dashboard',
                                 current: false,
-                                state: { opened: false },
                                 icon: '../main-menu/dashboard.svg'
                             }),
                             $(MenuExecutableItem, {
@@ -53,7 +50,6 @@ function App() {
                                 identity: {parent: 'menuFolderItem-1'},
                                 name: 'Railway Processing',
                                 current: false,
-                                state: { opened: false },
                                 icon: '../main-menu/train.svg'
                             }),
                             $(MenuExecutableItem, {
@@ -61,7 +57,6 @@ function App() {
                                 identity: {parent: 'menuFolderItem-1'},
                                 name: 'Units on Hold',
                                 current: false,
-                                state: { opened: false },
                                 icon: ''
                             }),
                         ]
@@ -79,7 +74,6 @@ function App() {
                                 identity: {parent: 'menuFolderItem-18'},
                                 name: 'Main Console',
                                 current: false,
-                                state: { opened: false },
                                 icon: '../main-menu/main_console.svg'
                             }),
                             $(MenuExecutableItem, {
@@ -87,7 +81,6 @@ function App() {
                                 identity: {parent: 'menuFolderItem-18'},
                                 name: 'Topologies',
                                 current: false,
-                                state: { opened: false },
                                 icon: '../main-menu/area.svg'
                             }),
                             $(MenuExecutableItem, {
@@ -95,7 +88,6 @@ function App() {
                                 identity: {parent: 'menuFolderItem-18'},
                                 name: 'Units on Hold',
                                 current: false,
-                                state: { opened: false },
                                 icon: ''
                             })
                         ]
@@ -139,7 +131,6 @@ function App() {
                                 identity: {parent: 'menuFolderItem-11'},
                                 name: 'Locations',
                                 current: false,
-                                state: { opened: false },
                                 icon: ''
                             }),
                             $(MenuExecutableItem, {
@@ -147,7 +138,6 @@ function App() {
                                 identity: {parent: 'menuFolderItem-11'},
                                 name: 'Topologies',
                                 current: false,
-                                state: { opened: false },
                                 icon: '../main-menu/area.svg'
                             }),
                             $(MenuExecutableItem, {
@@ -155,7 +145,6 @@ function App() {
                                 identity: {parent: 'menuFolderItem-11'},
                                 name: 'Storage Spaces',
                                 current: false,
-                                state: { opened: false },
                                 icon: '../main-menu/storage_space.svg'
                             })
                         ]
@@ -207,7 +196,6 @@ function App() {
                                 identity: {parent: 'menuFolderItem-11'},
                                 name: 'Locations',
                                 current: false,
-                                state: { opened: false },
                                 icon: ''
                             }),
                             $(MenuExecutableItem, {
@@ -215,7 +203,6 @@ function App() {
                                 identity: {parent: 'menuFolderItem-11'},
                                 name: 'Topologies',
                                 current: false,
-                                state: { opened: false },
                                 icon: '../main-menu/area.svg'
                             }),
                             $(MenuExecutableItem, {
@@ -223,7 +210,6 @@ function App() {
                                 identity: {parent: 'menuFolderItem-11'},
                                 name: 'Storage Spaces',
                                 current: false,
-                                state: { opened: false },
                                 icon: '../main-menu/storage_space.svg'
                             })
                         ]
@@ -267,7 +253,6 @@ function App() {
                         identity: {parent: 'menuFolderItem-1'},
                         name: 'Main Console',
                         current: false,
-                        state: { opened: false },
                         icon: '../main-menu/main_console.svg'
                     }),
                     $(MenuExecutableItem, {
@@ -275,7 +260,6 @@ function App() {
                         identity: {parent: 'menuFolderItem-1'},
                         name: 'Temperature Control',
                         current: true,
-                        state: { opened: false },
                         icon: '../main-menu/thermometer.svg'
                     }),
                     $(MenuExecutableItem, {
@@ -283,7 +267,6 @@ function App() {
                         identity: {parent: 'menuFolderItem-1'},
                         name: 'Activity Dashboard',
                         current: false,
-                        state: { opened: false },
                         icon: '../main-menu/dashboard.svg'
                     }),
                     $(MenuExecutableItem, {
@@ -291,7 +274,6 @@ function App() {
                         identity: {parent: 'menuFolderItem-1'},
                         name: 'Railway Processing',
                         current: false,
-                        state: { opened: false },
                         icon: '../main-menu/train.svg'
                     }),
                     $(MenuExecutableItem, {
@@ -299,7 +281,6 @@ function App() {
                         identity: {parent: 'menuFolderItem-1'},
                         name: 'Units on Hold',
                         current: false,
-                        state: { opened: false },
                         icon: ''
                     }),
                     $(MenuFolderItem, {
