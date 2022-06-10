@@ -1,5 +1,5 @@
 const CONE_ANGLE = 0.52;  // 0.52rad ~ 30deg
-const DIRECTION_BONUS = 0.5;
+const DIRECTION_BONUS = 0.3;
 
 function inRange(num: number, range: number[], inclusive = false) {
     return inclusive 
@@ -15,7 +15,7 @@ interface LineSegmentCoords {
 
 function calcDistance(from: LineSegmentCoords, to: LineSegmentCoords, coneAngle: number) {
     // check if located in the right direction
-    if (to.y < 0) return;
+    if (+to.y.toFixed(2) < 0) return;
 
     // check if on the same level
     const range = [from.x0, from.x1];
