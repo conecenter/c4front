@@ -1,12 +1,20 @@
 import clsx from 'clsx';
 import React, { ReactElement, ReactNode, useContext, useEffect, useRef, useState } from 'react';
-import { ARROW_DOWN_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY, KEY_TO_DIRECTION } from '../../main/keyboard-keys';
 import { usePopupPos } from '../../main/popup';
 import { useClickSync } from '../exchange/click-sync';
 import { useInputSync } from '../exchange/input-sync';
 import { PathContext, useFocusControl } from '../focus-control';
 import { MenuItemState } from './main-menu-bar';
 import { handleMenuBlur, patchToState, stateToPatch } from './main-menu-utils';
+import {
+    ARROW_DOWN_KEY,
+    ARROW_LEFT_KEY, 
+    ARROW_RIGHT_KEY, 
+    ARROW_UP_KEY, 
+    ENTER_KEY, 
+    ESCAPE_KEY, 
+    KEY_TO_DIRECTION 
+} from '../../main/keyboard-keys';
 
 const ARROW_DOWN_URL = '/mod/main/ee/cone/core/ui/c4view/arrow-down.svg';
 
@@ -39,22 +47,38 @@ function MenuFolderItem({identity, name, current, state, icon, path, children}: 
     const { focusClass, focusHtml } = useFocusControl(path);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-        if (e.key === ENTER_KEY) {
-            e.currentTarget.click();
-            e.stopPropagation();
-            // @ts-ignore
-            const pathToFocus = children && children[0].props.path;
-                setTimeout(() => {
-                    if (pathToFocus && menuFolderRef.current) {
-                        const itemToFocus: HTMLElement | null = menuFolderRef.current.querySelector(`[data-path='${pathToFocus}']`);
-                        itemToFocus?.focus();
-                    }
-                }, 0);
-        }
-        if (e.key === ESCAPE_KEY && opened) {
-            e.currentTarget.focus();
-            setFinalState({ opened: false });
-            e.stopPropagation();
+        switch(e.key) {
+            case ARROW_RIGHT_KEY:
+                if (!popupLrMode && !opened) break;
+                if (opened) e.stopPropagation();
+            case ENTER_KEY:
+                if (!opened) {
+                    setFinalState({ opened: true });
+                    e.stopPropagation();
+                    // @ts-ignore
+                    const pathToFocus = children && children[0].props.path;
+                    setTimeout(() => {
+                        if (pathToFocus && menuFolderRef.current) {
+                            const itemToFocus: HTMLElement | null = menuFolderRef.current.querySelector(`[data-path='${pathToFocus}']`);
+                            itemToFocus?.focus();
+                        }
+                    }, 0);
+                }                
+                break;
+            case ARROW_LEFT_KEY:
+                if (popupLrMode && !opened) {
+                    e.stopPropagation();
+                    break;
+                } else if (opened) {
+                    e.stopPropagation();
+                    if (!popupLrMode) break;
+                }
+            case ESCAPE_KEY:
+                if (opened) {
+                    e.currentTarget.focus();
+                    setFinalState({ opened: false });
+                }
+                break;
         }
     }
 
