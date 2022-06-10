@@ -13,7 +13,6 @@ import {
   MenuUserItem
 } from './main-menu-items';
 import { ScrollInfoContext } from '../scroll-info-context';
-import { M_KEY } from "../../main/keyboard-keys";
 
 const DATA_PATH = 'main-menu-bar';
 
@@ -115,6 +114,7 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
     </Expander>
   );
 
+  /*
   const [focusControl, setFocusControl] = useState(false);
   const [indexFocused, setIndexFocused] = useState(0);  // useRef??
 
@@ -129,6 +129,9 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
         firstFocusableItems.forEach(item => item.focus());
         setFocusControl(true);
         // if (state.isBurger) openBurger(e)
+      }
+      if (e.key === ESCAPE_KEY) {
+        setFocusControl(false);
       }
     }
     if (doc) {
@@ -161,7 +164,7 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
       nextFocusableItems.forEach(item => item.focus());
     }
   }, [indexFocused])
-
+*/
   return (
     <ExpanderArea key='top-bar' 
                   maxLineCount={1}
@@ -169,7 +172,7 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
                     className: clsx('mainMenuBar topRow', !hasOpened && 'hideOnScroll'),
                     style: { top: scrollPos.elementsStyles.get(DATA_PATH) },
                     'data-path': DATA_PATH,
-                    onKeyDown: handleKeyDown
+                    //onKeyDown: handleKeyDown
                   }}
                   expandTo={[
       <Expander key='left-menu-compressed' area="lt" expandOrder={1} expandTo={leftMenuExpanded}>
