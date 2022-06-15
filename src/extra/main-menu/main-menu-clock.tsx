@@ -5,6 +5,8 @@ import {useSync} from '../../main/vdom-hooks';
 import {Patch} from '../exchange/input-sync';
 import {useUserLocale} from '../locale';
 import {bg, de, da, et, enGB, lt, pl, ro, ru, uk, it} from 'date-fns/locale';
+import { useFocusControl } from '../focus-control';
+import clsx from 'clsx';
 
 interface IntlLocales {
   [name: string]: Locale
@@ -63,8 +65,10 @@ function MainMenuClock({identity, serverTime, timestampFormatId}: MainMenuClock)
     return () => clearInterval(id);
   }, []);
 
+  const { focusClass, focusHtml } = useFocusControl('main-menu-clock');
+
   return (
-    <div className='menuCustomItem dateTimeClock'>
+    <div className={clsx(focusClass,'menuCustomItem dateTimeClock')} {...focusHtml}>
       <span className='dateDisplay'>{date}</span>
       <span>{time}</span>
     </div>

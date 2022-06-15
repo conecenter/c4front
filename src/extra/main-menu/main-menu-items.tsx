@@ -20,6 +20,15 @@ const ARROW_DOWN_URL = '/mod/main/ee/cone/core/ui/c4view/arrow-down.svg';
 
 type MenuItem = MenuFolderItem | MenuExecutableItem | MenuCustomItem | MenuUserItem;
 
+const getNextArrayIndex = (arrLength: number, currIndex: number, direction: string = 'up') => {
+    switch(direction) {
+        case 'up':
+            return currIndex === 0 ? arrLength - 1 : currIndex - 1;                
+        case 'down':
+            return arrLength <= currIndex + 1 ? 0 : currIndex + 1;
+    }
+}
+
 interface MenuFolderItem {
     key: string,
 	identity: Object,
@@ -44,19 +53,22 @@ function MenuFolderItem({identity, name, current, state, icon, path, children}: 
         if (isPopupChild(menuFolderRef.current)) setPopupLrMode(true);
     });
 
+    const currentPath = useContext(PathContext);
+
     const { focusClass, focusHtml } = useFocusControl(path);
+
+    const flatChildren = flattenPopupChildren(children);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
         switch(e.key) {
             case ARROW_RIGHT_KEY:
                 if (!popupLrMode && !opened) break;
-                if (opened) e.stopPropagation();
             case ENTER_KEY:
                 if (!opened) {
                     setFinalState({ opened: true });
                     e.stopPropagation();
                     // @ts-ignore
-                    const pathToFocus = children && children[0].props.path;
+                    const pathToFocus = flatChildren && flatChildren[0].props.path;
                     setTimeout(() => {
                         if (pathToFocus && menuFolderRef.current) {
                             const itemToFocus: HTMLElement | null = menuFolderRef.current.querySelector(`[data-path='${pathToFocus}']`);
@@ -66,10 +78,7 @@ function MenuFolderItem({identity, name, current, state, icon, path, children}: 
                 }                
                 break;
             case ARROW_LEFT_KEY:
-                if (popupLrMode && !opened) {
-                    e.stopPropagation();
-                    break;
-                } else if (opened) {
+                if (opened) {
                     e.stopPropagation();
                     if (!popupLrMode) break;
                 }
@@ -77,10 +86,24 @@ function MenuFolderItem({identity, name, current, state, icon, path, children}: 
                 if (opened) {
                     e.currentTarget.focus();
                     setFinalState({ opened: false });
-                }
+                } 
                 break;
+            case ARROW_DOWN_KEY:
+            case ARROW_UP_KEY:
+                if (!open) break;
+                const focusedIndex = flatChildren.findIndex(child => child.props.path === currentPath);
+                if (focusedIndex === -1) break;
+                const nextFocusedIndex = getNextArrayIndex(flatChildren.length, focusedIndex, KEY_TO_DIRECTION[e.key]);
+                if (nextFocusedIndex === undefined) break;
+                const pathToFocus = flatChildren[nextFocusedIndex].props.path;
+                if (pathToFocus && menuFolderRef.current) {
+                    const itemToFocus: HTMLElement | null = menuFolderRef.current.querySelector(`[data-path='${pathToFocus}']`);
+                    itemToFocus && itemToFocus.focus();
+                }
+                e.preventDefault();
+                e.stopPropagation();
         }
-    }
+    };
 
     return (
         <div
@@ -88,9 +111,10 @@ function MenuFolderItem({identity, name, current, state, icon, path, children}: 
             className={clsx('menuItem', opened && 'menuFolderOpened', current && 'isCurrent', focusClass)}
             {...focusHtml}
             onBlur={(e) => handleMenuBlur(e, setFinalState)}
+            //onFocus={(e) => {if (e.options.preventScroll)}}
             onClick={() => setFinalState({ opened: !opened })}
             onKeyDown={handleKeyDown}
-        >
+        >            
             {icon && <img src={icon} className='rowIconSize' />}
             <span>{name}</span>
             <img
@@ -123,11 +147,19 @@ function MenuExecutableItem({identity, name, current, path, icon}: MenuExecutabl
     const { clicked, onClick } = useClickSync(identity, 'receiver');
 
     const { focusClass, focusHtml } = useFocusControl(path);
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === ENTER_KEY) {
+            e.stopPropagation();
+            onClick();
+        }
+    }
     
     return (
         <div className={clsx('menuItem', current && 'isCurrent', clicked && 'executeAnim', focusClass)}
              {...focusHtml}
-             onClick={onClick} >
+             onClick={onClick}
+             onKeyDown={handleKeyDown} >
             {icon && <img src={icon} className='rowIconSize'/>}
             <span>{name}</span>
         </div>
@@ -142,9 +174,11 @@ interface MenuCustomItem {
     children?: ReactNode
 }
 
-function MenuCustomItem({children}: MenuCustomItem) {
+function MenuCustomItem({path, children}: MenuCustomItem) {
+    const { focusClass, focusHtml } = useFocusControl(path);
+
     return (
-        <div className='menuCustomItem' >
+        <div className={clsx(focusClass, 'menuCustomItem')} {...focusHtml} >
             {children}
         </div>
     );
@@ -160,11 +194,11 @@ function MenuPopupElement({popupLrMode, children}: MenuPopupElement) {
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
     const [popupPos] = usePopupPos(popupElement, popupLrMode);
 
+    const hasIcon = children ? children.some(hasIconProp) : false;
+/*
     const currentPath = useContext(PathContext);
     
-    const flatChildren = flattenPopupChildren(children);
-
-    const hasIcon = children ? children.some(hasIconProp) : false;
+    // const flatChildren = flattenPopupChildren(children);
 
     const getNextArrayIndex = (arrLength: number, currIndex: number, direction: string = 'up') => {
         switch(direction) {
@@ -192,13 +226,14 @@ function MenuPopupElement({popupLrMode, children}: MenuPopupElement) {
                 e.stopPropagation();
         }
     }
-
+*/
     return (
         <div ref={setPopupElement}
              className={clsx('menuPopupBox popupEl', hasIcon && 'hasIcons')}
              style={popupPos}
              onClick={(e) => e.stopPropagation()}
-             onKeyDown={handleKeyDown}>
+             //onKeyDown={handleKeyDown}
+             >
             {children}
         </div>
     );
@@ -270,6 +305,57 @@ function MenuUserItem({identity, shortName, longName, current, state, path, icon
         if (isPopupChild(menuFolderRef.current)) setPopupLrMode(true);
     });
 
+    const currentPath = useContext(PathContext);
+
+    const flatChildren = flattenPopupChildren(children);
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+        switch(e.key) {
+            case ARROW_RIGHT_KEY:
+                if (!popupLrMode && !opened) break;
+                if (opened) e.stopPropagation();
+            case ENTER_KEY:
+                if (!opened) {
+                    setFinalState({ opened: true });
+                    e.stopPropagation();
+                    // @ts-ignore
+                    const pathToFocus = flatChildren && flatChildren[0].props.path;
+                    setTimeout(() => {
+                        if (pathToFocus && menuFolderRef.current) {
+                            const itemToFocus: HTMLElement | null = menuFolderRef.current.querySelector(`[data-path='${pathToFocus}']`);
+                            itemToFocus?.focus();
+                        }
+                    }, 0);
+                }                
+                break;
+            case ARROW_LEFT_KEY:
+                if (opened) {
+                    e.stopPropagation();
+                    if (!popupLrMode) break;
+                }
+            case ESCAPE_KEY:
+                if (opened) {
+                    e.currentTarget.focus();
+                    setFinalState({ opened: false });
+                } 
+                break;
+            case ARROW_DOWN_KEY:
+            case ARROW_UP_KEY:
+                if (!open) break;
+                const focusedIndex = flatChildren.findIndex(child => child.props.path === currentPath);
+                if (focusedIndex === -1) break;
+                const nextFocusedIndex = getNextArrayIndex(flatChildren.length, focusedIndex, KEY_TO_DIRECTION[e.key]);
+                if (nextFocusedIndex === undefined) break;
+                const pathToFocus = flatChildren[nextFocusedIndex].props.path;
+                if (pathToFocus && menuFolderRef.current) {
+                    const itemToFocus: HTMLElement | null = menuFolderRef.current.querySelector(`[data-path='${pathToFocus}']`);
+                    itemToFocus && itemToFocus.focus();
+                }
+                e.preventDefault();
+                e.stopPropagation();
+        }
+    };
+
     return (
         <div
             ref={menuFolderRef}
@@ -277,6 +363,7 @@ function MenuUserItem({identity, shortName, longName, current, state, path, icon
             {...focusHtml}
             onBlur={(e) => handleMenuBlur(e, setFinalState)}
             onClick={() => setFinalState({ opened: !opened })}
+            onKeyDown={handleKeyDown}
         >
             {icon && <img src={icon} className='rowIconSize' />}
             <span className='longName'>{longName}</span>

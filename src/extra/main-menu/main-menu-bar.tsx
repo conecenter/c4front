@@ -1,4 +1,4 @@
-import React, {ForwardedRef, ReactElement, useContext, useEffect, useState} from "react";
+import React, {ReactElement, useContext, useEffect, useRef, useState} from "react";
 import clsx from 'clsx';
 import {Expander, ExpanderArea} from '../../main/expander-area';
 import {useInputSync} from '../exchange/input-sync';
@@ -13,19 +13,78 @@ import {
   MenuUserItem
 } from './main-menu-items';
 import { ScrollInfoContext } from '../scroll-info-context';
+import { PathContext, useFocusControl } from "../focus-control";
+import { ARROW_DOWN_KEY, ARROW_LEFT_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY, KEY_TO_DIRECTION, M_KEY } from "../../main/keyboard-keys";
 
 const DATA_PATH = 'main-menu-bar';
 
 
 interface BurgerMenu {
   opened: boolean,
+  domRef: React.RefObject<HTMLDivElement>,
   setFinalState: (s: MenuItemState) => void,
   children: ReactElement<MenuItem>[]
 }
 
-const BurgerMenu = React.forwardRef(({opened, setFinalState, children}: BurgerMenu, domRef: ForwardedRef<HTMLDivElement>) => {
+const BurgerMenu = ({opened, domRef, setFinalState, children}: BurgerMenu) => {
+  const { focusClass, focusHtml } = useFocusControl('burgerMenu');
+
+  const currentPath = useContext(PathContext);
+
+  const getNextArrayIndex = (arrLength: number, currIndex: number, direction: string = 'up') => {
+    switch(direction) {
+        case 'up':
+            return currIndex === 0 ? arrLength - 1 : currIndex - 1;                
+        case 'down':
+            return arrLength <= currIndex + 1 ? 0 : currIndex + 1;
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    switch(e.key) {
+      case ENTER_KEY:
+        if (!opened) {
+            setFinalState({ opened: true });
+            e.stopPropagation();
+            // @ts-ignore
+            const pathToFocus = children && children[0].props.path;
+            setTimeout(() => {
+                if (pathToFocus && domRef.current) {
+                    const itemToFocus: HTMLElement | null = domRef.current.querySelector(`[data-path='${pathToFocus}']`);
+                    itemToFocus?.focus();
+                }
+            }, 0);
+        }                
+        break;
+      case ESCAPE_KEY:
+        if (opened) {
+            e.currentTarget.focus();
+            setFinalState({ opened: false });
+        } 
+        break;
+      case ARROW_DOWN_KEY:
+      case ARROW_UP_KEY:
+        if (!opened) break;
+        const focusedIndex = children.findIndex(child => child.props.path === currentPath);
+        if (focusedIndex === -1) break;
+        const nextFocusedIndex = getNextArrayIndex(children.length, focusedIndex, KEY_TO_DIRECTION[e.key]);
+        if (nextFocusedIndex === undefined) break;
+        const pathToFocus = children[nextFocusedIndex].props.path;
+        if (pathToFocus && domRef.current) {
+          const itemToFocus: HTMLElement | null = domRef.current.querySelector(`[data-path='${pathToFocus}']`);
+          itemToFocus && itemToFocus.focus();
+        }
+        e.preventDefault();
+        e.stopPropagation();
+    }
+};
+
   return (
-    <div ref={domRef} className='menuBurgerBox' onBlur={(e) => handleMenuBlur(e, setFinalState)}>
+    <div className={clsx(focusClass, 'menuBurgerBox')} 
+         onBlur={(e) => handleMenuBlur(e, setFinalState)}
+         onKeyDown={handleKeyDown}
+         {...focusHtml}
+         ref={domRef} >
       <button key='left-menu'
               className='btnBurger'
               onClick={() => setFinalState({opened: !opened})} >
@@ -48,7 +107,7 @@ const BurgerMenu = React.forwardRef(({opened, setFinalState, children}: BurgerMe
           <MenuPopupElement popupLrMode={false} children={children}/>}
     </div>
   )
-});
+};
 
 
 interface MainMenuBar {
@@ -71,7 +130,7 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
     setFinalState
   } = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
 
-  const domRef = React.useRef<HTMLInputElement>(null);
+  const domRef = useRef<HTMLDivElement>(null);
 
   const scrollPos = useContext(ScrollInfoContext);
 
@@ -114,24 +173,17 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
     </Expander>
   );
 
-  /*
-  const [focusControl, setFocusControl] = useState(false);
-  const [indexFocused, setIndexFocused] = useState(0);  // useRef??
-
   useEffect(() => {
-    const doc =  domRef.current ? domRef.current.ownerDocument : null;
+    const doc =  domRef.current?.ownerDocument;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (!doc) return;
       if ((e.ctrlKey || e.altKey) && e.key === M_KEY) {
+        setFinalState({ opened: true });
         // focus first top-level item
-        const firstFocusablePath = leftChildren[indexFocused].props.path;
-        const firstFocusableItems: NodeListOf<HTMLElement> = doc.querySelectorAll(`[data-path='${firstFocusablePath}']`);
+        const firstFocusablePath = leftChildren[0].props.path;
+        const firstFocusableItems: NodeListOf<HTMLElement> = doc!.querySelectorAll(`[data-path='${firstFocusablePath}']`);
+        firstFocusableItems[0].click();
         firstFocusableItems.forEach(item => item.focus());
-        setFocusControl(true);
-        // if (state.isBurger) openBurger(e)
-      }
-      if (e.key === ESCAPE_KEY) {
-        setFocusControl(false);
+        //if (leftChildren[0].type === MenuFolderItem) 
       }
     }
     if (doc) {
@@ -139,32 +191,40 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
       window?.addEventListener("keydown", onKeyDown);
       return () => window?.removeEventListener("keydown", onKeyDown);
     }
-  }, []); // ???
+  }, []);
+
+  const [arrowNavIndex, setArrowNavInd] = useState<number | null>(null);
+
+  const unitedChildren = [...leftChildren, ...(rightChildren || [])];
 
   function handleKeyDown(e: React.KeyboardEvent) {
-    if (focusControl) {
+    const isFolderItem = (item: ReactElement) => item.type === MenuFolderItem || item.type === MenuUserItem; // TYPE of item
+    if (e.key === ARROW_RIGHT_KEY)  {
       e.stopPropagation();
-      let nextFocused;
-      switch(e.key) {
-        case 'ArrowRight':
-          nextFocused = leftChildren.length <= indexFocused + 1 ? 0 : indexFocused + 1;
-          break;
-        case 'ArrowLeft':
-          nextFocused = indexFocused === 0 ? leftChildren.length - 1 : indexFocused - 1;
+      const openedMenuFolderInd = unitedChildren.findIndex(
+        (child) => isFolderItem(child) && (child as ReactElement<MenuFolderItem>).props.state.opened
+      );
+      if (openedMenuFolderInd === -1 || openedMenuFolderInd >= unitedChildren.length - 1) return;
+      /* TODO
+      if (!isFolderItem(unitedChildren[openedMenuFolderInd + 1])) {
+
       }
-      if (nextFocused !== undefined) setIndexFocused(nextFocused);
+      */
+      setArrowNavInd(openedMenuFolderInd + 1);
     }
   }
 
   useEffect(() => {
-    const doc =  domRef.current ? domRef.current.ownerDocument : null;
-    if (doc) {
-      const nextFocusablePath = leftChildren[indexFocused].props.path;
-      const nextFocusableItems: NodeListOf<HTMLElement> = doc.querySelectorAll(`[data-path='${nextFocusablePath}']`);
-      nextFocusableItems.forEach(item => item.focus());
+    const doc =  domRef.current?.ownerDocument;
+    if (arrowNavIndex !== null && doc) {
+      // @ts-ignore - TODO
+      const nextFocusablePath = unitedChildren[arrowNavIndex].props.path;
+      const nextFocusableItem: HTMLElement | null = doc.querySelector(`[data-path='${nextFocusablePath}']:not([style*="visibility: hidden"] *)`);
+      nextFocusableItem?.focus();
+      nextFocusableItem?.click();
     }
-  }, [indexFocused])
-*/
+  }, [arrowNavIndex]);
+
   return (
     <ExpanderArea key='top-bar' 
                   maxLineCount={1}
@@ -172,11 +232,11 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
                     className: clsx('mainMenuBar topRow', !hasOpened && 'hideOnScroll'),
                     style: { top: scrollPos.elementsStyles.get(DATA_PATH) },
                     'data-path': DATA_PATH,
-                    //onKeyDown: handleKeyDown
+                    onKeyDown: handleKeyDown
                   }}
                   expandTo={[
       <Expander key='left-menu-compressed' area="lt" expandOrder={1} expandTo={leftMenuExpanded}>
-        <BurgerMenu ref={domRef} opened={opened} setFinalState={setFinalState} children={leftChildren}/>
+        <BurgerMenu opened={opened} setFinalState={setFinalState} children={leftChildren} domRef={domRef}/>
       </Expander>,
 
       <Expander key='right-menu-compressed'

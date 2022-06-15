@@ -1,5 +1,5 @@
 const CONE_ANGLE = 0.52;  // 0.52rad ~ 30deg
-const DIRECTION_BONUS = 0.3;
+const DIRECTION_BONUS = 0.25;
 
 function inRange(num: number, range: number[], inclusive = false) {
     return inclusive 
