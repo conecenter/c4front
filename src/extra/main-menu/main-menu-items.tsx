@@ -4,7 +4,7 @@ import { usePopupPos } from '../../main/popup';
 import { useClickSync } from '../exchange/click-sync';
 import { useInputSync } from '../exchange/input-sync';
 import { PathContext, useFocusControl } from '../focus-control';
-import { MenuItemState, OnArrowBtnCtx } from './main-menu-bar';
+import { MenuItemState, MenuControlsContext } from './main-menu-bar';
 import { handleMenuBlur, patchToState, stateToPatch } from './main-menu-utils';
 import {
     ARROW_DOWN_KEY,
@@ -35,7 +35,7 @@ interface MenuFolderItem {
     name: string,
     current: boolean,
     state: MenuItemState,
-    path?: string,
+    path: string,
     icon?: string,
     children?: ReactElement<MenuItem | MenuItemsGroup>[]
 }
@@ -53,62 +53,62 @@ function MenuFolderItem({identity, name, current, state, icon, path, children}: 
         if (isPopupChild(menuFolderRef.current)) setPopupLrMode(true);
     });
 
-    const currentPath = useContext(PathContext);
-
     const { focusClass, focusHtml } = useFocusControl(path);
 
-    const flatChildren = flattenPopupChildren(children);
-
-    const onArrowBtn = useContext(OnArrowBtnCtx);
+    const currentPath = useContext(PathContext);
+    const onArrowKey = useContext(MenuControlsContext);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+        const menuFolder = menuFolderRef.current;
         switch(e.key) {
             case ARROW_RIGHT_KEY:
                 if (!popupLrMode && !opened) break;
                 if (!popupLrMode && opened) {
                     e.stopPropagation();
-                    // @ts-ignore
-                    onArrowBtn && onArrowBtn(path, menuFolderRef.current);
+                    if (onArrowKey && menuFolder) onArrowKey(path, menuFolder, e.key);
+                    break;
                 }
             case ENTER_KEY:
                 if (!opened) {
                     setFinalState({ opened: true });
                     e.stopPropagation();
-                    // @ts-ignore
+                    const flatChildren = flattenPopupChildren(children);
                     const pathToFocus = flatChildren && flatChildren[0].props.path;
                     setTimeout(() => {
-                        if (pathToFocus && menuFolderRef.current) {
-                            const itemToFocus: HTMLElement | null = menuFolderRef.current.querySelector(`[data-path='${pathToFocus}']`);
+                        if (pathToFocus && menuFolder) {
+                            const itemToFocus: HTMLElement | null = menuFolder.querySelector(`[data-path='${pathToFocus}']`);
                             itemToFocus?.focus();
                         }
                     });
                 }                
                 break;
             case ARROW_LEFT_KEY:
-                if (opened) {
+                if (!popupLrMode && opened) {
                     e.stopPropagation();
-                    if (!popupLrMode) break;
+                    if (onArrowKey && menuFolder) onArrowKey(path, menuFolder, e.key);
+                    break;
                 }
             case ESCAPE_KEY:
                 if (opened) {
+                    e.stopPropagation();
                     e.currentTarget.focus();
                     setFinalState({ opened: false });
-                } 
+                }
                 break;
             case ARROW_DOWN_KEY:
             case ARROW_UP_KEY:
-                if (!open) break;
+                if (!open || !menuFolder) break;
+                const flatChildren = flattenPopupChildren(children);
                 const focusedIndex = flatChildren.findIndex(child => child.props.path === currentPath);
-                if (focusedIndex === -1) break;
                 const nextFocusedIndex = getNextArrayIndex(flatChildren.length, focusedIndex, KEY_TO_DIRECTION[e.key]);
                 if (nextFocusedIndex === undefined) break;
                 const pathToFocus = flatChildren[nextFocusedIndex].props.path;
-                if (pathToFocus && menuFolderRef.current) {
-                    const itemToFocus: HTMLElement | null = menuFolderRef.current.querySelector(`[data-path='${pathToFocus}']`);
-                    itemToFocus && itemToFocus.focus();
+                const itemToFocus: HTMLElement | null = menuFolder.querySelector(`[data-path='${pathToFocus}']`);
+                if (itemToFocus) {
+                    itemToFocus.focus();
+                    e.preventDefault();
+                    e.stopPropagation();
                 }
-                e.preventDefault();
-                e.stopPropagation();
         }
     };
 
@@ -165,7 +165,8 @@ function MenuExecutableItem({identity, name, current, path, icon}: MenuExecutabl
         <div className={clsx('menuItem', current && 'isCurrent', clicked && 'executeAnim', focusClass)}
              {...focusHtml}
              onClick={onClick}
-             onKeyDown={handleKeyDown} >
+             onKeyDown={handleKeyDown} 
+        >
             {icon && <img src={icon} className='rowIconSize'/>}
             <span>{name}</span>
         </div>
@@ -201,45 +202,12 @@ function MenuPopupElement({popupLrMode, children}: MenuPopupElement) {
     const [popupPos] = usePopupPos(popupElement, popupLrMode);
 
     const hasIcon = children ? children.some(hasIconProp) : false;
-/*
-    const currentPath = useContext(PathContext);
-    
-    // const flatChildren = flattenPopupChildren(children);
 
-    const getNextArrayIndex = (arrLength: number, currIndex: number, direction: string = 'up') => {
-        switch(direction) {
-            case 'up':
-                return currIndex === 0 ? arrLength - 1 : currIndex - 1;                
-            case 'down':
-                return arrLength <= currIndex + 1 ? 0 : currIndex + 1;
-        }
-    }
-
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-        switch(e.key) {
-            case ARROW_DOWN_KEY:
-            case ARROW_UP_KEY:
-                const focusedIndex = flatChildren.findIndex(child => child.props.path === currentPath);
-                if (focusedIndex === -1) break;
-                const nextFocusedIndex = getNextArrayIndex(flatChildren.length, focusedIndex, KEY_TO_DIRECTION[e.key]);
-                if (nextFocusedIndex === undefined) break;
-                const pathToFocus = flatChildren[nextFocusedIndex].props.path;
-                if (pathToFocus && popupElement) {
-                    const itemToFocus: HTMLElement | null = popupElement.querySelector(`[data-path='${pathToFocus}']`);
-                    itemToFocus && itemToFocus.focus();
-                }
-                e.preventDefault();
-                e.stopPropagation();
-        }
-    }
-*/
     return (
         <div ref={setPopupElement}
              className={clsx('menuPopupBox popupEl', hasIcon && 'hasIcons')}
              style={popupPos}
-             onClick={(e) => e.stopPropagation()}
-             //onKeyDown={handleKeyDown}
-             >
+             onClick={(e) => e.stopPropagation()} >
             {children}
         </div>
     );
@@ -324,7 +292,6 @@ function MenuUserItem({identity, shortName, longName, current, state, path, icon
                 if (!opened) {
                     setFinalState({ opened: true });
                     e.stopPropagation();
-                    // @ts-ignore
                     const pathToFocus = flatChildren && flatChildren[0].props.path;
                     setTimeout(() => {
                         if (pathToFocus && menuFolderRef.current) {

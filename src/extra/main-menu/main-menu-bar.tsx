@@ -1,8 +1,8 @@
-import React, {createContext, ReactElement, useCallback, useContext, useEffect, useRef, useState} from "react";
+import React, {createContext, ReactElement, useCallback, useContext, useEffect, useRef} from "react";
 import clsx from 'clsx';
 import {Expander, ExpanderArea} from '../../main/expander-area';
 import {useInputSync} from '../exchange/input-sync';
-import {handleMenuBlur, patchToState, stateToPatch} from './main-menu-utils';
+import {getNextArrayIndex, handleMenuBlur, patchToState, stateToPatch} from './main-menu-utils';
 import {MainMenuClock} from './main-menu-clock';
 import {
   MenuCustomItem,
@@ -14,9 +14,16 @@ import {
 } from './main-menu-items';
 import { ScrollInfoContext } from '../scroll-info-context';
 import { PathContext, useFocusControl } from "../focus-control";
-import { ARROW_DOWN_KEY, ARROW_LEFT_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY, KEY_TO_DIRECTION, M_KEY } from "../../main/keyboard-keys";
+import { ARROW_DOWN_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY, KEY_TO_DIRECTION, M_KEY } from "../../main/keyboard-keys";
 
 const DATA_PATH = 'main-menu-bar';
+const KEY_MODIFICATOR = { ArrowLeft: -1, ArrowRight: 1 };
+
+type onArrowKey = (path: string, elem: HTMLElement, key: 'ArrowLeft' | 'ArrowRight') => void;
+
+const MenuControlsContext = createContext<onArrowKey | null>(null);
+
+const isMenuFolderType = (item: ReactElement) => item.type === MenuFolderItem || item.type === MenuUserItem;
 
 
 interface BurgerMenu {
@@ -31,22 +38,12 @@ const BurgerMenu = ({opened, domRef, setFinalState, children}: BurgerMenu) => {
 
   const currentPath = useContext(PathContext);
 
-  const getNextArrayIndex = (arrLength: number, currIndex: number, direction: string = 'up') => {
-    switch(direction) {
-        case 'up':
-            return currIndex === 0 ? arrLength - 1 : currIndex - 1;                
-        case 'down':
-            return arrLength <= currIndex + 1 ? 0 : currIndex + 1;
-    }
-  }
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     switch(e.key) {
       case ENTER_KEY:
         if (!opened) {
             setFinalState({ opened: true });
             e.stopPropagation();
-            // @ts-ignore
             const pathToFocus = children && children[0].props.path;
             setTimeout(() => {
                 if (pathToFocus && domRef.current) {
@@ -109,7 +106,6 @@ const BurgerMenu = ({opened, domRef, setFinalState, children}: BurgerMenu) => {
   )
 };
 
-const OnArrowBtnCtx = createContext<null | ((path: string, elem: HTMLDivElement | null) => void)>(null);
 
 interface MainMenuBar {
   key: string,
@@ -192,23 +188,23 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
       return () => window?.removeEventListener("keydown", onKeyDown);
     }
   }, []);
-
-  const onArrowBtn = useCallback((path: string, elem: HTMLDivElement | null) => {
-    const unitedChildren = [...leftChildren, ...(rightChildren || [])];
-    const doc =  elem?.ownerDocument;
-    const openedMenuFolderInd = unitedChildren.findIndex(
-      child => (child as ReactElement<MenuFolderItem>).props.path === path
-    );
-    if (openedMenuFolderInd === -1 || openedMenuFolderInd >= unitedChildren.length - 1 || !doc) return;
-    // @ts-ignore - TODO
-    const nextFocusablePath = unitedChildren[openedMenuFolderInd + 1].props.path;
-    const nextFocusableItem: HTMLElement | null = doc.querySelector(`[data-path='${nextFocusablePath}']:not([style*="visibility: hidden"] *)`);
+  
+  const onArrowKey: onArrowKey = useCallback((path, elem, key) => {
+    const menuItems = [...leftChildren, ...(rightChildren || [])];
+    const doc =  elem.ownerDocument;
+    const openedMenuFolderIndex = menuItems.findIndex(child => child.props.path === path);
+    if (openedMenuFolderIndex === -1 || !doc) return;
+    const nextMenuItemIndex = openedMenuFolderIndex + KEY_MODIFICATOR[key];
+    if (nextMenuItemIndex < 0 || nextMenuItemIndex >= menuItems.length) return;
+    const nextFocusablePath = menuItems[nextMenuItemIndex].props.path;
+    const selector = `[data-path='${nextFocusablePath}']:not([style*="visibility: hidden"] *)`;
+    const nextFocusableItem: HTMLElement | null = doc.querySelector(selector);
     nextFocusableItem?.focus();
-    nextFocusableItem?.click();  // isFolderElement?
+    if (isMenuFolderType(menuItems[nextMenuItemIndex])) nextFocusableItem?.click();
   }, []);
 
   return (
-    <OnArrowBtnCtx.Provider value={onArrowBtn}>
+    <MenuControlsContext.Provider value={onArrowKey}>
       <ExpanderArea key='top-bar' 
                     maxLineCount={1}
                     props={{ 
@@ -230,9 +226,9 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
           {rightMenuCompressed}
         </Expander>
       ]}/>
-    </OnArrowBtnCtx.Provider>
+    </MenuControlsContext.Provider>
   );
-}
+};
 
 function getRightMenuCompressed(rightChildren: ReactElement<MenuItem>[]) {
   const menuUserItem = rightChildren.find(child => child.type === MenuUserItem) as ReactElement<MenuUserItem> | undefined;
@@ -254,7 +250,7 @@ function getRightMenuCompressed(rightChildren: ReactElement<MenuItem>[]) {
   return React.cloneElement(menuUserItem, {}, menuUserChildren);
 }
 
-export {MainMenuBar, MenuFolderItem, OnArrowBtnCtx};
+export {MainMenuBar, MenuFolderItem, MenuControlsContext};
 export type {MenuItemState};
 
 export const mainMenuComponents = {MainMenuBar, MenuFolderItem, MenuExecutableItem, MenuCustomItem, MenuItemsGroup, MenuUserItem, MainMenuClock}

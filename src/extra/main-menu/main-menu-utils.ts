@@ -20,4 +20,13 @@ function handleMenuBlur(e: React.FocusEvent, setFinalState: (s: MenuItemState) =
     setFinalState({ opened: false });
 }
 
-export { patchToState, stateToPatch, handleMenuBlur };
+const getNextArrayIndex = (arrLength: number, currIndex: number, direction: string = 'up') => {
+    switch(direction) {
+        case 'up':
+            return currIndex === 0 ? arrLength - 1 : currIndex - 1;                
+        case 'down':
+            return arrLength <= currIndex + 1 ? 0 : currIndex + 1;
+    }
+  }
+
+export { patchToState, stateToPatch, handleMenuBlur, getNextArrayIndex };
