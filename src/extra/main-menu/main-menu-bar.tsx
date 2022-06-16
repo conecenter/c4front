@@ -1,4 +1,4 @@
-import React, {ReactElement, useContext, useEffect, useRef, useState} from "react";
+import React, {createContext, ReactElement, useCallback, useContext, useEffect, useRef, useState} from "react";
 import clsx from 'clsx';
 import {Expander, ExpanderArea} from '../../main/expander-area';
 import {useInputSync} from '../exchange/input-sync';
@@ -53,7 +53,7 @@ const BurgerMenu = ({opened, domRef, setFinalState, children}: BurgerMenu) => {
                     const itemToFocus: HTMLElement | null = domRef.current.querySelector(`[data-path='${pathToFocus}']`);
                     itemToFocus?.focus();
                 }
-            }, 0);
+            });
         }                
         break;
       case ESCAPE_KEY:
@@ -109,6 +109,7 @@ const BurgerMenu = ({opened, domRef, setFinalState, children}: BurgerMenu) => {
   )
 };
 
+const OnArrowBtnCtx = createContext<null | ((path: string, elem: HTMLDivElement | null) => void)>(null);
 
 interface MainMenuBar {
   key: string,
@@ -180,10 +181,9 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
         setFinalState({ opened: true });
         // focus first top-level item
         const firstFocusablePath = leftChildren[0].props.path;
-        const firstFocusableItems: NodeListOf<HTMLElement> = doc!.querySelectorAll(`[data-path='${firstFocusablePath}']`);
-        firstFocusableItems[0].click();
-        firstFocusableItems.forEach(item => item.focus());
-        //if (leftChildren[0].type === MenuFolderItem) 
+        const firstFocusableItem: HTMLElement | null = doc!.querySelector(`[data-path='${firstFocusablePath}']:not([style*="visibility: hidden"] *)`);
+        firstFocusableItem?.click();
+        firstFocusableItem?.focus();
       }
     }
     if (doc) {
@@ -193,60 +193,44 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
     }
   }, []);
 
-  const [arrowNavIndex, setArrowNavInd] = useState<number | null>(null);
-
-  const unitedChildren = [...leftChildren, ...(rightChildren || [])];
-
-  function handleKeyDown(e: React.KeyboardEvent) {
-    const isFolderItem = (item: ReactElement) => item.type === MenuFolderItem || item.type === MenuUserItem; // TYPE of item
-    if (e.key === ARROW_RIGHT_KEY)  {
-      e.stopPropagation();
-      const openedMenuFolderInd = unitedChildren.findIndex(
-        (child) => isFolderItem(child) && (child as ReactElement<MenuFolderItem>).props.state.opened
-      );
-      if (openedMenuFolderInd === -1 || openedMenuFolderInd >= unitedChildren.length - 1) return;
-      /* TODO
-      if (!isFolderItem(unitedChildren[openedMenuFolderInd + 1])) {
-
-      }
-      */
-      setArrowNavInd(openedMenuFolderInd + 1);
-    }
-  }
-
-  useEffect(() => {
-    const doc =  domRef.current?.ownerDocument;
-    if (arrowNavIndex !== null && doc) {
-      // @ts-ignore - TODO
-      const nextFocusablePath = unitedChildren[arrowNavIndex].props.path;
-      const nextFocusableItem: HTMLElement | null = doc.querySelector(`[data-path='${nextFocusablePath}']:not([style*="visibility: hidden"] *)`);
-      nextFocusableItem?.focus();
-      nextFocusableItem?.click();
-    }
-  }, [arrowNavIndex]);
+  const onArrowBtn = useCallback((path: string, elem: HTMLDivElement | null) => {
+    const unitedChildren = [...leftChildren, ...(rightChildren || [])];
+    const doc =  elem?.ownerDocument;
+    const openedMenuFolderInd = unitedChildren.findIndex(
+      child => (child as ReactElement<MenuFolderItem>).props.path === path
+    );
+    if (openedMenuFolderInd === -1 || openedMenuFolderInd >= unitedChildren.length - 1 || !doc) return;
+    // @ts-ignore - TODO
+    const nextFocusablePath = unitedChildren[openedMenuFolderInd + 1].props.path;
+    const nextFocusableItem: HTMLElement | null = doc.querySelector(`[data-path='${nextFocusablePath}']:not([style*="visibility: hidden"] *)`);
+    nextFocusableItem?.focus();
+    nextFocusableItem?.click();  // isFolderElement?
+  }, []);
 
   return (
-    <ExpanderArea key='top-bar' 
-                  maxLineCount={1}
-                  props={{ 
-                    className: clsx('mainMenuBar topRow', !hasOpened && 'hideOnScroll'),
-                    style: { top: scrollPos.elementsStyles.get(DATA_PATH) },
-                    'data-path': DATA_PATH,
-                    onKeyDown: handleKeyDown
-                  }}
-                  expandTo={[
-      <Expander key='left-menu-compressed' area="lt" expandOrder={1} expandTo={leftMenuExpanded}>
-        <BurgerMenu opened={opened} setFinalState={setFinalState} children={leftChildren} domRef={domRef}/>
-      </Expander>,
+    <OnArrowBtnCtx.Provider value={onArrowBtn}>
+      <ExpanderArea key='top-bar' 
+                    maxLineCount={1}
+                    props={{ 
+                      className: clsx('mainMenuBar topRow', !hasOpened && 'hideOnScroll'),
+                      style: { top: scrollPos.elementsStyles.get(DATA_PATH) },
+                      'data-path': DATA_PATH,
+                      //onKeyDown: handleKeyDown
+                    }}
+                    expandTo={[
+        <Expander key='left-menu-compressed' area="lt" expandOrder={1} expandTo={leftMenuExpanded}>
+          <BurgerMenu opened={opened} setFinalState={setFinalState} children={leftChildren} domRef={domRef}/>
+        </Expander>,
 
-      <Expander key='right-menu-compressed'
-                className='rightMenuBox rightMenuCompressed'
-                area="rt"
-                expandOrder={0}
-                expandTo={rightMenuExpanded}>
-        {rightMenuCompressed}
-      </Expander>
-    ]}/>
+        <Expander key='right-menu-compressed'
+                  className='rightMenuBox rightMenuCompressed'
+                  area="rt"
+                  expandOrder={0}
+                  expandTo={rightMenuExpanded}>
+          {rightMenuCompressed}
+        </Expander>
+      ]}/>
+    </OnArrowBtnCtx.Provider>
   );
 }
 
@@ -270,7 +254,7 @@ function getRightMenuCompressed(rightChildren: ReactElement<MenuItem>[]) {
   return React.cloneElement(menuUserItem, {}, menuUserChildren);
 }
 
-export {MainMenuBar, MenuFolderItem};
+export {MainMenuBar, MenuFolderItem, OnArrowBtnCtx};
 export type {MenuItemState};
 
 export const mainMenuComponents = {MainMenuBar, MenuFolderItem, MenuExecutableItem, MenuCustomItem, MenuItemsGroup, MenuUserItem, MainMenuClock}

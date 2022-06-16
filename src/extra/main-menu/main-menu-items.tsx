@@ -4,7 +4,7 @@ import { usePopupPos } from '../../main/popup';
 import { useClickSync } from '../exchange/click-sync';
 import { useInputSync } from '../exchange/input-sync';
 import { PathContext, useFocusControl } from '../focus-control';
-import { MenuItemState } from './main-menu-bar';
+import { MenuItemState, OnArrowBtnCtx } from './main-menu-bar';
 import { handleMenuBlur, patchToState, stateToPatch } from './main-menu-utils';
 import {
     ARROW_DOWN_KEY,
@@ -59,10 +59,17 @@ function MenuFolderItem({identity, name, current, state, icon, path, children}: 
 
     const flatChildren = flattenPopupChildren(children);
 
+    const onArrowBtn = useContext(OnArrowBtnCtx);
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
         switch(e.key) {
             case ARROW_RIGHT_KEY:
                 if (!popupLrMode && !opened) break;
+                if (!popupLrMode && opened) {
+                    e.stopPropagation();
+                    // @ts-ignore
+                    onArrowBtn && onArrowBtn(path, menuFolderRef.current);
+                }
             case ENTER_KEY:
                 if (!opened) {
                     setFinalState({ opened: true });
@@ -74,7 +81,7 @@ function MenuFolderItem({identity, name, current, state, icon, path, children}: 
                             const itemToFocus: HTMLElement | null = menuFolderRef.current.querySelector(`[data-path='${pathToFocus}']`);
                             itemToFocus?.focus();
                         }
-                    }, 0);
+                    });
                 }                
                 break;
             case ARROW_LEFT_KEY:
@@ -111,10 +118,9 @@ function MenuFolderItem({identity, name, current, state, icon, path, children}: 
             className={clsx('menuItem', opened && 'menuFolderOpened', current && 'isCurrent', focusClass)}
             {...focusHtml}
             onBlur={(e) => handleMenuBlur(e, setFinalState)}
-            //onFocus={(e) => {if (e.options.preventScroll)}}
             onClick={() => setFinalState({ opened: !opened })}
             onKeyDown={handleKeyDown}
-        >            
+        >
             {icon && <img src={icon} className='rowIconSize' />}
             <span>{name}</span>
             <img
