@@ -115,6 +115,9 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
 
   const domRef = useRef<HTMLDivElement>(null);
 
+  const currentPath = useContext(PathContext);
+  const prevFocusedPath = useRef('');
+
   const scrollPos = useContext(ScrollInfoContext);
 
   // Left part of menu
@@ -163,6 +166,7 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (isMenuOpenCombo(e)) {
+        prevFocusedPath.current = currentPath;
         const isBurgerMenu = domRef.current?.matches(VISIBLE_CHILD_SEL);
         if (isBurgerMenu) setFinalState({ opened: true });
         window!.scrollTo({top: 0});
@@ -182,6 +186,14 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
       return () => window.removeEventListener("keydown", onKeyDown);
     }
   });
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === ESCAPE_KEY && prevFocusedPath.current) {
+      const doc =  domRef.current?.ownerDocument;
+      const returnFocusTo: HTMLElement | null | undefined = doc?.querySelector(`[data-path='${prevFocusedPath.current}']`);
+      returnFocusTo?.focus();
+    }
+  }
   
   // Handling menu items controls via ArrowLeft / ArrowRight
   const onArrowKey: onArrowKey = useCallback((path, elem, key) => {
@@ -205,7 +217,8 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
                     props={{ 
                       className: clsx('mainMenuBar topRow', !hasOpened && 'hideOnScroll'),
                       style: { top: scrollPos.elementsStyles.get(DATA_PATH) },
-                      'data-path': DATA_PATH
+                      'data-path': DATA_PATH,
+                      //onKeyDown: {handleKeyDown}
                     }}
                     expandTo={[
         <Expander key='left-menu-compressed' area="lt" expandOrder={1} expandTo={leftMenuExpanded}>
