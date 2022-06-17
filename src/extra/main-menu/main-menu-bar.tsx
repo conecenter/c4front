@@ -2,8 +2,11 @@ import React, {createContext, ReactElement, useCallback, useContext, useEffect, 
 import clsx from 'clsx';
 import {Expander, ExpanderArea} from '../../main/expander-area';
 import {useInputSync} from '../exchange/input-sync';
-import {getNextArrayIndex, handleMenuBlur, patchToState, stateToPatch} from './main-menu-utils';
+import {handleArrowUpDown, handleEnter, handleMenuBlur, patchToState, stateToPatch} from './main-menu-utils';
 import {MainMenuClock} from './main-menu-clock';
+import { ScrollInfoContext } from '../scroll-info-context';
+import { PathContext, useFocusControl } from "../focus-control";
+import { ARROW_DOWN_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY, M_KEY } from "../../main/keyboard-keys";
 import {
   MenuCustomItem,
   MenuExecutableItem,
@@ -12,19 +15,17 @@ import {
   MenuPopupElement,
   MenuUserItem
 } from './main-menu-items';
-import { ScrollInfoContext } from '../scroll-info-context';
-import { PathContext, useFocusControl } from "../focus-control";
-import { ARROW_DOWN_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY, KEY_TO_DIRECTION, M_KEY } from "../../main/keyboard-keys";
 
 const DATA_PATH = 'main-menu-bar';
 const KEY_MODIFICATOR = { ArrowLeft: -1, ArrowRight: 1 };
+const VISIBLE_CHILD_SEL = ':not([style*="visibility: hidden"] *)';
 
 type onArrowKey = (path: string, elem: HTMLElement, key: 'ArrowLeft' | 'ArrowRight') => void;
 
 const MenuControlsContext = createContext<onArrowKey | null>(null);
 
 const isMenuFolderType = (item: ReactElement) => item.type === MenuFolderItem || item.type === MenuUserItem;
-
+const isMenuOpenCombo = (e: KeyboardEvent) => (e.ctrlKey || e.altKey) && e.key === M_KEY;
 
 interface BurgerMenu {
   opened: boolean,
@@ -41,40 +42,25 @@ const BurgerMenu = ({opened, domRef, setFinalState, children}: BurgerMenu) => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     switch(e.key) {
       case ENTER_KEY:
-        if (!opened) {
-            setFinalState({ opened: true });
-            e.stopPropagation();
-            const pathToFocus = children && children[0].props.path;
-            setTimeout(() => {
-                if (pathToFocus && domRef.current) {
-                    const itemToFocus: HTMLElement | null = domRef.current.querySelector(`[data-path='${pathToFocus}']`);
-                    itemToFocus?.focus();
-                }
-            });
-        }                
+        if (!opened && domRef.current) {
+          handleEnter(e, domRef.current, setFinalState, children);
+        }
         break;
       case ESCAPE_KEY:
         if (opened) {
-            e.currentTarget.focus();
-            setFinalState({ opened: false });
+          e.currentTarget.focus();
+          setFinalState({ opened: false });
         } 
+        break;
+      case ARROW_RIGHT_KEY:
+        if (opened) e.stopPropagation();
         break;
       case ARROW_DOWN_KEY:
       case ARROW_UP_KEY:
-        if (!opened) break;
-        const focusedIndex = children.findIndex(child => child.props.path === currentPath);
-        if (focusedIndex === -1) break;
-        const nextFocusedIndex = getNextArrayIndex(children.length, focusedIndex, KEY_TO_DIRECTION[e.key]);
-        if (nextFocusedIndex === undefined) break;
-        const pathToFocus = children[nextFocusedIndex].props.path;
-        if (pathToFocus && domRef.current) {
-          const itemToFocus: HTMLElement | null = domRef.current.querySelector(`[data-path='${pathToFocus}']`);
-          itemToFocus && itemToFocus.focus();
-        }
-        e.preventDefault();
-        e.stopPropagation();
+        if (!opened || !domRef.current) break;
+        handleArrowUpDown(e, domRef.current, currentPath, children);
     }
-};
+  };
 
   return (
     <div className={clsx(focusClass, 'menuBurgerBox')} 
@@ -170,25 +156,34 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
     </Expander>
   );
 
+  // Open menu by keyboard combination
   useEffect(() => {
     const doc =  domRef.current?.ownerDocument;
+    const window = doc?.defaultView;
+
     const onKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.altKey) && e.key === M_KEY) {
-        setFinalState({ opened: true });
-        // focus first top-level item
+      if (isMenuOpenCombo(e)) {
+        const isBurgerMenu = domRef.current?.matches(VISIBLE_CHILD_SEL);
+        if (isBurgerMenu) setFinalState({ opened: true });
+        window!.scrollTo({top: 0});
         const firstFocusablePath = leftChildren[0].props.path;
-        const firstFocusableItem: HTMLElement | null = doc!.querySelector(`[data-path='${firstFocusablePath}']:not([style*="visibility: hidden"] *)`);
-        firstFocusableItem?.click();
-        firstFocusableItem?.focus();
+        const pathSelector = `[data-path='${firstFocusablePath}']`;
+        const firstFocusableItem: HTMLElement | null = isBurgerMenu 
+            ? domRef.current!.querySelector(pathSelector)
+            : doc!.querySelector(`${pathSelector}${VISIBLE_CHILD_SEL}`);
+        setTimeout(() => {
+          firstFocusableItem?.focus();
+          if (!isBurgerMenu) firstFocusableItem?.click();
+        }, 10); // timeout until menu bar appears on screen
       }
     }
-    if (doc) {
-      const window = doc.defaultView;
-      window?.addEventListener("keydown", onKeyDown);
-      return () => window?.removeEventListener("keydown", onKeyDown);
+    if (window) {
+      window.addEventListener("keydown", onKeyDown);
+      return () => window.removeEventListener("keydown", onKeyDown);
     }
-  }, []);
+  });
   
+  // Handling menu items controls via ArrowLeft / ArrowRight
   const onArrowKey: onArrowKey = useCallback((path, elem, key) => {
     const menuItems = [...leftChildren, ...(rightChildren || [])];
     const doc =  elem.ownerDocument;
@@ -197,7 +192,7 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
     const nextMenuItemIndex = openedMenuFolderIndex + KEY_MODIFICATOR[key];
     if (nextMenuItemIndex < 0 || nextMenuItemIndex >= menuItems.length) return;
     const nextFocusablePath = menuItems[nextMenuItemIndex].props.path;
-    const selector = `[data-path='${nextFocusablePath}']:not([style*="visibility: hidden"] *)`;
+    const selector = `[data-path='${nextFocusablePath}']${VISIBLE_CHILD_SEL}`;
     const nextFocusableItem: HTMLElement | null = doc.querySelector(selector);
     nextFocusableItem?.focus();
     if (isMenuFolderType(menuItems[nextMenuItemIndex])) nextFocusableItem?.click();
@@ -210,8 +205,7 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
                     props={{ 
                       className: clsx('mainMenuBar topRow', !hasOpened && 'hideOnScroll'),
                       style: { top: scrollPos.elementsStyles.get(DATA_PATH) },
-                      'data-path': DATA_PATH,
-                      //onKeyDown: handleKeyDown
+                      'data-path': DATA_PATH
                     }}
                     expandTo={[
         <Expander key='left-menu-compressed' area="lt" expandOrder={1} expandTo={leftMenuExpanded}>

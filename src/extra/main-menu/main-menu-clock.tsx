@@ -18,7 +18,7 @@ interface MainMenuClock {
   identity: Object,
   serverTime: string,
   timestampFormatId: number,
-  path?: string
+  path: string
 }
 
 const SYNC_INTERVAL = 600000;
@@ -26,7 +26,7 @@ const SYNC_INTERVAL = 600000;
 const calcOffset = (timestamp: number) => timestamp - Date.now();
 const getInitialState = (offset: number) => Math.abs(offset) < 1000 ? (Date.now() + offset) : null;
 
-function MainMenuClock({identity, serverTime, timestampFormatId, path='main-menu-clock'}: MainMenuClock) {
+function MainMenuClock({identity, serverTime, timestampFormatId, path}: MainMenuClock) {
   const localOffsetRef = useRef(calcOffset(Number(serverTime)));
   const [timestamp, setTimestamp] = useState<number | null>(getInitialState(localOffsetRef.current));
   

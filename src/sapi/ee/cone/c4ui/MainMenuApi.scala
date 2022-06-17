@@ -80,7 +80,7 @@ trait MainMenuClock extends MenuItem
     receiver: Receiver[C],
   ): MenuUserItem
 
-  @c4el("MainMenuClock") def mainMenuClock(
+  @c4elPath("MainMenuClock") def mainMenuClock(
     key: String,
     serverTime: String,
     timestampFormatId: Int,

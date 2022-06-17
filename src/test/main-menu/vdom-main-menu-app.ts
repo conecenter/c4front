@@ -324,7 +324,8 @@ function App() {
                 key: 'DateTimeClock',
                 identity: {parent: 'menuCustomItem-1'},
                 serverTime: '1648628097000',
-                timestampFormatId: 1
+                timestampFormatId: 1,
+                path: 'mi-clock'
             }),
             $(MenuFolderItem, {
                 key: 'menuFolderItem-21',

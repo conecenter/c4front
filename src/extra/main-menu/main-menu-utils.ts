@@ -1,5 +1,8 @@
+import { ReactElement } from 'react';
+import { KEY_TO_DIRECTION } from '../../main/keyboard-keys';
 import { Patch, PatchHeaders } from '../exchange/input-sync';
 import { MenuItemState } from './main-menu-bar';
+import { MenuItem } from './main-menu-items';
 
 // Server sync functionality
 
@@ -20,13 +23,48 @@ function handleMenuBlur(e: React.FocusEvent, setFinalState: (s: MenuItemState) =
     setFinalState({ opened: false });
 }
 
+function handleArrowUpDown(
+    event: React.KeyboardEvent, 
+    elem: HTMLElement, 
+    currentPath: string, 
+    children: ReactElement<MenuItem>[]
+) {
+    const focusedIndex = children.findIndex(child => child.props.path === currentPath);
+    const nextFocusedIndex = getNextArrayIndex(children.length, focusedIndex, KEY_TO_DIRECTION[event.key as 'ArrowUp' | 'ArrowDown']);
+    if (nextFocusedIndex === undefined) return;
+    const pathToFocus = children[nextFocusedIndex].props.path;
+    const itemToFocus: HTMLElement | null = elem.querySelector(`[data-path='${pathToFocus}']`);
+    if (itemToFocus) {
+        itemToFocus.focus();
+        event.preventDefault();
+        event.stopPropagation();
+    }
+}
+
+function handleEnter(
+    event: React.KeyboardEvent,
+    elem: HTMLElement,
+    setFinalState: (s: MenuItemState) => void,
+    children: ReactElement<MenuItem>[],
+  ) {
+    event.stopPropagation();
+    setFinalState({ opened: true });
+    const pathToFocus = children && children[0].props.path;
+    if (pathToFocus) {
+        setTimeout(() => {
+            const itemToFocus: HTMLElement | null = elem.querySelector(`[data-path='${pathToFocus}']`);
+            itemToFocus?.focus();
+        });
+    }
+};
+
 const getNextArrayIndex = (arrLength: number, currIndex: number, direction: string = 'up') => {
     switch(direction) {
         case 'up':
-            return currIndex === 0 ? arrLength - 1 : currIndex - 1;                
+            return currIndex <= 0 ? arrLength - 1 : currIndex - 1;                
         case 'down':
             return arrLength <= currIndex + 1 ? 0 : currIndex + 1;
     }
   }
 
-export { patchToState, stateToPatch, handleMenuBlur, getNextArrayIndex };
+export { patchToState, stateToPatch, handleMenuBlur, getNextArrayIndex, handleArrowUpDown, handleEnter };
