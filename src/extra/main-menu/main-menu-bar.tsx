@@ -1,4 +1,4 @@
-import React, {createContext, ReactElement, useCallback, useContext, useEffect, useRef} from "react";
+import React, {createContext, ReactElement, useCallback, useContext, useEffect, useRef, useState} from "react";
 import clsx from 'clsx';
 import {Expander, ExpanderArea} from '../../main/expander-area';
 import {useInputSync} from '../exchange/input-sync';
@@ -16,7 +16,7 @@ import {
   MenuUserItem
 } from './main-menu-items';
 
-const DATA_PATH = 'main-menu-bar';
+const MENU_BAR_PATH = 'main-menu-bar';
 const KEY_MODIFICATOR = { ArrowLeft: -1, ArrowRight: 1 };
 const VISIBLE_CHILD_SEL = ':not([style*="visibility: hidden"] *)';
 
@@ -26,6 +26,7 @@ const MenuControlsContext = createContext<onArrowKey | null>(null);
 
 const isMenuFolderType = (item: ReactElement) => item.type === MenuFolderItem || item.type === MenuUserItem;
 const isMenuOpenCombo = (e: KeyboardEvent) => (e.ctrlKey || e.altKey) && e.key === M_KEY;
+
 
 interface BurgerMenu {
   opened: boolean,
@@ -97,7 +98,6 @@ interface MainMenuBar {
   key: string,
   identity: Object,
   state: MenuItemState,
-  hasOpened?: boolean,
   icon?: string
   leftChildren: ReactElement<MenuItem>[],
   rightChildren?: ReactElement<MenuItem | MainMenuClock>[]
@@ -107,7 +107,7 @@ interface MenuItemState {
   opened: boolean
 }
 
-function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChildren}: MainMenuBar) {
+function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainMenuBar) {
   const {
     currentState: {opened},
     setFinalState
@@ -187,6 +187,8 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
     }
   });
 
+  const [isFocused, setIsFocused] = useState(false);
+
   // Return focus on Esc after menu opening with keyboard combo
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === ESCAPE_KEY && prevFocusedPath.current) {
@@ -199,6 +201,7 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
   function handleMenuBarBlur(e: React.FocusEvent) {
     if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) return;
     prevFocusedPath.current = null;
+    setIsFocused(false);
   }
   
   // Handling menu items controls via ArrowLeft/ArrowRight
@@ -221,10 +224,11 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
       <ExpanderArea key='top-bar' 
                     maxLineCount={1}
                     props={{ 
-                      className: clsx('mainMenuBar topRow', !hasOpened && 'hideOnScroll'),
-                      style: { top: scrollPos.elementsStyles.get(DATA_PATH) },
-                      'data-path': DATA_PATH,
+                      className: clsx('mainMenuBar topRow', !isFocused && 'hideOnScroll'),
+                      style: { top: scrollPos.elementsStyles.get(MENU_BAR_PATH) },
+                      'data-path': MENU_BAR_PATH,
                       onKeyDown: handleKeyDown,
+                      onFocus: () => setIsFocused(true),
                       onBlur: handleMenuBarBlur
                     }}
                     expandTo={[
