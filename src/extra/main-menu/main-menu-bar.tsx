@@ -116,7 +116,7 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
   const domRef = useRef<HTMLDivElement>(null);
 
   const currentPath = useContext(PathContext);
-  const prevFocusedPath = useRef('');
+  const prevFocusedPath = useRef<string | null>(null);
 
   const scrollPos = useContext(ScrollInfoContext);
 
@@ -187,15 +187,21 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
     }
   });
 
+  // Return focus on Esc after menu opening with keyboard combo
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === ESCAPE_KEY && prevFocusedPath.current) {
-      const doc =  domRef.current?.ownerDocument;
-      const returnFocusTo: HTMLElement | null | undefined = doc?.querySelector(`[data-path='${prevFocusedPath.current}']`);
+      const doc =  domRef.current!.ownerDocument;
+      const returnFocusTo: HTMLElement | null = doc.querySelector(`[data-path='${prevFocusedPath.current}']`);
       returnFocusTo?.focus();
     }
   }
+
+  function handleMenuBarBlur(e: React.FocusEvent) {
+    if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) return;
+    prevFocusedPath.current = null;
+  }
   
-  // Handling menu items controls via ArrowLeft / ArrowRight
+  // Handling menu items controls via ArrowLeft/ArrowRight
   const onArrowKey: onArrowKey = useCallback((path, elem, key) => {
     const menuItems = [...leftChildren, ...(rightChildren || [])];
     const doc =  elem.ownerDocument;
@@ -218,7 +224,8 @@ function MainMenuBar({identity, state, hasOpened, icon, leftChildren, rightChild
                       className: clsx('mainMenuBar topRow', !hasOpened && 'hideOnScroll'),
                       style: { top: scrollPos.elementsStyles.get(DATA_PATH) },
                       'data-path': DATA_PATH,
-                      //onKeyDown: {handleKeyDown}
+                      onKeyDown: handleKeyDown,
+                      onBlur: handleMenuBarBlur
                     }}
                     expandTo={[
         <Expander key='left-menu-compressed' area="lt" expandOrder={1} expandTo={leftMenuExpanded}>
