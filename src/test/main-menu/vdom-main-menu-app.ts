@@ -1,9 +1,17 @@
 import ReactDOM from "react-dom";
 import { createElement as $ } from "react";
 import { createSyncProviders } from "../../main/vdom-hooks";
-import { MainMenuBar, MenuFolderItem } from '../../extra/main-menu/main-menu-bar';
-import { MenuExecutableItem, MenuItemsGroup, MenuCustomItem, MenuUserItem } from '../../extra/main-menu/main-menu-items';
-import { MainMenuClock } from '../../extra/main-menu/main-menu-clock';
+import { mainMenuComponents } from '../../extra/main-menu/main-menu-bar';
+
+const { 
+    MainMenuBar,
+    MenuFolderItem, 
+    MenuExecutableItem, 
+    MenuItemsGroup, 
+    MenuCustomItem, 
+    MenuUserItem, 
+    MainMenuClock 
+} = mainMenuComponents;
 
 function App() {
     const child = $(MainMenuBar, {

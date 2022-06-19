@@ -4,17 +4,11 @@ import {Expander, ExpanderArea} from '../../main/expander-area';
 import {useInputSync} from '../exchange/input-sync';
 import {handleArrowUpDown, handleEnter, handleMenuBlur, patchToState, stateToPatch} from './main-menu-utils';
 import {MainMenuClock} from './main-menu-clock';
-import { ScrollInfoContext } from '../scroll-info-context';
-import { PathContext, useFocusControl } from "../focus-control";
-import { ARROW_DOWN_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY, M_KEY } from "../../main/keyboard-keys";
-import {
-  MenuCustomItem,
-  MenuExecutableItem,
-  MenuFolderItem,
-  MenuItem, MenuItemsGroup,
-  MenuPopupElement,
-  MenuUserItem
-} from './main-menu-items';
+import {ScrollInfoContext} from '../scroll-info-context';
+import {PathContext, useFocusControl} from "../focus-control";
+import {ARROW_DOWN_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY, M_KEY} from "../../main/keyboard-keys";
+import {MenuCustomItem, MenuExecutableItem, MenuItemsGroup, MenuPopupElement, MenuUserItem} from './main-menu-items';
+import {MenuFolderItem} from "./menu-folder-item";
 
 const MENU_BAR_PATH = 'main-menu-bar';
 const KEY_MODIFICATOR = { ArrowLeft: -1, ArrowRight: 1 };
@@ -28,72 +22,6 @@ const isMenuFolderType = (item: ReactElement) => item.type === MenuFolderItem ||
 const isMenuOpenCombo = (e: KeyboardEvent) => (e.ctrlKey || e.altKey) && e.key === M_KEY;
 
 
-interface BurgerMenu {
-  opened: boolean,
-  domRef: React.RefObject<HTMLDivElement>,
-  setFinalState: (s: MenuItemState) => void,
-  children: ReactElement<MenuItem>[]
-}
-
-const BurgerMenu = ({opened, domRef, setFinalState, children}: BurgerMenu) => {
-  const { focusClass, focusHtml } = useFocusControl('burgerMenu');
-
-  const currentPath = useContext(PathContext);
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    switch(e.key) {
-      case ENTER_KEY:
-        if (!opened && domRef.current) {
-          handleEnter(e, domRef.current, setFinalState, children);
-        }
-        break;
-      case ESCAPE_KEY:
-        if (opened) {
-          e.currentTarget.focus();
-          setFinalState({ opened: false });
-        } 
-        break;
-      case ARROW_RIGHT_KEY:
-        if (opened) e.stopPropagation();
-        break;
-      case ARROW_DOWN_KEY:
-      case ARROW_UP_KEY:
-        if (!opened || !domRef.current) break;
-        handleArrowUpDown(e, domRef.current, currentPath, children);
-    }
-  };
-
-  return (
-    <div className={clsx(focusClass, 'menuBurgerBox')} 
-         onBlur={(e) => handleMenuBlur(e, setFinalState)}
-         onKeyDown={handleKeyDown}
-         {...focusHtml}
-         ref={domRef} >
-      <button key='left-menu'
-              className='btnBurger'
-              onClick={() => setFinalState({opened: !opened})} >
-        <svg xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" version="1.1"
-             viewBox="0 0 32 32">
-          <line strokeLinecap="round" x1="2" x2="30" strokeWidth="4"
-                y1={opened ? '16' : '9'}
-                y2={opened ? '16' : '9'}
-                style={opened ? {transform: "rotate(-45deg)"} : {}}/>
-          <line strokeLinecap="round" x1="2" y1="17" x2="30" y2="17" strokeWidth="4"
-                style={opened ? {opacity: "0"} : {}}/>
-          <line strokeLinecap="round" x1="2" x2="30" strokeWidth="4"
-                y1={opened ? '16' : '25'}
-                y2={opened ? '16' : '25'}
-                style={opened ? {transform: "rotate(45deg)"} : {}}/>
-        </svg>
-      </button>
-
-      {opened &&
-          <MenuPopupElement popupLrMode={false} children={children}/>}
-    </div>
-  )
-};
-
-
 interface MainMenuBar {
   key: string,
   identity: Object,
@@ -102,6 +30,8 @@ interface MainMenuBar {
   leftChildren: ReactElement<MenuItem>[],
   rightChildren?: ReactElement<MenuItem | MainMenuClock>[]
 }
+
+type MenuItem = MenuFolderItem | MenuExecutableItem | MenuCustomItem | MenuUserItem;
 
 interface MenuItemState {
   opened: boolean
@@ -268,7 +198,81 @@ function getRightMenuCompressed(rightChildren: ReactElement<MenuItem>[]) {
   return React.cloneElement(menuUserItem, {}, menuUserChildren);
 }
 
-export {MainMenuBar, MenuFolderItem, MenuControlsContext};
-export type {MenuItemState};
 
-export const mainMenuComponents = {MainMenuBar, MenuFolderItem, MenuExecutableItem, MenuCustomItem, MenuItemsGroup, MenuUserItem, MainMenuClock}
+interface BurgerMenu {
+  opened: boolean,
+  domRef: React.RefObject<HTMLDivElement>,
+  setFinalState: (s: MenuItemState) => void,
+  children: ReactElement<MenuItem>[]
+}
+
+function BurgerMenu({opened, domRef, setFinalState, children}: BurgerMenu) {
+  const { focusClass, focusHtml } = useFocusControl('burgerMenu');
+
+  const currentPath = useContext(PathContext);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    switch(e.key) {
+      case ENTER_KEY:
+        if (!opened && domRef.current) {
+          handleEnter(e, domRef.current, setFinalState, children);
+        }
+        break;
+      case ESCAPE_KEY:
+        if (opened) {
+          e.currentTarget.focus();
+          setFinalState({ opened: false });
+        } 
+        break;
+      case ARROW_RIGHT_KEY:
+        if (opened) e.stopPropagation();
+        break;
+      case ARROW_DOWN_KEY:
+      case ARROW_UP_KEY:
+        if (!opened || !domRef.current) break;
+        handleArrowUpDown(e, domRef.current, currentPath, children);
+    }
+  };
+
+  return (
+    <div className={clsx(focusClass, 'menuBurgerBox')} 
+         onBlur={(e) => handleMenuBlur(e, setFinalState)}
+         onKeyDown={handleKeyDown}
+         {...focusHtml}
+         ref={domRef} >
+      <button key='left-menu'
+              className='btnBurger'
+              onClick={() => setFinalState({opened: !opened})} >
+        <svg xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" version="1.1"
+             viewBox="0 0 32 32">
+          <line strokeLinecap="round" x1="2" x2="30" strokeWidth="4"
+                y1={opened ? '16' : '9'}
+                y2={opened ? '16' : '9'}
+                style={opened ? {transform: "rotate(-45deg)"} : {}}/>
+          <line strokeLinecap="round" x1="2" y1="17" x2="30" y2="17" strokeWidth="4"
+                style={opened ? {opacity: "0"} : {}}/>
+          <line strokeLinecap="round" x1="2" x2="30" strokeWidth="4"
+                y1={opened ? '16' : '25'}
+                y2={opened ? '16' : '25'}
+                style={opened ? {transform: "rotate(45deg)"} : {}}/>
+        </svg>
+      </button>
+
+      {opened &&
+          <MenuPopupElement popupLrMode={false} children={children}/>}
+    </div>
+  )
+};
+
+export const mainMenuComponents = { 
+  MainMenuBar,
+  MenuFolderItem, 
+  MenuExecutableItem, 
+  MenuCustomItem, 
+  MenuItemsGroup, 
+  MenuUserItem, 
+  MainMenuClock
+};
+
+export { MenuControlsContext };
+export type { MenuItemState, MenuItem };
