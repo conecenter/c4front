@@ -1,21 +1,17 @@
 const CONE_ANGLE = 0.52;  // 0.52rad ~ 30deg
 const DIRECTION_BONUS = 0.25;
 
-function inRange(num: number, range: number[], inclusive = false) {
-    return inclusive 
-        ? num >= range[0] && num <= range[1] 
-        : num > range[0] && num < range[1];
-}
-
 interface LineSegmentCoords {
     y: number,
     x0: number,
     x1: number
 }
 
+type Coord = 'y' | 'x0' | 'x1';
+
 function calcDistance(from: LineSegmentCoords, to: LineSegmentCoords, coneAngle: number) {
     // check if located in the right direction
-    if (+to.y.toFixed(2) < 0) return;
+    if (to.y < 0) return;
 
     // check if on the same level
     const range = [from.x0, from.x1];
@@ -33,6 +29,13 @@ function calcDistance(from: LineSegmentCoords, to: LineSegmentCoords, coneAngle:
          } 
     }
 }
+
+function inRange(num: number, range: number[], inclusive = false) {
+    return inclusive 
+        ? num >= range[0] && num <= range[1] 
+        : num > range[0] && num < range[1];
+}
+
 
 function findClosestNode(baseElement: Element, nodes: Element[], direction: string, coneAngle = CONE_ANGLE) {
     if (!baseElement) return;
@@ -76,13 +79,19 @@ function findClosestNode(baseElement: Element, nodes: Element[], direction: stri
                     x1: curr.bottom - base.top
                 }
         }
-        const distance = to && calcDistance(from, to, coneAngle);
+        const distance = to && calcDistance(from, formatTo3Digits(to), coneAngle);
         if (distance !== undefined) {
             if (!closest || distance < closest.distance) return { node: current, distance };
         }
         return closest;			
     }, null);
     return closestNode?.node;
+}
+
+function formatTo3Digits(obj: LineSegmentCoords) {
+    const coordsArr = Object.keys(obj) as Coord[];
+    coordsArr.forEach(coord => obj[coord] = +obj[coord].toFixed(3));
+    return obj;
 }
 
 export { findClosestNode };
