@@ -167,7 +167,7 @@ function FlexibleCell({key, sizes, grow, className, children}: FlexibleCell) {
     key,
     className: clsx(FLEXIBLE_CELL_CLASSNAME, className),
     style: {
-      flexGrow: grow ? '1' : undefined,
+      flexGrow: grow || sizes?.max ? 1 : undefined,
       ...sizes && {
         flexBasis: `${sizes.min}em`,
         maxWidth: sizes.max ? `${sizes.max}em` : undefined
