@@ -1,18 +1,112 @@
+:root {
+  --color-primaryColor: #4DB6AC;
+  --textColor-primaryColor: #000000;
+  --color-light-primaryColor: #B2DFDB;
+  --textColor-light-primaryColor: #000000;
+  --color-dark-primaryColor: #009688;
+  --textColor-dark-primaryColor: #000000;
+  --color-grayColor: #CFD8DC;
+  --textColor-grayColor: #000000;
+  --color-light-grayColor: #ffffff;
+  --textColor-light-grayColor: #000000;
+  --color-dark-grayColor: #90A4AE;
+  --textColor-dark-grayColor: #000000;
+  --color-secondaryColor: #FFD54F;
+  --textColor-secondaryColor: #000000;
+  --color-light-secondaryColor: #FFECB3;
+  --textColor-light-secondaryColor: #000000;
+  --color-dark-secondaryColor: #FFC107;
+  --textColor-dark-secondaryColor: #000000;
+  --color-redColor: #EF5350;
+  --textColor-redColor: #000000;
+  --color-light-redColor: #EF9A9A;
+  --textColor-light-redColor: #000000;
+  --color-dark-redColor: #E53935;
+  --textColor-dark-redColor: #000000;
+  --color-yellowColor: #FFEB3B;
+  --textColor-yellowColor: #000000;
+  --color-light-yellowColor: #FFF176;
+  --textColor-light-yellowColor: #000000;
+  --color-dark-yellowColor: #FBC02D;
+  --textColor-dark-yellowColor: #000000;
+  --color-greenColor: #43A047;
+  --textColor-greenColor: #000000;
+  --color-light-greenColor: #A5D6A7;
+  --textColor-light-greenColor: #000000;
+  --color-dark-greenColor: #2E7D32;
+  --textColor-dark-greenColor: #ffffff;
+  --color-headerColor: #CFD8DC;
+  --textColor-headerColor: #000000;
+  --color-light-headerColor: #ECEFF1;
+  --textColor-light-headerColor: #000000;
+  --color-dark-headerColor: #B0BEC5;
+  --textColor-dark-headerColor: #000000;
+  --color-body: #ffffff;
+  --textColor-body: #000000;
+  --color-light-body: #ffffff;
+  --textColor-light-body: #000000;
+  --color-dark-body: #ffffff;
+  --textColor-dark-body: #000000;
+  --color-focusOutlineColor: #D32F2F;
+  --textColor-focusOutlineColor: #ffffff;
+  --color-light-focusOutlineColor: #F44336;
+  --textColor-light-focusOutlineColor: #000000;
+  --color-dark-focusOutlineColor: #B71C1C;
+  --textColor-dark-focusOutlineColor: #ffffff;
+}
+
+button {
+  min-height: 1.6em;
+  min-width: 1.6em;
+  color: var(--textColor-body);
+  background-color: transparent;
+  cursor: pointer;
+  margin: 0.2em;
+  border: medium none;
+  font-size: 1em;
+  font-family: inherit;
+  line-height: 1;
+  align-self: center;
+  padding: 0 0.2em;
+  white-space: nowrap;
+  > .text{
+      padding: 0 1em;
+  }
+  > svg, img {
+      + .text {
+          vertical-align: text-top;
+      }
+  }
+  outline: currentcolor none medium;
+  outline-offset: -0.1em
+}
+
 html, body {
   margin: 0;
   height: 100%;
-  background-color: #2b2b2b;
+  // background-color: #2b2b2b;
 }
 
-.pivotSettingPart {
-  border-color: gray;
+.groupBox {
+  flex-grow: 1;
+  border-color: var(--color-dark-headerColor);
   border-style: dashed;
   margin: 0.4em;
+  position: relative;
+  display: flex;
+  flex-flow: column;
+}
+
+/************** Pivot Settings **************/
+.pivotSettingPart {
+  @extend .groupBox;
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;
   flex-direction: row;
   min-height: 2em;
+  border-width: 1px;
+  padding: 0.5em 0.5em 1em;
 }
 
 .pivotSettings {
@@ -20,16 +114,16 @@ html, body {
   gap: 0px 0px;
   grid-auto-flow: row;
   grid-template-areas:
-    "pivotFields pivotFilters pivotFilters pivotFilters"
-    "pivotFields pivotBreaks pivotBreaks pivotBreaks"
-    "pivotFields . pivotColumns pivotColumns"
-    "pivotFields pivotRows pivotData pivotCells"
-    "pivotFields pivotRows pivotData pivotCells";
+  "pivotFields pivotFilters pivotFilters pivotFilters"
+  "pivotFields pivotBreaks pivotBreaks pivotBreaks"
+  "pivotFields . pivotColumns pivotColumns"
+  "pivotFields pivotRows pivotData pivotCells"
+  "pivotFields pivotRows pivotData pivotCells";
 }
 
 .pivotFields {
   @extend .pivotSettingPart;
-  flex-direction: column;
+  // flex-direction: column;
   grid-area: pivotFields;
 }
 
@@ -63,28 +157,24 @@ html, body {
   grid-area: pivotCells;
 }
 
-.pivotButton {
-  min-height: 1.6em;
-  min-width: 1.6em;
-  color: black;
-  background-color: #6464e5;
-  cursor: pointer;
-  margin: 0.2em;
-  border: medium none;
-  font-size: 1em;
-  font-family: inherit;
-  line-height: 1;
-  align-self: center;
-  padding: 0 0.2em;
-  white-space: nowrap;
-  outline: currentcolor none medium;
-  outline-offset: -0.1em;
+.pivotCanDrop{
+  background-color: var(--color-light-greenColor);
 }
 
-.pivotSelectedElement {
-  background-color: #ffc800;
+.pivotCanDelete{
+  background-color: var(--color-light-redColor);
 }
 
 .pivotDraggedElement {
-  opacity: 0.5;
+  opacity: 0.25;
+}
+
+.pivotSelectedElement {
+  background-color: var(--color-yellowColor) !important;
+  color: var(--textColor-yellowColor) !important;
+}
+
+.pivotButton {
+  background-color: var(--color-primaryColor);
+  color: var(--textColor-primaryColor);
 }
