@@ -1,11 +1,12 @@
 import {cloneElement, createElement as $, useCallback, useEffect, useMemo, useState} from "react"
+import clsx from 'clsx'
 
 import {findFirstParent, identityAt, never, sortedWith} from "./vdom-util.js"
 import {NoCaptionContext, useEventListener, useSync} from "./vdom-hooks.js"
 import {useWidth,useMergeRef} from "./sizes.js"
 import {useGridDrag} from "./grid-drag.js"
-import {getPath, useFocusControl} from "../extra/focus-control.ts"
-import clsx from 'clsx'
+import {useFocusControl} from "../extra/focus-control.ts"
+import {BindGroupElement} from "../extra/binds/binds-elements"
 
 const dragRowIdOf = identityAt('dragRow')
 const dragColIdOf = identityAt('dragCol')
@@ -105,7 +106,6 @@ export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, expand
     const style = { ...props.style, gridRow, gridColumn }
     const expanderProps = expanding==="expander" ? { 'data-expander': expander || 'passive' } : {}
     const argClassNamesStr = argClassNames ? argClassNames.join(" ") : ""
-//    const path = getPath(identity);
     const { focusClass, focusHtml } = useFocusControl(path);
     const className = clsx(argClassNamesStr, !noDefCellClass && GRID_CLASS_NAMES.CELL, focusClass);
     // const className = noDefCellClass ? argClassNamesStr : `${argClassNamesStr} ${GRID_CLASS_NAMES.CELL}`
@@ -239,7 +239,9 @@ export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey 
     const style = { display: "grid", gridTemplateRows, gridTemplateColumns }
     const res = $("div", { onMouseDown, onClick: clickAction, style, className: "grid", "data-grid-key": gridKey, "header-row-keys": headerRowKeys, ref }, dragBGEl, ...allChildren)
     const dragCSSEl = $("style",{dangerouslySetInnerHTML: { __html: dragCSSContent}})
-    return $(NoCaptionContext.Provider,{value:true},dragCSSEl,res)
+    return $(NoCaptionContext.Provider,{value:true},[
+        $(BindGroupElement,{groupId:'grid-list-bind'},dragCSSEl,res)
+    ])
 }
 
 const getAllChildren = ({children,rows,cols,hasHiddenCols,hideElementsForHiddenCols,dragRowKey}) => {
