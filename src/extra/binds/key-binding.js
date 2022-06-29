@@ -95,31 +95,18 @@ const KeyBindingsManager = ({ links, children, bindSrcId, escapeBindSrcId, noTou
   const updateActiveGroup = (newGroup) => {
     if (isBindMode && activeBindGroup != newGroup) {
       // console.log("accepted change to :" + newGroup + ", prev was: " + activeBindGroup)
-      setActiveBindGroup(prev => {
-        calculateUpdate(prev, newGroup)
-        return newGroup
-      })
-    } else {
-      // console.log("denide change to: " + newGroup)
+      setActiveBindGroup(prev => calculateUpdate(prev, newGroup))
     }
   }
 
   const addGroup = (group) => {
-    // if (isBindMode) {
-
-    setAvailableGroups(prev => {
-      const newAvailable = (!prev.includes(group)) ? [...prev, group] : prev
-      return newAvailable
-    })
-
+    setAvailableGroups(prev => !prev.includes(group) ? [...prev, group] : prev)
     if (activeBindGroup === "" && group !== "menubar") updateActiveGroup(group)
-
   }
   const removeGroup = (group) => {
     if (isBindMode) {
       // console.log("remove group: " + group)
-      setAvailableGroups(prev => prev.filter(el => el != group)
-      )
+      setAvailableGroups(prev => prev.filter(el => el != group))
     }
   }
 
@@ -190,7 +177,7 @@ const KeyBindingsManager = ({ links, children, bindSrcId, escapeBindSrcId, noTou
         )(element)
         if (parentGroupElement != null) {
           const parentGroupId = parentGroupElement.getAttribute("groupId")
-          //console.log("onChangeAction on: " + eventName + ", switch to: " + parentGroupId + ", activeGroup was: " + activeGroup)
+          // console.log("onChangeAction on: " + eventName + ", switch to: " + parentGroupId + ", activeGroup was: " + activeGroup)
           updateActiveGroup(parentGroupId)
           if (eventName == "focus") event.stopPropagation()
         }

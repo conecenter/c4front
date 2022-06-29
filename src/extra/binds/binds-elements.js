@@ -1,8 +1,90 @@
-import { createElement as $, useContext, useState, useEffect } from 'react'
+import React, { createElement as $, useContext, useState, useEffect } from 'react'
+import clsx from 'clsx'
+
 import { useBinds, BindKeyData, useProvideBinds, OnPageBindProvider, OnPageBindContext } from './key-binding'
 import { KeyBinder } from './key-binder'
 import { firstChild } from './binds-utils'
-import clsx from 'clsx'
+import { VISIBLE_CHILD_SEL } from '../main-menu/main-menu-bar'
+
+/*
+const initialButtonState = { mouseOver: false, touchStart: false }
+const buttonReducer = (state, action) => {
+	switch (action.type) {
+		case 'mouseOver':
+			return { ...state, mouseOver: action.value }
+		case 'touchStart':
+			return { ...state, touchStart: action.value }
+		default:
+			return state
+	}
+}
+const BindingButton = (props) => {
+	const [state, dispatch] = React.useReducer(buttonReducer, initialButtonState)
+	const elem = React.useRef(null)
+	const changing = !!props.value
+	const disabled = changing ? true : null
+	const hasOverStyle = props.className && props.className.split(" ").some(cs => cs.includes("-over"))
+	const hasActionStyle = props.onClick || props.onChange ? {} : {cursor: "initial"}
+	const style = {
+		...hasActionStyle,
+		...(state.mouseOver && !hasOverStyle ? { opacity: "0.8" } : null),
+		...(disabled ? { opacity: "0.4" } : null)
+	}
+	const { focusClass, focusHtml } = useFocusControl(props.path)
+	const className = clsx(props.className, focusClass)
+	React.useEffect(() => {
+		if (props.forwardRef) props.forwardRef.current = elem.current
+		elem.current.changing = changing
+	}, [changing])
+	React.useEffect(() => {
+		const onEnter = e => {
+			//log(`Enter ;`)
+			if (typeof e.stopPropagation === "function") { e.stopPropagation() }
+			elem.current.click()
+		}
+		const onClick = e => {
+			if (!changing && (props.onClick || props.onChange)) {
+				const w = e.target.ownerDocument.defaultView
+				w.setTimeout(() => {
+					if (props.onClick) { props.onClick(e) }
+					else if (props.onChange) { props.onChange({ target: { headers: { "x-r-action": "change" }, value: "1" } }) }
+				})
+			}
+            if(props.url) {
+                e.stopPropagation()
+                e.preventDefault()
+                window.open(props.url)
+            }
+			if (props.local && typeof e.stopPropagation === "function") {
+				e.stopPropagation()
+			}
+			const focEl = findFirstParent(el => el.classList.contains("activeFocusWrapper") && el)(elem.current)
+			if (focEl) focEl.focus()
+			// problem was dropdown in popup: button-option disappear after click, and focus goes to nowhere, and popup closes
+		}
+		elem.current.addEventListener("enter", onEnter)
+		elem.current.addEventListener("click", onClick)
+		return () => {
+			elem.current.removeEventListener("enter", onEnter)
+			elem.current.removeEventListener("click", onClick)
+		}
+	}, [props.onClick, props.onChange, changing])
+	const onMouseOver = (value) => () => {
+		if (value) props.onMouseOver && props.onMouseOver()
+		else props.onMouseOut && props.onMouseOut()
+		dispatch({ type: 'mouseOver', value })
+	}
+	const onTouchStart = (value) => () => dispatch({ type: 'touchStart', value })
+	const noAction = !(props.onClick || props.onChange) ? {noop: 1} : {}
+	return $("button", {
+		...noAction,
+		title: props.hint, className, key: "btn", 
+		style, ref: elem, ...focusHtml,
+		onMouseOver: onMouseOver(true), onMouseOut: onMouseOver(false),
+		onTouchStart: onTouchStart(true), onTouchEnd: onTouchStart(false)
+	}, props.children)
+}
+*/
 
 const log = e => {
 	if (e && e.ownerDocument && e.ownerDocument.defaultView)
@@ -12,13 +94,11 @@ const log = e => {
 		return () => { }
 }
 
-const GenLabel = (label) => {
-	return $("div", { key: "label", className: "bindLabelCssClass" }, [label])
-}
+const GenLabel = label =>  $("span", { className: "bindLabelCssClass" }, label)
 
 const GetButtonCaption = (keyData, buttonCaption) => {
 	const getLabel = (label) => { return [GenLabel(label), buttonCaption] }
-	const buttonKeyLabel = (keyData != null && keyData.label != null && keyData.label != "") ? getLabel(keyData.label) : buttonCaption;
+	const buttonKeyLabel = (keyData != null && keyData.label != null && keyData.label != "") ? getLabel(keyData.label) : [buttonCaption];
 	return buttonKeyLabel;
 }
 
@@ -31,8 +111,8 @@ const NVL = (data, def) => {
 }
 
 const BindingElement = (props) => {
-	const { children, buttonCaption, bindSrcId, onChange, prioritized, elemType } = props
-	const actionElemType = elemType || 'button'
+	const { children, buttonCaption, bindSrcId, onChange, onClick, prioritized, elemType } = props
+	// const actionElemType = elemType || 'button'
 	const [isValid, setIsValid] = useState(false)
 	const groupContext = useContext(OnPageBindContext)
 	const [elem, setElem] = useState(null)
@@ -41,8 +121,7 @@ const BindingElement = (props) => {
 	const [keyCode, setKeyCode] = useState(null)
 
 	// const [parentGroup, setParentGroup] = useState(null)
-
-	const [checkedChildren, setCheckedChildren] = useState([])
+	// const [checkedChildren, setCheckedChildren] = useState([])
 
 	useEffect(() => {
 		setIsValid(keyCode !== null && (keyCode.startsWith("F") || keyCode === "Enter" || keyCode === "Esc" || groupContext))
@@ -72,7 +151,6 @@ const BindingElement = (props) => {
 	}, [elem]) */
 
 	useEffect(() => {
-		const elCheck = elem !== null
 		// if (keyCode == "F1") console.log("set F1, elCheck=" + elCheck + ", isValid=" + isValid + " prioritized=" + prioritized)
 		if (elem !== null && isValid) KeyBinder.bind(elem, keyCode, callBack, prioritized)
 		//console.log("groupContext for " + bindSrcId + " is: " + groupContext + ", isValid: " + isValid)
@@ -83,14 +161,7 @@ const BindingElement = (props) => {
 		}
 	}, [elem, keyCode, callBack, isValid]) //groupContext, bindSrcId,
 
-
-	function generateBtnLabel() {
-		return isValid ? GetButtonCaption(keyData, buttonCaption) : buttonCaption;
-	}
-
-	const buttonText = (isValid) ? [$("span", { className: "text" }, [generateBtnLabel()])] : [buttonCaption]
-
-	// const updatedPropsClassName = (typeof props.className === "undefined") ? { className: "shortButton" } : { className: props.className + " shortButton" }
+	const buttonText = isValid ? GetButtonCaption(keyData, buttonCaption) : [buttonCaption]
 
 	// const customOnClick = (normalOnClick) => {
 	// 	return (event) => {
@@ -98,32 +169,26 @@ const BindingElement = (props) => {
 	// 		if (event.stopPropagation) event.stopPropagation()
 	// 	}
 	// }
-
 	// const updateOnClick = (typeof props.onClick === "undefined") ? { onClick: customOnClick() } : { onClick: customOnClick(props.onClick) }
-
-	// const updatedProps = { ...props, ...updatedPropsClassName }// , ...updateOnClick
-
+	/*
 	useEffect(() => {
 		setCheckedChildren(NVL(children, []))
 	}, [children])
-
+	*/
+	const checkedChildren = NVL(children, [])
 	const drawNormal = !isValid && checkedChildren === []
-	// const bindElement = drawNormal ? $(actionElemType, { ...props }, [buttonText, ...checkedChildren]) : $(actionElemType, { ...updatedProps }, [buttonText, ...checkedChildren])
-	// const btnPtops = drawNormal ? props : updatedProps
 	const className = clsx(props.className, !drawNormal && 'shortButton')
 	// const isEmptyButton = !buttonText.every((e) => e == "") && actionElemType === ButtonElement
 	// const spanElem = isEmptyButton ? null : $("span", { ref: setElem }, [$(actionElemType, { ...btnPtops }, [...buttonText, ...checkedChildren])])
-	return $("span", { ref: setElem }, [$(actionElemType, { className }, [...buttonText, ...checkedChildren])])
+	return $('button', { ref: setElem, className, onClick: onClick || onChange }, [...buttonText, ...checkedChildren])
 }
-
 
 const BindGroupElement = (props) => {
 	const { children, bindSrcId, groupId, additionChange, forceAtStart, showBtn, additionChangeOnClose, onFocusChange } = props
 	const { provideBinds, updateBindProvider } = useProvideBinds(groupId)
 
-	const contextValues = useBinds()
 	const { activeBindGroup, updateActiveGroup, addGroup, removeGroup, escapeBindSrcId, haveBackOption,
-		goBackInHistory, isBindMode } = contextValues
+		goBackInHistory, isBindMode } = useBinds()
 
 	const [drawBindBtn, setDrawBindBtn] = useState(null)
 	const [drawEscBtn, setDrawEscBtn] = useState(null)
@@ -136,8 +201,6 @@ const BindGroupElement = (props) => {
 		updateBindProvider()
 		//	if (additionChange) additionChange(event)
 	}
-
-	// const label = (keyData !== null) ? GenLabel(keyData.label) : null;
 
 	const onFocusChangeFn = (groupId, eventName) => {
 		return (event) => {
@@ -164,14 +227,13 @@ const BindGroupElement = (props) => {
 
 	const checkForFocus = (gId) => {
 		if (elem !== null) {
-
 			const active = firstChild(elem,
-				el => el.classList && el.classList.contains("activeFocusWrapper"),
+				el => el.classList && el.classList.contains("activeFocusWrapper") && el.matches(VISIBLE_CHILD_SEL),
 				el => el.classList && el.classList.contains("activeFocusWrapper"),
 				true)
 
 			const el = firstChild(elem,
-				el => el.classList && el.classList.contains("focusWrapper"),
+				el => el.classList && el.classList.contains("focusWrapper") && el.matches(VISIBLE_CHILD_SEL),
 				el => el.classList && el.classList.contains("withBindProvider"),
 				true)
 
@@ -181,7 +243,7 @@ const BindGroupElement = (props) => {
 				true)
 
 			if (active) {
-				//console.log("have already active inside: " + gId)
+				// console.log("have already active inside: " + gId)
 			} else if (el) {
 				// console.log("found focusWrapper in: " + gId)
 				// console.log(el)
@@ -203,7 +265,8 @@ const BindGroupElement = (props) => {
 				const newValue = groupId === activeBindGroup
 				if (prev && !newValue && additionChangeOnClose) additionChangeOnClose()
 				if (!prev && newValue) {
-					setTimeout(() => { checkForFocus(groupId) }, 200)
+					checkForFocus(groupId)
+					// setTimeout(() => { checkForFocus(groupId) }, 200)
 					if (additionChange) additionChange()
 				}
 				return newValue
@@ -211,38 +274,34 @@ const BindGroupElement = (props) => {
 		}
 	}, [groupId, activeBindGroup, elem])
 
-	useEffect(() => {
-		setDrawBindBtn(typeof showBtn !== "undefined" && showBtn)
-	}, [showBtn])
+	// useEffect(() => {
+	// 	setDrawBindBtn(typeof showBtn !== "undefined" && showBtn)
+	// }, [showBtn])
 
 	useEffect(() => {
-		if (drawBindBtn != null) {
-			const newVal = drawBindBtn && activeBindGroup === groupId && haveBackOption(groupId)
+		if (showBtn) {
+			const newVal = activeBindGroup === groupId && haveBackOption(groupId)
 			// console.log("drawEscBtn for group: " + groupId + " is :" + newVal + ", activeBindGroup: " + activeBindGroup + ", haveBackOption: " + haveBackOption(groupId))
 			setDrawEscBtn(newVal)
 		}
-	}, [drawBindBtn, activeBindGroup, haveBackOption, groupId])
+	}, [showBtn, activeBindGroup, haveBackOption, groupId])
 
 	useEffect(() => {
-		if (drawBindBtn != null && !drawBindBtn) addGroup(groupId)
+		if (!showBtn) addGroup(groupId)
 		return () => removeGroup(groupId)
-	}, [drawBindBtn])
+	}, [showBtn])
 
 	useEffect(() => {
-		if (activeBindGroup == "" && typeof forceAtStart !== "undefined" && forceAtStart) {
-			updateBindProvider()
-		}
+		if (activeBindGroup == "" && forceAtStart) updateBindProvider()
 	}, [activeBindGroup])
 
-	const isDrawEscBtn = drawEscBtn != null && drawEscBtn
-	const btn = (drawBindBtn != null && drawBindBtn && !isDrawEscBtn) ? [$(BindingElement, { ...btnProps }, [])] : []
-	const escBtn = isDrawEscBtn ? [$(BindingElement, { ...escBtnProps }, [])] : []
+	const btn = (showBtn && !drawEscBtn) ? [$(BindingElement, { ...btnProps }, [])] : []
+	const escBtn = drawEscBtn ? [$(BindingElement, { ...escBtnProps }, [])] : []
 
 	const focusGroupElement = [$("div", { ref: setElem, className: groupId + " withBindProvider", groupId: groupId }, children)]
 
 	const withProvider = () => {
-		return $("div", { key: "withBindProvider", style: { display: "inherit", alignItems: "center" } },
-			[
+		return $(React.Fragment, null, [
 				...btn,
 				...escBtn,
 				OnPageBindProvider({
