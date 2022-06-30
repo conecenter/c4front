@@ -1,7 +1,7 @@
 import React, { createElement as $, useContext, useState, useEffect } from 'react'
 import clsx from 'clsx'
 
-import { useBinds, BindKeyData, useProvideBinds, OnPageBindProvider, OnPageBindContext } from './key-binding'
+import { useBinds, BindKeyData, useProvideBinds, OnPageBindContext } from './key-binding'
 import { KeyBinder } from './key-binder'
 import { firstChild } from './binds-utils'
 import { VISIBLE_CHILD_SEL } from '../main-menu/main-menu-bar'
@@ -184,13 +184,15 @@ const BindingElement = (props) => {
 }
 
 const BindGroupElement = (props) => {
-	const { children, bindSrcId, groupId, additionChange, forceAtStart, showBtn, additionChangeOnClose, onFocusChange } = props
-	const { provideBinds, updateBindProvider } = useProvideBinds(groupId)
-
+	const { bindSrcId, groupId, showBtn, forceAtStart, additionChange, additionChangeOnClose, children } = props
 	const { activeBindGroup, updateActiveGroup, addGroup, removeGroup, escapeBindSrcId, haveBackOption,
 		goBackInHistory, isBindMode } = useBinds()
 
-	const [drawBindBtn, setDrawBindBtn] = useState(null)
+	if (!isBindMode) return children
+
+	const { provideBinds, updateBindProvider } = useProvideBinds(groupId)
+
+	// const [drawBindBtn, setDrawBindBtn] = useState(null)
 	const [drawEscBtn, setDrawEscBtn] = useState(null)
 
 	const [onFocusGroup, setOnFocusGroup] = useState(false)
@@ -209,13 +211,11 @@ const BindGroupElement = (props) => {
 		}
 	}
 
-	const getBtnProps = (bSrcId, action) => {
-		return {
-			bindSrcId: bSrcId,
-			onChange: action,
-			children: ""
-		}
-	}
+	const getBtnProps = (bSrcId, action) => ({
+		bindSrcId: bSrcId,
+		onChange: action,
+		children: ""
+	})
 
 	const onChangeBack = (event) => {
 		goBackInHistory(event)
@@ -228,7 +228,7 @@ const BindGroupElement = (props) => {
 	const checkForFocus = (gId) => {
 		if (elem !== null) {
 			const active = firstChild(elem,
-				el => el.classList && el.classList.contains("activeFocusWrapper") && el.matches(VISIBLE_CHILD_SEL),
+				el => el.classList && el.classList.contains("activeFocusWrapper"),
 				el => el.classList && el.classList.contains("activeFocusWrapper"),
 				true)
 
@@ -298,19 +298,13 @@ const BindGroupElement = (props) => {
 	const btn = (showBtn && !drawEscBtn) ? [$(BindingElement, { ...btnProps }, [])] : []
 	const escBtn = drawEscBtn ? [$(BindingElement, { ...escBtnProps }, [])] : []
 
-	const focusGroupElement = [$("div", { ref: setElem, className: groupId + " withBindProvider", groupId: groupId }, children)]
+	// const focusGroupElement = [$("div", { ref: setElem, className: groupId + " withBindProvider", groupId: groupId }, children)]
 
-	const withProvider = () => {
-		return $(React.Fragment, null, [
-				...btn,
-				...escBtn,
-				OnPageBindProvider({
-					childs: focusGroupElement,
-					provideBinds
-				})
-			])
-	}
-	return isBindMode ? withProvider() : children
+	return $('div', {ref: setElem, className: groupId + " withBindProvider", groupId: groupId, style: { display: "inherit", alignItems: "center" }}, [
+		...btn,
+		...escBtn,
+		$(OnPageBindContext.Provider, {value: provideBinds}, children)
+	])
 }
 
 export { BindingElement, BindGroupElement }

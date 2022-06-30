@@ -31,11 +31,6 @@ const useProvideBinds = (groupId) => {
 
 const OnPageBindContext = React.createContext(false)
 
-const OnPageBindProvider = (props) => {
-  const { childs, provideBinds } = props
-  return $(OnPageBindContext.Provider, { value: provideBinds }, [...childs])
-}
-
 const calculateNewHistoryArray = (prevs, group) => {
   const filtered = prevs.filter(p => p != group)
   const newArr = [group, ...filtered]
@@ -226,4 +221,4 @@ const BindKeyData = (keyMappingMap, bindSrcId) => {
   }
 }
 
-export { KeyBindingsManager, useBinds, BindKeyData, OnPageBindContext, useProvideBinds, OnPageBindProvider }
+export { KeyBindingsManager, useBinds, BindKeyData, OnPageBindContext, useProvideBinds }

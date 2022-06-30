@@ -13,6 +13,8 @@ import {
     ENTER_KEY, 
     ESCAPE_KEY
 } from '../../main/keyboard-keys';
+import { BindGroupElement } from '../binds/binds-elements';
+import { useBinds } from '../binds/key-binding';
 
 const ARROW_DOWN_URL = '/mod/main/ee/cone/core/ui/c4view/arrow-down.svg';
 
@@ -82,6 +84,16 @@ function MenuFolderItem({identity, name, shortName, current, state, icon, path, 
                 handleArrowUpDown(e, menuFolder, currentPath, flatChildren);
         }
     };
+    
+    /* or use additionChange from binds logic?
+    const { activeBindGroup } = useBinds();
+    useEffect(() => {
+        const isActiveGroup = activeBindGroup === 'folder-mi-wht-management';
+        if (isActiveGroup && !opened) {
+            setFinalState({ opened: true });
+        } else if (!isActiveGroup && opened) setFinalState({ opened: false });
+    }, [activeBindGroup])
+    */
 
     return (
         <div
@@ -92,17 +104,19 @@ function MenuFolderItem({identity, name, shortName, current, state, icon, path, 
             onClick={() => setFinalState({ opened: !opened })}
             onKeyDown={handleKeyDown} >
 
-            {icon && <img src={icon} className='rowIconSize' />}
-            <span className={clsx(shortName && 'longName')}>{name}</span>
-            {shortName &&
-                <span className='shortName'>{shortName}</span>}
-            <img
-                src={ARROW_DOWN_URL}
-                className='menuFolderIcon'
-                alt='arrow-down-icon' />
-
-            {opened &&
-                <MenuPopupElement popupLrMode={popupLrMode}>{children}</MenuPopupElement>}
+            <BindGroupElement bindSrcId='row-0-button-srcId' groupId='folder-mi-wht-management' showBtn={true}>
+                {icon && <img src={icon} className='rowIconSize' />}
+                <span className={clsx(shortName && 'longName')}>{name}</span>
+                {shortName &&
+                    <span className='shortName'>{shortName}</span>}
+                <img
+                    src={ARROW_DOWN_URL}
+                    className='menuFolderIcon'
+                    alt='arrow-down-icon' />
+        
+                {opened &&
+                    <MenuPopupElement popupLrMode={popupLrMode}>{children}</MenuPopupElement>}
+            </BindGroupElement>
         </div>
     );
 }
