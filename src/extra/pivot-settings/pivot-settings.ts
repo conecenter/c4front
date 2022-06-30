@@ -67,6 +67,7 @@ function PivotSettingsInner(props: PivotSettingsProps) {
         el(PivotSettingsPart, {
             key: "filterFields",
             className: "pivotFilters",
+            label: "Filters",
             state,
             dropAction,
             clickAction,
@@ -75,6 +76,7 @@ function PivotSettingsInner(props: PivotSettingsProps) {
         el(PivotSettingsPart, {
             key: "breakFields",
             className: "pivotBreaks",
+            label: "Breaks",
             state,
             dropAction,
             clickAction,
@@ -83,6 +85,7 @@ function PivotSettingsInner(props: PivotSettingsProps) {
         el(PivotSettingsPart, {
             key: "rowFields",
             className: "pivotColumns",
+            label: "Columns",
             state,
             dropAction,
             clickAction,
@@ -91,6 +94,7 @@ function PivotSettingsInner(props: PivotSettingsProps) {
         el(PivotSettingsPart, {
             key: "colFields",
             className: "pivotRows",
+            label: "Rows",
             state,
             dropAction,
             clickAction,
@@ -99,6 +103,7 @@ function PivotSettingsInner(props: PivotSettingsProps) {
         el(PivotSettingsPart, {
             key: "dataFields",
             className: "pivotData",
+            label: "Data",
             state,
             dropAction,
             clickAction,
@@ -107,6 +112,7 @@ function PivotSettingsInner(props: PivotSettingsProps) {
         el(PivotSettingsPart, {
             key: "cellFields",
             className: "pivotCells",
+            label: "Cell",
             state,
             dropAction,
             clickAction,
@@ -118,12 +124,13 @@ function PivotSettingsInner(props: PivotSettingsProps) {
 interface PivotSettingsPartProps {
     className: string
     state: PivotSettingsState
+    label: string
     dropAction: PivotDropAction
     clickAction: PivotClickAction
     accepts: string
 }
 
-function PivotSettingsPart({className, state, dropAction,clickAction, accepts}: PivotSettingsPartProps) {
+function PivotSettingsPart({className, state, label, dropAction, clickAction, accepts}: PivotSettingsPartProps) {
     const [{canDrop}, drop] = useDrop(() => ({
         accept: [ItemTypes.FIELD, accepts],
         drop: (item: PivotDragItem, monitor) => {
@@ -139,6 +146,7 @@ function PivotSettingsPart({className, state, dropAction,clickAction, accepts}: 
             ref: drop,
             className: `${className} ${canDropClass}`,
         },
+        el('span', null, label),
         state[className].map((value) => el(PivotField, {
             key: value.id,
             type: accepts,

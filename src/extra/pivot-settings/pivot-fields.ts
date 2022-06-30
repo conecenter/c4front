@@ -25,6 +25,7 @@ export function PivotFields({fields, dropAction}: PivotFieldsProps) {
     ref: drop,
     className: `${PartNames.FIELDS} ${canDeleteClass}`
   },
+    el('span', null, 'Fields'),
     fields.map((value) => el(PivotField, {key: value.id,type: ItemTypes.FIELD, origin: PartNames.FIELDS, field: value, dropAction}))
     )
 }
