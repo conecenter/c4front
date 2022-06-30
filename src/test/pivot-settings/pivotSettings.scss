@@ -182,6 +182,11 @@ html, body {
   color: var(--textColor-yellowColor) !important;
 }
 
+.pivotInvalidElement:not(.pivotFields *) {
+  background-color: var(--color-redColor);
+  color: var(--textColor-redColor);
+}
+
 .pivotButton {
   background-color: var(--color-primaryColor);
   color: var(--textColor-primaryColor);

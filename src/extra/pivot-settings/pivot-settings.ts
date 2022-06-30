@@ -12,12 +12,14 @@ import {ItemTypes} from "./pivot-const";
 import {HTML5Backend} from "react-dnd-html5-backend";
 import {XYCoord} from "react-dnd/lib";
 import {usePatchSync} from "../exchange/patch-sync";
+import clsx from "clsx";
 
 
 export interface PivotField {
     id: string,
     name: string,
-    selected: boolean
+    selected: boolean,
+    invalid?: boolean
 }
 
 export interface PivotSettingsState {
@@ -182,14 +184,18 @@ export function PivotField({origin, type, field, dropAction, clickAction}: Pivot
             }),
         })
     )
-    const draggedElementClass = isDragging ? "pivotDraggedElement" : ""
-    const selectedElementClass = field.selected ? "pivotSelectedElement" : ""
+    const className = clsx(
+        'pivotButton', 
+        isDragging && "pivotDraggedElement", 
+        field.selected && "pivotSelectedElement",
+        field.invalid && "pivotInvalidElement"
+    )
     const onClick = clickAction ? () => clickAction(origin, field.id) : undefined
     return el("button", {
         key: field.id,
         "data-id": field.id,
         ref: (ref) => drag(drop(ref)),
         onClick: onClick,
-        className: `pivotButton ${draggedElementClass} ${selectedElementClass}`,
+        className
     }, field.name)
 }

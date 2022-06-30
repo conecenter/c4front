@@ -5,7 +5,7 @@ import {createSyncProviders} from "../../main/vdom-hooks";
 
 function App() {
     function getFields(key: string): PivotField[] {
-        return Array.from(Array(5).keys()).map((value) => ({id: `${key}-${value}`, name: `${key}-${value}`, selected: false}))
+        return Array.from(Array(5).keys()).map((value) =>  ({id: `${key}-${value}`, name: `${key}-${value}`, selected: false, invalid: value === 3 ? true : false}))
     }
 
     const pivotProps: PivotSettingsProps = {
