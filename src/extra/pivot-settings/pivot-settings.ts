@@ -1,4 +1,4 @@
-import {createElement as el, ReactNode, useCallback, useMemo, useRef, useState} from "react";
+import {createElement as el, useCallback, useRef} from "react";
 import {DndProvider, useDrag, useDrop} from "react-dnd";
 import {PivotFields} from "./pivot-fields";
 import {
@@ -8,7 +8,7 @@ import {
     pivotServerStateToState,
     pivotChangeToState, patchToPivotChange, applyPivotChange, PivotClickAction, getClickChange
 } from "./pivot-exchange";
-import {ItemTypes} from "./pivot-const";
+import {ItemTypes, PartNames} from "./pivot-const";
 import {HTML5Backend} from "react-dnd-html5-backend";
 import {XYCoord} from "react-dnd/lib";
 import {usePatchSync} from "../exchange/patch-sync";
@@ -22,8 +22,13 @@ export interface PivotField {
     invalid?: boolean
 }
 
+export interface PivotFieldsGroup {
+    groupName: string,
+    fields: PivotField[]
+}
+
 export interface PivotSettingsState {
-    fields: PivotField[],
+    fields: (PivotField | PivotFieldsGroup)[],
     pivotFilters: PivotField[]
     pivotBreaks: PivotField[]
     pivotRows: PivotField[]
@@ -31,8 +36,10 @@ export interface PivotSettingsState {
     pivotData: PivotField[]
     pivotCells: PivotField[],
 
-    [key: string]: PivotField[],
+    //[key: string]: PivotField[],
 }
+
+export type PivotSettingsPartClass = 'pivotFilters' | 'pivotBreaks' | 'pivotRows' | 'pivotColumns' | 'pivotData' | 'pivotCells';
 
 export interface PivotSettingsProps extends PivotSettingsState {
     // @ts-ignore
@@ -124,7 +131,7 @@ function PivotSettingsInner(props: PivotSettingsProps) {
 }
 
 interface PivotSettingsPartProps {
-    className: string
+    className: PivotSettingsPartClass
     state: PivotSettingsState
     label: string
     dropAction: PivotDropAction
@@ -198,4 +205,25 @@ export function PivotField({origin, type, field, dropAction, clickAction}: Pivot
         onClick: onClick,
         className
     }, field.name)
+}
+
+
+export interface PivotFieldsGroupProps {
+    key: string,
+    groupName: string,
+    dropAction: PivotDropAction,
+    fields: PivotField[]
+}
+
+export function PivotFieldsGroup({ groupName, dropAction, fields }: PivotFieldsGroupProps) {
+    return el('div', null, 
+        el('div', null,
+            el('span', null, groupName)
+        ),
+        fields.map(item => el(PivotField, {key: item.id, type: ItemTypes.FIELD, origin: PartNames.FIELDS, field: item, dropAction}))
+    );
+}
+
+export function isPivotFieldsGroup(item: PivotField | PivotFieldsGroup): item is PivotFieldsGroup { 
+    return (item as PivotFieldsGroup).groupName !== undefined; 
 }

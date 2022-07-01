@@ -1,5 +1,6 @@
 import {createElement as el} from "react";
 import {render} from "react-dom";
+import {PivotFieldsGroup} from "../../extra/pivot-settings/pivot-settings";
 import {PivotField, PivotSettings, PivotSettingsProps} from "../../extra/pivot-settings/pivot-settings";
 import {createSyncProviders} from "../../main/vdom-hooks";
 
@@ -7,11 +8,20 @@ function App() {
     function getFields(key: string): PivotField[] {
         return Array.from(Array(5).keys()).map((value) =>  ({id: `${key}-${value}`, name: `${key}-${value}`, selected: false, invalid: value === 3 ? true : false}))
     }
+    function getPivotFields(key: string): (PivotField | PivotFieldsGroup)[] {
+        return [...Array.from(
+            Array(5).keys()).map((value) => ({id: `${key}-${value}`, name: `${key}-${value}`, selected: false})),
+            {
+                groupName: 'Grouped Fields', 
+                fields: Array.from(Array(5).keys()).map(value => ({id: `${key}-1${value}`, name: `${key}-1${value}`, selected: false}))
+            }
+        ]
+    }
 
     const pivotProps: PivotSettingsProps = {
         // @ts-ignore
         identity: {parent: "test"},
-        fields: getFields("fields"),
+        fields: getPivotFields("fields"),
         pivotBreaks: [],
         pivotCells: [],
         pivotColumns: [],

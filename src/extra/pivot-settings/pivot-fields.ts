@@ -1,11 +1,11 @@
 import {useDrop} from "react-dnd";
-import {PivotField} from "./pivot-settings";
+import {isPivotFieldsGroup, PivotField, PivotFieldsGroup} from "./pivot-settings";
 import {createElement as el} from "react";
 import {PivotDragItem, PivotDropAction} from "./pivot-exchange";
 import {ItemTypes, PartNames} from "./pivot-const";
 
 interface PivotFieldsProps {
-  fields: PivotField[],
+  fields: (PivotField | PivotFieldsGroup)[],
   dropAction: PivotDropAction
 }
 
@@ -26,6 +26,9 @@ export function PivotFields({fields, dropAction}: PivotFieldsProps) {
     className: `${PartNames.FIELDS} ${canDeleteClass}`
   },
     el('span', null, 'Fields'),
-    fields.map((value) => el(PivotField, {key: value.id,type: ItemTypes.FIELD, origin: PartNames.FIELDS, field: value, dropAction}))
+    fields.map(item => isPivotFieldsGroup(item)
+      ? el(PivotFieldsGroup, {key: item.groupName, groupName: item.groupName, fields: item.fields, dropAction})
+      : el(PivotField, {key: item.id, type: ItemTypes.FIELD, origin: PartNames.FIELDS, field: item, dropAction})
+    )
     )
 }

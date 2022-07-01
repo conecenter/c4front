@@ -1,8 +1,9 @@
-import {PivotField, PivotSettingsProps, PivotSettingsState} from "./pivot-settings";
+import {PivotField, PivotSettingsPartClass, PivotSettingsProps, PivotSettingsState} from "./pivot-settings";
 import {DATA_ID, PartNames} from "./pivot-const";
 import update, {extend} from "immutability-helper";
 import {XYCoord} from "react-dnd/dist/types/types/monitors";
 import {Patch, PatchHeaders} from "../exchange/patch-sync";
+import { isPivotFieldsGroup, PivotFieldsGroup } from "./pivot-settings";
 
 type PivotChangeType = "reorder" | "move" | "add" | "remove" | "select" | "noop"
 
@@ -149,8 +150,13 @@ function iua<Item>(iu: Item | undefined): Item[] {
     else return [iu]
 }
 
-function find(id: string, list: PivotField[]): PivotField[] {
-    return iua(list.find((item) => item.id === id))
+function flattenPivotFieldsGroups(list: (PivotField | PivotFieldsGroup)[]): PivotField[] {
+    return list.reduce((acc: PivotField[], item) => acc.concat(isPivotFieldsGroup(item) ? item.fields : item), [])
+}
+
+function find(id: string, list: (PivotField | PivotFieldsGroup)[]): PivotField[] {
+    const flatList = flattenPivotFieldsGroups(list);
+    return iua(flatList.find((item) => item.id === id))
 }
 
 extend('$filterOut', function (itemId: string, list: PivotField[]) {
@@ -166,10 +172,8 @@ const applyPivotChange: (prev: PivotSettingsState, ch: PivotChange) => PivotSett
         case "add":
             return update(prev, {[ch.to]: {$push: find(ch.draggedItemId, prev.fields)}})
         case "remove":
-            // @ts-ignore
             return update(prev, {[ch.from]: {$filterOut: ch.draggedItemId}})
         case "move":
-            // @ts-ignore
             return update(prev, {
                 [ch.from]: {$filterOut: ch.draggedItemId},
                 [ch.to]: {$push: find(ch.draggedItemId, prev[ch.from])}
@@ -183,7 +187,6 @@ const applyPivotChange: (prev: PivotSettingsState, ch: PivotChange) => PivotSett
             draggedList.splice(targetInd + indexOffset, 0, ...item)
             return update(prev, {[ch.in]: {$set: draggedList}})
         case "select":
-            // @ts-ignore
             return update(prev, {[ch.location]: {$select: ch.itemId}})
         default:
             return prev
