@@ -131,8 +131,18 @@ html, body {
 
 .pivotFields {
   @extend .pivotSettingPart;
-  // flex-direction: column;
   grid-area: pivotFields;
+  flex-direction: column;  
+
+  > div {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .pivotButton {
+    align-self: flex-start;
+    display: block;
+  }
 }
 
 .pivotFilters {
