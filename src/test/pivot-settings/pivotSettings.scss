@@ -55,6 +55,10 @@
   --textColor-dark-focusOutlineColor: #ffffff;
 }
 
+.textLineSize {
+  height: 1em;
+}
+
 button {
   min-height: 1.6em;
   min-width: 1.6em;
@@ -134,14 +138,22 @@ html, body {
   grid-area: pivotFields;
   flex-direction: column;  
 
-  > div {
+  .pivotFieldsGroup {
     display: flex;
     flex-direction: column;
-  }
-  
-  .pivotButton {
-    align-self: flex-start;
-    display: block;
+
+    .btnOpenGroup {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      margin: 0;
+      //border: 0.05em solid var(--color-headerColor);
+
+      > img {
+        margin-right: 0.5em;
+      }
+    }
   }
 }
 

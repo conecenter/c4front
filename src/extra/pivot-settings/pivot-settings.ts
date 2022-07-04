@@ -216,12 +216,17 @@ export interface PivotFieldsGroupProps {
 }
 
 export function PivotFieldsGroup({ groupName, dropAction, fields }: PivotFieldsGroupProps) {
-    return el('div', null, 
-        el('div', null,
-            el('span', null, groupName)
-        ),
-        fields.map(item => el(PivotField, {key: item.id, type: ItemTypes.FIELD, origin: PartNames.FIELDS, field: item, dropAction}))
-    );
+    return (
+        el('div', {className: 'pivotFieldsGroup'}, 
+            el('button', {className: 'btnOpenGroup', /*onClick: {}*/},
+                el('img', {src: '../../test/datepicker/arrow-down.svg', className: 'textLineSize', alt: 'arrow-down'}),
+                el('span', null, groupName),
+            ),
+            fields.map(item => el
+                (PivotField, {key: item.id, type: ItemTypes.FIELD, origin: PartNames.FIELDS, field: item, dropAction})
+            )
+        )
+    )
 }
 
 export function isPivotFieldsGroup(item: PivotField | PivotFieldsGroup): item is PivotFieldsGroup { 
