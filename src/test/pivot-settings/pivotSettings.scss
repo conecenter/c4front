@@ -136,22 +136,43 @@ html, body {
 .pivotFields {
   @extend .pivotSettingPart;
   grid-area: pivotFields;
-  flex-direction: column;  
+  flex-direction: column;
+  align-items: flex-start;
+  
+  .pivotButton {
+    align-self: flex-start;
+  }
 
   .pivotFieldsGroup {
     display: flex;
     flex-direction: column;
 
-    .btnOpenGroup {
+    > .btnOpenGroup {
       display: flex;
       align-items: center;
       justify-content: center;
       width: 100%;
       margin: 0;
-      //border: 0.05em solid var(--color-headerColor);
 
       > img {
-        margin-right: 0.5em;
+        font-size: 0.9em;
+        margin-right: 0.4em;
+      }
+    }
+
+    > div {
+      display: none;
+      flex-direction: column;
+      margin-left: 1.2em;
+    }
+
+    &.openedPivotGroup {
+      > div {
+        display: flex;
+      }
+
+      > .btnOpenGroup > img {
+          transform: rotate(180deg);
       }
     }
   }
