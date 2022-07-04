@@ -220,7 +220,7 @@ export function PivotFieldsGroup({ groupName, dropAction, fields }: PivotFieldsG
     return (
         el('div', {className: clsx('pivotFieldsGroup', opened && 'openedPivotGroup')}, 
             el('button', {className: 'btnOpenGroup', onClick: () => setOpened(!opened)},
-                el('img', {src: '../../test/datepicker/arrow-down.svg', className: 'textLineSize', alt: 'arrow-down'}),
+                el('img', {src: '/mod/main/ee/cone/core/ui/c4view/arrow-down.svg', className: 'textLineSize', alt: 'arrow-down'}),
                 el('span', null, groupName),
             ),
             el('div', null, fields.map(item => el
