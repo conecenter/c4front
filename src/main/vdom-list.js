@@ -184,6 +184,8 @@ const useGridClickAction = identity => {
             const headers = {
                 "x-r-row-key": cellDataKeys.rowKey,
                 "x-r-col-key": cellDataKeys.colKey,
+                "x-r-ctrl-key": ev.ctrlKey,
+                "x-r-shift-key": ev.shiftKey,
             }
             enqueueClickActionPatch({headers})
         }
