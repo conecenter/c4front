@@ -108,7 +108,7 @@ html, body {
   flex-wrap: wrap;
   align-content: flex-start;
   flex-direction: row;
-  min-height: 2em;
+  min-height: 3em;
   border-width: 1px;
   padding: 0.5em 0.5em 1em;
   
@@ -153,6 +153,10 @@ html, body {
       justify-content: center;
       width: 100%;
       margin: 0;
+
+      &:hover {
+        opacity: 0.8;
+      }
 
       > img {
         font-size: 0.9em;
@@ -220,9 +224,11 @@ html, body {
   opacity: 0.25;
 }
 
-.pivotSelectedElement {
-  background-color: var(--color-yellowColor) !important;
-  color: var(--textColor-yellowColor) !important;
+.pivotButton {
+  border-radius: 0.28em;
+  padding: 0.25em 0.55em;
+  background-color: var(--color-primaryColor);
+  color: var(--textColor-primaryColor);
 }
 
 .pivotInvalidElement:not(.pivotFields *) {
@@ -230,7 +236,7 @@ html, body {
   color: var(--textColor-redColor);
 }
 
-.pivotButton {
-  background-color: var(--color-primaryColor);
-  color: var(--textColor-primaryColor);
+.pivotSelectedElement {
+  background-color: var(--color-yellowColor);
+  color: var(--textColor-yellowColor);
 }
