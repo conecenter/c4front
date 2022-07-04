@@ -12,7 +12,8 @@ function App() {
         return [...Array.from(
             Array(5).keys()).map((value) => ({id: `${key}-${value}`, name: `${key}-${value}`, selected: false})),
             {
-                groupName: 'Grouped Fields', 
+                groupName: 'Grouped Fields',
+                identity: '/fields-group',
                 fields: Array.from(Array(5).keys()).map(value => ({id: `${key}-1${value}`, name: `${key}-1${value}`, selected: false}))
             }
         ]

@@ -13,6 +13,7 @@ import {HTML5Backend} from "react-dnd-html5-backend";
 import {XYCoord} from "react-dnd/lib";
 import {usePatchSync} from "../exchange/patch-sync";
 import clsx from "clsx";
+import { useClickSync } from "../exchange/click-sync";
 
 
 export interface PivotField {
@@ -23,6 +24,7 @@ export interface PivotField {
 }
 
 export interface PivotFieldsGroup {
+    identity: string,
     groupName: string,
     fields: PivotField[]
 }
@@ -210,12 +212,16 @@ export function PivotField({origin, type, field, dropAction, clickAction}: Pivot
 
 export interface PivotFieldsGroupProps {
     key: string,
+    identity: string,
     groupName: string,
     dropAction: PivotDropAction,
     fields: PivotField[]
 }
 
-export function PivotFieldsGroup({ groupName, dropAction, fields }: PivotFieldsGroupProps) {
+export function PivotFieldsGroup({ identity, groupName, dropAction, fields }: PivotFieldsGroupProps) {
+    console.log(identity)
+    const {clicked, onClick} = useClickSync(identity, 'clickAction');
+    console.log(clicked)
     return (
         el('div', {className: 'pivotFieldsGroup'}, 
             el('button', {className: 'btnOpenGroup', /*onClick: {}*/},
