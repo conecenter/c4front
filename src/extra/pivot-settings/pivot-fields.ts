@@ -26,9 +26,9 @@ export function PivotFields({fields, dropAction}: PivotFieldsProps) {
     className: `${PartNames.FIELDS} ${canDeleteClass}`
   },
     el('span', null, 'Fields'),
-    fields.map(item => isPivotFieldsGroup(item)
-      ? el(PivotFieldsGroup, {key: item.groupName, groupName: item.groupName, fields: item.fields, dropAction})
+    fields.map((item, index) => isPivotFieldsGroup(item)
+      ? el(PivotFieldsGroup, {key: `${index}`, groupName: item.groupName, fields: item.fields, dropAction})
       : el(PivotField, {key: item.id, type: ItemTypes.FIELD, origin: PartNames.FIELDS, field: item, dropAction})
     )
-    )
+  )
 }
