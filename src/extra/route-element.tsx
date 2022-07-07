@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { MouseEventHandler } from 'react';
+import clsx from 'clsx';
+
 
 interface RouteElementProps {
     key: string,
@@ -7,15 +9,26 @@ interface RouteElementProps {
  
  interface RoutePartData {
     text: string,
-    hint: string,
     done: boolean,
-    onClick?: Function
+    hint?: string,
+    onClick?: MouseEventHandler<HTMLDivElement>
  }
 
  function RouteElement({routeParts}: RouteElementProps) {
     return (
         <div className='routeElement'>
-            Hello world!
+            {routeParts.map((part, ind) => {
+                const { text, hint, done, onClick } = part;
+                return (
+                    <div key={`${text}-${ind}`}
+                         className={clsx(done && 'routePartDone')} 
+                         style={onClick ? { cursor: 'pointer' } : undefined}
+                         title={hint}
+                         onClick={onClick} >
+                        {text}
+                    </div>
+                );
+            })}
         </div>
     );
  }

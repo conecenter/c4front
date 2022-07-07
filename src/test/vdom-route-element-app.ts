@@ -7,7 +7,24 @@ import { RouteElement } from "../extra/route-element";
 function App() {
     const child = $(RouteElement, {
         key: "TEST1",
-        routeParts: []        
+        routeParts: [
+            {
+                text: '*',
+                hint: 'hello world',
+                done: true,
+                onClick: () => console.log('click handler')
+            },
+            {
+                text: 'ABC',
+                hint: 'abc route part',
+                done: false
+            },
+            {
+                text: '-->',
+                hint: 'cargo movement',
+                done: false
+            }
+        ]        
     })
     const sender = {
         enqueue: (identity: any, patch: any) => console.log(patch)
