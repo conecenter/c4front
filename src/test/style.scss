@@ -1,15 +1,60 @@
 @import "reset";
 
 :root {
-  --color-secondaryColor: rgb(225, 225, 225);
-  --light-secondaryColor: hsl(0, 0%, 63.3333%);
-  --color-body: hsl(0, 0%, 100%);
-  --textColor-body: hsl(0, 0%, 12.9412%);
-  --color-darkPrimaryColor: rgb(176, 162, 116);
-  --color-headerColor: #cfd8dc;
-  --color-dark-headerColor: #b0bec5;
+  --color-primaryColor: #4DB6AC;
+  --textColor-primaryColor: #000000;
+  --color-light-primaryColor: #B2DFDB;
+  --textColor-light-primaryColor: #000000;
+  --color-dark-primaryColor: #009688;
   --textColor-dark-primaryColor: #000000;
+  --color-grayColor: #CFD8DC;
+  --textColor-grayColor: #000000;
+  --color-light-grayColor: #ffffff;
+  --textColor-light-grayColor: #000000;
+  --color-dark-grayColor: #90A4AE;
+  --textColor-dark-grayColor: #000000;
+  --color-secondaryColor: #FFD54F;
+  --textColor-secondaryColor: #000000;
+  --color-light-secondaryColor: #FFECB3;
+  --textColor-light-secondaryColor: #000000;
+  --color-dark-secondaryColor: #FFC107;
+  --textColor-dark-secondaryColor: #000000;
+  --color-redColor: #EF5350;
+  --textColor-redColor: #000000;
+  --color-light-redColor: #EF9A9A;
+  --textColor-light-redColor: #000000;
+  --color-dark-redColor: #E53935;
+  --textColor-dark-redColor: #000000;
+  --color-yellowColor: #FFEB3B;
+  --textColor-yellowColor: #000000;
+  --color-light-yellowColor: #FFF176;
+  --textColor-light-yellowColor: #000000;
+  --color-dark-yellowColor: #FBC02D;
+  --textColor-dark-yellowColor: #000000;
+  --color-greenColor: #43A047;
+  --textColor-greenColor: #000000;
+  --color-light-greenColor: #A5D6A7;
+  --textColor-light-greenColor: #000000;
+  --color-dark-greenColor: #2E7D32;
+  --textColor-dark-greenColor: #ffffff;
+  --color-headerColor: #CFD8DC;
+  --textColor-headerColor: #000000;
   --color-light-headerColor: #ECEFF1;
+  --textColor-light-headerColor: #000000;
+  --color-dark-headerColor: #B0BEC5;
+  --textColor-dark-headerColor: #000000;
+  --color-body: #ffffff;
+  --textColor-body: #000000;
+  --color-light-body: #ffffff;
+  --textColor-light-body: #000000;
+  --color-dark-body: #ffffff;
+  --textColor-dark-body: #000000;
+  --color-focusOutlineColor: #D32F2F;
+  --textColor-focusOutlineColor: #ffffff;
+  --color-light-focusOutlineColor: #F44336;
+  --textColor-light-focusOutlineColor: #000000;
+  --color-dark-focusOutlineColor: #B71C1C;
+  --textColor-dark-focusOutlineColor: #ffffff;
 }
 
 body {
@@ -687,5 +732,37 @@ div.grid {
         border-radius: 0px;
       }
     }
+  }
+}
+
+// RouteElement
+.routeElement {
+  display: flex;
+  height: 1.8em;
+  width: 100%;
+  background-color: var(--color-grayColor);
+  color: var(--textColor-grayColor);
+  border-radius: 1em;
+  margin: 5em;
+  max-width: 500px;;
+
+  > div {
+      flex-grow: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-right: 1px solid var(--color-dark-grayColor);
+      overflow: hidden;
+      padding: 0 0.4em;
+
+      &.routePartDone {
+          //background-color: var(--color-dark-primaryColor);
+          background-color: var(--color-light-greenColor);
+          color: var(--textColor-dark-primaryColor);
+      }
+      
+      &.isLastDone, &:last-child {
+          border-radius: 0 1em 1em 0;
+      }
   }
 }
