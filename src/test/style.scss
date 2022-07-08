@@ -739,26 +739,30 @@ div.grid {
 .routeElement {
   display: flex;
   height: 1.8em;
-  max-width: 100%;
   width: 100%;
   background-color: var(--color-grayColor);
   color: var(--textColor-grayColor);
-  border-radius: 0.58em;
-  margin: 1em;  // remove for production
-  max-width: 400px; // remove for production
+  border-radius: 1em;
+  margin: 5em;
+  max-width: 500px;;
 
   > div {
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-right: 1px solid var(--color-dark-grayColor);
-    border-radius: 0.58em;
-    overflow: hidden;
+      flex-grow: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-right: 1px solid var(--color-dark-grayColor);
+      overflow: hidden;
+      padding: 0 0.4em;
 
-    &.routePartDone {
-      background-color: var(--color-dark-primaryColor);
-      color: var(--textColor-dark-primaryColor);
-    }    
+      &.routePartDone {
+          //background-color: var(--color-dark-primaryColor);
+          background-color: var(--color-light-greenColor);
+          color: var(--textColor-dark-primaryColor);
+      }
+      
+      &.isLastDone, &:last-child {
+          border-radius: 0 1em 1em 0;
+      }
   }
 }

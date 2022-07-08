@@ -15,27 +15,22 @@ function App() {
                 onClick: () => console.log('click handler')
             },
             {
-                text: 'RUVVO',
+                text: 'RUVVO ➝ RUMAG',
                 hint: 'abc route part',
-                done: false
+                done: true
             },
             {
-                text: '➝',
+                text: '●',
+                hint: 'cargo movement',
+                done: true
+            },
+            {
+                text: 'RUMAG ➝ RUVVO',
                 hint: 'cargo movement',
                 done: false
             },
             {
-                text: 'RUMAG',
-                hint: 'cargo movement',
-                done: false
-            },
-            {
-                text: '➝',
-                hint: 'cargo movement',
-                done: false
-            },
-            {
-                text: 'RUVVO',
+                text: '●',
                 hint: 'cargo movement',
                 done: false
             }
