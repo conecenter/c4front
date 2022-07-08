@@ -9,18 +9,33 @@ function App() {
         key: "TEST1",
         routeParts: [
             {
-                text: '*',
+                text: '●',
                 hint: 'hello world',
                 done: true,
                 onClick: () => console.log('click handler')
             },
             {
-                text: 'ABC',
+                text: 'RUVVO',
                 hint: 'abc route part',
                 done: false
             },
             {
-                text: '-->',
+                text: '➝',
+                hint: 'cargo movement',
+                done: false
+            },
+            {
+                text: 'RUMAG',
+                hint: 'cargo movement',
+                done: false
+            },
+            {
+                text: '➝',
+                hint: 'cargo movement',
+                done: false
+            },
+            {
+                text: 'RUVVO',
                 hint: 'cargo movement',
                 done: false
             }
@@ -36,4 +51,4 @@ function App() {
 
 const containerElement = document.createElement("div")
 document.body.appendChild(containerElement)
-ReactDOM.render($(App), containerElement)
+ReactDOM.render($(App), containerElement) 

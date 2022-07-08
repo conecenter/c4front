@@ -20,9 +20,9 @@ interface RouteElementProps {
             {routeParts.map((part, ind) => {
                 const { text, hint, done, onClick } = part;
                 return (
-                    <div key={`${text}-${ind}`}
+                    <div key={`${ind}`}
                          className={clsx(done && 'routePartDone')} 
-                         style={onClick ? { cursor: 'pointer' } : undefined}
+                         style={onClick ? {cursor: 'pointer'} : undefined}
                          title={hint}
                          onClick={onClick} >
                         {text}

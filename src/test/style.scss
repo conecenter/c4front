@@ -742,6 +742,7 @@ div.grid {
   max-width: 100%;
   width: 100%;
   background-color: var(--color-grayColor);
+  color: var(--textColor-grayColor);
   border-radius: 0.58em;
   margin: 1em;  // remove for production
   max-width: 400px; // remove for production
@@ -757,6 +758,7 @@ div.grid {
 
     &.routePartDone {
       background-color: var(--color-dark-primaryColor);
+      color: var(--textColor-dark-primaryColor);
     }    
   }
 }
