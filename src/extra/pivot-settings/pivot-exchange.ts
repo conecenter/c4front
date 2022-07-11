@@ -1,8 +1,9 @@
-import {PivotField, PivotSettingsProps, PivotSettingsState} from "./pivot-settings";
+import {PivotField, PivotSettingsPartClass, PivotSettingsProps, PivotSettingsState} from "./pivot-settings";
 import {DATA_ID, PartNames} from "./pivot-const";
 import update, {extend} from "immutability-helper";
 import {XYCoord} from "react-dnd/dist/types/types/monitors";
 import {Patch, PatchHeaders} from "../exchange/patch-sync";
+import {isPivotFieldsGroup, PivotFieldsGroup} from "./pivot-settings";
 
 type PivotChangeType = "reorder" | "move" | "add" | "remove" | "select" | "noop"
 
@@ -149,8 +150,13 @@ function iua<Item>(iu: Item | undefined): Item[] {
     else return [iu]
 }
 
-function find(id: string, list: PivotField[]): PivotField[] {
-    return iua(list.find((item) => item.id === id))
+function flattenPivotFieldsGroups(list: (PivotField | PivotFieldsGroup)[]): PivotField[] {
+    return list.reduce((acc: PivotField[], item) => acc.concat(isPivotFieldsGroup(item) ? item.fields : item), [])
+}
+
+function find(id: string, list: (PivotField | PivotFieldsGroup)[]): PivotField[] {
+    const flatList = flattenPivotFieldsGroups(list);
+    return iua(flatList.find((item) => item.id === id))
 }
 
 extend('$filterOut', function (itemId: string, list: PivotField[]) {
@@ -166,24 +172,21 @@ const applyPivotChange: (prev: PivotSettingsState, ch: PivotChange) => PivotSett
         case "add":
             return update(prev, {[ch.to]: {$push: find(ch.draggedItemId, prev.fields)}})
         case "remove":
-            // @ts-ignore
             return update(prev, {[ch.from]: {$filterOut: ch.draggedItemId}})
         case "move":
-            // @ts-ignore
             return update(prev, {
                 [ch.from]: {$filterOut: ch.draggedItemId},
-                [ch.to]: {$push: find(ch.draggedItemId, prev[ch.from])}
+                [ch.to]: {$push: find(ch.draggedItemId, prev[ch.from as PivotSettingsPartClass])}
             })
         case "reorder":
-            const item = find(ch.draggedItemId, prev[ch.in])
-            // @ts-ignore
-            const draggedList = update(prev[ch.in], {$filterOut: ch.draggedItemId})
+            const item = find(ch.draggedItemId, prev[ch.in as PivotSettingsPartClass])
+            //@ts-ignore
+            const draggedList = update(prev[ch.in as PivotSettingsPartClass], {$filterOut: ch.draggedItemId})
             const targetInd = draggedList.findIndex((value) => value.id === ch.targetId)
             const indexOffset = ch.dropLeft ? 0 : 1
             draggedList.splice(targetInd + indexOffset, 0, ...item)
             return update(prev, {[ch.in]: {$set: draggedList}})
         case "select":
-            // @ts-ignore
             return update(prev, {[ch.location]: {$select: ch.itemId}})
         default:
             return prev
@@ -233,7 +236,7 @@ function getPivotChange(state: PivotSettingsState, root: Element | undefined, ev
         // @ts-ignore
         if (intersection !== null && intersection.id !== event.item.id) {
             const reorderEvent = intersection as ReorderCommand
-            const itemInd = state[event.dragOrigin].findIndex(item => item.id === event.item.id)
+            const itemInd = state[event.dragOrigin as PivotSettingsPartClass].findIndex(item => item.id === event.item.id)
             // @ts-ignore
             const targetInd = update(state[event.dragOrigin], {$filterOut: event.item.id}).findIndex((value) => value.id === reorderEvent.id)
             const indexOffset = reorderEvent.dropLeft ? 0 : 1
