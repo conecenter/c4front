@@ -1,23 +1,28 @@
 import React, { useContext } from 'react';
 import clsx from 'clsx';
+import { NoFocusContext } from './labeled-element';
 
 const PathContext = React.createContext("path");
 
 interface FocusControlObj {
     focusClass?: string,
-    focusHtml?: { 'data-path': string, tabIndex: number }
+    focusHtml?: { 'data-path'?: string, tabIndex: number }
+} 
+
+function useFocusControl(path: string | undefined): FocusControlObj {
+    if (!path) return {};
+
+    const noFocusCtx = useContext(NoFocusContext);
+    if (noFocusCtx) return { focusClass: '', focusHtml: { tabIndex: 1 }};
+    
+    const focusClass = clsx('focusWrapper', isCurrentlyFocused(path) && 'activeFocusWrapper');
+    const focusHtml = { 'data-path': path, tabIndex: 1 };
+    return { focusClass, focusHtml };
 }
 
 function isCurrentlyFocused(path: string | undefined) {
     const currentPath = useContext(PathContext);
     return currentPath && path && currentPath === path;
-}    
-
-function useFocusControl(path: string | undefined): FocusControlObj {
-    if (!path) return {};
-    const focusClass = clsx('focusWrapper', isCurrentlyFocused(path) && 'activeFocusWrapper');
-    const focusHtml = { 'data-path': path, tabIndex: 1 };
-    return { focusClass, focusHtml }
 }
 
 

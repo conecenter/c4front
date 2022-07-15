@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 
+const SEL_FOCUSABLE = '.focusWrapper';
+
 const ENTER_EVENT = 'enter';
 const DELETE_EVENT = 'delete';
 const BACKSPACE_EVENT = 'backspace';
@@ -55,5 +57,6 @@ export {
 	PASTE_EVENT, 
 	COPY_EVENT, 
 	CUT_EVENT, 
-	TAB_EVENT 
+	TAB_EVENT,
+	SEL_FOCUSABLE
 };
