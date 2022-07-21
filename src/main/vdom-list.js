@@ -1,13 +1,15 @@
-import {cloneElement, createElement as $, useCallback, useEffect, useLayoutEffect, useMemo, useState} from "react"
+import {cloneElement, createElement as $, useCallback, useEffect, useMemo, useState} from "react"
 
 import {findFirstParent, identityAt, never, sortedWith} from "./vdom-util.js"
 import {NoCaptionContext, useEventListener, useSync} from "./vdom-hooks.js"
 import {useWidth,useMergeRef} from "./sizes.js"
 import {useGridDrag} from "./grid-drag.js"
+import {ESCAPE_KEY} from "./keyboard-keys"
 
 const dragRowIdOf = identityAt('dragRow')
 const dragColIdOf = identityAt('dragCol')
 const clickActionIdOf = identityAt('clickAction')
+const keyboardActionIdOf = identityAt('keyboardAction')
 const hasHiddenColsIdOf = identityAt('hasHiddenCols')
 
 const ROW_KEYS = {
@@ -192,6 +194,16 @@ const useGridClickAction = identity => {
     }, [enqueueClickActionPatch])
 }
 
+const useGridKeyboardAction = identity => {
+    const [_, enqueueKeyboardActionPatch] = useSync(keyboardActionIdOf(identity));
+    return useCallback(ev => {
+        if (ev.key === ESCAPE_KEY) {
+            const headers = {"x-r-escape-key": "1"}
+            enqueueKeyboardActionPatch({headers})
+        }
+    }, [enqueueKeyboardActionPatch])
+}
+
 const useValueToServer = (identity, value) => {
     const [patches, enqueuePatch] = useSync(identity)
     useEffect(()=>{
@@ -204,6 +216,7 @@ export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey 
 
     const [dragData,dragCSSContent,onMouseDown] = useSyncGridDrag({ identity, rows, cols, gridKey })
     const clickAction = useGridClickAction(identity)
+    const keyboardAction = useGridKeyboardAction(identity)
 
     const hasDragRow = useMemo(()=>children.some(c=>c.props.dragHandle==="x"),[children])
     const gridTemplateRows = useMemo(() => getGidTemplateRows([
@@ -234,7 +247,16 @@ export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey 
     const headerRowKeys = rows.filter(row => row.isHeader).map(row => row.rowKey).join(' ')
     const dragBGEl = $("div", { key: "gridBG", className: "gridBG", style: { gridColumn: spanAll, gridRow: spanAll }})
     const style = { display: "grid", gridTemplateRows, gridTemplateColumns }
-    const res = $("div", { onMouseDown, onClick: clickAction, style, className: "grid", "data-grid-key": gridKey, "header-row-keys": headerRowKeys, ref }, dragBGEl, ...allChildren)
+    const res = $("div", {
+        onMouseDown, 
+        onClick: clickAction, 
+        onKeyDown: keyboardAction, 
+        style, 
+        className: "grid", 
+        "data-grid-key": gridKey, 
+        "header-row-keys": headerRowKeys,
+        ref
+    }, dragBGEl, ...allChildren)
     const dragCSSEl = $("style",{dangerouslySetInnerHTML: { __html: dragCSSContent}})
     return $(NoCaptionContext.Provider,{value:true},dragCSSEl,res)
 }
