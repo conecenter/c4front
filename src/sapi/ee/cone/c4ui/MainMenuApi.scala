@@ -48,6 +48,8 @@ trait MainMenuClock extends MenuItem
     icon: Option[String] = None,
     children: ElList[MenuInnerItem],
     receiver: Receiver[C],
+    bindSrcId: String,
+    groupId: String,
   ): MenuFolderItem
 
   @c4elPath("MenuExecutableItem") def menuExecutableItem(
@@ -57,6 +59,7 @@ trait MainMenuClock extends MenuItem
 //    state: MenuItemState,
     icon: Option[String] = None,
     receiver: Receiver[C],
+    bindSrcId: String,
   ): MenuExecutableItem
 
   @c4elPath("MenuCustomItem") def menuCustomItem(
