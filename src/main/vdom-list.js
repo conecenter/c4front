@@ -276,7 +276,7 @@ const getAllChildren = ({children,rows,cols,hasHiddenCols,hideElementsForHiddenC
                 key: cell.key,
                 style: cell.props.children ? { flexBasis:  `${col.width.min}em` } : undefined,
                 className: "inputLike",
-                'data-col-key': col.colKey,
+                'data-expanded-col-key': col.colKey,
                 children: cell.props.children,
             })),
             'data-expanded-cell': ''
