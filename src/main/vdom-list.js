@@ -274,8 +274,9 @@ const getAllChildren = ({children,rows,cols,hasHiddenCols,hideElementsForHiddenC
             style: { display: "flex", flexFlow: "row wrap", visibility: dragRowKey?"hidden":null },
             children: pairs.map(([col, cell]) => $("div",{
                 key: cell.key,
-                style: { flexBasis: `${col.width.min}em` },
+                style: cell.props.children ? { flexBasis:  `${col.width.min}em` } : undefined,
                 className: "inputLike",
+                'data-col-key': col.colKey,
                 children: cell.props.children,
             })),
             'data-expanded-cell': ''
