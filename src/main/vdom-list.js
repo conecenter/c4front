@@ -294,16 +294,19 @@ const getAllChildren = ({children,rows,cols,hasHiddenCols,hideElementsForHiddenC
 /*,(a,b)=>{    Object.entries(a).filter(([k,v])=>b[k]!==v).forEach(([k,v])=>console.log(k)) */
 
 /// Highlighter, may be moved out
-
-export function Highlighter({attrName, highlightClass: argHighlightClass, notHighlightClass: argNotHighlightClass}) {
+export function Highlighter({attrName, highlightClass: argHighlightClass, notHighlightClass: argNotHighlightClass, gridKey}) {
     const [key,setKey] = useState(null)
     const [element,setElement] = useState(null)
     const move = useCallback(ev => {
         setKey(findFirstParent(el=>el.getAttribute(attrName))(ev.target))
-    },[setKey])
+    }, [])
     const elemSelector = argHighlightClass ? `.${argHighlightClass}` : 'div'
     const notHighlightClass = argNotHighlightClass ? `:not(.${argNotHighlightClass})` : ''
-    const style = key ? `${elemSelector}[${attrName}="${key}"]${notHighlightClass}{background-color: var(--highlight-color);}` : ""
+    const gridSelector = gridKey ? `[data-grid-key="${gridKey}"]` : ''
+    const style = key 
+        ? `${gridSelector} ${elemSelector}[${attrName}="${key}"]${notHighlightClass} 
+            { background-color: var(--highlight-color); }`
+        : ""
     const doc = element && element.ownerDocument
     useEventListener(doc, "mousemove", move)
     return $("style", { ref: setElement, dangerouslySetInnerHTML: { __html: style } })
