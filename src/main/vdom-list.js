@@ -297,12 +297,13 @@ const getAllChildren = ({children,rows,cols,hasHiddenCols,hideElementsForHiddenC
 export function Highlighter({attrName, highlightClass: argHighlightClass, notHighlightClass: argNotHighlightClass, gridKey}) {
     const [key,setKey] = useState(null)
     const [element,setElement] = useState(null)
+    const gridSelector = gridKey ? `[data-grid-key="${gridKey}"]` : ''
     const move = useCallback(ev => {
-        setKey(findFirstParent(el=>el.getAttribute(attrName))(ev.target))
-    }, [])
+        if (gridSelector && !ev.target.matches(`${gridSelector} :scope`)) setKey(null);
+        else setKey(findFirstParent(el=>el.getAttribute(attrName))(ev.target))
+    }, [gridKey])
     const elemSelector = argHighlightClass ? `.${argHighlightClass}` : 'div'
     const notHighlightClass = argNotHighlightClass ? `:not(.${argNotHighlightClass})` : ''
-    const gridSelector = gridKey ? `[data-grid-key="${gridKey}"]` : ''
     const style = key 
         ? `${gridSelector} ${elemSelector}[${attrName}="${key}"]${notHighlightClass} 
             { background-color: var(--highlight-color); }`

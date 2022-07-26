@@ -163,6 +163,7 @@ case class NoReceiver[C]() extends Receiver[C] {
     attrName: HighlightByAttr,
     highlightClass: CSSClassName = NoCSSClassName,
     notHighlightClass: CSSClassName = NoCSSClassName,
+    gridKey: String = "",
   ): ToChildPair
   @c4val("data-row-key") def rowHighlightByAttr: HighlightByAttr
   @c4val("data-col-key") def colHighlightByAttr: HighlightByAttr
