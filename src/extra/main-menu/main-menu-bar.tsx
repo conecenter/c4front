@@ -151,7 +151,7 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
   }, []);
 
   return (
-    <BindGroupElement groupId='menubar'>
+    <BindGroupElement groupId='menubar' forceAtStart={true} >
       <MenuControlsContext.Provider value={onArrowKey}>
         <ExpanderArea key='top-bar' 
                       maxLineCount={1}

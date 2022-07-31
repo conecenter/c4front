@@ -94,10 +94,8 @@ const KeyBindingsManager = ({ links, children, bindSrcId, escapeBindSrcId, noTou
     }
   }
 
-  const addGroup = (group) => {
-    setAvailableGroups(prev => !prev.includes(group) ? [...prev, group] : prev)
-    if (activeBindGroup === "" && group !== "menubar") updateActiveGroup(group)
-  }
+  const addGroup = (group) => setAvailableGroups(prev => !prev.includes(group) ? [...prev, group] : prev)
+
   const removeGroup = (group) => {
     if (isBindMode) {
       // console.log("remove group: " + group)
