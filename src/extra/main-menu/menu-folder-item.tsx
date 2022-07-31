@@ -26,11 +26,15 @@ interface MenuFolderItem {
     current: boolean,
     state: MenuItemState,
     path: string,
+    bindSrcId?: string,
+    groupId?: string,
     icon?: string,
     children?: ReactElement<MenuItem | MenuItemsGroup>[]
 }
 
-function MenuFolderItem({identity, name, shortName, current, state, icon, path, children}: MenuFolderItem) {
+function MenuFolderItem(props: MenuFolderItem) {
+    const {identity, name, shortName, current, state, icon, path, bindSrcId, groupId, children} = props;
+
     const {
         currentState: { opened },
         setFinalState
@@ -85,34 +89,31 @@ function MenuFolderItem({identity, name, shortName, current, state, icon, path, 
         }
     };
     
-    /* or use additionChange from binds logic?
-    const { activeBindGroup } = useBinds();
+    // or use additionChange from binds logic?
+    const { isBindMode, activeBindGroup } = useBinds();
     useEffect(() => {
-        const isActiveGroup = activeBindGroup === 'folder-mi-wht-management';
+        const isActiveGroup = activeBindGroup === groupId;
         if (isActiveGroup && !opened) {
+            menuFolderRef.current?.focus();
             setFinalState({ opened: true });
         } else if (!isActiveGroup && opened) setFinalState({ opened: false });
-    }, [activeBindGroup])
-    */
+    }, [activeBindGroup]);
 
     return (
-        <div
-            ref={menuFolderRef}
+        <div ref={menuFolderRef}
             className={clsx('menuItem', opened && 'menuFolderOpened', current && 'isCurrent', focusClass)}
             {...focusHtml}
             onBlur={(e) => handleMenuBlur(e, setFinalState)}
-            onClick={() => setFinalState({ opened: !opened })}
+            onClick={() => !isBindMode && setFinalState({ opened: !opened })}
             onKeyDown={handleKeyDown} >
 
-            <BindGroupElement bindSrcId='row-0-button-srcId' groupId='folder-mi-wht-management' showBtn={true}>
+            <BindGroupElement bindSrcId={bindSrcId} groupId={groupId} showBtn={true} >
+
                 {icon && <img src={icon} className='rowIconSize' />}
                 <span className={clsx(shortName && 'longName')}>{name}</span>
                 {shortName &&
                     <span className='shortName'>{shortName}</span>}
-                <img
-                    src={ARROW_DOWN_URL}
-                    className='menuFolderIcon'
-                    alt='arrow-down-icon' />
+                <img src={ARROW_DOWN_URL} className='menuFolderIcon' alt='arrow-down-icon' />
         
                 {opened &&
                     <MenuPopupElement popupLrMode={popupLrMode}>{children}</MenuPopupElement>}
