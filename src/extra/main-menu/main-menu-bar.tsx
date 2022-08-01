@@ -2,7 +2,7 @@ import React, {createContext, ReactElement, useCallback, useContext, useEffect, 
 import clsx from 'clsx';
 import {Expander, ExpanderArea} from '../../main/expander-area';
 import {useInputSync} from '../exchange/input-sync';
-import {handleArrowUpDown, handleEnter, handleMenuBlur, patchToState, stateToPatch} from './main-menu-utils';
+import {handleArrowUpDown, handleFolderEnter, handleMenuBlur, patchToState, stateToPatch} from './main-menu-utils';
 import {MainMenuClock} from './main-menu-clock';
 import {ScrollInfoContext} from '../scroll-info-context';
 import {PathContext, useFocusControl} from "../focus-control";
@@ -218,7 +218,8 @@ function BurgerMenu({opened, domRef, setFinalState, children}: BurgerMenu) {
     switch(e.key) {
       case ENTER_KEY:
         if (!opened && domRef.current) {
-          handleEnter(e, domRef.current, setFinalState, children);
+          e.stopPropagation();
+          handleFolderEnter(domRef.current, setFinalState, children);
         }
         break;
       case ESCAPE_KEY:

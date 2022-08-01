@@ -4,7 +4,7 @@ import { useInputSync } from '../exchange/input-sync';
 import { PathContext, useFocusControl } from '../focus-control';
 import { MenuItemState, MenuControlsContext } from './main-menu-bar';
 import { MenuItem, MenuItemsGroup, MenuPopupElement } from './main-menu-items';
-import { handleArrowUpDown, handleEnter, handleMenuBlur, patchToState, stateToPatch } from './main-menu-utils';
+import { handleArrowUpDown, handleFolderEnter, handleMenuBlur, patchToState, stateToPatch } from './main-menu-utils';
 import {
     ARROW_DOWN_KEY,
     ARROW_LEFT_KEY,
@@ -41,10 +41,12 @@ function MenuFolderItem(props: MenuFolderItem) {
     } = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
 
     const [popupLrMode, setPopupLrMode] = useState(false);
+
     const menuFolderRef = useRef<HTMLDivElement>(null);
+    const menuFolder = menuFolderRef.current;
 
     useEffect(() => {
-        if (isPopupChild(menuFolderRef.current)) setPopupLrMode(true);
+        if (isPopupChild(menuFolder)) setPopupLrMode(true);
     });
 
     const { focusClass, focusHtml } = useFocusControl(path);
@@ -53,7 +55,6 @@ function MenuFolderItem(props: MenuFolderItem) {
     const onArrowKey = useContext(MenuControlsContext);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-        const menuFolder = menuFolderRef.current;
         switch(e.key) {
             case ARROW_RIGHT_KEY:
                 if (!popupLrMode && !opened) break;
@@ -64,8 +65,8 @@ function MenuFolderItem(props: MenuFolderItem) {
                 }
             case ENTER_KEY:
                 if (!opened && menuFolder) {
-                    const flatChildren = flattenMenuChildren(children);
-                    handleEnter(e, menuFolder, setFinalState, flatChildren);
+                    e.stopPropagation();
+                    handleFolderEnter(menuFolder, setFinalState, children);
                 }                
                 break;
             case ARROW_LEFT_KEY:
@@ -84,19 +85,18 @@ function MenuFolderItem(props: MenuFolderItem) {
             case ARROW_DOWN_KEY:
             case ARROW_UP_KEY:
                 if (!opened || !menuFolder) break;
-                const flatChildren = flattenMenuChildren(children);
-                handleArrowUpDown(e, menuFolder, currentPath, flatChildren);
+                handleArrowUpDown(e, menuFolder, currentPath, children);
         }
     };
     
-    // or use additionChange from binds logic?
+    // Binds mode logic
     const { isBindMode, activeBindGroup } = useBinds();
     useEffect(() => {
-        const isActiveGroup = activeBindGroup === groupId;
-        if (isActiveGroup && !opened) {
-            menuFolderRef.current?.focus();
+        const isActiveFolder = menuFolder?.querySelector(`[groupid="${activeBindGroup}"]`);
+        if (isActiveFolder && !opened) {
+            menuFolder!.focus();
             setFinalState({ opened: true });
-        } else if (!isActiveGroup && opened) setFinalState({ opened: false });
+        } else if (!isActiveFolder && opened) setFinalState({ opened: false });
     }, [activeBindGroup]);
 
     return (
@@ -125,22 +125,6 @@ function MenuFolderItem(props: MenuFolderItem) {
 function isPopupChild(element: HTMLElement | null) {
     const parent = element && element.parentElement;
     return parent && parent.classList.contains('popupEl');
-}
-
-function isMenuItemsGroup(item: ReactElement<MenuItem | MenuItemsGroup>): item is ReactElement<MenuItemsGroup> { 
-    return (item as ReactElement<MenuItemsGroup>).type === MenuItemsGroup; 
-  }
-
-function flattenMenuChildren(children?: ReactElement<MenuItem | MenuItemsGroup>[]): ReactElement<MenuItem>[] {
-    if (!children) return [];
-    return children.reduce((res: ReactElement<MenuItem>[], child) => {
-        return res.concat(
-            // @ts-ignore
-            isMenuItemsGroup(child)
-                ? flattenMenuChildren(child.props.children)
-                : child
-        );
-    }, [])
 }
 
 export { MenuFolderItem };
