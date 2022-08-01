@@ -92,7 +92,7 @@ function MenuFolderItem(props: MenuFolderItem) {
     // Binds mode logic
     const { isBindMode, activeBindGroup } = useBinds();
     useEffect(() => {
-        if (!menuFolder) return;
+        if (!isBindMode || !menuFolder) return;
         const isActiveFolder = menuFolder.querySelector(`[groupid="${activeBindGroup}"]`);
         if (isActiveFolder && !opened) {
             menuFolder.focus();
