@@ -92,11 +92,15 @@ function MenuFolderItem(props: MenuFolderItem) {
     // Binds mode logic
     const { isBindMode, activeBindGroup } = useBinds();
     useEffect(() => {
-        const isActiveFolder = menuFolder?.querySelector(`[groupid="${activeBindGroup}"]`);
+        if (!menuFolder) return;
+        const isActiveFolder = menuFolder.querySelector(`[groupid="${activeBindGroup}"]`);
         if (isActiveFolder && !opened) {
-            menuFolder!.focus();
+            menuFolder.focus();
             setFinalState({ opened: true });
-        } else if (!isActiveFolder && opened) setFinalState({ opened: false });
+        } else if (!isActiveFolder && opened) {
+            menuFolder.focus();
+            setFinalState({ opened: false });
+        }
     }, [activeBindGroup]);
 
     return (
