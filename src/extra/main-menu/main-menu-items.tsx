@@ -6,6 +6,8 @@ import { useFocusControl } from '../focus-control';
 import { MenuItem, MenuItemState } from './main-menu-bar';
 import { ENTER_KEY } from '../../main/keyboard-keys';
 import { MenuFolderItem } from './menu-folder-item';
+import { BindingElement } from '../binds/binds-elements';
+import { useBinds } from '../binds/key-binding';
 
 
 interface MenuExecutableItem {
@@ -14,13 +16,16 @@ interface MenuExecutableItem {
     name: string,
     current: boolean,
     path?: string,
-    icon?: string
+    icon?: string,
+    bindSrcId?: string
 }
 
-function MenuExecutableItem({identity, name, current, path, icon}: MenuExecutableItem) {
+function MenuExecutableItem({identity, name, current, path, icon, bindSrcId}: MenuExecutableItem) {
     const { clicked, onClick } = useClickSync(identity, 'receiver');
 
     const { focusClass, focusHtml } = useFocusControl(path);
+
+    const { isBindMode } = useBinds();
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === ENTER_KEY) {
@@ -35,6 +40,7 @@ function MenuExecutableItem({identity, name, current, path, icon}: MenuExecutabl
              onClick={onClick}
              onKeyDown={handleKeyDown} 
         >
+            {isBindMode && <BindingElement bindSrcId={bindSrcId} onChange={onClick} />}
             {icon && <img src={icon} className='rowIconSize'/>}
             <span>{name}</span>
         </div>
