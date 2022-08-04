@@ -81,6 +81,8 @@ trait MainMenuClock extends MenuItem
     icon: Option[String] = None,
     children: ElList[MenuInnerItem],
     receiver: Receiver[C],
+    bindSrcId: String,
+    groupId: String,
   ): MenuUserItem
 
   @c4elPath("MainMenuClock") def mainMenuClock(
