@@ -3,6 +3,7 @@ import {createElement as $,useState,useContext,createContext,useCallback,cloneEl
 import {em} from "./vdom-util.js"
 import {useWidths} from "../main/sizes.js"
 import {usePopupPos,usePopupMiss} from "../main/popup.js"
+import { NoCaptionContext } from "./vdom-hooks.js"
 
 //// move to shared
 
@@ -118,7 +119,9 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
     const children = [...filterGroupElements,...btnElements]
     /* maxWidth: maxFilterAreaWidth ? em(maxFilterAreaWidth) : "100vw"*/
     const height = yRowToEm(groupedFilters.length)
-    return $("div",{className},addContainer(height,children))
+    return $(NoCaptionContext.Provider, {value: false},
+        $("div",{className},addContainer(height,children))
+    )
 }
 
 ////
