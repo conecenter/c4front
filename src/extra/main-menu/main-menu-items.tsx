@@ -119,6 +119,8 @@ interface MenuUserItem {
     state: MenuItemState,
     path: string,
     icon?: string,
+    bindSrcId?: string,
+    groupId?: string,
     children: ReactElement<MenuItem | MenuItemsGroup>[]
 }
 
