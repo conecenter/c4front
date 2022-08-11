@@ -63,7 +63,7 @@ function handleFolderEnter(
 ) {
     setFinalState({ opened: true });
     const flatChildren = flattenMenuChildren(children);
-    const pathToFocus = flatChildren && flatChildren[0].props.path;
+    const pathToFocus = flatChildren[0]?.props.path;
     if (pathToFocus) {
         setTimeout(() => {
             const itemToFocus: HTMLElement | null = elem.querySelector(`[data-path='${pathToFocus}']`);

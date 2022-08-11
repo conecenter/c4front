@@ -38,7 +38,7 @@ function MenuFolderItem(props: MenuFolderItem) {
     const {
         currentState: { opened },
         setFinalState
-    } = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
+    } = useInputSync(identity, 'receiver', state, false, p => state, s => s, stateToPatch);
 
     const [popupLrMode, setPopupLrMode] = useState(false);
 
