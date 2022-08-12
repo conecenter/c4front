@@ -119,9 +119,7 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
     const children = [...filterGroupElements,...btnElements]
     /* maxWidth: maxFilterAreaWidth ? em(maxFilterAreaWidth) : "100vw"*/
     const height = yRowToEm(groupedFilters.length)
-    return $(NoCaptionContext.Provider, {value: false},
-        $("div",{className},addContainer(height,children))
-    )
+    return $("div",{className},addContainer(height,children))
 }
 
 ////
@@ -148,7 +146,7 @@ export function PopupManager({children}){
 export function FilterButtonExpander({identity,optButtons:rawOptButtons,className,popupClassName,popupItemClassName,children,openedChildren,getButtonWidth}){
     const optButtons = rawOptButtons || []
     const [popupElement,setPopupElement] = useState(null)
-    const [popupStyle,popupParentStyle] = usePopupPos(popupElement)
+    const [popupStyle] = usePopupPos(popupElement)
     const width = em(Math.max(...optButtons.map(getButtonWidth)))
     const [isOpened,toggle] = usePopupState(identity)
 
@@ -172,7 +170,8 @@ export function FilterButtonPlace({className,children}){
 }
 
 export function FilterItem({className,children}){
-    return $("div",{className},children)
+    return $(NoCaptionContext.Provider, {value: false},
+        $("div",{className},children))
 }
 
 export const components = {FilterArea,FilterButtonExpander,FilterButtonPlace,FilterItem,PopupManager}
