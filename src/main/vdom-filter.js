@@ -153,7 +153,8 @@ export function FilterButtonExpander({identity,optButtons:rawOptButtons,classNam
     //console.log("p-render-")
     return $("div",
         {
-            className, style:{height:"2em"}, [popupAttrName]:popupSkipValue,
+            className, style:{height:"2em"}, 
+            //...{[popupAttrName]:popupSkipValue},
             onClick: ev => toggle(!isOpened),
         },
         isOpened ? [
