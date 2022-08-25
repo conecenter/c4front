@@ -8,6 +8,7 @@ import {useGridDrag} from "./grid-drag.js"
 import {ESCAPE_KEY} from "./keyboard-keys"
 import {useFocusControl} from "../extra/focus-control.ts"
 import {BindGroupElement} from "../extra/binds/binds-elements"
+import { HoverExpander } from "../extra/hover-expander"
 
 const dragRowIdOf = identityAt('dragRow')
 const dragColIdOf = identityAt('dragCol')
@@ -102,7 +103,7 @@ const getGridCol = ({ colKey }) => colKey === GRIDCELL_COLSPAN_ALL ? spanAll : C
 
 const spanAll = "1 / -1"
 
-export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, expanding, expander, dragHandle, noDefCellClass, classNames: argClassNames, gridRow: argGridRow, gridColumn: argGridColumn, path, ...props }) {
+export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, expanding, expander, dragHandle, noDefCellClass, classNames: argClassNames, gridRow: argGridRow, gridColumn: argGridColumn, path, needsHoverExpander, ...props }) {
     const gridRow = argGridRow || getGridRow({ rowKey, rowKeyMod })
     const gridColumn = argGridColumn || getGridCol({ colKey })
     const style = { ...props.style, gridRow, gridColumn }
@@ -110,8 +111,8 @@ export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, expand
     const argClassNamesStr = argClassNames ? argClassNames.join(" ") : ""
     const { focusClass, focusHtml } = useFocusControl(path);
     const className = clsx(argClassNamesStr, !noDefCellClass && GRID_CLASS_NAMES.CELL, focusClass);
-    // const className = noDefCellClass ? argClassNamesStr : `${argClassNamesStr} ${GRID_CLASS_NAMES.CELL}`
-    return $("div", { ...props, ...expanderProps, 'data-col-key': colKey, 'data-row-key': rowKey, "data-drag-handle": dragHandle, ...focusHtml, style, className }, children)
+    const cellContent = needsHoverExpander ? $(HoverExpander, { children }) : children;
+    return $("div", { ...props, ...expanderProps, 'data-col-key': colKey, 'data-row-key': rowKey, "data-drag-handle": dragHandle, ...focusHtml, style, className }, cellContent)
 }
 
 const colKeysOf = children => children.map(c => c.colKey)
