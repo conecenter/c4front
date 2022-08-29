@@ -7,16 +7,16 @@ const PathContext = React.createContext("path");
 interface FocusControlObj {
     focusClass?: string,
     focusHtml?: { 'data-path'?: string, tabIndex: number }
-} 
+}
 
 function useFocusControl(path: string | undefined): FocusControlObj {
     if (!path) return {};
 
     const noFocusCtx = useContext(NoFocusContext);
-    if (noFocusCtx) return { focusClass: '', focusHtml: { tabIndex: 1 }};
-    
-    const focusClass = clsx('focusWrapper', isCurrentlyFocused(path) && 'activeFocusWrapper');
+    if (noFocusCtx) return { focusClass: '', focusHtml: { tabIndex: 1, "data-path": '' } };
+
     const focusHtml = { 'data-path': path, tabIndex: 1 };
+    const focusClass = clsx('focusWrapper', isCurrentlyFocused(path) && 'activeFocusWrapper');
     return { focusClass, focusHtml };
 }
 

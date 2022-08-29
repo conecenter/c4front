@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 
 const SEL_FOCUSABLE = '.focusWrapper';
+const SEL_FOCUSABLE_ATTR = '[data-path]';
 
 const ENTER_EVENT = 'enter';
 const DELETE_EVENT = 'delete';
@@ -58,5 +59,6 @@ export {
 	COPY_EVENT, 
 	CUT_EVENT, 
 	TAB_EVENT,
-	SEL_FOCUSABLE
+	SEL_FOCUSABLE,
+	SEL_FOCUSABLE_ATTR
 };

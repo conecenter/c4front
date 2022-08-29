@@ -1,8 +1,8 @@
 import clsx from 'clsx';
 import React, { useContext, ReactNode, useEffect, useRef, useState } from 'react';
 import { HorizontalCaptionContext, NoCaptionContext } from '../main/vdom-hooks';
-import { useFocusControl, FocusControlObj } from './focus-control';
-import { SEL_FOCUSABLE } from './focus-module-interface';
+import { useFocusControl } from './focus-control';
+import { SEL_FOCUSABLE_ATTR } from './focus-module-interface';
 import { FlexibleSizes } from './view-builder/flexible-api';
 
 
@@ -21,7 +21,7 @@ interface LabeledElement {
 function LabeledElement({ path, label, sizes, labelChildren, children }: LabeledElement) {
     const showCaption = !useContext(NoCaptionContext);
 
-    const { focusClass, focusHtml }: FocusControlObj = useFocusControl(path);
+    const { focusClass, focusHtml } = useFocusControl(path);
 
     const isHorizontalCaption = useContext(HorizontalCaptionContext);
 
@@ -29,10 +29,8 @@ function LabeledElement({ path, label, sizes, labelChildren, children }: Labeled
     const [disableChildFocus, setDisableChildFocus] = useState(false);
     const refLE = useRef<HTMLDivElement>(null);
     useEffect(() => {
-        if (hasSingleChildlessFocusable(refLE.current)) {
-            setDisableChildFocus(true);
-        }
-    }, []);
+        setDisableChildFocus(hasSingleChildlessFocusable(refLE.current));
+    }, [labelChildren, children]);
 
     const className = clsx(
         'labeledElement', 
@@ -69,19 +67,19 @@ function LabeledElement({ path, label, sizes, labelChildren, children }: Labeled
 }
 
 function hasSingleChildlessFocusable(elem: HTMLDivElement | null) {
-    const focusableDescendants = elem?.querySelectorAll(SEL_FOCUSABLE);
+    const focusableDescendants = elem?.querySelectorAll(SEL_FOCUSABLE_ATTR);
     if (!focusableDescendants) return false;
-    if (focusableDescendants.length <= 1) return true;
+    if (focusableDescendants.length === 1) return true;
 
     let count = 0;
     for (let elem of focusableDescendants) {
-        const focusableInside = elem.querySelector(SEL_FOCUSABLE);
+        const focusableInside = elem.querySelector(SEL_FOCUSABLE_ATTR);
         if (!focusableInside) {
             count++;
             if (count > 1) break;
         }
     }
-    return count <= 1;
+    return count === 1;
 }
 
 export { LabeledElement, NoFocusContext };
