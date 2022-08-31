@@ -10,7 +10,7 @@ interface FocusControlObj {
 }
 
 function useFocusControl(path: string | undefined): FocusControlObj {
-    if (!path) return {};
+    if (!path) return { focusClass: '', focusHtml: { tabIndex: 1, "data-path": '' } };
 
     const noFocusCtx = useContext(NoFocusContext);
     if (noFocusCtx) return { focusClass: '', focusHtml: { tabIndex: 1, "data-path": '' } };
