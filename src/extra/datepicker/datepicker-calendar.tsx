@@ -120,9 +120,9 @@ export function DatepickerCalendar({
         date: +dateValues[0],
         ...timeSettings
     });
-    const focusChanged = focusActiveWrapper(popupCalendarRef);
+    focusActiveWrapper(popupCalendarRef);
     sendFinalChange(createTimestampChange(getTimestamp(chosenDate, dateSettings)));
-    if (!focusChanged) closePopup();
+    closePopup();
   }
 
   /*
