@@ -20,10 +20,9 @@ interface LabeledElement {
 
 function LabeledElement({ path, label, sizes, labelChildren, children }: LabeledElement) {
     const showCaption = !useContext(NoCaptionContext);
+    const isHorizontalCaption = useContext(HorizontalCaptionContext);
 
     const { focusClass, focusHtml } = useFocusControl(path);
-
-    const isHorizontalCaption = useContext(HorizontalCaptionContext);
 
     // Disable focusable descendants focus if LE has single childless focusable descendant
     const [disableChildFocus, setDisableChildFocus] = useState(false);
@@ -33,8 +32,9 @@ function LabeledElement({ path, label, sizes, labelChildren, children }: Labeled
     }, [labelChildren, children]);
 
     const className = clsx(
-        'labeledElement', 
+        'labeledElement',
         focusClass,
+        disableChildFocus && 'focusProvider',
         isHorizontalCaption && 'horizontalCaption'
     );
 
@@ -45,7 +45,7 @@ function LabeledElement({ path, label, sizes, labelChildren, children }: Labeled
             maxWidth: sizes.max ? `${sizes.max}em` : undefined
         }
     };
-    
+
     return (
         <NoFocusContext.Provider value={disableChildFocus} >
             <div ref={refLE} className={className} {...focusHtml} style={style} >
