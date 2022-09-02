@@ -34,7 +34,7 @@ function LabeledElement({ path, label, sizes, labelChildren, children }: Labeled
     const className = clsx(
         'labeledElement',
         focusClass,
-        disableChildFocus && 'focusProvider',
+        disableChildFocus && 'focusFrameProvider',
         isHorizontalCaption && 'horizontalCaption'
     );
 
@@ -52,7 +52,7 @@ function LabeledElement({ path, label, sizes, labelChildren, children }: Labeled
                 {showCaption ? (
                     <NoCaptionContext.Provider value={true}>
                         <div className='labelBox'>
-                            <label>{label}</label>
+                            {label && <label>{label}</label>}
                             {labelChildren}
                         </div>
                         <div className='contentBox'>
