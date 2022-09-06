@@ -10,6 +10,7 @@ import {ARROW_DOWN_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY, M_
 import {MenuCustomItem, MenuExecutableItem, MenuItemsGroup, MenuPopupElement, MenuUserItem} from './main-menu-items';
 import {MenuFolderItem} from "./menu-folder-item";
 import { BindGroupElement } from "../binds/binds-elements";
+import { NoCaptionContext } from "../../main/vdom-hooks";
 
 const MENU_BAR_PATH = 'main-menu-bar';
 const KEY_MODIFICATOR = { ArrowLeft: -1, ArrowRight: 1 };
@@ -152,31 +153,33 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
 
   return (
     <BindGroupElement groupId='menubar' forceAtStart={true} >
-      <MenuControlsContext.Provider value={onArrowKey}>
-        <ExpanderArea key='top-bar' 
-                      maxLineCount={1}
-                      props={{ 
-                        className: clsx('mainMenuBar topRow', !isFocused && 'hideOnScroll'),
-                        style: { top: scrollPos.elementsStyles.get(MENU_BAR_PATH) },
-                        'data-path': MENU_BAR_PATH,
-                        onKeyDown: handleKeyDown,
-                        onFocus: () => setIsFocused(true),
-                        onBlur: handleMenuBarBlur
-                      }}
-                      expandTo={[
-          <Expander key='left-menu-compressed' area="lt" expandOrder={1} expandTo={leftMenuExpanded}>
-            <BurgerMenu opened={opened} setFinalState={setFinalState} children={leftChildren} domRef={domRef}/>
-          </Expander>,
+      <NoCaptionContext.Provider value={true} >
+        <MenuControlsContext.Provider value={onArrowKey}>
+          <ExpanderArea key='top-bar' 
+                        maxLineCount={1}
+                        props={{ 
+                          className: clsx('mainMenuBar topRow', !isFocused && 'hideOnScroll'),
+                          style: { top: scrollPos.elementsStyles.get(MENU_BAR_PATH) },
+                          'data-path': MENU_BAR_PATH,
+                          onKeyDown: handleKeyDown,
+                          onFocus: () => setIsFocused(true),
+                          onBlur: handleMenuBarBlur
+                        }}
+                        expandTo={[
+            <Expander key='left-menu-compressed' area="lt" expandOrder={1} expandTo={leftMenuExpanded}>
+              <BurgerMenu opened={opened} setFinalState={setFinalState} children={leftChildren} domRef={domRef}/>
+            </Expander>,
 
-          <Expander key='right-menu-compressed'
-                    className='rightMenuBox rightMenuCompressed'
-                    area="rt"
-                    expandOrder={0}
-                    expandTo={rightMenuExpanded}>
-            {rightMenuCompressed}
-          </Expander>
-        ]}/>
-      </MenuControlsContext.Provider>
+            <Expander key='right-menu-compressed'
+                      className='rightMenuBox rightMenuCompressed'
+                      area="rt"
+                      expandOrder={0}
+                      expandTo={rightMenuExpanded}>
+              {rightMenuCompressed}
+            </Expander>
+          ]}/>
+        </MenuControlsContext.Provider>
+      </NoCaptionContext.Provider>
     </BindGroupElement>
   );
 };

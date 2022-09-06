@@ -52,6 +52,6 @@ export const useAnimationFrame = extractedUse((element,callback) => {
     return () => cancelAnimationFrame(req)
 },useEffect)
 
-export const NoCaptionContext = createContext(true)
+export const NoCaptionContext = createContext(false)
 
 export const HorizontalCaptionContext = createContext(false);
