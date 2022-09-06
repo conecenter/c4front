@@ -48,20 +48,19 @@ function LabeledElement({ path, label, sizes, labelChildren, children }: Labeled
 
     return (
         <NoFocusContext.Provider value={disableChildFocus} >
-            <div ref={refLE} className={className} {...focusHtml} style={style} >
-                {showCaption ? (
-                    <NoCaptionContext.Provider value={true}>
+            <NoCaptionContext.Provider value={true}>
+                <div ref={refLE} className={className} {...focusHtml} style={style} >
+                    {showCaption &&
                         <div className='labelBox'>
                             {label && <label>{label}</label>}
                             {labelChildren}
-                        </div>
-                        <div className='contentBox'>
-                            {children}
-                        </div>
-                    </NoCaptionContext.Provider>
-                ) 
-                : children}
-            </div>
+                        </div> 
+                    }
+                    <div className='contentBox'>
+                        {children}
+                    </div>
+                </div>
+            </NoCaptionContext.Provider>
         </NoFocusContext.Provider>
     );
 }
