@@ -173,7 +173,12 @@ export function DatePickerInputElement({
 	const { focusClass, focusHtml } = useFocusControl(path);
 
   	return (
-		<div ref={inputBoxRef} className={clsx("inputBox", focusClass)} {...focusHtml} onBlur={onInputBoxBlur} >
+		<div ref={inputBoxRef} 
+			 className={clsx("inputBox", focusClass)}
+			 onClick={(e) => e.stopPropagation()}
+			 onBlur={onInputBoxBlur}			 
+			 {...focusHtml} >
+
 			<div className="inputSubBox">
 				<input ref={inputRef} value={inputValue} onChange={onChange} onKeyDown={onKeyDown} onBlur={onInputBlur} />
 			</div>
@@ -183,7 +188,9 @@ export function DatePickerInputElement({
 				className={`${currentState.popupDate ? 'rotate180deg ' : ''}btnCalendar`} 
 				onClick={onPopupToggle} />
 
-			{children}
+			<div className='sideContent'>
+				{children}
+			</div>
 
 			{currentState.popupDate &&
 				<DatepickerCalendar { ...{currentState, currentDateOpt, dateSettings, sendFinalChange, inputRef} } />}
