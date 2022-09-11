@@ -36,7 +36,7 @@ interface ClickSyncOpt {
 function useClickSyncOpt(
   identity: Object,
   receiverName: string,
-  needsReceiver: boolean
+  needsReceiver?: boolean
 ): ClickSyncOpt {
   const {currentState, sendFinalChange} = usePatchSync<boolean, boolean, boolean>(
     identity,

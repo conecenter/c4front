@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import React, { useContext, ReactNode, useEffect, useRef, useState } from 'react';
 import { HorizontalCaptionContext, NoCaptionContext } from '../main/vdom-hooks';
+import { useClickSyncOpt } from './exchange/click-sync';
 import { useFocusControl } from './focus-control';
 import { SEL_FOCUSABLE_ATTR } from './focus-module-interface';
 import { FlexibleSizes } from './view-builder/flexible-api';
@@ -11,14 +12,17 @@ const NoFocusContext = React.createContext(false);
 
 interface LabeledElement {
     key: string,
+    identity: Object,
     path: string,
     label: string,
     sizes?: FlexibleSizes,
+    accented?: boolean,
+    clickable?: boolean,
     labelChildren: ReactNode,
     children: ReactNode
 }
 
-function LabeledElement({ path, label, sizes, labelChildren, children }: LabeledElement) {
+function LabeledElement({ identity, path, label, sizes, accented, clickable, labelChildren, children }: LabeledElement) {
     const showCaption = !useContext(NoCaptionContext);
     const isHorizontalCaption = useContext(HorizontalCaptionContext);
 
@@ -31,9 +35,12 @@ function LabeledElement({ path, label, sizes, labelChildren, children }: Labeled
         setDisableChildFocus(hasSingleChildlessFocusable(refLE.current));
     }, [labelChildren, children]);
 
+    const { clicked, onClick } = useClickSyncOpt(identity, 'receiver', clickable);
+    
     const className = clsx(
         'labeledElement',
         focusClass,
+        accented && 'accented',
         disableChildFocus && 'focusFrameProvider',
         isHorizontalCaption && 'horizontalCaption'
     );
@@ -43,15 +50,16 @@ function LabeledElement({ path, label, sizes, labelChildren, children }: Labeled
         ...sizes && {
             flexBasis: `${sizes.min}em`,
             maxWidth: sizes.max ? `${sizes.max}em` : undefined
-        }
+        },
+        ...clickable && { cursor: 'pointer' }
     };
 
     return (
         <NoFocusContext.Provider value={disableChildFocus} >
             <NoCaptionContext.Provider value={true}>
-                <div ref={refLE} className={className} {...focusHtml} style={style} >
+                <div ref={refLE} className={className} {...focusHtml} style={style} onClick={onClick} >
                     {showCaption &&
-                        <div className='labelBox'>
+                        <div className='labelBox' style={clicked ? { opacity: 0.8 } : undefined}>
                             {label && <label>{label}</label>}
                             {labelChildren}
                         </div> 
