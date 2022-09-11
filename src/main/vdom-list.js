@@ -8,7 +8,8 @@ import {useGridDrag} from "./grid-drag.js"
 import {ESCAPE_KEY} from "./keyboard-keys"
 import {useFocusControl} from "../extra/focus-control.ts"
 import {BindGroupElement} from "../extra/binds/binds-elements"
-import { HoverExpander } from "../extra/hover-expander"
+import {HoverExpander} from "../extra/hover-expander"
+import {isSelColElement} from "../extra/dom-utils"
 
 const dragRowIdOf = identityAt('dragRow')
 const dragColIdOf = identityAt('dragCol')
@@ -187,6 +188,7 @@ const getCellDataAttrs = element => {
 const useGridClickAction = identity => {
     const [clickActionPatches, enqueueClickActionPatch] = useSync(clickActionIdOf(identity))
     return useCallback(ev => {
+        if (isSelColElement(ev.target)) return;
         const cellDataKeys = findFirstParent(getCellDataAttrs)(ev.target)
         if (cellDataKeys && cellDataKeys.rowKey && cellDataKeys.colKey) {
             const headers = {
@@ -255,7 +257,7 @@ export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey 
     const style = { display: "grid", gridTemplateRows, gridTemplateColumns }
     const res = $("div", {
         onMouseDown,
-        onClick: clickAction,
+        onClickCapture: clickAction,
         onKeyDown: keyboardAction,
         style,
         className: "grid",

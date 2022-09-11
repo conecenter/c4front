@@ -94,4 +94,7 @@ function formatTo3Digits(obj: LineSegmentCoords) {
     return obj;
 }
 
-export { findClosestNode };
+
+const isSelColElement = (elem: Element) => elem?.matches('.selCol :is(.checkBox, .checkBox :scope)');
+
+export { findClosestNode, isSelColElement };
