@@ -10,7 +10,7 @@ import ee.cone.c4vdom._
   def max: Option[Em]
 }
 
-@c4tagSwitch("FrontApp") trait FlexibleAlign extends ToJson
+@c4tagSwitch("FrontApp") trait FlexibleAlignment extends ToJson
 
 @c4tagSwitch("FrontApp") trait FlexibleGroupboxDisplay extends ToJson
 
@@ -24,10 +24,10 @@ trait FlexibleElement extends ToChildPair
     max: Option[Em],
   ): FlexibleSize
 
-  @c4val("l") def left: FlexibleAlign
-  @c4val("c") def center: FlexibleAlign
-  @c4val("r") def right: FlexibleAlign
-  @c4val("f") def fill: FlexibleAlign
+  @c4val("l") def left: FlexibleAlignment
+  @c4val("c") def center: FlexibleAlignment
+  @c4val("r") def right: FlexibleAlignment
+  @c4val("f") def fill: FlexibleAlignment
 
   @c4el("FlexibleColumnRoot") def flexibleColumnRoot(
     key: String,
@@ -37,7 +37,7 @@ trait FlexibleElement extends ToChildPair
   @c4el("FlexibleColumn") def flexibleColumn(
     key: String,
     sizes: Option[FlexibleSize],
-    align: Option[FlexibleAlign],
+    alignment: FlexibleAlignment,
     children: ViewRes,
     className: Option[String] = None,
   ): FlexibleElement
@@ -46,8 +46,8 @@ trait FlexibleElement extends ToChildPair
 
   @c4el("FlexibleGroupbox") def flexibleGroupbox(
     key: String,
-    sizes: FlexibleSize,
-    align: FlexibleAlign,
+    sizes: Option[FlexibleSize],
+    alignment: FlexibleAlignment,
     children: ElList[FlexibleElement],
     label: Option[String] = None,
     displayStyle: Option[FlexibleGroupboxDisplay] = None
@@ -56,27 +56,28 @@ trait FlexibleElement extends ToChildPair
   @c4el("FlexibleRow") def flexibleRow(
     key: String,
     sizes: Option[FlexibleSize],
+    alignment: FlexibleAlignment,
     children: ViewRes,
     className: Option[String] = None,
   ): FlexibleElement
 
   @c4val("FlexibleChildAlign") def flexibleChildAlign(
-    align: Option[FlexibleAlign],
+    alignment: Option[FlexibleAlignment],
   ): FlexibleChildAlign
 
   @c4el("FlexibleCell") def flexibleCell(
     key: String,
     sizes: Option[FlexibleSize],
     grow: Option[Boolean],
-    align: Option[FlexibleAlign],
+    alignment: FlexibleAlignment,
     children: ViewRes,
     className: Option[String] = None,
   ): FlexibleElement
 
   @c4el("FlexibleLabeled") def flexibleLabeled(
     key: String,
-    sizes: FlexibleSize,
-    align: FlexibleAlign,
+    sizes: Option[FlexibleSize],
+    align: FlexibleAlignment,
     label: String,
     children: ViewRes,
     labelChildren: ViewRes = Nil,
