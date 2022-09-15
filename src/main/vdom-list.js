@@ -109,9 +109,8 @@ export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, expand
     const gridColumn = argGridColumn || getGridCol({ colKey })
     const style = { ...props.style, gridRow, gridColumn }
     const expanderProps = expanding==="expander" ? { 'data-expander': expander || 'passive' } : {}
-    const argClassNamesStr = argClassNames ? argClassNames.join(" ") : ""
     const { focusClass, focusHtml } = useFocusControl(path);
-    const className = clsx(argClassNamesStr, !noDefCellClass && GRID_CLASS_NAMES.CELL, focusClass);
+    const className = clsx(argClassNames, !noDefCellClass && GRID_CLASS_NAMES.CELL, focusClass);
     const cellContent = needsHoverExpander ? $(HoverExpander, { children }) : children;
     return $("div", { ...props, ...expanderProps, 'data-col-key': colKey, 'data-row-key': rowKey, "data-drag-handle": dragHandle, ...focusHtml, style, className }, cellContent)
 }
