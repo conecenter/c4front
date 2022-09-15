@@ -41,7 +41,6 @@ function FlexibleColumn({key, sizes, className, children}: FlexibleColumn) {
     key,
     className: clsx(FLEXIBLE_COLUMN_CLASSNAME, className),
     style: sizes && {
-      flexBasis: `${sizes.min}em`,
       minWidth: `${sizes.min}em`,
       maxWidth: sizes.max ? `${sizes.max}em` : undefined,
     }
