@@ -61,6 +61,14 @@ trait FlexibleElement extends ToChildPair
     className: Option[String] = None,
   ): FlexibleElement
 
+  @c4el("ThinFlexibleRow") def thinFlexibleRow(
+    key: String,
+    sizes: Option[FlexibleSize],
+    align: FlexibleAlign,
+    children: ViewRes,
+    className: Option[String] = None,
+  ): FlexibleElement
+
   @c4val("FlexibleChildAlign") def flexibleChildAlign(
     align: Option[FlexibleAlign],
   ): FlexibleChildAlign
