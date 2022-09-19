@@ -42,7 +42,7 @@ function LabeledElement({ identity, path, label, sizes, accented, clickable, lab
         focusClass,
         accented && 'accented',
         disableChildFocus && 'focusFrameProvider',
-        isHorizontalCaption && 'horizontalCaption'
+        (!showCaption || isHorizontalCaption) && 'contentBox'
     );
 
     const style = {
@@ -56,19 +56,19 @@ function LabeledElement({ identity, path, label, sizes, accented, clickable, lab
 
     return (
         <NoFocusContext.Provider value={disableChildFocus} >
-            <NoCaptionContext.Provider value={true}>
                 <div ref={refLE} className={className} {...focusHtml} style={style} onClick={onClick} >
-                    {showCaption &&
-                        <div className='labelBox' style={clicked ? { opacity: 0.8 } : undefined}>
-                            {label && <label>{label}</label>}
-                            {labelChildren}
-                        </div> 
-                    }
-                    <div className='contentBox'>
-                        {children}
-                    </div>
+                    {showCaption ? (
+                        <NoCaptionContext.Provider value={true} >
+                            <div className='labelBox' style={clicked ? { opacity: 0.8 } : undefined}>
+                                {label && <label>{label}</label>}
+                                {labelChildren}
+                            </div>
+                            <div className='contentBox'>
+                                {children}
+                            </div>
+                        </NoCaptionContext.Provider> )
+                        : children }
                 </div>
-            </NoCaptionContext.Provider>
         </NoFocusContext.Provider>
     );
 }
