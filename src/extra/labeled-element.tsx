@@ -26,14 +26,17 @@ function LabeledElement({ identity, path, label, sizes, accented, clickable, lab
     const showCaption = !useContext(NoCaptionContext);
     const isHorizontalCaption = useContext(HorizontalCaptionContext);
 
-    const { focusClass, focusHtml } = useFocusControl(path);
+    const isEmptyLabel = !(label || labelChildren);
+
+    const { focusClass, focusHtml } = useFocusControl(isEmptyLabel ? '' : path);
 
     // Disable focusable descendants focus if LE has single childless focusable descendant
     const [disableChildFocus, setDisableChildFocus] = useState(false);
     const refLE = useRef<HTMLDivElement>(null);
     useEffect(() => {
-        setDisableChildFocus(hasSingleChildlessFocusable(refLE.current));
-    }, [labelChildren, children]);
+        if (isEmptyLabel) setDisableChildFocus(false);
+        else setDisableChildFocus(hasSingleChildlessFocusable(refLE.current));
+    }, [isEmptyLabel, labelChildren, children]);
 
     const { clicked, onClick } = useClickSyncOpt(identity, 'receiver', clickable);
     
