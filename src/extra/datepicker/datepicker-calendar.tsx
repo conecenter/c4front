@@ -12,6 +12,7 @@ interface DatepickerCalendarProps {
   currentDateOpt: Option<Date>,
   dateSettings: DateSettings,
   setFinalState: (state: DatePickerState) => void,
+  setTempState: (state: DatePickerState) => void,
   inputRef: React.MutableRefObject<HTMLInputElement | null>
 }
 
@@ -22,6 +23,7 @@ export function DatepickerCalendar({
   currentDateOpt,
   dateSettings,
   setFinalState,
+  setTempState,
   inputRef
 }: DatepickerCalendarProps) {
 
@@ -51,7 +53,7 @@ export function DatepickerCalendar({
     const change = e.currentTarget.dataset.change;
     if (change) {
       const newDate = addMonths(new Date(year, month), Number(change));
-      setFinalState({...currentState, popupDate: getCalendarDate(newDate) });
+      setTempState({...currentState, popupDate: getCalendarDate(newDate) });
     }
   }
 
@@ -63,7 +65,7 @@ export function DatepickerCalendar({
 
   function onMonthChoice(e: React.MouseEvent<HTMLButtonElement>) {
     const newMonth = e.currentTarget.dataset.month;
-    if (newMonth) setFinalState({ ...currentState, popupDate: { year, month: +newMonth } });
+    if (newMonth) setTempState({ ...currentState, popupDate: { year, month: +newMonth } });
   }
 
   /*
@@ -73,7 +75,7 @@ export function DatepickerCalendar({
 
   function onCalendarYearChange(e: React.MouseEvent<HTMLButtonElement>) {
     const change = e.currentTarget.dataset.change;
-    if (change) setFinalState({...currentState, popupDate: { month, year: year + Number(change) } });
+    if (change) setTempState({...currentState, popupDate: { month, year: year + Number(change) } });
   }
 
   /*
@@ -158,9 +160,9 @@ export function DatepickerCalendar({
       if (!e.currentTarget.dataset.change) return;
       if (nonEmpty(currentDateOpt)) {
           const adjustedDate = adjustDate(currentDateOpt, symbol, +e.currentTarget.dataset.change, true);
-          setFinalState(createTimestampState(getTimestamp(adjustedDate, dateSettings)));
+          setTempState(createTimestampState(getTimestamp(adjustedDate, dateSettings)));
       } 
-      else setFinalState(createTimestampState(Date.now()));
+      else setTempState(createTimestampState(Date.now()));
     }
   }
 

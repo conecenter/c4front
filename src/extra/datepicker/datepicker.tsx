@@ -158,7 +158,8 @@ export function DatePickerInputElement({
 					currentState, 
 					currentDateOpt, 
 					dateSettings, 
-					setFinalState, 
+					setFinalState,
+					setTempState, 
 					inputRef
 				}} />}
 		</div>
