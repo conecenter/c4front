@@ -1,15 +1,10 @@
 
 import {createElement as $,useState,useContext,createContext,useCallback,cloneElement,useMemo} from "react"
-import {em} from "./vdom-util.js"
+import {em,sum} from "./vdom-util.js"
 import {useWidths} from "../main/sizes.js"
 import {usePopupPos,usePopupMiss} from "../main/popup.js"
 
-//// move to shared
-
 //// non-shared
-
-const sum = l => l.reduce((a,b)=>a+b,0)
-
 
 const fitButtonsSide = (allButtons,sideName,isExpanded,isMultiline) => {
     const {list,getWidth} = allButtons
@@ -82,7 +77,7 @@ const fitRows = (filters,buttons,outerWidth,rowCount) => outerWidth ? (
 const dMinMax = el => el.props.maxWidth - el.props.minWidth
 
 export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
-    const [btnWidths,addPos,outerWidth,addContainer] = useWidths(null)
+    const [btnWidths,addPos,outerWidth,addContainer] = useWidths()
     const getButtonWidth = item => btnWidths[item.key]||0
     const getButtonsWidth = items => sum(items.map(getButtonWidth))
 
