@@ -1,15 +1,13 @@
 
 import {useState,useMemo,useCallback} from "react"
 import {useEventListener,useAnimationFrame} from "./vdom-hooks.js"
-import {findFirstParent,sortedWith} from "./vdom-util.js"
+import {findFirstParent,sortedWith,range} from "./vdom-util.js"
 
 const distinctBy = f => l => { //gives last?
     const entries = l.map(el => [f(el), el])
     const map = Object.fromEntries(entries)
     return entries.filter(([k, v]) => map[k] === v).map(([k, v]) => v)
 }
-
-const range = sz => [...Array(sz).keys()]
 
 const getLast = l => l[l.length - 1]
 
