@@ -14,9 +14,11 @@ const makePosYX = (top,left) => makePosXY(left,top)
 
 const fitTryAlign = ({lim,popupSize,parentFrom:from,parentSize}) => {
     const to = from + parentSize - popupSize
-    let tryFit = rangeSw(NaN, from, lim, NaN);
-    return !isNaN(tryFit) ? tryFit : !isNaN(tryFit = rangeSw(NaN, to, lim, NaN))
-        ? tryFit : (rangeSw(0, from, lim, lim) + rangeSw(0, to, lim, lim)) / 2
+    return (
+        rangeSw(undefined, from, lim, undefined) ??
+        rangeSw(undefined, to, lim, undefined) ??
+        (rangeSw(0, from, lim, lim) + rangeSw(0, to, lim, lim)) / 2
+    )
 }
 const fitNonOverlap = ({lim,popupSize,parentFrom,parentSize}) => (
     rangeSw(0, parentFrom + parentSize, lim, rangeSw(NaN, parentFrom - popupSize, lim, lim))

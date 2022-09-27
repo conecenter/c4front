@@ -12,16 +12,16 @@ const groupByIndex = (items,by) => {
 }
 
 const elementToUnscaledHeightUpdater = element => {
-    const height = parseFloat(getComputedStyle(element).height) / getFontSize(element) // left side can be rounded to pixels while right is not, so result is not perfectly unscaled
-    return was => !was || was < height ? height : was                                  // so we only increase memorized height to avoid chatter
+    const height = parseFloat(getComputedStyle(element).height) / getFontSize(element)
+    return was => !was || was < height ? height : was
 }
 
 const div = attr => createElement("div",attr)
 
 export const DashboardRoot = ({
     containerHeight, containerPaddingTop, containerPaddingLeft, containerStyle,
-    children, boardStyle, // board is inside container
-    minColWidth, maxColWidth, minScale, maxScale, cardStyles, rowGap, colGap // col widths are in em-s before scaling
+    children, boardStyle,
+    minColWidth, maxColWidth, minScale, maxScale, cardStyles, rowGap, colGap
 }) => {
     if(children.length <= 0) return null
     const [containerWidth,ref] = useWidth()
@@ -43,7 +43,7 @@ export const DashboardRoot = ({
         const scaleToApply = limited(minScale, scaleToFitContainer, maxScale)
         const willBest =
             wasBest && scaleToFitContainer < wasBest.scaleToFitContainer ||
-            wasBest && boardWidth * scaleToApply > containerInnerWidth ? // while scaleToFitContainer seems optimal, minScale can prevent fitting width at all
+            wasBest && boardWidth * scaleToApply > containerInnerWidth ?
             wasBest : {scaleToFitContainer,scaleToApply,colCount,boardWidth,rowHeights}
         return calcBoardSizes(colCount+1, willBest)
     }
@@ -79,16 +79,3 @@ export const DashboardRoot = ({
         })]
     })
 }
-
-/*
-We try to maximize usage of viewport area.
-Find such number of columns, for which we can fit board to viewport with max scale.
-
-Having different card heights, ex 3-col layout can happen to be higher than 2-col one,
-so we need to try every col count.
-
-when col-count and scale is chosen, we can make cards a bit wider
-
-in grid: justifySelf ~ align, alignSelf ~ vertical align
-
-*/

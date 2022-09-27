@@ -1,7 +1,7 @@
 
 import {createElement,useState,useMemo,useCallback,useLayoutEffect} from "react"
 import {em} from "./vdom-util.js"
-import {extractedUse} from "../main/vdom-hooks.js"
+import {extractedUse,useEventListener} from "../main/vdom-hooks.js"
 
 
 /********* ResizeObserver *****************************************************/
@@ -48,20 +48,15 @@ export const useWidth = () => {
     return [width,ref]
 }
 
-/********* multi width ********************************************************/
+/********* multi common *******************************************************/
 
 function Observed({observer,...props}){
     const ref = useObservedRef(observer)
     return createElement("div",{...props,ref})
 }
 
-const useAddPos = extractedUse((observer) => (key,pos,children,className) => createElement(Observed,{
-    key, [keyAttrName]: key, observer, children, className,
-    style: {
-        position: "absolute", boxSizing: "border-box",
-        top: em(pos?pos.top:0), left: em(pos?pos.left:0),
-        visibility: pos?null:"hidden",
-    }
+const useAddObserved = extractedUse((observer,keyAttrName) => (key,attr) => createElement(Observed,{
+    [keyAttrName]: key, observer, ...attr
 }), useMemo)
 
 const deleted = key => was => (
@@ -69,33 +64,68 @@ const deleted = key => was => (
         Object.fromEntries(Object.entries(was).filter(([k,v])=>k!==key)) : was
 )
 
-const keyAttrName = "data-width-key"
-
-const widthsFromElement = (keep,element) => {
+const useSizesFromElements = extractedUse((keyAttrName,singleSizeUpdater)=>(keep,element) => {
     const key = element.getAttribute(keyAttrName)
     if(!keep) return deleted(key)
-    const width = element.getBoundingClientRect().width / getFontSize(element)
+    const update = singleSizeUpdater(element)
     return was => {
-        const d = width - (key in was ? was[key] : 0) //Math.abs(d)<0.2
-        return d==0 ? was : {...was,[key]:width}
+        const willV = update(was[key])
+        return willV===was[key] ? was : {...was,[key]:willV}
     }
+}, useMemo)
+
+export const useObservedChildSizes = (keyAttrName,singleSizeUpdater) => {
+    const [theSizes,setSizes] = useState({})
+    const sizesFromElements = useSizesFromElements(keyAttrName, singleSizeUpdater)
+    const observer = useResizeObserver(false,setSizes,sizesFromElements)
+    const addObserved = useAddObserved(observer, keyAttrName)
+    return [theSizes,addObserved]
+}
+
+/********* multi width ********************************************************/
+
+const useAddPos = extractedUse(addObserved => (key,pos,children) => addObserved(key,{
+    key, children,
+    style: {
+        position: "absolute", boxSizing: "border-box",
+        top: em(pos?pos.top:0), left: em(pos?pos.left:0),
+        visibility: pos?null:"hidden",
+    }
+}), useMemo)
+
+const singleWidthUpdater = element => {
+    const width = element.getBoundingClientRect().width / getFontSize(element)
+    return was => width
 }
 
 const containerKeyAttrValue = "container"
 
-const useAddContainer = extractedUse((ref,keyAttrValue)=>(height,children, props={})=>{
-    const style = { position: "relative", height, ...props.style }
-    return createElement("div",{ ref, [keyAttrName]:containerKeyAttrValue, ...props, style, children })
-},useMemo)
+const useAddContainer = extractedUse(addObserved=>(height,children)=>addObserved(
+    containerKeyAttrValue,
+    { style: { position: "relative", height }, children }
+), useMemo)
 
-export const useWidths = nextRef => {
-    const [theWidths,setWidths] = useState({})
-    const observer = useResizeObserver(false,setWidths,widthsFromElement)
-    const addPos = useAddPos(observer)
+export const useWidths = () => {
+    const [theWidths,addObserved] = useObservedChildSizes("data-width-key",singleWidthUpdater)
+    const addPos = useAddPos(addObserved)
     //
-    const ref = useObservedRef(observer)
-    const addContainer = useAddContainer(useMergeRef(ref,nextRef))
+    const addContainer = useAddContainer(addObserved)
     const containerWidth = theWidths[containerKeyAttrValue]
     return [theWidths,addPos,containerWidth,addContainer]
 }
-/* addChildPos useChildWidths em */
+
+/********* viewport height ****************************************************/
+
+const useSetViewportStateFromElement = extractedUse(setState => element => {
+    const height = element ? parseInt(element.ownerDocument.documentElement.clientHeight / getFontSize(element)) : Infinity
+    setState({element,height})
+},useMemo)
+
+export const useViewportHeightIntEm = () => { // !fix ref
+    const [{height,element},setState] = useState(Infinity)
+    const set = useSetViewportStateFromElement(setState)
+    const refresh = useCallback(()=>set(element),[set,element])
+    const win = element && element.ownerDocument.defaultView
+    useEventListener(win, "resize", refresh)
+    return [height,set]
+}

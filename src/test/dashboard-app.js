@@ -38,6 +38,7 @@ const App = () => {
         ref,
         onClick: ev => setMode(was=>(was+1)%2),
         children: height && $(DashboardRoot,{
+            position: "absolute",
             containerHeight: height,
             containerPaddingTop: 1, containerPaddingLeft: 2,
             minColWidth: 10, maxColWidth: 12,

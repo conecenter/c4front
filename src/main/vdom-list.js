@@ -310,7 +310,7 @@ export function Highlighter({attrName, highlightClass: argHighlightClass, notHig
     const move = useCallback(ev => {
         if (gridSelector && !ev.target.matches(`${gridSelector} :scope`)) setKey(null);
         else setKey(findFirstParent(el=>el.getAttribute(attrName))(ev.target))
-    }, [gridKey])
+    }, [setKey,gridKey])
     const elemSelector = argHighlightClass ? `.${argHighlightClass}` : 'div'
     const notHighlightClass = argNotHighlightClass ? `:not(.${argNotHighlightClass})` : ''
     const style = key
