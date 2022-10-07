@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { CSSProperties } from 'react';
 
+const VK_COL_WIDTH = 2;
+const VK_ROW_HEIGHT = 2.2;
 
 interface VirtualKeyboard {
     key: string,
@@ -14,15 +16,18 @@ interface VirtualKeyboard {
 }
 
 interface KeyboardLayout {
-    base: VKButtonData[],
-    [name: string]: VKButtonData[]
+    [name: string]: {
+        rowsTotal: number,
+        colsTotal: number,
+        buttons: VKButtonData[]
+    }
 }
 
 interface VKButtonData {
-    key: string,
+    keyCode: string,
     position: { 
         row: number,
-        col: number, 
+        column: number, 
         width: number, 
         height: number
     },
@@ -30,27 +35,44 @@ interface VKButtonData {
     className?: string
 }
 
- function VirtualKeyboard({}: VirtualKeyboard) {
-    
+ function VirtualKeyboard({ keyboardTypes }: VirtualKeyboard) {
+    const { rowsTotal, colsTotal } = keyboardTypes.number.base;
+    const wrapperStyle: CSSProperties = {
+        height: `${VK_ROW_HEIGHT * rowsTotal}em`,
+        maxWidth: `${VK_COL_WIDTH * colsTotal}em`,
+    }
     return (
-        <div style={{position: 'fixed', height: '4.4em', maxWidth: '25em', border: '1px solid', bottom: '0', right: '0', left: '0', margin: 'auto'}}>
-            <div style={{position: 'absolute', left: '0', top: '0', width: '20%', height: '2.2em', border: '1px solid'}}>
-                A
-            </div>
-            <div style={{position: 'absolute', left: '20%', top: '0', width: '20%', height: '2.2em', border: '1px solid'}}>
-                B
-            </div>
-            <div style={{position: 'absolute', left: '40%', top: '0', width: '20%', height: '2.2em', border: '1px solid'}}>
-                C
-            </div>
-            <div style={{position: 'absolute', left: '60%', top: '0', width: '20%', height: '2.2em', border: '1px solid'}}>
-                Enter
-            </div>
-            <div style={{position: 'absolute', left: '80%', top: '0', width: '20%', height: '2.2em', border: '1px solid'}}>
-                C
-            </div>
+        <div style={wrapperStyle} className='virtualKeyboard' >
+            {keyboardTypes.number.base.buttons.map((btn, ind) => {
+                const { keyCode, position: {row, column, width, height}, name, className } = btn;
+                const btnStyle: CSSProperties = {
+                    position: 'absolute',
+                    left: `${(column - 1) * 100 / colsTotal}%`,
+                    top: `${VK_ROW_HEIGHT * (row - 1)}em`,
+                    width: `${width * 100 / colsTotal}%`,
+                    height: `${VK_ROW_HEIGHT * height}em`,
+                }
+                return <VKButton key={`${keyCode}-${ind}`} style={btnStyle} {...{keyCode, name, className}} />
+            })}
         </div>
     );
+ }
+
+
+ interface VKButton {
+    key: string,
+    keyCode: string,
+    style: CSSProperties,
+    className?: string,
+    name?: string
+ }
+
+ function VKButton({keyCode, style, className, name}: VKButton) {
+    return (
+        <button type='button' style={style} className={className} >
+            {name ?? keyCode}
+        </button>
+    )
  }
 
  export { VirtualKeyboard };
