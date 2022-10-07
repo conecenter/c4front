@@ -21,11 +21,11 @@ import ee.cone.c4vdom.{ToChildPair, ToJson, c4el, c4tagSwitch, c4tags, c4val}
 
   @c4val def key(
     key: String,
-    /*row: BigDecimal,
-    column: BigDecimal,
-    width: Option[BigDecimal] = Some(1),
-    height: Option[BigDecimal] = Some(1),*/
     symbol: String = "",
+    column: Em,
+    row: Em,
+    width: Option[Em],
+    height: Option[Em],
     color: ColorDef,
   ): Key
 
@@ -42,7 +42,6 @@ import ee.cone.c4vdom.{ToChildPair, ToJson, c4el, c4tagSwitch, c4tags, c4val}
     key: String, //VDomKey
     keyboardTypes: List[KeyboardType],
     position: KeyboardPosition,
-    scale: Em,
   ): ToChildPair
 }
 
