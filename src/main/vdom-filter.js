@@ -28,7 +28,8 @@ const doFitFilters = (filters,resTemplate) => {
     const fit = (res,filter) => {
         if(!res) return null
         const w = filter.props.minWidth
-        const row = res.find(row=>row.leftWidth>=w)
+        const minRowIndex = res.findLastIndex(row=>row.items.length>0) //0 ; this prevents filter order changing; make <=0 to make filters fill the gaps
+        const row = res.find((row,j) => j>=minRowIndex && row.leftWidth>=w)
         if(!row) return null
         const leftWidth = row.leftWidth-w
         const items = [...row.items,filter]
