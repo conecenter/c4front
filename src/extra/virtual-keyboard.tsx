@@ -1,4 +1,5 @@
 import React, { CSSProperties } from 'react';
+import { ColorDef } from './view-builder/common-api';
 
 const VK_COL_WIDTH = 2;
 const VK_ROW_HEIGHT = 2.2;
@@ -6,45 +7,42 @@ const VK_ROW_HEIGHT = 2.2;
 interface VirtualKeyboard {
     key: string,
     identity: Object,
-    keyboardTypes: {
-        // text: KeyboardLayout,
-        number: KeyboardLayout,
-        // location: KeyboardLayout
-    },
-    // position: 'left' | 'right' | 'bottom' | 'static',
-    // scale: number
+    keyboardTypes: KeyboardType[],
+    position: "left" | "right" | "bottom" | "static"
 }
 
-interface KeyboardLayout {
-    [name: string]: {
-        rowsTotal: number,
-        colsTotal: number,
-        buttons: VKButtonData[]
-    }
+interface KeyboardType {
+    name: string,   // TODO: text, number, location ?
+    modes: KeyboardMode[]   // TODO: change to [ Key[] ] ? why another object?
 }
 
-interface VKButtonData {
-    keyCode: string,
-    position: { 
-        row: number,
-        column: number, 
-        width: number, 
-        height: number
-    },
-    name?: string,
-    className?: string
+interface KeyboardMode {
+    keys: Key[],
+    rowsTotal: number,  // TODO ?
+    colsTotal: number   // TODO ?
+}
+
+interface Key {
+    key: string,
+    symbol?: string,
+    row: number,
+    column: number, 
+    width: number, 
+    height: number,
+    color?: ColorDef
 }
 
  function VirtualKeyboard({ keyboardTypes }: VirtualKeyboard) {
-    const { rowsTotal, colsTotal } = keyboardTypes.number.base;
+    // @ts-ignore
+    const { rowsTotal, colsTotal } = keyboardTypes[0].modes[0];
     const wrapperStyle: CSSProperties = {
         height: `${VK_ROW_HEIGHT * rowsTotal}em`,
         maxWidth: `${VK_COL_WIDTH * colsTotal}em`,
     }
     return (
         <div style={wrapperStyle} className='virtualKeyboard' >
-            {keyboardTypes.number.base.buttons.map((btn, ind) => {
-                const { keyCode, position: {row, column, width, height}, name, className } = btn;
+            {keyboardTypes[0].modes[0].keys.map((btn, ind) => {
+                const { key, symbol, row, column, width, height } = btn;
                 const btnStyle: CSSProperties = {
                     position: 'absolute',
                     left: `${(column - 1) * 100 / colsTotal}%`,
@@ -52,25 +50,24 @@ interface VKButtonData {
                     width: `${width * 100 / colsTotal}%`,
                     height: `${VK_ROW_HEIGHT * height}em`,
                 }
-                return <VKButton key={`${keyCode}-${ind}`} style={btnStyle} {...{keyCode, name, className}} />
+                return <VKKey key={`${key}-${ind}`} style={btnStyle} {...{ keyCode: key, symbol }} />
             })}
         </div>
     );
  }
 
 
- interface VKButton {
+ interface VKKey {
     key: string,
     keyCode: string,
-    style: CSSProperties,
-    className?: string,
-    name?: string
+    symbol?: string,
+    style: CSSProperties    
  }
 
- function VKButton({keyCode, style, className, name}: VKButton) {
+ function VKKey({keyCode, symbol, style}: VKKey) {
     return (
-        <button type='button' style={style} className={className} >
-            {name ?? keyCode}
+        <button type='button' style={style} >
+            {symbol ?? keyCode}
         </button>
     )
  }
