@@ -976,12 +976,16 @@ div.grid {
   right: 0;
   left: 0;
   margin: auto;
+
+  font-size: 0.35em;
   border: 1px solid black;
 
   button {
     margin: 0;
     padding: 0;
-    border: 1px solid black;
     overflow: hidden;
+    background-color: var(--color-light-headerColor);
+
+    border: 1px solid black;
   }
 }
