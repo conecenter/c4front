@@ -42,6 +42,7 @@ import ee.cone.c4vdom.{ToChildPair, ToJson, c4el, c4tagSwitch, c4tags, c4val}
     key: String, //VDomKey
     keyboardTypes: List[KeyboardType],
     position: KeyboardPosition,
+    setup: Boolean = false,
   ): ToChildPair
 }
 
