@@ -4,10 +4,43 @@ import { ColorDef } from './view-builder/common-api';
 import { createElement as el, ReactNode, useCallback, useMemo} from 'react'
 import {ScrollInfoContext, ScrollInfo} from "../extra/scroll-info-context";
 import {useAnimationFrame} from "../main/vdom-hooks";
+import clsx from 'clsx';
 
 const BOTTOM_ROW_CLASS = "bottom-row";
 const VK_COL_WIDTH = 2;
 const VK_ROW_HEIGHT = 2.2;
+
+
+interface PositioningStyles {
+    [name: string]: CSSProperties
+}
+
+const POSITIONING_STYLES: PositioningStyles = {
+    bottom: {
+        position: 'fixed',
+        bottom: '0',
+        right: '0',
+        left: '0',
+        margin: 'auto'
+    },
+    left: {
+        position: 'fixed',
+        left: '0',
+        top: '0',
+        bottom: '0',
+        margin: 'auto'
+    },
+    right: {
+        position: 'fixed',
+        right: '0',
+        top: '0',
+        bottom: '0',
+        margin: 'auto'
+    },
+    static: {
+        position: 'relative'
+    }
+}
 
 interface VirtualKeyboard {
     key: string,
@@ -23,9 +56,7 @@ interface KeyboardType {
 }
 
 interface KeyboardMode {
-    keys: Key[],
-    rowsTotal: number,  // TODO ?
-    colsTotal: number   // TODO ?
+    keys: Key[]
 }
 
 interface Key {
@@ -38,7 +69,7 @@ interface Key {
     color?: ColorDef
 }
 
-function VirtualKeyboard({ keyboardTypes, setupType }: VirtualKeyboard) {
+function VirtualKeyboard({ keyboardTypes, setupType, position }: VirtualKeyboard) {
     const vkRef = useRef<HTMLDivElement | null>(null);
     
     // Show VK logic
@@ -55,7 +86,6 @@ function VirtualKeyboard({ keyboardTypes, setupType }: VirtualKeyboard) {
     if (!keyboardType) return null;
 
     // Positioning logic
-    // const { rowsTotal, colsTotal } = keyboardTypes[0].modes[0];
     const [ rowsTotal, colsTotal ] = keyboardType.modes[0].keys.reduce((dimensions, key) => {
         const { row, column, width, height } = key;
         const colMax = column + width - 1;
@@ -63,14 +93,18 @@ function VirtualKeyboard({ keyboardTypes, setupType }: VirtualKeyboard) {
         const rowMax = row + height - 1;
         const colsTotal = rowMax > dimensions[1] ? rowMax : dimensions[1];
         return [rowsTotal, colsTotal];
-    }, [0, 0]);
+    }, [0, 0]);    
 
     const wrapperStyle: CSSProperties = {
         height: `${VK_ROW_HEIGHT * rowsTotal}em`,
-        maxWidth: `${VK_COL_WIDTH * colsTotal}em`,
+        width: `${VK_COL_WIDTH * colsTotal}em`,
+        ...POSITIONING_STYLES[position]
     }
     return (
-            <div ref={vkRef}  style={wrapperStyle} className={`virtualKeyboard ${BOTTOM_ROW_CLASS}`} >
+            <div ref={vkRef}  
+                 style={wrapperStyle} 
+                 className={clsx('virtualKeyboard', position === 'bottom' && BOTTOM_ROW_CLASS)} >
+
                 {keyboardType.modes[0].keys.map((btn, ind) => {
                     const { key, symbol, row, column, width, height } = btn;
                     const btnStyle: CSSProperties = {

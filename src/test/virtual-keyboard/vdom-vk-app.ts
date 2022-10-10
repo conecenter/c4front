@@ -32,9 +32,7 @@ function App() {
                                     { key: '3', row: 3, column: 3, width: 1, height: 1 },
                                     { key: '0', row: 4, column: 1, width: 3, height: 1 },
                                     { key: 'Enter', symbol: '⏎', row: 3, column: 4, width: 1, height: 2 },
-                                ],
-                                rowsTotal: 4,
-                                colsTotal: 4
+                                ]
                             }
                         ]
                     }
