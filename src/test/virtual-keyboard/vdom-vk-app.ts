@@ -1,10 +1,11 @@
 import ReactDOM from "react-dom"
 import React, { createElement as $ } from "react"
 import { createSyncProviders } from "../../main/vdom-hooks";
-import { VirtualKeyboard } from "../../extra/virtual-keyboard";
+import { components } from "../../extra/virtual-keyboard";
 
 
 function App() {
+    const { VirtualKeyboard } = components;
     const child = $('div', {style: {fontSize: '5em'}},
         $('input', {type: 'text', style: {border: '1px solid'}}),
         "jgjsdlgj dsgdslgjldfjg fjgfg  gadjfg fdgf gjf gfdgfdj gfdgfdjga ajglkfjgjlf gfag fgfadljglajlgjlajg glajgl lf gjfjg fdgfdl gagjafjgj agj fald glfadjlgj adfglfd glfa jglf dglfdl gfdlg fdjgfdjlf gfdl g",

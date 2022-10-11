@@ -148,4 +148,4 @@ function VirtualKeyboard({ keyboardTypes, setupType, position }: VirtualKeyboard
     )
  }
 
- export { VirtualKeyboard };
+ export const components = {VirtualKeyboard}
