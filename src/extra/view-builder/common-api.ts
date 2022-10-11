@@ -36,4 +36,4 @@ export function colorToProps<T>(color: ColorDef): ColorProps {
     }
 }
 
-export type {ColorDef}
+export type {ColorDef, ColorProps}

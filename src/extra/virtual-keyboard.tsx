@@ -1,7 +1,7 @@
 import React, { CSSProperties, MutableRefObject, useContext, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { PathContext } from './focus-control';
-import { ColorDef } from './view-builder/common-api';
+import { ColorDef, ColorProps, colorToProps } from './view-builder/common-api';
 
 
 const BOTTOM_ROW_CLASS = "bottom-row";
@@ -97,22 +97,24 @@ function VirtualKeyboard({ keyboardTypes, setupType, position }: VirtualKeyboard
         width: `${VK_COL_WIDTH * colsTotal}em`,
         ...POSITIONING_STYLES[position]
     }
+
+    const keys = keyboardType.modes[0].keys.map((btn, ind) => {
+        const { key, symbol, row, column, width, height, color } = btn;
+        const btnStyle: CSSProperties = {
+            position: 'absolute',
+            left: `${(column - 1) * 100 / colsTotal}%`,
+            top: `${VK_ROW_HEIGHT * (row - 1)}em`,
+            width: `${width * 100 / colsTotal}%`,
+            height: `${VK_ROW_HEIGHT * height}em`
+        }
+        return <VKKey key={`${key}-${ind}`} style={btnStyle} {...{ keyCode: key, symbol, color }} />
+    });
+
     return (
             <div ref={vkRef}  
                  style={wrapperStyle} 
                  className={clsx('vkKeyboard', position === 'bottom' && BOTTOM_ROW_CLASS)} >
-
-                {keyboardType.modes[0].keys.map((btn, ind) => {
-                    const { key, symbol, row, column, width, height } = btn;
-                    const btnStyle: CSSProperties = {
-                        position: 'absolute',
-                        left: `${(column - 1) * 100 / colsTotal}%`,
-                        top: `${VK_ROW_HEIGHT * (row - 1)}em`,
-                        width: `${width * 100 / colsTotal}%`,
-                        height: `${VK_ROW_HEIGHT * height}em`,
-                    }
-                    return <VKKey key={`${key}-${ind}`} style={btnStyle} {...{ keyCode: key, symbol }} />
-                })}
+                {keys}
             </div>
         );
 }
@@ -128,19 +130,24 @@ function VirtualKeyboard({ keyboardTypes, setupType, position }: VirtualKeyboard
     key: string,
     keyCode: string,
     symbol?: string,
-    style: CSSProperties
+    style: CSSProperties,
+    color?: ColorDef
  }
 
- function VKKey({keyCode, symbol, style}: VKKey) {
+ function VKKey({keyCode, symbol, style, color}: VKKey) {
+    const { style: colorStyle, className }: ColorProps = color ? colorToProps(color) : {};
+    const colorClass = className || 'headerLighterColorCss';
+
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         const window = (e.target as HTMLButtonElement).ownerDocument.defaultView;
         const customEvent = new KeyboardEvent('keydown', { key: keyCode, bubbles: true, code: 'vk' });
         window?.dispatchEvent(customEvent);
     }
+
     return (
         <button type='button' 
-                className='vkElement' 
-                style={style} 
+                className={clsx('vkElement', colorClass)}
+                style={{ ...style, ...colorStyle }}
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={handleClick} >
             {symbol ?? keyCode}
@@ -148,4 +155,4 @@ function VirtualKeyboard({ keyboardTypes, setupType, position }: VirtualKeyboard
     )
  }
 
- export const components = {VirtualKeyboard}
+ export { VirtualKeyboard }

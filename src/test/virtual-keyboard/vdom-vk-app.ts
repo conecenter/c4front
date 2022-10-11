@@ -1,11 +1,10 @@
 import ReactDOM from "react-dom"
 import React, { createElement as $ } from "react"
 import { createSyncProviders } from "../../main/vdom-hooks";
-import { components } from "../../extra/virtual-keyboard";
+import { VirtualKeyboard } from "../../extra/virtual-keyboard";
 
 
 function App() {
-    const { VirtualKeyboard } = components;
     const child = $('div', {style: {fontSize: '5em'}},
         $('input', {type: 'text', style: {border: '1px solid'}}),
         "jgjsdlgj dsgdslgjldfjg fjgfg  gadjfg fdgf gjf gfdgfdj gfdgfdjga ajglkfjgjlf gfag fgfadljglajlgjlajg glajgl lf gjfjg fdgfdl gagjafjgj agj fald glfadjlgj adfglfd glfa jglf dglfdl gfdlg fdjgfdjlf gfdl g",
@@ -32,7 +31,8 @@ function App() {
                                 { key: '2', row: 3, column: 2, width: 1, height: 1 },
                                 { key: '3', row: 3, column: 3, width: 1, height: 1 },
                                 { key: '0', row: 4, column: 1, width: 3, height: 1 },
-                                { key: 'Enter', symbol: '⏎', row: 3, column: 4, width: 1, height: 2 },
+                                //@ts-ignore
+                                { key: 'Enter', symbol: '⏎', row: 3, column: 4, width: 1, height: 2, color: { tp: 'p', cssClass: 'redColor' } },
                             ]
                         }
                     ]

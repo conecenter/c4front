@@ -295,6 +295,11 @@ div.grid {
   border-color: var(--color-secondaryColor);
 }
 
+.headerLighterColorCss{
+  background: var(--color-light-headerColor);
+  color: var(--textColor-light-headerColor);
+}
+
 .primaryColor {
   background-color: #e5d089;
   color: white;
@@ -972,16 +977,15 @@ div.grid {
 /***********************Virtual Keyboard**************************/
 .vkKeyboard {
   max-width: 100%;
+  background-color: var(--color-body);
+  border: 1px solid var(--textColor-body);
 
   font-size: 0.35em;
-  border: 1px solid black;
 
-  button {
+  .vkElement {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background-color: var(--color-light-headerColor);
-
-    border: 1px solid black;
+    border: 1px solid var(--textColor-body);
   }
 }
