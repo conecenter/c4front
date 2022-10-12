@@ -2,6 +2,7 @@ import React, { CSSProperties, MutableRefObject, useContext, useEffect, useMemo,
 import clsx from 'clsx';
 import { PathContext } from './focus-control';
 import { ColorDef, ColorProps, colorToProps } from './view-builder/common-api';
+import { usePatchSync } from './exchange/patch-sync';
 
 const BOTTOM_ROW_CLASS = "bottom-row";
 const VK_COL_WIDTH = 2;
@@ -68,6 +69,8 @@ interface Key {
 function VirtualKeyboard({ identity, hash, position, setupType }: VirtualKeyboard) {
     const vkRef = useRef<HTMLDivElement | null>(null);
 
+    const handleClick = useVKSyncOpt(identity, 'receiver', !!setupType);
+
     // Get keyboard types data
     const [keyboardTypes, setKeyboardTypes] = useState<KeyboardType[] | null>(null);
     useEffect(() => {
@@ -128,7 +131,7 @@ function VirtualKeyboard({ identity, hash, position, setupType }: VirtualKeyboar
             width: `${width * 100 / colsTotal!}%`,
             height: `${VK_ROW_HEIGHT * height}em`
         }
-        return <VKKey key={`${key}-${ind}`} style={btnStyle} {...{ keyCode: key, symbol, color }} />
+        return <VKKey key={`${key}-${ind}`} style={btnStyle} {...{ keyCode: key, symbol, color }} handleClick={handleClick} />
     }), [keyboardType]);
 
     return showVk ? (
@@ -154,23 +157,47 @@ function getBiggerNum(a: number, b: number) {
     return a > b ? a : b;
 }
 
+function useVKSyncOpt(
+    identity: Object,
+    receiverName: string,
+    needsReceiver?: boolean
+  ) {
+    const {sendFinalChange} = usePatchSync<string, string, string>(
+      identity,
+      receiverName,
+      '',
+      false,
+      (b) => b,
+      (ch) => ({
+        headers: {"x-r-key": ch},
+        value: ""
+      }),
+      (p) => '',
+      (prevState, ch) => ch
+    )
+    const onClick = needsReceiver ? (ch: string) => sendFinalChange(ch) : undefined
+    return onClick;
+  }
+
 
  interface VKKey {
     key: string,
     keyCode: string,
     symbol?: string,
     style: CSSProperties,
-    color?: ColorDef
+    color?: ColorDef,
+    handleClick?: (ch: string) => void
  }
 
- function VKKey({keyCode, symbol, style, color}: VKKey) {
+ function VKKey({keyCode, symbol, style, color, handleClick}: VKKey) {
     const { style: colorStyle, className }: ColorProps = color ? colorToProps(color) : {};
     const colorClass = className || 'headerLighterColorCss';
 
-    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const onClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         const window = (e.target as HTMLButtonElement).ownerDocument.defaultView;
         const customEvent = new KeyboardEvent('keydown', { key: keyCode, bubbles: true, code: 'vk' });
         window?.dispatchEvent(customEvent);
+        handleClick && handleClick(keyCode);
     }
 
     return (
@@ -178,7 +205,7 @@ function getBiggerNum(a: number, b: number) {
                 className={clsx('vkElement', colorClass)}
                 style={{ ...style, ...colorStyle }}
                 onMouseDown={(e) => e.preventDefault()}
-                onClick={handleClick} >
+                onClick={onClick} >
             {symbol ?? keyCode}
         </button>
     )
