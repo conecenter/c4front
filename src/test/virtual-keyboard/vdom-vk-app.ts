@@ -13,7 +13,8 @@ function App() {
             identity: {parent: "test"},
             position: 'bottom',
             setupType: 'text',
-            keyboardTypes: [
+            hash: 'url',
+            /*keyboardTypes: [
                 {
                     name: 'text',
                     modes: [
@@ -37,7 +38,7 @@ function App() {
                         }
                     ]
                 }
-            ]
+            ]*/
         })
     )
     const sender = {
