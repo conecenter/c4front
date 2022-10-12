@@ -5,8 +5,8 @@ import { ColorDef, ColorProps, colorToProps } from './view-builder/common-api';
 import { usePatchSync } from './exchange/patch-sync';
 
 const BOTTOM_ROW_CLASS = "bottom-row";
-const VK_COL_WIDTH = 2;
-const VK_ROW_HEIGHT = 2.2;
+const VK_COL_WIDTH = 2.8;
+const VK_ROW_HEIGHT = 3.1;
 
 const FIXED_STYLES: CSSProperties = {
     position: 'fixed',
@@ -69,6 +69,7 @@ interface Key {
 function VirtualKeyboard({ identity, hash, position, setupType }: VirtualKeyboard) {
     const vkRef = useRef<HTMLDivElement | null>(null);
 
+    // Exchange with server in setup mode
     const handleClick = useVKSyncOpt(identity, 'receiver', !!setupType);
 
     // Get keyboard types data
@@ -128,7 +129,7 @@ function VirtualKeyboard({ identity, hash, position, setupType }: VirtualKeyboar
             position: 'absolute',
             left: `${(column - 1) * 100 / colsTotal!}%`,
             top: `${VK_ROW_HEIGHT * (row - 1)}em`,
-            width: `${width * 100 / colsTotal!}%`,
+            width: `${width* 100 / colsTotal!}%`,
             height: `${VK_ROW_HEIGHT * height}em`
         }
         return <VKKey key={`${key}-${ind}`} style={btnStyle} {...{ keyCode: key, symbol, color }} handleClick={handleClick} />
@@ -136,7 +137,7 @@ function VirtualKeyboard({ identity, hash, position, setupType }: VirtualKeyboar
 
     return showVk ? (
         <div ref={vkRef}
-            className={clsx('vkKeyboard', position === 'bottom' && BOTTOM_ROW_CLASS)} 
+            className={clsx('vkKeyboard', 'headerLighterColorCss', position === 'bottom' && BOTTOM_ROW_CLASS)} 
             style={{
                 height: `${VK_ROW_HEIGHT * rowsTotal}em`,
                 width: `${VK_COL_WIDTH * colsTotal}em`,
@@ -163,19 +164,19 @@ function useVKSyncOpt(
     needsReceiver?: boolean
   ) {
     const {sendFinalChange} = usePatchSync<string, string, string>(
-      identity,
-      receiverName,
-      '',
-      false,
-      (b) => b,
-      (ch) => ({
-        headers: {"x-r-key": ch},
-        value: ""
-      }),
-      (p) => '',
-      (prevState, ch) => ch
-    )
-    const onClick = needsReceiver ? (ch: string) => sendFinalChange(ch) : undefined
+        identity,
+        receiverName,
+        '',
+        false,
+        (b) => b,
+        (ch) => ({
+            headers: {"x-r-key": ch},
+            value: ""
+        }),
+        (p) => '',
+        (prevState, ch) => ch
+    );
+    const onClick = needsReceiver ? (ch: string) => sendFinalChange(ch) : undefined;
     return onClick;
   }
 
@@ -191,7 +192,7 @@ function useVKSyncOpt(
 
  function VKKey({keyCode, symbol, style, color, handleClick}: VKKey) {
     const { style: colorStyle, className }: ColorProps = color ? colorToProps(color) : {};
-    const colorClass = className || 'headerLighterColorCss';
+    const colorClass = className || 'bodyColorCss';
 
     const onClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         const window = (e.target as HTMLButtonElement).ownerDocument.defaultView;
@@ -201,14 +202,21 @@ function useVKSyncOpt(
     }
 
     return (
-        <button type='button' 
-                className={clsx('vkElement', colorClass)}
-                style={{ ...style, ...colorStyle }}
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={onClick} >
-            {symbol ?? keyCode}
-        </button>
+        <div className='vkKeyBox' style={style} >
+            <button type='button' 
+                    className={clsx('vkElement', colorClass)}
+                    style={colorStyle}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={onClick} >
+                {symbol ?? keyCode}
+            </button>
+        </div>
     )
  }
+/*
+ display: flex;
+ align-items: stretch;
+ padding: 6px;
+ box-sizing: border-box;*/
 
  export { VirtualKeyboard }
