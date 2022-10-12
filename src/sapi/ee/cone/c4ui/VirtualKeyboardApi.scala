@@ -6,7 +6,7 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
 
 @c4tagSwitch("FrontApp") trait KeyboardType extends ToJson
 
-@c4tags("FrontApp") trait VirtualKeyboardElements {
+@c4tags("FrontApp") trait VirtualKeyboardElements[C] {
 
   @c4val("left") def left: KeyboardPosition
   @c4val("right") def right: KeyboardPosition
@@ -18,6 +18,7 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
     hash: String, // hash of a published json file with the rest of the keyboard
     setupType: String = "", // Name of the keyboard type to set-up (only setup mode)
     position: KeyboardPosition,
+    receiver: Receiver[C] = NoReceiver[C],
   ): ToChildPair
 }
 
