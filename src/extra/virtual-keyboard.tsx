@@ -110,13 +110,13 @@ function VirtualKeyboard({ identity, hash, position, setupType }: VirtualKeyboar
         ? keyboardType.modes[0].keys.reduce(
             (dimensions, key) => {
                 const { row, column, width, height } = key;
-                const colMax = column + width - 1;
-                const rowsTotal = getBiggerNum(colMax, dimensions[0]);
                 const rowMax = row + height - 1;
-                const colsTotal = getBiggerNum(rowMax, dimensions[1]);
+                const rowsTotal = getBiggerNum(rowMax, dimensions[0]);
+                const colMax = column + width - 1;
+                const colsTotal = getBiggerNum(colMax, dimensions[1]);
                 return [rowsTotal, colsTotal];
             }, [0, 0])
-        : []
+        : [0, 0]
     ), [keyboardType]);
 
     const keys = useMemo(() => keyboardType?.modes[0].keys.map((btn, ind) => {
@@ -135,8 +135,8 @@ function VirtualKeyboard({ identity, hash, position, setupType }: VirtualKeyboar
         <div ref={vkRef}
             className={clsx('vkKeyboard', position === 'bottom' && BOTTOM_ROW_CLASS)} 
             style={{
-                height: `${VK_ROW_HEIGHT * rowsTotal!}em`,
-                width: `${VK_COL_WIDTH * colsTotal!}em`,
+                height: `${VK_ROW_HEIGHT * rowsTotal}em`,
+                width: `${VK_COL_WIDTH * colsTotal}em`,
                 ...POSITIONING_STYLES[position]
             }} >
             {keys}
@@ -145,7 +145,7 @@ function VirtualKeyboard({ identity, hash, position, setupType }: VirtualKeyboar
 }
 
  function getInputInFocus(domRef: MutableRefObject<HTMLDivElement | null>, currentPath: string) {
-    const cNode = domRef.current?.ownerDocument.querySelector(`[data-path]=${currentPath}`);
+    const cNode = domRef.current?.ownerDocument.querySelector(`[data-path='${currentPath}']`);
     const input = cNode?.querySelector<HTMLInputElement>('input:not([readonly])');
     return input;
 }
