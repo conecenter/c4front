@@ -76,7 +76,7 @@ function VirtualKeyboard({ identity, hash, position, setupType }: VirtualKeyboar
             if (!response.ok) throw new Error('Network response was not OK');
             return response.json();
         })
-        .then(keyboardsData => setKeyboardTypes(keyboardsData))
+        .then(keyboardsData => setKeyboardTypes(keyboardsData.keyboardTypes))
         .catch(error => console.error('Fetch operation error:', error))
     }, [hash]);
 
@@ -99,10 +99,11 @@ function VirtualKeyboard({ identity, hash, position, setupType }: VirtualKeyboar
         else if (showVk) setShowVk(false);
     }, [currentPath, setupType, keyboardTypes]);
     
-
     // Get keyboard type
     const keyboardTypeName = setupType || inputType.current;
     const keyboardType = keyboardTypes?.find(type => type.name === keyboardTypeName);
+
+    console.log(keyboardType)
 
     // Positioning logic
     const [ rowsTotal, colsTotal ] = useMemo(() => (keyboardType 
@@ -117,15 +118,6 @@ function VirtualKeyboard({ identity, hash, position, setupType }: VirtualKeyboar
             }, [0, 0])
         : []
     ), [keyboardType]);
-    /*const [ rowsTotal, colsTotal ] = keyboardType.modes[0].keys.reduce(
-        (dimensions, key) => {
-            const { row, column, width, height } = key;
-            const colMax = column + width - 1;
-            const rowsTotal = getBiggerNum(colMax, dimensions[0]);
-            const rowMax = row + height - 1;
-            const colsTotal = getBiggerNum(rowMax, dimensions[1]);
-            return [rowsTotal, colsTotal];
-        }, [0, 0]);*/
 
     const keys = useMemo(() => keyboardType?.modes[0].keys.map((btn, ind) => {
         const { key, symbol, row, column, width, height, color } = btn;
@@ -139,19 +131,17 @@ function VirtualKeyboard({ identity, hash, position, setupType }: VirtualKeyboar
         return <VKKey key={`${key}-${ind}`} style={btnStyle} {...{ keyCode: key, symbol, color }} />
     }), [keyboardType]);
 
-    return showVk
-        ? (
-            <div ref={vkRef}
-                 className={clsx('vkKeyboard', position === 'bottom' && BOTTOM_ROW_CLASS)} 
-                 style={{
-                    height: `${VK_ROW_HEIGHT * rowsTotal!}em`,
-                    width: `${VK_COL_WIDTH * colsTotal!}em`,
-                    ...POSITIONING_STYLES[position]
-                }} >
-                {keys}
-            </div>
+    return showVk ? (
+        <div ref={vkRef}
+            className={clsx('vkKeyboard', position === 'bottom' && BOTTOM_ROW_CLASS)} 
+            style={{
+                height: `${VK_ROW_HEIGHT * rowsTotal!}em`,
+                width: `${VK_COL_WIDTH * colsTotal!}em`,
+                ...POSITIONING_STYLES[position]
+            }} >
+            {keys}
+        </div>
         ) : null;
-        
 }
 
  function getInputInFocus(domRef: MutableRefObject<HTMLDivElement | null>, currentPath: string) {
