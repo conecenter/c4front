@@ -2,7 +2,7 @@ import React, { CSSProperties, MutableRefObject, useContext, useEffect, useMemo,
 import clsx from 'clsx';
 import { PathContext } from './focus-control';
 import { ColorDef, ColorProps, colorToProps } from './view-builder/common-api';
-import { usePatchSync } from './exchange/patch-sync';
+import { Patch, PatchHeaders, usePatchSync } from './exchange/patch-sync';
 
 const BOTTOM_ROW_CLASS = "bottom-row";
 const VK_COL_WIDTH = 3.2;
@@ -44,7 +44,8 @@ interface VirtualKeyboard {
     identity: Object,
     hash: string,
     position: "left" | "right" | "bottom" | "static",
-    setupType?: string
+    setupType?: string,
+    switchedMode?: VkState
 }
 
 interface KeyboardType {
@@ -66,11 +67,98 @@ interface Key {
     color?: ColorDef
 }
 
-function VirtualKeyboard({ identity, hash, position, setupType }: VirtualKeyboard) {
+type VkState = SwitchedMode | undefined;
+
+interface SwitchedMode {
+    vkType: string,
+    mode: number
+}
+
+type VkChange = KeypressChange | ModeChange | NoAction;
+
+interface KeypressChange {
+    tp: 'keypress',
+    key: string
+}
+
+interface ModeChange {
+    tp: 'modeChange',
+    vkType: string,
+    mode: number
+}
+
+interface NoAction {
+    tp: "noop"
+}
+
+function changeToPatch(ch: VkChange): Patch {
+    return {
+        value: ch.tp,
+        headers: getHeaders(ch)
+    };
+}
+
+function getHeaders(ch: VkChange): PatchHeaders {
+    switch (ch.tp) {
+        case "keypress":
+            return { "x-r-key": ch.key };
+        case "modeChange":
+            return { 
+                "x-r-vktype": ch.vkType,
+                "x-r-mode": ch.mode.toString()
+            };
+        default:
+            return {};
+    }
+}
+
+function patchToChange(patch: Patch): VkChange {
+    const headers = patch.headers as PatchHeaders;
+    switch (patch.value) {
+        case 'keypress':
+            return {
+                tp: 'keypress',
+                key: headers["x-r-key"]
+            };
+        case 'modeChange':
+            return {
+                tp: 'modeChange',
+                vkType: headers["x-r-vktype"],
+                mode: Number(headers["x-r-mode"])
+            };
+        default:
+            return { tp: 'noop' };
+    }
+}
+
+function applyChange(prevState: VkState, ch: VkChange): VkState {
+    switch (ch.tp) {
+        case "modeChange":
+            return { vkType: ch.vkType, mode: ch.mode };
+        default:
+            return prevState;
+    }
+}
+
+const SWITCHER_KEYS = ['Switcher1', 'Switcher2', 'Switcher3'];
+const isSwitcherKey = (keyCode: string) => SWITCHER_KEYS.includes(keyCode);
+
+function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: VirtualKeyboard) {
     const vkRef = useRef<HTMLDivElement | null>(null);
 
-    // Exchange with server in setup mode
-    const handleClick = useVKSyncOpt(identity, 'receiver', !!setupType);
+    // Exchange with server
+    //const handleClick = useVKSyncOpt(identity, 'receiver', !!setupType);
+    const {currentState, sendFinalChange} = usePatchSync<VkState, VkState, VkChange>(
+        identity,
+        'receiver',
+        switchedMode,
+        false,
+        b => b,
+        changeToPatch,
+        patchToChange,
+        applyChange
+    );
+    //const handleClick = setupType ? (ch: VkChange) => sendFinalChange(ch) : undefined;
 
     // Get keyboard types data
     const [keyboardTypes, setKeyboardTypes] = useState<KeyboardType[] | null>(null);
@@ -97,9 +185,12 @@ function VirtualKeyboard({ identity, hash, position, setupType }: VirtualKeyboar
         else setVkType(undefined);
     }, [currentPath, setupType, keyboardTypes]);
 
+    const mode = currentState && vkType?.name === currentState.vkType
+        ? (currentState.mode - 1) : 0;
+
     // Positioning logic
     const [ rowsTotal, colsTotal ] = useMemo(() => (vkType 
-        ? vkType.modes[0].keys.reduce(
+        ? vkType.modes[mode].keys.reduce(
             (dimensions, key) => {
                 const { row, column, width, height } = key;
                 const rowMax = row + height - 1;
@@ -109,9 +200,9 @@ function VirtualKeyboard({ identity, hash, position, setupType }: VirtualKeyboar
                 return [rowsTotal, colsTotal];
             }, [0, 0])
         : [0, 0]
-    ), [vkType]);
+    ), [vkType, mode]);
 
-    const keys = useMemo(() => vkType?.modes[0].keys.map((btn, ind) => {
+    const keys = useMemo(() => vkType?.modes[mode].keys.map((btn, ind) => {
         const { key, symbol, row, column, width, height, color } = btn;
         const btnStyle: CSSProperties = {
             position: 'absolute',
@@ -120,8 +211,16 @@ function VirtualKeyboard({ identity, hash, position, setupType }: VirtualKeyboar
             width: `${width* 100 / colsTotal!}%`,
             height: `${VK_ROW_HEIGHT * height}em`
         }
-        return <VKKey key={`${key}-${ind}`} style={btnStyle} {...{ keyCode: key, symbol, color }} vkType={vkType.name} handleClick={handleClick} />
-    }), [vkType]);
+        const handleClick = setupType 
+            ? () => sendFinalChange({ tp: 'keypress', key })
+            : isSwitcherKey(key) 
+                ? () => sendFinalChange({ tp: 'modeChange', vkType: vkType.name, mode: +key.slice(-1) })
+                : undefined;
+        return <VKKey key={`${key}-${ind}`} 
+                      style={btnStyle} 
+                      {...{ keyCode: key, symbol, color }} 
+                      handleClick={handleClick} />
+    }), [vkType, mode]);
 
     return vkType ? (
         <div ref={vkRef}
@@ -146,7 +245,7 @@ function getBiggerNum(a: number, b: number) {
     return a > b ? a : b;
 }
 
-function useVKSyncOpt(
+/*function useVKSyncOpt(
     identity: Object,
     receiverName: string,
     needsReceiver?: boolean
@@ -154,14 +253,11 @@ function useVKSyncOpt(
     const {sendFinalChange} = usePatchSync<string, string, string>(
         identity,
         receiverName,
-        '',
+        switchedMode,
         false,
         (b) => b,
         (ch) => ({
-            headers: {
-                "x-r-vkType": ch,
-                "x-r-mode": '1'
-            },
+            headers: {"x-r-key": ch},
             value: ""
         }),
         (p) => '',
@@ -169,7 +265,8 @@ function useVKSyncOpt(
     );
     const onClick = needsReceiver ? (ch: string) => sendFinalChange(ch) : undefined;
     return onClick;
-  }
+  }*/
+
 
 
  interface VKKey {
@@ -178,19 +275,20 @@ function useVKSyncOpt(
     symbol?: string,
     style: CSSProperties,
     color?: ColorDef,
-    vkType?: string,
-    handleClick?: (ch: string) => void
+    handleClick?: () => void
  }
 
- function VKKey({keyCode, symbol, style, color, handleClick, vkType}: VKKey) {
+function VKKey({keyCode, symbol, style, color, handleClick }: VKKey) {
     const { style: colorStyle, className }: ColorProps = color ? colorToProps(color) : {};
     const colorClass = className || 'bodyColorCss';
 
     const onClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-        const window = (e.target as HTMLButtonElement).ownerDocument.defaultView;
-        const customEvent = new KeyboardEvent('keydown', { key: keyCode, bubbles: true, code: 'vk' });
-        window?.dispatchEvent(customEvent);
-        handleClick && handleClick(vkType || '');
+        if (handleClick) handleClick();
+        else {
+            const window = (e.target as HTMLButtonElement).ownerDocument.defaultView;
+            const customEvent = new KeyboardEvent('keydown', { key: keyCode, bubbles: true, code: 'vk' });
+            window?.dispatchEvent(customEvent);
+        }        
     }
 
     return (
