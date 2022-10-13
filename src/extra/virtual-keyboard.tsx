@@ -159,8 +159,8 @@ function useVKSyncOpt(
         (b) => b,
         (ch) => ({
             headers: {
-                "x-r-vkType": "text",
-                "x-r-mode": '2'
+                "x-r-vkType": ch,
+                "x-r-mode": '1'
             },
             value: ""
         }),
