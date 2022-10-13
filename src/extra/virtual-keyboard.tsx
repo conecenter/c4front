@@ -5,8 +5,8 @@ import { ColorDef, ColorProps, colorToProps } from './view-builder/common-api';
 import { usePatchSync } from './exchange/patch-sync';
 
 const BOTTOM_ROW_CLASS = "bottom-row";
-const VK_COL_WIDTH = 2.8;
-const VK_ROW_HEIGHT = 3.1;
+const VK_COL_WIDTH = 3.3;
+const VK_ROW_HEIGHT = 3.7;
 
 const FIXED_STYLES: CSSProperties = {
     position: 'fixed',
@@ -48,7 +48,7 @@ interface VirtualKeyboard {
 }
 
 interface KeyboardType {
-    name: string,   // TODO: text, number, location ?
+    name: string,
     modes: KeyboardMode[]   // TODO: change to [ Key[] ] ? why another object?
 }
 
@@ -83,35 +83,23 @@ function VirtualKeyboard({ identity, hash, position, setupType }: VirtualKeyboar
         .then(keyboardsData => setKeyboardTypes(keyboardsData.keyboardTypes))
         .catch(error => console.error('Fetch operation error:', error))
     }, [hash]);
-
-    console.log(keyboardTypes);
     
-    // Show VK logic
-    const [showVk, setShowVk] = useState(false);
+    // Get VK parameters
+    const [vkType, setVkType] = useState<KeyboardType>();
     const currentPath = useContext(PathContext);
-    const inputType = useRef('text');
     useEffect(() => {
-        if (!keyboardTypes) {
-            setShowVk(false);
-            return;
-        };
-        const inputInFocus = getInputInFocus(vkRef, currentPath);
-        if (setupType || inputInFocus) {
-            inputType.current = inputInFocus?.dataset?.type || 'text';
-            setShowVk(true);
+        const inputType = setupType || getFocusedInputType(vkRef, currentPath);
+        if (keyboardTypes && inputType) {
+            const keyboardType = keyboardTypes.find(type => type.name === inputType) 
+                || keyboardTypes.find(type => type.name === 'text');
+            setVkType(keyboardType);
         }
-        else if (showVk) setShowVk(false);
+        else setVkType(undefined);
     }, [currentPath, setupType, keyboardTypes]);
-    
-    // Get keyboard type
-    const keyboardTypeName = setupType || inputType.current;
-    const keyboardType = keyboardTypes?.find(type => type.name === keyboardTypeName);
-
-    console.log(keyboardType)
 
     // Positioning logic
-    const [ rowsTotal, colsTotal ] = useMemo(() => (keyboardType 
-        ? keyboardType.modes[0].keys.reduce(
+    const [ rowsTotal, colsTotal ] = useMemo(() => (vkType 
+        ? vkType.modes[0].keys.reduce(
             (dimensions, key) => {
                 const { row, column, width, height } = key;
                 const rowMax = row + height - 1;
@@ -121,9 +109,9 @@ function VirtualKeyboard({ identity, hash, position, setupType }: VirtualKeyboar
                 return [rowsTotal, colsTotal];
             }, [0, 0])
         : [0, 0]
-    ), [keyboardType]);
+    ), [vkType]);
 
-    const keys = useMemo(() => keyboardType?.modes[0].keys.map((btn, ind) => {
+    const keys = useMemo(() => vkType?.modes[0].keys.map((btn, ind) => {
         const { key, symbol, row, column, width, height, color } = btn;
         const btnStyle: CSSProperties = {
             position: 'absolute',
@@ -133,9 +121,9 @@ function VirtualKeyboard({ identity, hash, position, setupType }: VirtualKeyboar
             height: `${VK_ROW_HEIGHT * height}em`
         }
         return <VKKey key={`${key}-${ind}`} style={btnStyle} {...{ keyCode: key, symbol, color }} handleClick={handleClick} />
-    }), [keyboardType]);
+    }), [vkType]);
 
-    return showVk ? (
+    return vkType ? (
         <div ref={vkRef}
             className={clsx('vkKeyboard', 'headerLighterColorCss', position === 'bottom' && BOTTOM_ROW_CLASS)} 
             style={{
@@ -148,10 +136,10 @@ function VirtualKeyboard({ identity, hash, position, setupType }: VirtualKeyboar
         ) : null;
 }
 
- function getInputInFocus(domRef: MutableRefObject<HTMLDivElement | null>, currentPath: string) {
+ function getFocusedInputType(domRef: MutableRefObject<HTMLDivElement | null>, currentPath: string) {
     const cNode = domRef.current?.ownerDocument.querySelector(`[data-path='${currentPath}']`);
     const input = cNode?.querySelector<HTMLInputElement>('input:not([readonly])');
-    return input;
+    return input?.dataset?.type;
 }
 
 function getBiggerNum(a: number, b: number) {
@@ -211,12 +199,7 @@ function useVKSyncOpt(
                 {symbol ?? keyCode}
             </button>
         </div>
-    )
- }
-/*
- display: flex;
- align-items: stretch;
- padding: 6px;
- box-sizing: border-box;*/
+    );
+}
 
  export { VirtualKeyboard }
