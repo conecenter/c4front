@@ -5,8 +5,8 @@ import { ColorDef, ColorProps, colorToProps } from './view-builder/common-api';
 import { usePatchSync } from './exchange/patch-sync';
 
 const BOTTOM_ROW_CLASS = "bottom-row";
-const VK_COL_WIDTH = 3.3;
-const VK_ROW_HEIGHT = 3.7;
+const VK_COL_WIDTH = 3.2;
+const VK_ROW_HEIGHT = 3.6;
 
 const FIXED_STYLES: CSSProperties = {
     position: 'fixed',
@@ -120,12 +120,12 @@ function VirtualKeyboard({ identity, hash, position, setupType }: VirtualKeyboar
             width: `${width* 100 / colsTotal!}%`,
             height: `${VK_ROW_HEIGHT * height}em`
         }
-        return <VKKey key={`${key}-${ind}`} style={btnStyle} {...{ keyCode: key, symbol, color }} handleClick={handleClick} />
+        return <VKKey key={`${key}-${ind}`} style={btnStyle} {...{ keyCode: key, symbol, color }} vkType={vkType.name} handleClick={handleClick} />
     }), [vkType]);
 
     return vkType ? (
         <div ref={vkRef}
-            className={clsx('vkKeyboard', 'headerLighterColorCss', position === 'bottom' && BOTTOM_ROW_CLASS)} 
+            className={clsx('vkKeyboard', (position === 'bottom') && BOTTOM_ROW_CLASS)} 
             style={{
                 height: `${VK_ROW_HEIGHT * rowsTotal}em`,
                 width: `${VK_COL_WIDTH * colsTotal}em`,
@@ -158,7 +158,10 @@ function useVKSyncOpt(
         false,
         (b) => b,
         (ch) => ({
-            headers: {"x-r-key": ch},
+            headers: {
+                "x-r-vkType": "text",
+                "x-r-mode": '2'
+            },
             value: ""
         }),
         (p) => '',
@@ -175,10 +178,11 @@ function useVKSyncOpt(
     symbol?: string,
     style: CSSProperties,
     color?: ColorDef,
+    vkType?: string,
     handleClick?: (ch: string) => void
  }
 
- function VKKey({keyCode, symbol, style, color, handleClick}: VKKey) {
+ function VKKey({keyCode, symbol, style, color, handleClick, vkType}: VKKey) {
     const { style: colorStyle, className }: ColorProps = color ? colorToProps(color) : {};
     const colorClass = className || 'bodyColorCss';
 
@@ -186,7 +190,7 @@ function useVKSyncOpt(
         const window = (e.target as HTMLButtonElement).ownerDocument.defaultView;
         const customEvent = new KeyboardEvent('keydown', { key: keyCode, bubbles: true, code: 'vk' });
         window?.dispatchEvent(customEvent);
-        handleClick && handleClick(keyCode);
+        handleClick && handleClick(vkType || '');
     }
 
     return (
