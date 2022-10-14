@@ -67,7 +67,7 @@ interface Key {
     color?: ColorDef
 }
 
-type VkState = SwitchedMode | undefined;
+type VkState = SwitchedMode[] | undefined;
 
 interface SwitchedMode {
     vkType: string,
@@ -134,7 +134,11 @@ function patchToChange(patch: Patch): VkChange {
 function applyChange(prevState: VkState, ch: VkChange): VkState {
     switch (ch.tp) {
         case "modeChange":
-            return { vkType: ch.vkType, mode: ch.mode };
+            const prevModeInd = prevState?.findIndex(switchedMode => switchedMode.vkType === ch.vkType);
+            const newChangedMode = { vkType: ch.vkType, mode: ch.mode };
+            return prevModeInd && prevModeInd > -1
+                ? [...prevState!].splice(prevModeInd, 1, newChangedMode)
+                : [...prevState!, newChangedMode]
         default:
             return prevState;
     }
@@ -147,7 +151,6 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
     const vkRef = useRef<HTMLDivElement | null>(null);
 
     // Exchange with server
-    //const handleClick = useVKSyncOpt(identity, 'receiver', !!setupType);
     const {currentState, sendFinalChange} = usePatchSync<VkState, VkState, VkChange>(
         identity,
         'receiver',
@@ -158,7 +161,6 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
         patchToChange,
         applyChange
     );
-    //const handleClick = setupType ? (ch: VkChange) => sendFinalChange(ch) : undefined;
 
     // Get keyboard types data
     const [keyboardTypes, setKeyboardTypes] = useState<KeyboardType[] | null>(null);
@@ -185,8 +187,8 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
         else setVkType(undefined);
     }, [currentPath, setupType, keyboardTypes]);
 
-    const mode = currentState && vkType?.name === currentState.vkType
-        ? (currentState.mode - 1) : 0;
+    const currentVkMode = currentState?.find(switchedMode => vkType?.name === switchedMode.vkType);
+    const mode = currentVkMode ? (currentVkMode.mode - 1) : 0;
 
     // Positioning logic
     const [ rowsTotal, colsTotal ] = useMemo(() => (vkType 
