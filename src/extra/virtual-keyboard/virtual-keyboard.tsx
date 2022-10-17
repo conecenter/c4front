@@ -89,13 +89,14 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
         else setVkType(undefined);
     }, [currentPath, setupType, keyboardTypes]);
 
-    // Determining VK mode
+    // Determining VK mode & current keys set
     const currentVkMode = currentState?.find(switchedMode => vkType?.name === switchedMode.vkType);
     const mode = currentVkMode ? (currentVkMode.mode - 1) : 0;
+    const currentKeys = vkType?.modes[mode]?.keys || vkType?.modes[0]?.keys;
 
     // Positioning logic
-    const [ rowsTotal, colsTotal ] = useMemo(() => (vkType 
-        ? vkType.modes[mode].keys.reduce(
+    const [ rowsTotal, colsTotal ] = useMemo(() => (currentKeys 
+        ? currentKeys.reduce(
             (dimensions, key) => {
                 const { row, column, width, height } = key;
                 const rowMax = row + height - 1;
@@ -107,7 +108,7 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
         : [0, 0]
     ), [vkType, mode]);
 
-    const keys = useMemo(() => vkType?.modes[mode].keys.map((btn, ind) => {
+    const keys = useMemo(() => currentKeys?.map((btn, ind) => {
         const { key, symbol, row, column, width, height, color } = btn;
         const btnStyle: CSSProperties = {
             position: 'absolute',
@@ -120,7 +121,7 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
         const handleClick = setupType || isSwitcher
             ? () => {
                 setupType && sendFinalChange({ tp: 'keypress', key });
-                isSwitcher && sendFinalChange({ tp: 'modeChange', vkType: vkType.name, mode: +key.slice(-1) });
+                isSwitcher && sendFinalChange({ tp: 'modeChange', vkType: vkType!.name, mode: +key.slice(-1) });
             } : undefined;
         return <VKKey key={`${key}-${ind}`} 
                       style={btnStyle} 
@@ -142,7 +143,8 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
 }
 
  function getFocusedInputType(domRef: MutableRefObject<HTMLDivElement | null>, currentPath: string) {
-    const cNode = domRef.current?.ownerDocument.querySelector(`[data-path='${currentPath}']`);
+    const cNode = domRef.current?.ownerDocument.querySelector(`[data-path='${currentPath}']`)
+        || domRef.current?.ownerDocument.activeElement;
     const input = cNode?.querySelector<HTMLInputElement>('input:not([readonly])');
     return input 
         ? input.dataset?.type || 'text'
