@@ -64,15 +64,19 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
     // Get keyboard types data
     const [keyboardTypes, setKeyboardTypes] = useState<KeyboardType[] | null>(null);
     useEffect(() => {
+        let active = true;
         fetch(`/virtualkeyboard/${hash}.json`)
-        .then(response => {
-            if (!response.ok) throw new Error('Network response was not OK');
-            return response.json();
-        })
-        .then(keyboardsData => setKeyboardTypes(keyboardsData.keyboardTypes))
-        .catch(error => console.error('Fetch operation error:', error))
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not OK');
+                return response.json();
+            })
+            .then(keyboardsData => {
+                if (active) setKeyboardTypes(keyboardsData.keyboardTypes)
+            })
+            .catch(error => console.error('Fetch operation error:', error));
+        return () => { active = false }
     }, [hash]);
-    
+
     // Get VK parameters
     const [vkType, setVkType] = useState<KeyboardType>();
     const currentPath = useContext(PathContext);
