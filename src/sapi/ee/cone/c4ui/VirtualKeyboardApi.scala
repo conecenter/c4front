@@ -8,7 +8,7 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
 
 @c4tagSwitch("FrontApp") trait SwitchedMode extends ToJson
 
-@c4tags("FrontApp") trait VirtualKeyboardElements[C] {
+@c4tags("FrontApp") trait VirtualKeyboardTags[C] {
 
   @c4val("left") def left: KeyboardPosition
   @c4val("right") def right: KeyboardPosition
@@ -26,7 +26,7 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
     setupType: String = "", // Name of the keyboard type to set-up (only setup mode)
     position: KeyboardPosition,
     receiver: Receiver[C] = NoReceiver[C],
-    switchedMode: Option[SwitchedMode] = None
+    switchedMode: List[SwitchedMode] = Nil
   ): ToChildPair
 }
 
