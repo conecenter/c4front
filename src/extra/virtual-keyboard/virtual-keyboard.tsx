@@ -79,10 +79,9 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
     useEffect(() => {
         const inputType = setupType || getFocusedInputType(vkRef, currentPath);
         if (keyboardTypes && inputType) {
-            const keyboardType = keyboardTypes.find(type => type.name === inputType) 
-                || keyboardTypes.find(type => type.name === 'text');
+            const keyboardType = keyboardTypes.find(type => type.name === inputType);
             setVkType(keyboardType);
-        }
+        } 
         else setVkType(undefined);
     }, [currentPath, setupType, keyboardTypes]);
 
@@ -123,7 +122,7 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
                       handleClick={handleClick} />
     }), [vkType, mode]);
 
-    return vkType ? (
+    return (
         <div ref={vkRef}
             className={clsx('vkKeyboard', (position === 'bottom') && BOTTOM_ROW_CLASS)} 
             style={{
@@ -133,13 +132,15 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
             }} >
             {keys}
         </div>
-        ) : null;
+    );
 }
 
  function getFocusedInputType(domRef: MutableRefObject<HTMLDivElement | null>, currentPath: string) {
     const cNode = domRef.current?.ownerDocument.querySelector(`[data-path='${currentPath}']`);
     const input = cNode?.querySelector<HTMLInputElement>('input:not([readonly])');
-    return input?.dataset?.type;
+    return input 
+        ? input.dataset?.type || 'text'
+        : null;
 }
 
 function getBiggerNum(a: number, b: number) {
