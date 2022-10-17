@@ -115,7 +115,7 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
         }
         const handleClick = () => {
             if (setupType) sendFinalChange({ tp: 'keypress', key });
-            if (isSwitcherKey(key)) sendFinalChange({ tp: 'modeChange', vkType: vkType.name, mode: +key.slice(-1) + 1 });
+            if (isSwitcherKey(key)) sendFinalChange({ tp: 'modeChange', vkType: vkType.name, mode: +key.slice(-1) });
         }
         return <VKKey key={`${key}-${ind}`} 
                       style={btnStyle} 
