@@ -1,6 +1,6 @@
 
 import {createElement as $,useState,useContext,createContext,useCallback,cloneElement,useMemo} from "react"
-import {em,sum} from "./vdom-util.js"
+import {em,sum,findLastIndex} from "./vdom-util.js"
 import {useWidths} from "../main/sizes.js"
 import {usePopupPos,usePopupMiss} from "../main/popup.js"
 
@@ -28,7 +28,7 @@ const doFitFilters = (filters,resTemplate) => {
     const fit = (res,filter) => {
         if(!res) return null
         const w = filter.props.minWidth
-        const minRowIndex = res.findLastIndex(row=>row.items.length>0) //0 ; this prevents filter order changing; make <=0 to make filters fill the gaps
+        const minRowIndex = findLastIndex(res, row=>row.items.length>0) //0 ; this prevents filter order changing; make <=0 to make filters fill the gaps
         const row = res.find((row,j) => j>=minRowIndex && row.leftWidth>=w)
         if(!row) return null
         const leftWidth = row.leftWidth-w
