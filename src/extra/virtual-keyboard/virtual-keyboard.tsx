@@ -112,10 +112,12 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
             width: `${width* 100 / colsTotal!}%`,
             height: `${VK_ROW_HEIGHT * height}em`
         }
-        const handleClick = () => {
-            if (setupType) sendFinalChange({ tp: 'keypress', key });
-            if (isSwitcherKey(key)) sendFinalChange({ tp: 'modeChange', vkType: vkType.name, mode: +key.slice(-1) });
-        }
+        const isSwitcher = isSwitcherKey(key);
+        const handleClick = setupType || isSwitcher
+            ? () => {
+                setupType && sendFinalChange({ tp: 'keypress', key });
+                isSwitcher && sendFinalChange({ tp: 'modeChange', vkType: vkType.name, mode: +key.slice(-1) });
+            } : undefined;
         return <VKKey key={`${key}-${ind}`} 
                       style={btnStyle} 
                       {...{ keyCode: key, symbol, color }} 
