@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom"
 import React, { createElement as $ } from "react"
 import { createSyncProviders } from "../../main/vdom-hooks";
-import { VirtualKeyboard } from "../../extra/virtual-keyboard";
+import { VirtualKeyboard } from "../../extra/virtual-keyboard/virtual-keyboard";
 
 
 function App() {
