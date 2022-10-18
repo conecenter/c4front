@@ -83,7 +83,8 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
     useEffect(() => {
         const inputType = setupType || getFocusedInputType(vkRef, currentPath);
         if (keyboardTypes && inputType) {
-            const keyboardType = keyboardTypes.find(type => type.name === inputType);
+            const keyboardType = keyboardTypes.find(type => type.name === inputType)
+                || keyboardTypes.find(type => type.name === 'text');
             setVkType(keyboardType);
         } 
         else setVkType(undefined);
@@ -98,7 +99,7 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
     const [ rowsTotal, colsTotal ] = useMemo(() => (currentKeys 
         ? currentKeys.reduce(
             (dimensions, key) => {
-                const { row, column, width, height } = key;
+                const { row, column, width = 1, height = 1 } = key;
                 const rowMax = row + height - 1;
                 const rowsTotal = getBiggerNum(rowMax, dimensions[0]);
                 const colMax = column + width - 1;
