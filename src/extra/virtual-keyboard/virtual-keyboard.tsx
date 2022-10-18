@@ -114,7 +114,7 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
             position: 'absolute',
             left: `${(column - 1) * 100 / colsTotal!}%`,
             top: `${VK_ROW_HEIGHT * (row - 1)}em`,
-            width: `${width* 100 / colsTotal!}%`,
+            width: `${width * 100 / colsTotal!}%`,
             height: `${VK_ROW_HEIGHT * height}em`
         }
         const isSwitcher = isSwitcherKey(key);
@@ -131,7 +131,8 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
 
     return (
         <div ref={vkRef}
-            className={clsx('vkKeyboard', (position === 'bottom') && BOTTOM_ROW_CLASS)} 
+            className={clsx('vkKeyboard', (position === 'bottom') && BOTTOM_ROW_CLASS)}
+            onMouseDownCapture={(e) => e.preventDefault()}
             style={{
                 height: `${VK_ROW_HEIGHT * rowsTotal}em`,
                 width: `${VK_COL_WIDTH * colsTotal}em`,
@@ -143,8 +144,7 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
 }
 
  function getFocusedInputType(domRef: MutableRefObject<HTMLDivElement | null>, currentPath: string) {
-    const cNode = domRef.current?.ownerDocument.querySelector(`[data-path='${currentPath}']`)
-        || domRef.current?.ownerDocument.activeElement;
+    const cNode = domRef.current?.ownerDocument.querySelector(`[data-path='${currentPath}']`);
     const input = cNode?.querySelector<HTMLInputElement>('input:not([readonly])');
     return input 
         ? input.dataset?.type || 'text'

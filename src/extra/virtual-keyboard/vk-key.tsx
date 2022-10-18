@@ -29,7 +29,6 @@ function VKKey({keyCode, symbol, style, color, handleClick }: VKKey) {
             <button type='button' 
                     className={clsx('vkElement', colorClass)}
                     style={colorStyle}
-                    onMouseDown={(e) => e.preventDefault()}
                     onClick={onClick} >
                 {symbol ?? keyCode}
             </button>
