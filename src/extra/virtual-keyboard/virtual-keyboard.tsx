@@ -109,7 +109,7 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
     ), [vkType, mode]);
 
     const keys = useMemo(() => currentKeys?.map((btn, ind) => {
-        const { key, symbol, row, column, width, height, color } = btn;
+        const { key, symbol, row, column, width = 1, height = 1, color } = btn;
         const btnStyle: CSSProperties = {
             position: 'absolute',
             left: `${(column - 1) * 100 / colsTotal!}%`,
