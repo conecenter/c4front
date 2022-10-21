@@ -36,13 +36,16 @@ interface FlexibleColumn {
   children: ReactNode[]
 }
 
-function FlexibleColumn({key, sizes, className, children}: FlexibleColumn) {
+function FlexibleColumn({key, sizes, className, align, children}: FlexibleColumn) {
   return el("div", {
     key,
     className: clsx(FLEXIBLE_COLUMN_CLASSNAME, className),
-    style: sizes && {
+    style: {
+      flexGrow: align ? 0 : 1,
+      ...sizes && {
       minWidth: `${sizes.min}em`,
-      maxWidth: sizes.max ? `${sizes.max}em` : undefined,
+      maxWidth: sizes.max ? `${sizes.max}em` : undefined
+      }
     }
   }, children)
 }
