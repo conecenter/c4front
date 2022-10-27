@@ -1,7 +1,8 @@
 
-import {createElement} from "react"
+import {createElement as $,useCallback,useContext,useEffect,useState} from "react"
 import {useObservedChildSizes,getFontSize,useWidth} from "./sizes.js"
 import {sum,em} from "./vdom-util.js"
+import {ScrollInfoContext} from '../extra/scroll-info-context';
 
 const limited = (minV,v,maxV)=>Math.min(Math.max(minV,v),maxV)
 
@@ -16,10 +17,10 @@ const elementToUnscaledHeightUpdater = element => {
     return was => !was || was < height ? height : was                                  // so we only increase memorized height to avoid chatter
 }
 
-const div = attr => createElement("div",attr)
+const div = attr => $("div",attr)
 
 export const DashboardRoot = ({
-    containerHeight, containerPaddingTop, containerPaddingLeft, containerStyle,
+    containerHeight, containerPaddingTop = 0, containerPaddingLeft = 0, containerStyle,
     children, boardStyle, // board is inside container
     minColWidth, maxColWidth, minScale, maxScale, cardStyles, rowGap, colGap // col widths are in em-s before scaling
 }) => {
@@ -79,6 +80,36 @@ export const DashboardRoot = ({
         })]
     })
 }
+
+
+export const Dashboard = ({minColWidth, maxColWidth, minScale, maxScale, rowGap, colGap, children}) => {
+    const [{elem, containerHeight}, setState] = useState({});
+    const {totalSpaceUsed} = useContext(ScrollInfoContext);
+
+    const setParams = useCallback((element) => {
+        if (element) {
+            const vpHeight = element.ownerDocument.documentElement.clientHeight;
+            const heightEm = (vpHeight - totalSpaceUsed) / getFontSize(element);
+            setState({elem: element, containerHeight: heightEm});
+        } else setState({});
+    }, [totalSpaceUsed]);
+
+    useEffect(() => {
+        const win = elem?.ownerDocument.defaultView;
+        win?.addEventListener('resize', () => setParams(elem));
+        return win?.removeEventListener('resize', () => setParams(elem));
+    }, [elem, setParams]);
+
+    return $("div", {ref: setParams}, containerHeight && $(DashboardRoot, {
+            containerHeight,
+            minColWidth, maxColWidth,
+            rowGap, colGap,
+            minScale, maxScale,
+            children
+        })
+    );
+}
+
 
 /*
 We try to maximize usage of viewport area.
