@@ -41,10 +41,10 @@ function FlexibleColumn({key, sizes, className, align, children}: FlexibleColumn
     key,
     className: clsx(FLEXIBLE_COLUMN_CLASSNAME, className),
     style: {
-      flexGrow: align ? 0 : 1,
+      flexGrow: align && !sizes?.max ? 0 : 1,
       ...sizes && {
-      minWidth: `${sizes.min}em`,
-      maxWidth: sizes.max ? `${sizes.max}em` : undefined
+        minWidth: `${sizes.min}em`,
+        maxWidth: sizes.max ? `${sizes.max}em` : undefined
       }
     }
   }, children)
