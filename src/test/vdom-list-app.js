@@ -63,13 +63,18 @@ function App() {
         enableDrag && exCol("drag", 0, 1.5, 1.5),
     ].filter(Boolean)
     const exCell = rowKey => ({colKey}) => {
-        return colKey==="drag" && rowKey === "drag" ? null : $(GridCell, {
+        return (
+            colKey === "drag" && rowKey === "drag" ||
+            rowKey === "r7" && colKey === "c8" ||
+            rowKey === "r7" && colKey === "c9"
+        ) ? null : $(GridCell, {
             key: ":" + rowKey + colKey, rowKey, colKey,
             ...(rowKey === "head" ? { classNames: ["tableHeadContainer","headerColor"] } : {}),
             ...(rowKey === "drag" ? { dragHandle: "x", style: { userSelect: "none", cursor: "pointer" } } : {}),
             ...(colKey === "drag" ? { dragHandle: "y", style: { userSelect: "none", cursor: "pointer" } } : {}),
             ...(colKey === "expand" ? { expanding: "expander" } : {}),
             ...(colKey === "icon" ? { expanding: "none" } : {}),
+            ...(rowKey === "r7" && colKey === "c7"? { spanRight: true } : {}),
             children: (
                 rowKey === "head" ? (
                     colKey === "drag" || colKey === "expand" ? null : $(Text,{ key: "text", value: "H" + colKey })

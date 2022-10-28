@@ -99,9 +99,12 @@ const getGridCol = ({ colKey }) => colKey === GRIDCELL_COLSPAN_ALL ? spanAll : C
 
 const spanAll = "1 / -1"
 
-export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, expanding, expander, dragHandle, noDefCellClass, classNames: argClassNames, gridRow: argGridRow, gridColumn: argGridColumn, ...props }) {
+export function GridCell({
+    identity, children, rowKey, rowKeyMod, colKey, spanRight, expanding, expander, dragHandle,
+    noDefCellClass, classNames: argClassNames, gridRow: argGridRow, gridColumn: argGridColumn, ...props
+}) {
     const gridRow = argGridRow || getGridRow({ rowKey, rowKeyMod })
-    const gridColumn = argGridColumn || getGridCol({ colKey })
+    const gridColumn = argGridColumn || getGridCol({ colKey }) + (spanRight ? " / -1":"")
     const style = { ...props.style, gridRow, gridColumn }
     const expanderProps = expanding==="expander" ? { 'data-expander': expander || 'passive' } : {}
     const argClassNamesStr = argClassNames ? argClassNames.join(" ") : ""
