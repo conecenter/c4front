@@ -98,6 +98,7 @@ case class NoReceiver[C]() extends Receiver[C] {
     dragHandle: DragHandle = noDragHandle,
     noDefCellClass: Boolean = false,
     needsHoverExpander: Boolean = true,
+    spanRight: Boolean = false,
   ): GridCell
   @c4val("") def expandableExpanding: Expanding
   @c4val("none") def nonExpandableExpanding: Expanding
