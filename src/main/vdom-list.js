@@ -100,11 +100,11 @@ const getGridCol = ({ colKey }) => colKey === GRIDCELL_COLSPAN_ALL ? spanAll : C
 const spanAll = "1 / -1"
 
 export function GridCell({
-    identity, children, rowKey, rowKeyMod, colKey, spanRight, expanding, expander, dragHandle,
+    identity, children, rowKey, rowKeyMod, colKey, spanRight, spanRightTo, expanding, expander, dragHandle,
     noDefCellClass, classNames: argClassNames, gridRow: argGridRow, gridColumn: argGridColumn, ...props
 }) {
     const gridRow = argGridRow || getGridRow({ rowKey, rowKeyMod })
-    const gridColumn = argGridColumn || getGridCol({ colKey }) + (spanRight ? " / -1":"")
+    const gridColumn = argGridColumn || getGridCol({ colKey }) + (spanRightTo ? " / "+spanRightTo : "")
     const style = { ...props.style, gridRow, gridColumn }
     const expanderProps = expanding==="expander" ? { 'data-expander': expander || 'passive' } : {}
     const argClassNamesStr = argClassNames ? argClassNames.join(" ") : ""
@@ -287,11 +287,24 @@ const getAllChildren = ({children,rows,cols,hasHiddenCols,hideElementsForHiddenC
         return $(NoCaptionContext.Provider,{value:false, key:`${rowKey}-expanded`},res)
     })
     const toExpanderElements = hasHiddenCols ? setupExpanderElements(rows) : hideExpanderElements(cols)
-    const allChildren = toExpanderElements(hideElementsForHiddenCols(false,cell=>cell.props.colKey)([
+    const allChildren = spanRightElements(cols, toExpanderElements(hideElementsForHiddenCols(false,cell=>cell.props.colKey)([
         ...children, ...expandedElements
-    ]))
+    ])))
     console.log("inner render "+dragRowKey)
     return allChildren
+}
+
+const spanRightElements = (cols,children) => {
+    if(!children.some(c=>c.props.spanRight)) return children
+    const colKeys = colKeysOf(cols)
+    const colKeyIndexes = Object.fromEntries(colKeys.map((k,i)=>[k,i]))
+    const toKey = (c,i) => c.props.rowKey+" "+i
+    const toColN = c => colKeyIndexes[c.props.colKey]
+    const hasChild = new Set(children.map(c=>toKey(c,toColN(c))))
+    const findNext = (c,i) => (
+        i >= colKeys.length ? "-1" : hasChild.has(toKey(c,i)) ? getGridCol({ colKey: colKeys[i] }) : findNext(c,i+1)
+    )
+    return children.map(c => !c.props.spanRight ? c : cloneElement(c, { spanRightTo: findNext(c, toColN(c)+1) }))
 }
 
 /*,(a,b)=>{    Object.entries(a).filter(([k,v])=>b[k]!==v).forEach(([k,v])=>console.log(k)) */
