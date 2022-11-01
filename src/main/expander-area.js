@@ -1,8 +1,8 @@
 
-import {useState,useCallback,useMemo} from "react"
+import {createElement as $,useState,useCallback,useMemo} from "react"
 import {em} from "./vdom-util.js"
-import {useEventListener,extractedUse} from "./vdom-hooks.js"
-import {getFontSize,useWidths,useViewportHeightIntEm} from "./sizes.js"
+import {extractedUse} from "./vdom-hooks.js"
+import {useWidths,useViewportHeightIntEm} from "./sizes.js"
 
 const last = l => l && l.length>0 && l[l.length-1]
 
