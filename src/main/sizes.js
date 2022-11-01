@@ -100,9 +100,9 @@ const singleWidthUpdater = element => {
 
 const containerKeyAttrValue = "container"
 
-const useAddContainer = extractedUse(addObserved=>(height,children)=>addObserved(
+const useAddContainer = extractedUse(addObserved=>(height,children,props={})=>addObserved(
     containerKeyAttrValue,
-    { style: { position: "relative", height }, children }
+    { ...props, style: { position: "relative", height, ...props.style }, children }
 ), useMemo)
 
 export const useWidths = () => {
