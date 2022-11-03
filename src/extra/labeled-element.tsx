@@ -13,7 +13,6 @@ const NoFocusContext = React.createContext(false);
 interface LabeledElement {
     key: string,
     identity: Object,
-    path: string,
     label: string,
     sizes?: FlexibleSizes,
     accented?: boolean,
@@ -22,13 +21,13 @@ interface LabeledElement {
     children: ReactNode
 }
 
-function LabeledElement({ identity, path, label, sizes, accented, clickable, labelChildren, children }: LabeledElement) {
+function LabeledElement({ identity, label, sizes, accented, clickable, labelChildren, children }: LabeledElement) {
     const showCaption = !useContext(NoCaptionContext);
     const isHorizontalCaption = useContext(HorizontalCaptionContext);
 
     const isEmptyLabel = !(label || labelChildren);
 
-    const { focusClass, focusHtml } = useFocusControl(isEmptyLabel ? '' : path);
+    const { focusClass, focusHtml } = useFocusControl(isEmptyLabel ? undefined : identity);
 
     // Disable focusable descendants focus if LE has single childless focusable descendant
     const [disableChildFocus, setDisableChildFocus] = useState(false);

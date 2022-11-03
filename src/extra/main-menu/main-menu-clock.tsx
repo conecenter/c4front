@@ -17,8 +17,7 @@ interface MainMenuClock {
   key: string,
   identity: Object,
   serverTime: string,
-  timestampFormatId: number,
-  path: string
+  timestampFormatId: number
 }
 
 const SYNC_INTERVAL = 600000;
@@ -26,7 +25,7 @@ const SYNC_INTERVAL = 600000;
 const calcOffset = (timestamp: number) => timestamp - Date.now();
 const getInitialState = (offset: number) => Math.abs(offset) < 1000 ? (Date.now() + offset) : null;
 
-function MainMenuClock({identity, serverTime, timestampFormatId, path}: MainMenuClock) {
+function MainMenuClock({identity, serverTime, timestampFormatId}: MainMenuClock) {
   const localOffsetRef = useRef(calcOffset(Number(serverTime)));
   const [timestamp, setTimestamp] = useState<number | null>(getInitialState(localOffsetRef.current));
   
@@ -66,7 +65,7 @@ function MainMenuClock({identity, serverTime, timestampFormatId, path}: MainMenu
     return () => clearInterval(id);
   }, []);
 
-  const { focusClass, focusHtml } = useFocusControl(path);
+  const { focusClass, focusHtml } = useFocusControl(identity);
 
   return (
     <div className={clsx(focusClass,'menuCustomItem dateTimeClock')} {...focusHtml}>

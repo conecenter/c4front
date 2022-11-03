@@ -15,15 +15,14 @@ interface MenuExecutableItem {
 	identity: Object,
     name: string,
     current: boolean,
-    path?: string,
     icon?: string,
     bindSrcId?: string
 }
 
-function MenuExecutableItem({identity, name, current, path, icon, bindSrcId}: MenuExecutableItem) {
+function MenuExecutableItem({identity, name, current, icon, bindSrcId}: MenuExecutableItem) {
     const { clicked, onClick } = useClickSync(identity, 'receiver');
 
-    const { focusClass, focusHtml } = useFocusControl(path);
+    const { focusClass, focusHtml } = useFocusControl(identity);
 
     const { isBindMode } = useBinds();
 
@@ -51,12 +50,11 @@ function MenuExecutableItem({identity, name, current, path, icon, bindSrcId}: Me
 interface MenuCustomItem {
     key: string,
 	identity: Object,
-    path?: string,
     children?: ReactNode
 }
 
-function MenuCustomItem({path, children}: MenuCustomItem) {
-    const { focusClass, focusHtml } = useFocusControl(path);
+function MenuCustomItem({identity, children}: MenuCustomItem) {
+    const { focusClass, focusHtml } = useFocusControl(identity);
 
     return (
         <div className={clsx(focusClass, 'menuCustomItem')} {...focusHtml} >

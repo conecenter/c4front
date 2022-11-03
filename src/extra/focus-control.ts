@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import clsx from 'clsx';
 import { NoFocusContext } from './labeled-element';
 
@@ -9,8 +9,12 @@ interface FocusControlObj {
     focusHtml?: { 'data-path': string, tabIndex: number }
 }
 
-function useFocusControl(path: string | undefined): FocusControlObj {
-    if (!path) return {};
+function useFocusControl(identity?: Identity): FocusControlObj {
+    if (!identity) return {};
+    const path = useMemo(() => {
+        console.log('calc identity')
+        return getPath(identity);
+    }, [identity])
     const noFocusCtx = useContext(NoFocusContext);
     const focusHtml = { 'data-path': path, tabIndex: 1 };
     const focusClass = clsx(!noFocusCtx && 'focusWrapper', isCurrentlyFocused(path) && 'activeFocusWrapper');
@@ -24,12 +28,12 @@ function isCurrentlyFocused(path: string | undefined) {
 
 
 interface FocusableProps {
-    path?: string,
+    identity: Identity,
     children: (obj: FocusControlObj) => React.ReactNode
 }
 
-const Focusable = ({path, children}: FocusableProps) => {
-    const focusProps = useFocusControl(path);
+const Focusable = ({identity, children}: FocusableProps) => {
+    const focusProps = useFocusControl(identity);
     return children(focusProps);
 }
 

@@ -25,7 +25,6 @@ interface MenuFolderItem {
     shortName?: string,
     current: boolean,
     state: MenuItemState,
-    path: string,
     bindSrcId?: string,
     groupId?: string,
     icon?: string,
@@ -33,7 +32,7 @@ interface MenuFolderItem {
 }
 
 function MenuFolderItem(props: MenuFolderItem) {
-    const {identity, name, shortName, current, state, icon, path, bindSrcId, groupId, children} = props;
+    const {identity, name, shortName, current, state, icon, bindSrcId, groupId, children} = props;
 
     const {
         currentState: { opened },
@@ -49,7 +48,9 @@ function MenuFolderItem(props: MenuFolderItem) {
         if (isPopupChild(menuFolder)) setPopupLrMode(true);
     });
 
-    const { focusClass, focusHtml } = useFocusControl(path);
+    const { focusClass, focusHtml } = useFocusControl(identity);
+    // @ts-ignore
+    const path = focusHtml["data-path"];
     const currentPath = useContext(PathContext);
 
     // Keyboard controls logic

@@ -11,6 +11,7 @@ import {MenuCustomItem, MenuExecutableItem, MenuItemsGroup, MenuPopupElement, Me
 import {MenuFolderItem} from "./menu-folder-item";
 import {BindGroupElement} from "../binds/binds-elements";
 import {NoCaptionContext} from "../../main/vdom-hooks";
+import { identityAt } from "../../main/vdom-util";
 
 const MENU_BAR_PATH = 'main-menu-bar';
 const KEY_MODIFICATOR = { ArrowLeft: -1, ArrowRight: 1 };
@@ -219,14 +220,15 @@ function getRightMenuCompressed(rightChildren: ReactElement<MenuItem>[]) {
 
 
 interface BurgerMenu {
+  identity?: Object,
   opened: boolean,
   domRef: React.RefObject<HTMLDivElement>,
   setFinalState: (s: MenuItemState) => void,
   children: ReactElement<MenuItem>[]
 }
 
-function BurgerMenu({opened, domRef, setFinalState, children}: BurgerMenu) {
-  const { focusClass, focusHtml } = useFocusControl('burgerMenu');
+function BurgerMenu({identity = { key: 'burgerMenu' }, opened, domRef, setFinalState, children}: BurgerMenu) {
+  const { focusClass, focusHtml } = useFocusControl(identity);
 
   const currentPath = useContext(PathContext);
 
