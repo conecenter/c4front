@@ -4,7 +4,7 @@ import { useInputSync } from '../exchange/input-sync';
 import { PathContext, useFocusControl } from '../focus-control';
 import { MenuItemState, MenuControlsContext } from './main-menu-bar';
 import { MenuItem, MenuItemsGroup, MenuPopupElement } from './main-menu-items';
-import { handleArrowUpDown, handleFolderEnter, handleMenuBlur, patchToState, stateToPatch } from './main-menu-utils';
+import { focusIfKeyboardOpened, handleArrowUpDown, handleMenuBlur, stateToPatch } from './main-menu-utils';
 import {
     ARROW_DOWN_KEY,
     ARROW_LEFT_KEY,
@@ -50,29 +50,34 @@ function MenuFolderItem(props: MenuFolderItem) {
     });
 
     const { focusClass, focusHtml } = useFocusControl(path);
-
     const currentPath = useContext(PathContext);
-    const onArrowKey = useContext(MenuControlsContext);
+
+    // Keyboard controls logic
+    const {onArrowLeftRight, setReadyArrowLeftRight} = useContext(MenuControlsContext);
+    useEffect(() => { if (opened) setReadyArrowLeftRight?.() }, [opened]);
+
+    const openedByKeyboard = useRef(false);
+    const handleKeyboardOpen = () => focusIfKeyboardOpened(openedByKeyboard, menuFolder, children);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
         switch(e.key) {
             case ARROW_RIGHT_KEY:
-                if (!popupLrMode && !opened) break;
-                if (!popupLrMode && opened) {
+                if (!popupLrMode) {
                     e.stopPropagation();
-                    if (onArrowKey && menuFolder) onArrowKey(path, menuFolder, e.key);
+                    if (onArrowLeftRight && menuFolder) onArrowLeftRight(path, menuFolder, e.key, opened);
                     break;
                 }
             case ENTER_KEY:
                 if (!opened && menuFolder) {
                     e.stopPropagation();
-                    handleFolderEnter(menuFolder, setFinalState, children);
-                }                
+                    openedByKeyboard.current = true;
+                    setFinalState({ opened: true });
+                }
                 break;
             case ARROW_LEFT_KEY:
-                if (!popupLrMode && opened) {
+                if (!popupLrMode) {
                     e.stopPropagation();
-                    if (onArrowKey && menuFolder) onArrowKey(path, menuFolder, e.key);
+                    if (onArrowLeftRight && menuFolder) onArrowLeftRight(path, menuFolder, e.key, opened);
                     break;
                 }
             case ESCAPE_KEY:
@@ -120,7 +125,9 @@ function MenuFolderItem(props: MenuFolderItem) {
                 <img src={ARROW_DOWN_URL} className='menuFolderIcon' alt='arrow-down-icon' />
         
                 {opened &&
-                    <MenuPopupElement popupLrMode={popupLrMode}>{children}</MenuPopupElement>}
+                    <MenuPopupElement popupLrMode={popupLrMode} handleKeyboardOpen={handleKeyboardOpen} >
+                        {children}
+                    </MenuPopupElement>}
             </BindGroupElement>
         </div>
     );

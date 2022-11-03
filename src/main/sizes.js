@@ -84,8 +84,8 @@ export const useObservedChildSizes = (keyAttrName,singleSizeUpdater) => {
 
 /********* multi width ********************************************************/
 
-const useAddPos = extractedUse(addObserved => (key,pos,children) => addObserved(key,{
-    key, children,
+const useAddPos = extractedUse(addObserved => (key,pos,children,className) => addObserved(key,{
+    key, children,className,
     style: {
         position: "absolute", boxSizing: "border-box",
         top: em(pos?pos.top:0), left: em(pos?pos.left:0),

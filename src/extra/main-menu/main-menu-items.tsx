@@ -1,5 +1,5 @@
+import React, { ReactElement, ReactNode, useEffect, useState } from 'react';
 import clsx from 'clsx';
-import React, { ReactElement, ReactNode, useState } from 'react';
 import { usePopupPos } from '../../main/popup';
 import { useClickSync } from '../exchange/click-sync';
 import { useFocusControl } from '../focus-control';
@@ -68,14 +68,19 @@ function MenuCustomItem({path, children}: MenuCustomItem) {
 
 interface MenuPopupElement {
     popupLrMode: boolean,
+    handleKeyboardOpen: () => void,
     children?: ReactElement<MenuItem | MenuItemsGroup>[]
 }
 
-function MenuPopupElement({popupLrMode, children}: MenuPopupElement) {
+function MenuPopupElement({popupLrMode, handleKeyboardOpen, children}: MenuPopupElement) {
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
     const [popupPos] = usePopupPos(popupElement, popupLrMode);
 
     const hasIcon = children ? children.some(hasIconProp) : false;
+
+    useEffect(() => {
+        if (popupPos.visibility !== 'hidden') handleKeyboardOpen();
+    }, [popupPos.visibility]);
 
     return (
         <div ref={setPopupElement}

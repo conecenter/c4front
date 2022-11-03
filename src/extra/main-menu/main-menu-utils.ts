@@ -55,22 +55,20 @@ const getNextArrayIndex = (arrLength: number, currIndex: number, direction: stri
     }
 }
 
-
-function handleFolderEnter(
-    elem: HTMLElement,
-    setFinalState: (s: MenuItemState) => void,
+function focusIfKeyboardOpened(
+    openedByKeyboard: React.MutableRefObject<boolean>, 
+    elem: HTMLElement | null, 
     children?: ReactElement<MenuItem | MenuItemsGroup>[]
 ) {
-    setFinalState({ opened: true });
+    if (!openedByKeyboard.current || !elem) return;
     const flatChildren = flattenMenuChildren(children);
     const pathToFocus = flatChildren[0]?.props.path;
     if (pathToFocus) {
-        setTimeout(() => {
-            const itemToFocus: HTMLElement | null = elem.querySelector(`[data-path='${pathToFocus}']`);
-            itemToFocus?.focus();
-        });
+        const itemToFocus: HTMLElement | null = elem?.querySelector(`[data-path='${pathToFocus}']`);
+        itemToFocus?.focus();
     }
-};
+    openedByKeyboard.current = false;
+}
 
 function isMenuItemsGroup(item: ReactElement<MenuItem | MenuItemsGroup>): item is ReactElement<MenuItemsGroup> { 
     return (item as ReactElement<MenuItemsGroup>).type === MenuItemsGroup; 
@@ -88,4 +86,4 @@ function flattenMenuChildren(children?: ReactElement<MenuItem | MenuItemsGroup>[
     }, [])
 }
 
-export { patchToState, stateToPatch, handleMenuBlur, getNextArrayIndex, handleArrowUpDown, handleFolderEnter };
+export { patchToState, stateToPatch, handleMenuBlur, getNextArrayIndex, handleArrowUpDown, focusIfKeyboardOpened };
