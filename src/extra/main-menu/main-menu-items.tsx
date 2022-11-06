@@ -8,6 +8,7 @@ import { ENTER_KEY } from '../../main/keyboard-keys';
 import { MenuFolderItem } from './menu-folder-item';
 import { BindingElement } from '../binds/binds-elements';
 import { useBinds } from '../binds/key-binding';
+import { focusFirstMenuItem } from './main-menu-utils';
 
 
 interface MenuExecutableItem {
@@ -68,18 +69,24 @@ function MenuCustomItem({path, children}: MenuCustomItem) {
 
 interface MenuPopupElement {
     popupLrMode: boolean,
-    handleKeyboardOpen: () => void,
+    keyboardOperation: React.MutableRefObject<boolean>,
     children?: ReactElement<MenuItem | MenuItemsGroup>[]
 }
 
-function MenuPopupElement({popupLrMode, handleKeyboardOpen, children}: MenuPopupElement) {
+function MenuPopupElement({popupLrMode, keyboardOperation, children}: MenuPopupElement) {
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
     const [popupPos] = usePopupPos(popupElement, popupLrMode);
 
     const hasIcon = children ? children.some(hasIconProp) : false;
 
     useEffect(() => {
-        if (popupPos.visibility !== 'hidden') handleKeyboardOpen();
+        if (popupPos.visibility !== 'hidden' && keyboardOperation.current) {
+            focusFirstMenuItem(popupElement, children);
+            keyboardOperation.current = false;
+        }
+        return () => { 
+            if (popupPos.visibility !== 'hidden') keyboardOperation.current = false; 
+        }
     }, [popupPos.visibility]);
 
     return (

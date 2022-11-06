@@ -55,19 +55,17 @@ const getNextArrayIndex = (arrLength: number, currIndex: number, direction: stri
     }
 }
 
-function focusIfKeyboardOpened(
-    openedByKeyboard: React.MutableRefObject<boolean>, 
+function focusFirstMenuItem(
     elem: HTMLElement | null, 
     children?: ReactElement<MenuItem | MenuItemsGroup>[]
 ) {
-    if (!openedByKeyboard.current || !elem) return;
+    if (!elem) return;
     const flatChildren = flattenMenuChildren(children);
     const pathToFocus = flatChildren[0]?.props.path;
     if (pathToFocus) {
         const itemToFocus: HTMLElement | null = elem?.querySelector(`[data-path='${pathToFocus}']`);
         itemToFocus?.focus();
     }
-    openedByKeyboard.current = false;
 }
 
 function isMenuItemsGroup(item: ReactElement<MenuItem | MenuItemsGroup>): item is ReactElement<MenuItemsGroup> { 
@@ -86,4 +84,4 @@ function flattenMenuChildren(children?: ReactElement<MenuItem | MenuItemsGroup>[
     }, [])
 }
 
-export { patchToState, stateToPatch, handleMenuBlur, getNextArrayIndex, handleArrowUpDown, focusIfKeyboardOpened };
+export { patchToState, stateToPatch, handleMenuBlur, getNextArrayIndex, handleArrowUpDown, focusFirstMenuItem };

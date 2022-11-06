@@ -2,7 +2,7 @@ import React, {createContext, ReactElement, useCallback, useContext, useEffect, 
 import clsx from 'clsx';
 import {Expander, ExpanderArea} from '../../main/expander-area';
 import {useInputSync} from '../exchange/input-sync';
-import {focusIfKeyboardOpened, handleArrowUpDown, handleMenuBlur, patchToState, stateToPatch} from './main-menu-utils';
+import {handleArrowUpDown, handleMenuBlur, patchToState, stateToPatch} from './main-menu-utils';
 import {MainMenuClock} from './main-menu-clock';
 import {ScrollInfoContext} from '../scroll-info-context';
 import {PathContext, useFocusControl} from "../focus-control";
@@ -231,20 +231,21 @@ function BurgerMenu({opened, domRef, setFinalState, children}: BurgerMenu) {
   const currentPath = useContext(PathContext);
 
   // Keyboard controls logic
-  const openedByKeyboard = useRef(false);
-  const handleKeyboardOpen = () => focusIfKeyboardOpened(openedByKeyboard, domRef.current, children);
+  const keyboardOperation = useRef(false);
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     switch(e.key) {
       case ENTER_KEY:
         if (!opened && domRef.current) {
           e.stopPropagation();
-          openedByKeyboard.current = true;
+          keyboardOperation.current = true;
           setFinalState({ opened: true });
         }
         break;
       case ESCAPE_KEY:
         if (opened) {
+          keyboardOperation.current = true;
+          e.stopPropagation();
           e.currentTarget.focus();
           setFinalState({ opened: false });
         } 
@@ -254,6 +255,10 @@ function BurgerMenu({opened, domRef, setFinalState, children}: BurgerMenu) {
         break;
       case ARROW_DOWN_KEY:
       case ARROW_UP_KEY:
+        if (keyboardOperation.current) {
+          e.stopPropagation();
+          break;
+        }
         if (!opened || !domRef.current) break;
         handleArrowUpDown(e, domRef.current, currentPath, children);
     }
@@ -284,7 +289,7 @@ function BurgerMenu({opened, domRef, setFinalState, children}: BurgerMenu) {
       </button>
 
       {opened &&
-          <MenuPopupElement popupLrMode={false} handleKeyboardOpen={handleKeyboardOpen} children={children}/>}
+          <MenuPopupElement popupLrMode={false} keyboardOperation={keyboardOperation} children={children}/>}
     </div>
   )
 };
