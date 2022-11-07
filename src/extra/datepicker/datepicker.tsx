@@ -167,7 +167,8 @@ export function DatePickerInputElement({
 		memoInputValue,
 		onTimestampChange,
 		setSelection,
-		sendFinalChange
+		sendFinalChange,
+		inputBoxRef
 	)
 
 	const { focusClass, focusHtml } = useFocusControl(path);
@@ -223,7 +224,9 @@ function getCurrentProps(
 }
 
 function isFocusedInside(element: HTMLElement | null) {
-	if (element) return element.contains(element.ownerDocument.activeElement);
+	if (!element) return false;
+	const activeElement = element.ownerDocument.activeElement;
+	return element.contains(activeElement) && element !== activeElement;
 }
 
 export const components = {DatePickerInputElement}

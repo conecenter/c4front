@@ -48,7 +48,8 @@ function getOnKeyDown(
     memoInputValue: React.MutableRefObject<string>,
     onTimestampChange: (timestamp: number) => void,
     setSelection: (from: number, to: number) => void,
-    sendFinalChange: (ch: DatepickerChange) => void
+    sendFinalChange: (ch: DatepickerChange) => void,
+    inputBoxRef: React.MutableRefObject<HTMLElement | null>
     ): (event: KeyboardEvent<HTMLInputElement>) => void {
     return (e: React.KeyboardEvent<HTMLInputElement>) => {
         switch (e.key) {
@@ -89,8 +90,7 @@ function getOnKeyDown(
                         createInputChange(inputVal)
                     )
                 );
-                const target = e.currentTarget;
-                setTimeout(() => target.blur(), 0);
+                inputBoxRef.current?.focus();
         }
     }
 }
