@@ -1,6 +1,7 @@
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { usePopupPos } from '../main/popup';
 import { NoCaptionContext } from '../main/vdom-hooks';
+import { useAddEventListener } from './custom-hooks';
 import { usePatchSync } from './exchange/patch-sync';
 
 interface SyncedPopup {
@@ -16,18 +17,15 @@ function SyncedPopup({ identity, blurElementPath, children }: SyncedPopup) {
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
     const [popupStyle] = usePopupPos(popupElement);
 
-    function handleBlur(e: FocusEvent) {
+    const handleBlur = (e: FocusEvent) => {
         const doc = e.currentTarget as Document;
         const blurElementRef = (blurElementPath && doc.querySelector(`[data-path='${blurElementPath}']`)) || popupElement;
 		if (e.relatedTarget instanceof Node && blurElementRef?.contains(e.relatedTarget)) return;
         else closePopup();
-	}
-    
-    useEffect(() => {
-        const doc = popupElement?.ownerDocument;
-        doc?.addEventListener('focusout', handleBlur);
-        return () => doc?.removeEventListener('focusout', handleBlur);
-    }, [popupElement]);
+	};
+
+    const doc = popupElement?.ownerDocument;
+    useAddEventListener(doc, 'focusout', handleBlur);
 
     return popupOpen ? (
         <div ref={setPopupElement} className='popupEl' style={popupStyle} >
