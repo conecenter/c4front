@@ -1,4 +1,4 @@
-import React, { MouseEventHandler, ReactNode, useMemo } from 'react';
+import React, { ReactNode, useMemo } from 'react';
 import clsx from 'clsx';
 import { getPath, useFocusControl } from './focus-control';
 import { usePatchSync } from './exchange/patch-sync';
@@ -15,8 +15,7 @@ interface RouteElementProps {
     text: string,
     done: boolean,
     hint?: string,
-    children?: ReactNode[],
-    onClick?: MouseEventHandler<HTMLDivElement>
+    children?: ReactNode[]
 }
 
 function RouteElement({identity, compact, routeParts}: RouteElementProps) {
@@ -28,7 +27,7 @@ function RouteElement({identity, compact, routeParts}: RouteElementProps) {
     return (
         <div className={clsx('routeElement', compact && 'compact')}>
             {routeParts.map((part, ind) => {
-                const { text, hint, done, onClick } = part;
+                const { text, hint, done } = part;
                 const isLastDone = ind === lastDone;
 
                 const partPath = `${path}/part-${ind}`;
@@ -37,7 +36,7 @@ function RouteElement({identity, compact, routeParts}: RouteElementProps) {
                     <div key={`${ind}`}
                          {...focusHtml}
                          className={clsx(done && 'routePartDone', isLastDone && 'isLastDone', focusClass)}
-                         style={onClick ? {cursor: 'pointer'} : undefined}
+                         // style={onClick ? {cursor: 'pointer'} : undefined}
                          title={hint}
                          onClick={() => handleClick(ind)} >
                         {text}
@@ -59,7 +58,7 @@ function useRouteElementSync(
         false,
         (b) => b,
         (b) => ({
-            headers: {"x-r-clickedPart": b},
+            headers: {"x-r-clicked-part": b},
             value: ""
         }),
         (p) => '',
