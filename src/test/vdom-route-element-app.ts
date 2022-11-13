@@ -7,12 +7,12 @@ import { RouteElement } from "../extra/route-element";
 function App() {
     const child = $(RouteElement, {
         key: "TEST1",
+        identity: {parent: "TEST_1"},
         routeParts: [
             {
                 text: '●',
                 hint: 'hello world',
-                done: true,
-                onClick: () => console.log('click handler')
+                done: true
             },
             {
                 text: 'RUVVO ➝ RUMAG',
