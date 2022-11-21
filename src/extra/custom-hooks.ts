@@ -4,6 +4,7 @@ function useAddEventListener(
     element: EventTarget | null | undefined,
     eventName: string,
     handler: Function,
+    capture: boolean = false,
     dependencies: any[] = []
 ) {
     // Create a ref that stores handler
@@ -16,8 +17,8 @@ function useAddEventListener(
 
     useEffect(() => {
         const listener = (e: Event) => savedHandler.current(e);
-        element?.addEventListener(eventName, listener);
-        return () => element?.removeEventListener(eventName, listener);
+        element?.addEventListener(eventName, listener, capture);
+        return () => element?.removeEventListener(eventName, listener, capture);
     }, [eventName, element, ...dependencies]);
 }
 
