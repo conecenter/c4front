@@ -1,7 +1,9 @@
-import React, { ReactNode, useMemo } from 'react';
+import React, { ReactNode, useMemo, useRef } from 'react';
 import clsx from 'clsx';
 import { getPath, useFocusControl } from './focus-control';
 import { usePatchSync } from './exchange/patch-sync';
+import { useAddEventListener } from './custom-hooks';
+import { COPY_EVENT } from './focus-module-interface';
 
 
 interface RouteElementProps {
@@ -24,8 +26,23 @@ function RouteElement({identity, compact, routeParts}: RouteElementProps) {
 
     const { handleClick } = useRouteElementSync(identity, 'receiver');
 
+    // Copy on Ctrl+C functionality
+    const routeElemRef = useRef(null);
+	useAddEventListener(routeElemRef.current, COPY_EVENT, handleClipboardWrite);
+
+    async function handleClipboardWrite(e: CustomEvent) {
+		// On Firefox writing to the clipboard is blocked for non user-initiated event callbacks
+        e.stopPropagation();
+		try {
+            const wholeCode = routeParts.reduce((accum, part) => accum + part.text, '');
+			await navigator.clipboard.writeText(wholeCode);
+		} catch(err) {
+			console.log(err);
+		}
+	}
+
     return (
-        <div className={clsx('routeElement', compact && 'compact')}>
+        <div ref={routeElemRef} className={clsx('routeElement', compact && 'compact')}>
             {routeParts.map((part, ind) => {
                 const { text, hint, done } = part;
                 const isLastDone = ind === lastDone;
