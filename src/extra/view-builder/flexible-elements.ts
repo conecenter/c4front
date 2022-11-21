@@ -50,6 +50,14 @@ function FlexibleColumn({key, sizes, className, align, children}: FlexibleColumn
   }, children)
 }
 
+interface ScrollableColumn extends FlexibleColumn {
+  height: number
+}
+
+function ScrollableColumn({height, ...props}: ScrollableColumn) {
+  return el('div', { style: {height: `${height}em`, overflowY: 'scroll'} }, FlexibleColumn(props));
+}
+
 type GroupboxDisplayMode = 'accent'
 
 interface FlexibleGroupbox {
@@ -205,4 +213,4 @@ function FlexibleLabeled({sizes, label, labelChildren, children, horizontal}: Fl
   )
 }
 
-export const flexibleComponents = {FlexibleColumnRoot, FlexibleColumn, FlexibleGroupbox, FlexibleRow, ThinFlexibleRow, FlexibleCell, FlexibleLabeled}
+export const flexibleComponents = {FlexibleColumnRoot, FlexibleColumn, ScrollableColumn, FlexibleGroupbox, FlexibleRow, ThinFlexibleRow, FlexibleCell, FlexibleLabeled}
