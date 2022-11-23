@@ -1,6 +1,6 @@
 import {createElement as $, useCallback} from "react"
 import {identityAt, never} from "./vdom-util.js";
-import {useSync} from "./vdom-hooks.js";
+import {NoCaptionContext, useSync} from "./vdom-hooks.js";
 
 const fromKey = key => CSS.escape(`${key}-from`)
 const toKey = key => CSS.escape(`${key}-to`)
@@ -30,7 +30,8 @@ export function PivotRoot({rows, cols, children, classNames: argClassNames}) {
     const gridTemplateRows = getTemplate(rows)
     const className = argClassNames ? argClassNames.join(" ") : ""
     const style = {display: "grid", gridTemplateRows, gridTemplateColumns}
-    return $("div", {style, className, children})
+    return $(NoCaptionContext.Provider, { value: true },
+        $("div", {style, className, children}))
 }
 
 const clickActionIdOf = identityAt('clickAction')
