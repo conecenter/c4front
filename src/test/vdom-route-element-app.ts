@@ -5,9 +5,10 @@ import { RouteElement } from "../extra/route-element";
 
 
 function App() {
-    const child = $(RouteElement, {
+    const child = $('div', {style: { margin: '3em', width: 'max-content' }}, $(RouteElement, {
         key: "TEST1",
         identity: {parent: "TEST_1"},
+        compact: false,
         routeParts: [
             {
                 text: '●',
@@ -15,7 +16,7 @@ function App() {
                 done: true
             },
             {
-                text: 'RUVVO ➝ RUMAG',
+                text: 'RUVVO➝RUMAG',
                 hint: 'abc route part',
                 done: true
             },
@@ -25,7 +26,7 @@ function App() {
                 done: true
             },
             {
-                text: 'RUMAG ➝ RUVVO',
+                text: 'RUMAG➝RUVVO',
                 hint: 'cargo movement',
                 done: false
             },
@@ -35,7 +36,7 @@ function App() {
                 done: false
             }
         ]        
-    })
+    }))
     const sender = {
         enqueue: (identity: any, patch: any) => console.log(patch)
     }

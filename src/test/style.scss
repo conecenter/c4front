@@ -57,6 +57,11 @@
   --textColor-dark-focusOutlineColor: #ffffff;
 }
 
+.darkPrimaryColorCss{
+  background: var(--color-dark-primaryColor);
+  color: var(--textColor-dark-primaryColor);
+}
+
 body {
   font-family: helvetica;
   background: var(--color-body);
@@ -754,37 +759,55 @@ div.grid {
   }
 }
 
-// RouteElement
+/************** RouteElement **************/
 .routeElement {
   display: flex;
-  height: 1.8em;
-  width: 100%;
+  min-height: 1em;
+  max-height: 100%;
+  max-width: 100%;
   background-color: var(--color-grayColor);
   color: var(--textColor-grayColor);
-  border-radius: 1em;
-  margin: 5em;
-  max-width: 500px;;
+  min-width: min-content;
+  white-space: nowrap;
+  border-radius: 0.28em;
 
   > div {
-      flex-grow: 1;
       display: flex;
+      flex-grow: 1;
       justify-content: center;
       align-items: center;
-      border-right: 1px solid var(--color-dark-grayColor);
       overflow: hidden;
-      padding: 0 0.4em;
+      padding: 0.25em 0;
+      border-right: 1px solid var(--color-dark-grayColor);
 
-      &.routePartDone {
-          //background-color: var(--color-dark-primaryColor);
-          background-color: var(--color-light-greenColor);
-          color: var(--textColor-dark-primaryColor);
+      &:first-child {
+        padding-left: 0.55em;
+        border-top-left-radius: 0.28em;
+        border-bottom-left-radius: 0.28em;
       }
 
-      &.isLastDone, &:last-child {
-          border-radius: 0 1em 1em 0;
+      &:last-child {
+        padding-right: 0.55em;
+        border-radius: 0 0.28em 0.28em 0;
+        border-right: none;
+      }
+
+      &.routePartDone {
+          @extend .darkPrimaryColorCss;
+      }
+  }
+
+  &:not(.compact) > div {
+      padding: 0.25em 0.55em;
+      border-top-right-radius: 0.28em;
+      border-bottom-right-radius: 0.28em;
+
+      &.routePartDone:not(.isLastDone) {
+          box-shadow: 0.3em 0 0 0 var(--color-dark-primaryColor);  
       }
   }
 }
+
 /***********************Menu**************************/
 .mainMenuBar {
   position: fixed !important;
