@@ -362,10 +362,10 @@ div.grid {
   color: var(--textColor-body);
   box-sizing: border-box;
   position: relative;
-  border: 0.05em solid var(--color-secondaryColor);
+  border: 0.05em solid var(--color-headerColor);
 
   &:hover {
-    border-color: var(--light-secondaryColor);
+    border-color: var(--color-dark-headerColor);
   }
 
   > .inputSubBox {
@@ -643,6 +643,12 @@ div.grid {
       }
     }
   }
+}
+
+.roInputBox{
+  @extend .inputBox;
+  color: inherit;
+  background: none;
 }
 
 // Dropdown with custom content
