@@ -6,15 +6,16 @@ import { TimePicker } from "../../extra/timepicker/timepicker";
 const {createElement: $} = React
 
 function App() {
-    const children = $(TimePicker, {
-        key: "TEST",
-        identity: {parent: "test"},
-        timeFormatId: 0,
-        state: {
-            tp: 'timestring-state',
-            time: '00:00'
-        }
-    });
+    const children = $('div', {key: 'wrapper', style: {width: 'max-content', margin: '7em auto'}},
+        $(TimePicker, {
+            key: "TEST",
+            identity: {parent: "test"},
+            timeFormatId: 0,
+            state: {
+                tp: 'timestring-state',
+                timestamp: 55000
+            }
+    }));
     const sender = {
         enqueue: (identity: any, patch: any) => console.log(patch)
     }

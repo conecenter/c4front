@@ -441,7 +441,7 @@ div.grid {
   border: 0.05em solid var(--color-headerColor);
 
   &:hover {
-      border-color: var(--color-dark-headerColor);
+    border-color: var(--color-dark-headerColor);
   }
 }
 
@@ -725,6 +725,12 @@ div.grid {
       }
     }
   }
+}
+
+.roInputBox{
+  @extend .inputBox;
+  color: inherit;
+  background: none;
 }
 
 // Dropdown with custom content
