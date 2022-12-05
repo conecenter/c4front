@@ -5,6 +5,7 @@ import { useBinds, BindKeyData, useProvideBinds, OnPageBindContext } from './key
 import { KeyBinder } from './key-binder'
 import { firstChild } from './binds-utils'
 import { VISIBLE_CHILD_SEL } from '../main-menu/main-menu-bar'
+import { useFocusControl } from '../focus-control'
 
 /*
 const initialButtonState = { mouseOver: false, touchStart: false }
@@ -116,9 +117,11 @@ const BindingElement = (props) => {
 	const [isValid, setIsValid] = useState(false)
 	const groupContext = useContext(OnPageBindContext)
 	const [elem, setElem] = useState(null)
-	const { bindMap, updateActiveGroup } = useBinds()
+	const { bindMap } = useBinds()
 	const [keyData, setKeyData] = useState(null)
 	const [keyCode, setKeyCode] = useState(null)
+
+	const { focusClass, focusHtml } = useFocusControl(props.path)
 
 	// const [parentGroup, setParentGroup] = useState(null)
 	// const [checkedChildren, setCheckedChildren] = useState([])
@@ -177,10 +180,10 @@ const BindingElement = (props) => {
 	*/
 	const checkedChildren = NVL(children, [])
 	const drawNormal = !isValid && checkedChildren === []
-	const className = clsx(props.className, !drawNormal && 'shortButton')
+	const className = clsx(props.className, focusClass, !drawNormal && 'shortButton')
 	// const isEmptyButton = !buttonText.every((e) => e == "") && actionElemType === ButtonElement
 	// const spanElem = isEmptyButton ? null : $("span", { ref: setElem }, [$(actionElemType, { ...btnPtops }, [...buttonText, ...checkedChildren])])
-	return $('button', { ref: setElem, className, onClick: onClick || onChange }, [...buttonText, ...checkedChildren])
+	return $('button', { ref: setElem, className, ...focusHtml, onClick: onClick || onChange }, [...buttonText, ...checkedChildren])
 }
 
 const BindGroupElement = (props) => {
