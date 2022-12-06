@@ -9,7 +9,33 @@ function App() {
         key: "TEST1",
         identity: {parent: "TEST_1"},
         compact: false,
-        routeParts: []  
+        routeParts: [
+            {
+                text: '●',
+                hint: 'hello world',
+                done: true
+            },
+            {
+                text: 'RUVVO➝RUMAG',
+                hint: 'abc route part',
+                done: true
+            },
+            {
+                text: '●',
+                hint: 'cargo movement',
+                done: true
+            },
+            {
+                text: 'RUMAG➝RUVVO',
+                hint: 'cargo movement',
+                done: false
+            },
+            {
+                text: '●',
+                hint: 'cargo movement',
+                done: false
+            }
+        ]        
     }))
     const sender = {
         enqueue: (identity: any, patch: any) => console.log(patch)
