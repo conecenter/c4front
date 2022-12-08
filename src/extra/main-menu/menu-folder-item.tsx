@@ -17,6 +17,11 @@ import { BindGroupElement } from '../binds/binds-elements';
 import { useBinds } from '../binds/key-binding';
 
 const ARROW_DOWN_URL = '/mod/main/ee/cone/core/ui/c4view/arrow-down.svg';
+const ARROW_DOWN_ICON = (
+    <svg xmlns="http://www.w3.org/2000/svg" className='menuFolderIcon' fill="currentColor" viewBox="0 0 18000 18000" width="18000" height="18000">
+        <g><path d="M1646 6819c-546,-544 -549,-1428 -5,-1974 543,-547 1427,-549 1974,-6l5385 5362 5385 -5362c547,-543 1431,-541 1974,6 544,546 541,1430 -5,1974l-6370 6342c-544,541 -1423,542 -1968,0l-6370 -6342z"/></g>
+    </svg>
+);
 
 interface MenuFolderItem {
     key: string,
@@ -125,7 +130,7 @@ function MenuFolderItem(props: MenuFolderItem) {
                 <span className={clsx(shortName && 'longName')}>{name}</span>
                 {shortName &&
                     <span className='shortName'>{shortName}</span>}
-                <img src={ARROW_DOWN_URL} className='menuFolderIcon' alt='arrow-down-icon' />
+                {ARROW_DOWN_ICON}
         
                 {opened &&
                     <MenuPopupElement popupLrMode={popupLrMode} keyboardOperation={keyboardOperation} >
