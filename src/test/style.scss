@@ -57,9 +57,88 @@
   --textColor-dark-focusOutlineColor: #ffffff;
 }
 
+/********************Colors**************************/
 .darkPrimaryColorCss{
-  background: var(--color-dark-primaryColor);
-  color: var(--textColor-dark-primaryColor);
+    background: var(--color-dark-primaryColor);
+    color: var(--textColor-dark-primaryColor);
+}
+.darkPrimaryTextColorCss{
+    color: var(--textColor-dark-primaryColor);
+}
+.darkPrimaryLighterColorCss{
+    background: var(--color-light-dark-primaryColor);
+    color: var(--textColor-light-dark-primaryColor);
+}
+.primaryColorCss{
+    background: var(--color-primaryColor);
+    color: var(--textColor-primaryColor);
+}
+.primaryTextColorCss{
+    color: var(--textColor-primaryColor);
+}
+.primaryLighterColorCss{
+    background: var(--color-light-primaryColor);
+    color: var(--textColor-light-primaryColor);
+}
+.bodyColorCss{
+    background: var(--color-body);
+    color: var(--textColor-body);
+}
+.bodyLighterColorCss{
+    background: var(--color-light-body);
+    color: var(--textColor-light-body);
+}
+.secondaryColorCss{
+    background: var(--color-secondaryColor);
+    color: var(--textColor-secondaryColor);
+}
+.grayColorCss{
+    background: var(--color-grayColor);
+    color: var(--textColor-grayColor);
+}
+.secondaryLighterColorCss{
+    background: var(--color-light-secondaryColor);
+    color: var(--textColor-light-secondaryColor);
+}
+.greenColorCss{
+    background: var(--color-greenColor);
+    color: var(--textColor-greenColor);
+}
+.greenLighterColorCss{
+    background: var(--color-light-greenColor);
+    color: var(--textColor-light-greenColor);
+}
+.redColorCss{
+    background: var(--color-redColor);
+    color: var(--textColor-redColor);
+}
+.redLighterColorCss{
+    background: var(--color-light-redColor);
+    color: var(--textColor-light-redColor);
+}
+.yellowColorCss{
+    background: var(--color-yellowColor);
+    color: var(--textColor-yellowColor);
+}
+.yellowLighterColorCss{
+    background: var(--color-light-yellowColor);
+    color: var(--textColor-light-yellowColor);
+}
+.headerColorCss{
+    background: var(--color-headerColor);
+    color: var(--textColor-headerColor);
+}
+.headerLighterColorCss{
+    background: var(--color-light-headerColor);
+    color: var(--textColor-light-headerColor);
+}
+.focusOutlineColorCss{
+    background: var(--color-focusOutlineColor);
+    color: var(--textColor-focusOutlineColor);
+}
+.focusLighterOutlineColorCss{
+    background: var(--color-light-focusOutlineColor);
+    color: var(--textColor-light-focusOutlineColor);
 }
 
 body {
@@ -1011,4 +1090,69 @@ div.grid {
     overflow: hidden;
     border: 1px solid var(--textColor-body);
   }
+}
+
+/*********************ClickableDiv*******************/
+.clickableDiv{
+    cursor: pointer;
+    > span {
+        vertical-align: middle;
+    }
+    img, svg{
+        vertical-align: middle;
+    }
+    &:hover{
+        opacity: 0.8;
+    }
+}
+
+/***********************TCS-Dashboard**************************/
+.dashboardCard {
+	display: flex;
+	min-height: 13em;
+	max-width: 25em;
+	background-color: var(--color-light-headerColor);
+
+	.cardMainPart {
+		flex-grow: 1;
+		padding: 1em;
+
+		> div {
+			display: flex;
+		}
+
+		.cardIconField {
+			width: 6em;
+			height: 6em;
+			margin: 0 1em 1em 0;
+
+			img {
+				height: 6em;
+			}
+		}
+
+		.cardNameField {
+			font-size: 1.2em;
+			font-weight: 600;
+			flex-grow: 1;
+		}
+
+		.cardInnerItems {
+			flex-wrap: wrap;
+		}
+	}
+
+	.cardRightButton {
+		min-width: 1em;
+		font-weight: 600;
+		font-size: 2em;
+		text-align: center;
+
+		> * {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			height: 100%;
+		}
+	}
 }
