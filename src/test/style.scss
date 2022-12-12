@@ -1107,6 +1107,33 @@ div.grid {
 }
 
 /***********************TCS-Dashboard**************************/
+.dashboardHeader {
+  $strapWidth: 2em;
+
+  position: relative;
+	text-align: center;
+  padding-left: $strapWidth;
+  margin: 2em 0;
+  padding: 0.5em 2em 0.5em 4em;
+  background: #F4F4F4;
+  color: black;
+
+  &::before {
+		content: '';
+    position: absolute;
+    width: $strapWidth;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background-color: var(--color-primaryColor);
+	 }
+  
+  > h1 {
+    font-size: 2em;
+    font-weight: bold;
+  }
+}
+
 .dashboardCard {
 	display: flex;
 	min-height: 13em;
@@ -1155,4 +1182,11 @@ div.grid {
 			height: 100%;
 		}
 	}
+}
+
+.flexibleRow {
+  display: flex;
+  flex-flow: row wrap;
+  flex-grow: 1;
+  overflow: clip;
 }
