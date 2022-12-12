@@ -14,20 +14,12 @@ const DashboardCard = ({iconFieldItems, nameFieldItems, innerItems, rightButton}
         <NoCaptionContext.Provider value={true}>
             <div className='cardMainPart'>
                 <div>
-                    <div className='cardIconField'>
-                        {iconFieldItems}
-                    </div>
-                    <div className='cardNameField'>
-                        {nameFieldItems}
-                    </div>
+                    <div className='cardIconField'>{iconFieldItems}</div>
+                    <div className='cardNameField'>{nameFieldItems}</div>
                 </div>
-                <div className='cardInnerItems'>
-                    {innerItems}
-                </div>
+                <div className='cardInnerItems'>{innerItems}</div>
             </div>
-            <div className='cardRightButton'>
-                {rightButton}
-            </div>
+            <div className='cardRightButton'>{rightButton}</div>
         </NoCaptionContext.Provider>
     </div>
 );
