@@ -20,7 +20,7 @@ const elementToUnscaledHeightUpdater = element => {
 const div = attr => $("div",attr)
 
 export const DashboardRoot = ({
-    containerHeight, containerPaddingTop = 0, containerPaddingLeft = 0, containerStyle,
+    containerHeight, containerPaddingTop, containerPaddingLeft, containerStyle,
     children, boardStyle, // board is inside container
     minColWidth, maxColWidth, minScale, maxScale, cardStyles, rowGap, colGap // col widths are in em-s before scaling
 }) => {
@@ -62,7 +62,7 @@ export const DashboardRoot = ({
             key: "board",
             style: {
                 ...boardStyle,
-                display: "grid", justifySelf: "center"/*h*/, alignSelf: "center"/*v*/,
+                display: "grid", // justifySelf: "center"/*h*/, alignSelf: "center"/*v*/,
                 alignItems: "start",
                 rowGap: em(rowGap), columnGap: em(colGap),
                 gridTemplateColumns: `repeat(${boardSizes.colCount}, ${em(cardWidth)})`,
@@ -82,7 +82,13 @@ export const DashboardRoot = ({
 }
 
 
-export const Dashboard = ({minColWidth, maxColWidth, minScale, maxScale, rowGap, colGap, children}) => {
+export const Dashboard = ({
+    minColWidth, maxColWidth, 
+    minScale, maxScale, 
+    rowGap, colGap, 
+    containerPaddingTop = 0, containerPaddingLeft = 0, 
+    children
+}) => {
     const [{elem, containerHeight}, setState] = useState({});
     const {totalSpaceUsed} = useContext(ScrollInfoContext);
 
@@ -101,7 +107,7 @@ export const Dashboard = ({minColWidth, maxColWidth, minScale, maxScale, rowGap,
     }, [elem, setParams]);
 
     return $("div", {ref: setParams}, containerHeight && $(DashboardRoot, {
-            containerHeight,
+            containerHeight, containerPaddingTop, containerPaddingLeft,
             minColWidth, maxColWidth,
             rowGap, colGap,
             minScale, maxScale,
