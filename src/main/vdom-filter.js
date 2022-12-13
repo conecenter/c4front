@@ -150,8 +150,8 @@ export function FilterButtonExpander({identity,optButtons:rawOptButtons,classNam
     return $("div",
         {
             className, style:{height:"2em"}, 
-            //...{[popupAttrName]:popupSkipValue},
-            onClick: ev => toggle(!isOpened),
+            [popupAttrName]:popupSkipValue,
+            onClick: ev => toggle(!isOpened)
         },
         isOpened ? [
             openedChildren,
