@@ -139,24 +139,23 @@ export function PopupManager({children}){
     return $(PopupContext.Provider,{value},[...children,el])
 }
 
-export function FilterButtonExpander({identity,optButtons:rawOptButtons,className,popupClassName,popupItemClassName,children,openedChildren,getButtonWidth}){
+export function FilterButtonExpander({identity,optButtons:rawOptButtons,className,children,openedChildren,getButtonWidth}){
     const optButtons = rawOptButtons || []
     const [popupElement,setPopupElement] = useState(null)
     const [popupStyle] = usePopupPos(popupElement)
     const width = em(Math.max(...optButtons.map(getButtonWidth)))
     const [isOpened,toggle] = usePopupState(identity)
 
-    //console.log("p-render-")
     return $("div",
         {
-            className, style:{height:"2em"}, 
+            className, style:{maxHeight:"2em"}, 
             [popupAttrName]:popupSkipValue,
             onClick: ev => toggle(!isOpened)
         },
         isOpened ? [
-            openedChildren,
-            $("div",{key:"popup",className:popupClassName,style:{...popupStyle,width},ref:setPopupElement},optButtons.map(btn=>{
-                return $("div",{ key: btn.key, className: popupItemClassName }, btn.props.children)
+            openedChildren ?? children,
+            $("div",{key:"popup",className:'popupEl',style:{...popupStyle,width},ref:setPopupElement},optButtons.map(btn=>{
+                return $("div",{ key: btn.key, className:'gridPopupItem' }, btn.props.children)
             }))
         ] : children
     )
