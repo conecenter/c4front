@@ -97,6 +97,7 @@ interface FlexibleChildAlign {
 interface FlexibleRow {
   key: string
   sizes?: FlexibleSizes
+  align?: FlexibleAlign
   className?: string  // TODO: remove on the next step
   children: (ReactNode & FlexibleChildAlign)[]
 }
@@ -143,12 +144,15 @@ function wrapInRow(key: string, props: HTMLAttributes<HTMLDivElement>, children:
   return el("div", {key, ...props}, children)
 }
 
-function FlexibleRow({key, sizes, className, children}: FlexibleRow) {
+function FlexibleRow({key, sizes, className, align, children}: FlexibleRow) {
   const props: HTMLAttributes<HTMLDivElement> = {
     className: clsx(FLEXIBLE_ROW_CLASSNAME, className),
-    style: sizes && {
-      minWidth: `${sizes.min}em`,
-      maxWidth: sizes.max ? `${sizes.max}em` : undefined,
+    style: {
+      flexGrow: align && !sizes?.max ? 0 : 1,
+      ...sizes && {
+        minWidth: `${sizes.min}em`,
+        maxWidth: sizes.max ? `${sizes.max}em` : undefined
+      }
     }
   }
   const separated = separateChildren(children).map((list, ind) => wrapInRow(`${key}-${ind}`, props, list)) 
