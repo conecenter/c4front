@@ -36,8 +36,8 @@ trait UIElement extends ToChildPair
 
   @c4el("FlexibleColumn") def column(
     key: String,
-    sizes: Option[Size],
-    align: Align,
+    sizes: Option[Size] = None,
+    align: Option[Align] = None,
     children: ViewRes,
     className: Option[String] = None,
   ): UIElement
@@ -46,8 +46,8 @@ trait UIElement extends ToChildPair
 
   @c4el("FlexibleGroupbox") def groupbox(
     key: String,
-    sizes: Option[Size],
-    align: Align,
+    sizes: Option[Size] = None,
+    align: Option[Align] = None,
     children: ElList[UIElement],
     label: Option[String] = None,
     displayStyle: Option[GroupboxDisplay] = None
@@ -55,16 +55,16 @@ trait UIElement extends ToChildPair
 
   @c4el("FlexibleRow") def row(
     key: String,
-    sizes: Option[Size],
-    align: Align,
+    sizes: Option[Size] = None,
+    align: Option[Align] = None,
     children: ViewRes,
     className: Option[String] = None,
   ): UIElement
 
   @c4el("ThinFlexibleRow") def thinRow(
     key: String,
-    sizes: Option[Size],
-    align: Align,
+    sizes: Option[Size] = None,
+    align: Option[Align] = None,
     children: ViewRes,
     className: Option[String] = None,
   ): UIElement
@@ -75,17 +75,16 @@ trait UIElement extends ToChildPair
 
   @c4el("FlexibleCell") def cell(
     key: String,
-    sizes: Option[Size],
-    grow: Option[Boolean],
-    align: Align,
+    sizes: Option[Size] = None,
+    align: Option[Align] = None,
     children: ViewRes,
     className: Option[String] = None,
   ): UIElement
 
   @c4el("FlexibleLabeled") def labeled(
     key: String,
-    sizes: Option[Size],
-    align: Align,
+    sizes: Option[Size] = None,
+    align: Option[Align] = None,
     label: String,
     children: ViewRes,
     labelChildren: ViewRes = Nil,
