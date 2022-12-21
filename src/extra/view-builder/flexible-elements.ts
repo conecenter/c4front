@@ -41,7 +41,7 @@ function FlexibleColumn({key, sizes, className, align, children}: FlexibleColumn
     key,
     className: clsx(FLEXIBLE_COLUMN_CLASSNAME, className),
     style: {
-      flexGrow: align && !sizes?.max ? 0 : 1,
+      ...align && !sizes?.max && { flexGrow: 0 },
       ...sizes && {
         minWidth: `${sizes.min}em`,
         maxWidth: sizes.max ? `${sizes.max}em` : undefined
@@ -148,7 +148,7 @@ function FlexibleRow({key, sizes, className, align, children}: FlexibleRow) {
   const props: HTMLAttributes<HTMLDivElement> = {
     className: clsx(FLEXIBLE_ROW_CLASSNAME, className),
     style: {
-      flexGrow: align && !sizes?.max ? 0 : 1,
+      ...align && !sizes?.max && { flexGrow: 0 },
       ...sizes && {
         minWidth: `${sizes.min}em`,
         maxWidth: sizes.max ? `${sizes.max}em` : undefined
@@ -176,12 +176,13 @@ interface FlexibleCell {
   children: ReactNode[]
 }
 
-function FlexibleCell({key, sizes, grow, className, children}: FlexibleCell) {
+function FlexibleCell({key, align, sizes, grow = true, className, children}: FlexibleCell) {
+  const noGrow = !grow || (align && !sizes?.max);
   return el("div", {
     key,
     className: clsx(FLEXIBLE_CELL_CLASSNAME, className),
     style: {
-      flexGrow: grow || sizes?.max ? 1 : undefined,
+      ...noGrow && { flexGrow: 0 },
       ...sizes && {
         minWidth: `${sizes.min}em`,
         maxWidth: sizes.max ? `${sizes.max}em` : undefined
