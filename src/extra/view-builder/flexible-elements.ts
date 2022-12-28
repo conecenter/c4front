@@ -171,18 +171,16 @@ interface FlexibleCell {
   key: string
   align?: FlexibleAlign
   sizes?: FlexibleSizes
-  grow?: boolean  // TODO: remove after sizes implementation
-  className?: string  // TODO: remove on the next step
+  className?: string
   children: ReactNode[]
 }
 
-function FlexibleCell({key, align, sizes, grow = true, className, children}: FlexibleCell) {
-  const noGrow = !grow || (align && !sizes?.max);
+function FlexibleCell({key, align, sizes, className, children}: FlexibleCell) {
   return el("div", {
     key,
     className: clsx(FLEXIBLE_CELL_CLASSNAME, className),
     style: {
-      ...noGrow && { flexGrow: 0 },
+      ...align && !sizes?.max && { flexGrow: 0 },
       ...sizes && {
         minWidth: `${sizes.min}em`,
         maxWidth: sizes.max ? `${sizes.max}em` : undefined
