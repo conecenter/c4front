@@ -9,7 +9,7 @@ import {ESCAPE_KEY} from "./keyboard-keys"
 import {useFocusControl} from "../extra/focus-control.ts"
 import {BindGroupElement} from "../extra/binds/binds-elements"
 import {HoverExpander} from "../extra/hover-expander"
-import {isSelColElement} from "../extra/dom-utils"
+import {InputsSizeContext, isSelColElement} from "../extra/dom-utils"
 
 const dragRowIdOf = identityAt('dragRow')
 const dragColIdOf = identityAt('dragCol')
@@ -265,9 +265,11 @@ export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey 
         ref
     }, dragBGEl, ...allChildren)
     const dragCSSEl = $("style",{dangerouslySetInnerHTML: { __html: dragCSSContent}})
-    return $(NoCaptionContext.Provider,{value:true},[
-        $(BindGroupElement,{groupId:'grid-list-bind'},dragCSSEl,res)
-    ])
+    return $(NoCaptionContext.Provider,{value:true},
+        $(InputsSizeContext.Provider,{value:100},
+            $(BindGroupElement,{groupId:'grid-list-bind'},dragCSSEl,res)
+        )
+    )
 }
 
 const getAllChildren = ({children,rows,cols,hasHiddenCols,hideElementsForHiddenCols,dragRowKey}) => {

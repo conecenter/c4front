@@ -1,3 +1,5 @@
+import { createContext } from "react";
+
 const CONE_ANGLE = 0.52;  // 0.52rad ~ 30deg
 const DIRECTION_BONUS = 0.25;
 
@@ -95,6 +97,8 @@ function formatTo3Digits(obj: LineSegmentCoords) {
 }
 
 
+const InputsSizeContext = createContext(20);
+
 const isSelColElement = (elem: Element) => elem?.matches('.selCol :is(.checkBox, .checkBox :scope)');
 
-export { findClosestNode, isSelColElement };
+export { findClosestNode, isSelColElement, InputsSizeContext };
