@@ -9,7 +9,7 @@ import {ESCAPE_KEY} from "./keyboard-keys"
 import {useFocusControl} from "../extra/focus-control.ts"
 import {BindGroupElement} from "../extra/binds/binds-elements"
 import {HoverExpander} from "../extra/hover-expander"
-import {InputsSizeContext, isSelColElement} from "../extra/dom-utils"
+import {InputsSizeContext, isButtonElement, isSelColElement} from "../extra/dom-utils"
 
 const dragRowIdOf = identityAt('dragRow')
 const dragColIdOf = identityAt('dragCol')
@@ -187,7 +187,7 @@ const getCellDataAttrs = element => {
 const useGridClickAction = identity => {
     const [clickActionPatches, enqueueClickActionPatch] = useSync(clickActionIdOf(identity))
     return useCallback(ev => {
-        if (isSelColElement(ev.target)) return;
+        if (isSelColElement(ev.target) || isButtonElement(ev.target)) return;
         const cellDataKeys = findFirstParent(getCellDataAttrs)(ev.target)
         if (cellDataKeys && cellDataKeys.rowKey && cellDataKeys.colKey) {
             const headers = {
