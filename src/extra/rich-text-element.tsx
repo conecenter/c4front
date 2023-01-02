@@ -3,6 +3,7 @@ import React from "react";
 import { ColorDef, colorToProps } from "./view-builder/common-api"
 
 interface RichTextElement {
+    key: string,
     text: Row[],
     color?: ColorDef
 }
