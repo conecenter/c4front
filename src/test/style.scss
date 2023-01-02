@@ -141,6 +141,33 @@
     color: var(--textColor-light-focusOutlineColor);
 }
 
+/*****************IdeaColors********************/
+.darkIdeaBackGroundCssClass{
+  background-color:#2B2B2B;
+  color:#E3E7EF;
+}
+.darkIdeaWhiteTextCssClass{
+  color:#E3E7EF;
+}
+.darkIdeaGreenTextCssClass{
+  color:#45807D;
+}
+.darkIdeaYellowTextCssClass{
+  color:#B5B529;
+}
+.darkIdeaOrangeTextCssClass{
+  color:#CC7832;
+}
+.darkIdeaBeigeTextCssClass{
+  color:#FDC66B;
+}
+.darkIdeaLightBlueTextCssClass{
+  color:#9CE1E8;
+}
+.darkIdeaRedTextCssClass{
+  color:#CC2424;
+}
+
 body {
   font-family: helvetica;
   background: var(--color-body);
@@ -1189,4 +1216,12 @@ div.grid {
   flex-flow: row wrap;
   flex-grow: 1;
   overflow: clip;
+}
+
+/*********************** RichTextElement **************************/
+.richTextElement {
+  white-space: pre;
+  overflow-x: auto;
+  margin: 1em 0;
+  padding: 0.5em;
 }
