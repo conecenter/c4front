@@ -1,5 +1,5 @@
 import React, {createElement as el, HTMLAttributes, ReactNode} from "react";
-import {FlexibleAlign, FlexibleSizes} from "./flexible-api";
+import {FlexibleAlign, FlexibleChildAlign, FlexibleSizes} from "./flexible-api";
 import {
   FLEXIBLE_ACCENTED_GROUPBOX_CLASSNAME,
   FLEXIBLE_CELL_CLASSNAME,
@@ -88,18 +88,12 @@ function FlexibleGroupbox({key, label, displayMode, sizes, children}: FlexibleGr
   }, createLabel(label, children))
 }
 
-interface FlexibleChildAlign {
-  props: {
-    align?: FlexibleAlign
-  }
-}
-
 interface FlexibleRow {
   key: string
   sizes?: FlexibleSizes
   align?: FlexibleAlign
   className?: string  // TODO: remove on the next step
-  children: (ReactNode & FlexibleChildAlign)[]
+  children: (ReactNode & FlexibleChildAlign)
 }
 
 function correctNext(prev: FlexibleAlign, next: FlexibleAlign): boolean {
@@ -117,7 +111,7 @@ function correctNext(prev: FlexibleAlign, next: FlexibleAlign): boolean {
 
 const spacer = el("div", {style: {marginLeft: "auto", marginRight: "auto"}})
 
-function separateChildren(children: (ReactNode & FlexibleChildAlign)[]): React.ReactNode[][] {
+function separateChildren(children: (ReactNode & FlexibleChildAlign)): React.ReactNode[][] {
   const childrenArray = React.Children.toArray(children) as (ReactNode & FlexibleChildAlign)[]
   const newChildren = [[]] as ReactNode[][]
   let currentAlign: FlexibleAlign = "l"
