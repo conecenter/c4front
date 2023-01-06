@@ -13,7 +13,6 @@ interface Row {
 }
 
 interface Text {
-    key: string,
     text: string,
     color?: ColorDef 
 }
@@ -29,9 +28,9 @@ function RichTextElement({text, color}: RichTextElement) {
     );
 }
 
-const formatRow = (row: Text[]) => row.map(({key, text, color}) => {
+const formatRow = (row: Text[]) => row.map(({text, color}, ind) => {
     const {className, style} = colorToProps(color);
-    return <span key={key} className={className} style={style}>{text}</span>
+    return <span key={`${text}-${ind}`} className={className} style={style}>{text}</span>
 });
 
 export { RichTextElement };
