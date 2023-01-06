@@ -8,17 +8,17 @@ function App() {
         key: "TEST3",
         text: [
             { row: [
-                {key: '0', text: 'def ', color: {tp: 'p', cssClass: 'darkIdeaOrangeTextCssClass'}}, 
-                {key: '1', text: 'keepAlive', color: {tp: 'p', cssClass: 'darkIdeaBeigeTextCssClass'}}, 
-                {key: '2', text: '('}] 
+                {text: 'def ', color: {tp: 'p', cssClass: 'darkIdeaOrangeTextCssClass'}}, 
+                {text: 'keepAlive', color: {tp: 'p', cssClass: 'darkIdeaBeigeTextCssClass'}}, 
+                {text: '('}] 
             },
             { row : [
-                {key: '0', text: '\t'},
-                {key: '1', text: 'ProtoDefaultDescription$V_DefaultDescription'}, 
-                {key: '2', text: 'items:'}, 
-                {key: '3', text: '88663', color: {tp: 'p', cssClass: 'darkIdeaLightBlueTextCssClass'}}, 
-                {key: '4', text: ', keys:'},
-                {key: '5', text: '88663', color: {tp: 'p', cssClass: 'darkIdeaLightBlueTextCssClass'}}
+                {text: '\t'},
+                {text: 'ProtoDefaultDescription$V_DefaultDescription'}, 
+                {text: 'items:'}, 
+                {text: '88663', color: {tp: 'p', cssClass: 'darkIdeaLightBlueTextCssClass'}}, 
+                {text: ', keys:'},
+                {text: '88663', color: {tp: 'p', cssClass: 'darkIdeaLightBlueTextCssClass'}}
             ]}
         ],
         color: {tp: 'p', cssClass: 'darkIdeaBackGroundCssClass'}
