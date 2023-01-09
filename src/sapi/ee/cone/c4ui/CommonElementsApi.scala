@@ -18,12 +18,12 @@ import ee.cone.c4vdom.{ToChildPair, ToJson, c4el, c4tagSwitch, c4tags, c4val}
     textColor: String,
   ): ColorDef
 
-  @c4val("Text") def textElement(
+  @c4val("text") def textElement(
     text: String,
     color: Option[ColorDef] = None,
   ): Text
 
-  @c4val("Row") def rowElement(
+  @c4val("row") def rowElement(
     text: List[Text],
   ): Row
 
