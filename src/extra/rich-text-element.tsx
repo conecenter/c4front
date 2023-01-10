@@ -2,6 +2,12 @@ import clsx from "clsx";
 import React, { CSSProperties } from "react";
 import { ColorDef, colorToProps } from "./view-builder/common-api"
 
+const STYLES_MAP: {[index: string]: CSSProperties} = {
+    b: { fontWeight: 'bold' },
+    i: { fontStyle: 'italic' },
+    m: { fontFamily: 'monospace' }
+}
+
 interface RichTextElement {
     key: string,
     text: Row[],
@@ -33,6 +39,9 @@ function RichTextElement({text, color}: RichTextElement) {
     );
 }
 
+const getFontStyles = (fontStyles: FontStyle[] | undefined) => fontStyles?.reduce(
+    (acc: CSSProperties, currStyle: FontStyle): CSSProperties  => ({ ...acc, ...STYLES_MAP[currStyle] }), {});
+
 function formatRow(row: Text[]) {
     return row.map(({text, color, fontSize, fontStyle}, ind) => {
         const {className, style: colorStyle} = colorToProps(color);
@@ -43,19 +52,6 @@ function formatRow(row: Text[]) {
         }
         return <span key={`${text}-${ind}`} className={className} style={style}>{text}</span>
     });
-}
-
-function getFontStyles(fontStyles: FontStyle[] | undefined) {
-    return fontStyles?.reduce((acc: CSSProperties, currStyle: FontStyle): CSSProperties  => {
-        switch (currStyle) {
-            case 'b':
-                return { ...acc, fontWeight: 'bold' };
-            case 'i':
-                return { ...acc, fontStyle: 'italic' };
-            case 'm':
-                return { ...acc, fontFamily: 'monospace' };
-        }
-    }, {});
 }
 
 export { RichTextElement };
