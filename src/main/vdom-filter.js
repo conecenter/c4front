@@ -1,9 +1,10 @@
 
-import {createElement as $,useState,useContext,createContext,useCallback,cloneElement,useMemo} from "react"
+import {createElement as $,cloneElement} from "react"
 import {em,sum} from "./vdom-util.js"
 import {useWidths} from "../main/sizes.js"
-import {usePopupPos,usePopupMiss} from "../main/popup.js"
-import { NoCaptionContext } from "./vdom-hooks.js"
+import {NoCaptionContext} from "./vdom-hooks.js"
+import {usePopupState} from "../extra/popup-elements/popup-manager"
+import {NewPopupElement} from "../extra/popup-elements/popup-element"
 
 //// non-shared
 
@@ -120,42 +121,15 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
 
 ////
 
-
-const popupAttrName = "data-is-popup"
-const popupSkipValue = "1"
-const PopupContext = createContext()
-const usePopupState = identity => {
-    const [popup,setPopup] = useContext(PopupContext)
-    const isOpened = useCallback(p => p===identity, [identity])
-    const setOpened = useCallback(on => setPopup(on?identity:null), [setPopup,identity])
-    return [isOpened(popup),setOpened]
-}
-
-export function PopupManager({children}){
-    const [popup,setPopup] = useState(null) // todo useSync
-    const onPopupMiss = useCallback(()=>setPopup(was=>null),[setPopup])
-    const el = usePopupMiss(popupAttrName,popupSkipValue,onPopupMiss)
-    const value = useMemo(()=>[popup,setPopup],[popup,setPopup])
-    return $(PopupContext.Provider,{value},[...children,el])
-}
-
-export function FilterButtonExpander({identity,optButtons:rawOptButtons,className,children,openedChildren,getButtonWidth}){
+export function FilterButtonExpander({identity,optButtons:rawOptButtons,className,children,openedChildren}){
     const optButtons = rawOptButtons || []
-    const [popupElement,setPopupElement] = useState(null)
-    const [popupStyle] = usePopupPos(popupElement)
-    const width = em(Math.max(...optButtons.map(getButtonWidth)))
     const [isOpened,toggle] = usePopupState(identity)
-
-    return $("div",
-        {
-            className, style:{maxHeight:"2em"}, 
-            [popupAttrName]:popupSkipValue,
-            onClick: ev => toggle(!isOpened)
-        },
+    return $("div", {className,style:{maxHeight:"2em"},onClick:ev=>toggle(!isOpened)},
         isOpened ? [
             openedChildren ?? children,
-            $("div",{key:"popup",className:'popupEl',style:{...popupStyle,width},ref:setPopupElement},optButtons.map(btn=>{
-                return $("div",{ key: btn.key, className:'gridPopupItem' }, btn.props.children)
+            $(NewPopupElement,{identity},optButtons.map(btn=>{
+                return $("div",{key:btn.key,className:'gridPopupItem'}, 
+                    $(NoCaptionContext.Provider,{value:true},btn.props.children))
             }))
         ] : children
     )
@@ -170,4 +144,4 @@ export function FilterItem({className,children}){
         $("div",{className},children))
 }
 
-export const components = {FilterArea,FilterButtonExpander,FilterButtonPlace,FilterItem,PopupManager}
+export const components = {FilterArea,FilterButtonExpander,FilterButtonPlace,FilterItem}
