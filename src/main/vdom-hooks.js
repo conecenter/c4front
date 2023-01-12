@@ -53,5 +53,6 @@ export const useAnimationFrame = extractedUse((element,callback) => {
 },useEffect)
 
 export const NoCaptionContext = createContext(false)
+NoCaptionContext.displayName = 'NoCaptionContext'
 
 export const HorizontalCaptionContext = createContext(false);

@@ -51,4 +51,4 @@ function getPath(identity: Identity) {
 
 
 export type { FocusControlObj };
-export { PathContext, useFocusControl, Focusable, getPath };
+export { PathContext, useFocusControl, Focusable, getPath, isCurrentlyFocused };
