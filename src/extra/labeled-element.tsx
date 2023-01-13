@@ -67,9 +67,16 @@ function LabeledElement({ identity, path, label, sizes, accented, clickable, lab
 
     return (
         <NoFocusContext.Provider value={disableChildFocus} >
-            <div ref={refLE} className={className} {...focusHtml} style={style} onClick={onClick} onKeyDown={onKeyDown}>
+            <div ref={refLE} 
+                className={className} 
+                {...focusHtml} 
+                style={style} 
+                onClick={onClick} 
+                onKeyDown={onKeyDown} 
+                data-umid={umid}
+            >
                 {showCaption ? (
-                    <NoCaptionContext.Provider value={true} >
+                    <NoCaptionContext.Provider value={true}>
                         <div className='labelBox' style={clicked ? { opacity: 0.8 } : undefined}>
                             {label && <label>{label}</label>}
                             {labelChildren}
@@ -77,7 +84,7 @@ function LabeledElement({ identity, path, label, sizes, accented, clickable, lab
                         <div className='contentBox'>
                             {children}
                         </div>
-                    </NoCaptionContext.Provider> )
+                    </NoCaptionContext.Provider>)
                     : children }
                 {umButton}
             </div>
