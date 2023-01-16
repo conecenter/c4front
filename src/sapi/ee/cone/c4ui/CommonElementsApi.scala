@@ -1,6 +1,7 @@
 package ee.cone.c4ui
 
 import ee.cone.c4ui.FrontTypes.Em
+import ee.cone.c4vdom.Types.ViewRes
 import ee.cone.c4vdom.{ToChildPair, ToJson, c4el, c4tagSwitch, c4tags, c4val}
 
 @c4tagSwitch("FrontApp") trait ColorDef extends ToJson
@@ -40,5 +41,11 @@ import ee.cone.c4vdom.{ToChildPair, ToJson, c4el, c4tagSwitch, c4tags, c4val}
     key: String,
     text: List[Row],
     color: Option[ColorDef] = None
+  ): ToChildPair
+
+  @c4el("SystemButtonsSet") def systemButtons(
+    key: String,
+    children: ViewRes,
+    align: Option[Align] = None,
   ): ToChildPair
 }
