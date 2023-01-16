@@ -46,7 +46,7 @@ export const DashboardRoot = ({
             wasBest && scaleToFitContainer < wasBest.scaleToFitContainer ||
             wasBest && boardWidth * scaleToApply > containerInnerWidth ? // while scaleToFitContainer seems optimal, minScale can prevent fitting width at all
             wasBest : {scaleToFitContainer,scaleToApply,colCount,boardWidth,rowHeights}
-        return calcBoardSizes(colCount+1, willBest)
+        return colCount <= children.length ? calcBoardSizes(colCount+1, willBest) : wasBest;
     }
     const boardSizes = calcBoardSizes(1,undefined)
     const freeWidth =
@@ -56,7 +56,7 @@ export const DashboardRoot = ({
         ref,
         style: {
             ...containerStyle, minHeight: em(containerHeight), display: "grid",
-            padding: `${em(containerPaddingTop)} ${em(containerPaddingLeft)}`,
+            padding: `${em(containerPaddingTop)} ${em(containerPaddingLeft)}`
         },
         children: [div({
             key: "board",
