@@ -1,8 +1,7 @@
-
-import {createElement as $,useCallback,useContext,useEffect,useState} from "react"
+import {createElement as $,useCallback,useEffect,useState} from "react"
 import {useObservedChildSizes,getFontSize,useWidth} from "./sizes.js"
 import {sum,em} from "./vdom-util.js"
-import {ScrollInfoContext} from '../extra/scroll-info-context';
+import {useEventListener} from './vdom-hooks.js'
 
 const limited = (minV,v,maxV)=>Math.min(Math.max(minV,v),maxV)
 
@@ -86,27 +85,28 @@ export const Dashboard = ({
     minColWidth, maxColWidth, 
     minScale, maxScale, 
     rowGap, colGap, 
-    containerPaddingTop = 0, containerPaddingLeft = 0, 
+    containerPaddingTop = 1,
+    containerPaddingLeft = 1, 
     children
 }) => {
     const [{elem, containerHeight}, setState] = useState({});
-    const {totalSpaceUsed} = useContext(ScrollInfoContext);
 
-    const setParams = useCallback((element) => {
-        if (element) {
-            const vpHeight = element.ownerDocument.documentElement.clientHeight;
-            const heightEm = (vpHeight - totalSpaceUsed) / getFontSize(element);
-            setState({elem: element, containerHeight: heightEm});
-        } else setState({});
-    }, [totalSpaceUsed]);
+    const setParams = useCallback(element => {
+        if (element) setState({elem: element, containerHeight: countFreeVpSpace(element)});
+    }, []);
+    const recalcParams = useCallback(() => setParams(elem), [elem]);
+
+    const win = elem?.ownerDocument.defaultView;
+    useEventListener(win, 'resize', recalcParams);
 
     useEffect(() => {
-        const win = elem?.ownerDocument.defaultView;
-        win?.addEventListener('resize', () => setParams(elem));
-        return win?.removeEventListener('resize', () => setParams(elem));
-    }, [elem, setParams]);
+        if (!elem) return;
+        const observer = new ResizeObserver(entries => {entries.forEach(recalcParams)});
+        observer.observe(elem.ownerDocument.body, {box: "border-box"});
+        return () => observer.disconnect();
+    }, [elem]);
 
-    return $("div", {ref: setParams}, containerHeight && $(DashboardRoot, {
+    return $("div", {ref: setParams, className: 'dashboard'}, containerHeight !== undefined && $(DashboardRoot, {
             containerHeight, containerPaddingTop, containerPaddingLeft,
             minColWidth, maxColWidth,
             rowGap, colGap,
@@ -116,6 +116,13 @@ export const Dashboard = ({
     );
 }
 
+function countFreeVpSpace(element) {
+    const vpHeight = element.ownerDocument.documentElement.clientHeight;
+    const contentHeight = element.ownerDocument.body.scrollHeight - element.scrollHeight;
+    const freeSpaceHeight = vpHeight  - contentHeight;
+    const heightEm = freeSpaceHeight < 0 ? 0 : Math.floor(freeSpaceHeight / getFontSize(element));
+    return heightEm;
+}
 
 /*
 We try to maximize usage of viewport area.
