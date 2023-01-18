@@ -266,7 +266,7 @@ export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey 
     }, dragBGEl, ...allChildren)
     const dragCSSEl = $("style",{dangerouslySetInnerHTML: { __html: dragCSSContent}})
     return $(NoCaptionContext.Provider,{value:true},
-        $(InputsSizeContext.Provider,{value:100},
+        $(InputsSizeContext.Provider,{value:50},
             $(BindGroupElement,{groupId:'grid-list-bind'},dragCSSEl,res)
         )
     )
