@@ -10,10 +10,9 @@ function App() {
         $(TimePicker, {
             key: "TEST",
             identity: {parent: "test"},
-            timeFormatId: 0,
             state: {
                 tp: 'timestring-state',
-                timestamp: 55000
+                timestamp: 86350000
             }
     }));
     const sender = {

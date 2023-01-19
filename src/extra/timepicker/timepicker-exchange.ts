@@ -1,50 +1,51 @@
 import { Patch, PatchHeaders } from "../exchange/patch-sync";
-import { InputState, TimePickerState, TimestampState } from "./timepicker";
-
+import { TimePickerState, InputState, TimestampState } from "./timepicker";
 
 const isInputState = (state: TimestampState | InputState): state is InputState => state.tp === 'input-state';
 
-interface TimeChange {
-    tp: 'timeChange',
-    state: TimePickerState
+// Change to patch
+function getHeaders(ch: TimePickerState): PatchHeaders {
+    const headers: PatchHeaders = isInputState(ch)
+        ? { 
+            "x-r-input-value": ch.inputValue,
+            ...ch.tempTimestamp && {'x-r-temp-timestamp':  String(ch.tempTimestamp)}
+        } 
+        : { 'x-r-timestamp': String(ch.timestamp) };
+    return { 
+        "x-r-type": ch.tp,
+        ...headers
+    };
 }
 
-function changeToPatch(ch: TimeChange): Patch {
+function changeToPatch(ch: TimePickerState): Patch {
     return {
-        value: ch.tp,
+        value: 'timeChange',
         headers: getHeaders(ch)
     };
 }
 
-function getHeaders(ch: TimeChange): PatchHeaders {
-    switch (ch.tp) {
-        case "timeChange":
-            const headers: PatchHeaders = isInputState(ch.state)
-                ? { 
-                    "x-r-input-value": ch.state.inputValue,
-                    ...ch.state.tempTimestamp && {'x-r-temp-timestamp':  String(ch.state.tempTimestamp)}
-                } 
-                : { 'x-r-timestamp': String(ch.state.timestamp) };
-            return { 
-                "x-r-type": ch.state.tp,
-                ...headers
-            };
-    }
+// Patch to change
+const createInputState = (inputValue: string, tempTimestampString?: string): InputState => ({
+    tp: 'input-state',
+    inputValue,
+    ...tempTimestampString && { tempTimestamp: parseInt(tempTimestampString) }
+});
+
+const createTimestampState = (timestampString: string): TimestampState => ({
+    tp: 'timestring-state',
+    timestamp: parseInt(timestampString)
+});
+
+function patchToChange(patch: Patch): TimePickerState {
+    const {
+        'x-r-type': tp,
+        'x-r-input-value': inputValue, 
+        'x-r-temp-timestamp': tempTimestampString, 
+        'x-r-timestamp': timestampString 
+    } = patch.headers as PatchHeaders;
+    return tp === 'input-state'
+        ? createInputState(inputValue, tempTimestampString)
+        : createTimestampState(timestampString)
 }
 
-function patchToChange(patch: Patch): TimeChange {
-    const headers = patch.headers as PatchHeaders;
-    switch (patch.value) {
-        case 'timeChange':
-            const tpState = headers["x-r-type"];
-            const tempTimestamp = headers['x-r-temp-timestamp'] ? parseInt(headers['x-r-temp-timestamp']) : undefined;
-            return {
-                tp: 'timeChange',
-                state: isTimestampStateType(tpState) 
-                    ? createTimestampState(parseInt(headers['x-r-timestamp']))
-                    : createInputState(headers["x-r-input-value"], tempTimestamp)
-            };
-    }
-}
-
-export { changeToPatch }
+export { changeToPatch, patchToChange, isInputState }
