@@ -283,6 +283,7 @@ const getAllChildren = ({children,rows,cols,hasHiddenCols,hideElementsForHiddenC
             rowKey,
             rowKeyMod: "-expanded",
             style: { display: "flex", flexFlow: "row wrap", visibility: dragRowKey?"hidden":null },
+            needsHoverExpander: false,
             children: pairs.map(([col, cell]) => $("div",{
                 key: cell.key,
                 style: cell.props.children ? { flexBasis:  `${col.width.min}em` } : undefined,
