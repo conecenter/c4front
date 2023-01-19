@@ -443,28 +443,35 @@ div.grid {
   &:hover {
     border-color: var(--color-dark-headerColor);
   }
-}
 
-.inputBox, .inputSubbox, .inputSubBox {
-  > input, > div > input, > div[type='text'], > textarea {
-      margin: 0rem;
-      vertical-align: top;
-      border: medium none;
-      height: 100%;
-      padding: 0.2172em 0.3125em;
-      width: 100%;
-      z-index: 0;
-      box-sizing: border-box;
-      font-size: inherit;
-      outline: currentcolor none medium;
-      font-family: inherit;
-      color: inherit;
-      line-height: normal;
-      background-color: inherit;
-      flex: 1 1 20%;
-      min-width: 0;
+  .inputSubBox {
+    flex: 1 1 0%;
+    height: auto;
+    min-height: 100%;
+    display: flex;
+    position: relative;
+    text-align: left;
   }
-}
+
+  input {
+    margin: 0rem;
+    vertical-align: top;
+    border: medium none;
+    height: 100%;
+    padding: 0.2172em 0.3125em;
+    width: 100%;
+    z-index: 0;
+    box-sizing: border-box;
+    font-size: inherit;
+    outline: currentcolor none medium;
+    text-align: inherit;
+    font-family: inherit;
+    color: inherit;
+    line-height: normal;
+    background-color: inherit;
+    flex: 1 1 20%;
+    min-width: 0;
+  }
 
 .buttonEl {
   &:is(button), button {
