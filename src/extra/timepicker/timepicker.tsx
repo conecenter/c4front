@@ -36,9 +36,7 @@ function TimePicker({identity, state, deferredSend = true, children}: TimePicker
 
     return (
         <div className={clsx("inputBox")} onClick={(e) => e.stopPropagation()} >
-            <div className="inputSubBox">   {/*TODO: remove*/ }
-                <input value={inputValue} onChange={handleChange} />
-            </div>
+            <input value={inputValue} onChange={handleChange} />
 
             {children && 
                 <div className='sideContent'>
