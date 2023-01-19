@@ -1,13 +1,12 @@
-import React, { ReactNode, useState } from "react";
+import React, { ChangeEvent, ReactNode } from "react";
 import clsx from "clsx";
 import { usePatchSync } from "../exchange/patch-sync";
-import { changeToPatch } from "./timepicker-exchange";
+import { changeToPatch, isInputState, patchToChange } from "./timepicker-exchange";
 
 interface TimePickerProps {
 	key: string,
 	identity: Object,
 	state: TimePickerState,
-	timeFormatId: number,
     deferredSend?: boolean,
 	children?: ReactNode[]
 }
@@ -25,28 +24,20 @@ interface TimestampState {
 	timestamp: number   // 15:30 = 15*60*60*1000 + 30*60*1000
 }
 
-function TimePicker({identity, state, timeFormatId, deferredSend = true, children}: TimePickerProps) {
-    const { currentState, sendTempChange, sendFinalChange } = usePatchSync(
-        identity,
-        'receiver',
-        state,
-        deferredSend,
-        s => s,
-        changeToPatch,
-        patchToChange,
-        applyChange
-    );
+function TimePicker({identity, state, deferredSend = true, children}: TimePickerProps) {
+    const { currentState, sendTempChange, sendFinalChange } =
+        usePatchSync(identity, 'receiver', state, deferredSend, s => s, changeToPatch, patchToChange, (prev, ch) => ch);
 
-    const [inputValue, setInputValue] = useState<TimeStringState>({ tp: 'timestring-state', time: '00:00'});
+    const inputValue = isInputState(currentState) ? currentState.inputValue : convertMsToTime(currentState.timestamp);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setInputValue({ tp: 'timestring-state', time: e.target.value });
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+        sendTempChange({ tp: 'input-state', inputValue: e.target.value });
     }
 
     return (
         <div className={clsx("inputBox")} onClick={(e) => e.stopPropagation()} >
-            <div className="inputSubBox">
-                <input value={inputValue.time} onChange={handleChange} />
+            <div className="inputSubBox">   {/*TODO: remove*/ }
+                <input value={inputValue} onChange={handleChange} />
             </div>
 
             {children && 
@@ -55,6 +46,14 @@ function TimePicker({identity, state, timeFormatId, deferredSend = true, childre
                 </div>}
         </div>
     );
+}
+
+const padTo2Digits = (num: number) =>  num.toString().padStart(2, '0');
+
+function convertMsToTime(milliseconds: number) {
+    const totalMins = Math.floor(milliseconds / 60000);
+    const totalHours = Math.floor(totalMins / 60);
+    return `${padTo2Digits(totalHours % 24)}:${padTo2Digits(totalMins % 60)}`;
 }
 
 export { TimePicker };
