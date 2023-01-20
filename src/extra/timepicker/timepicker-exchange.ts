@@ -32,7 +32,7 @@ const createInputState = (inputValue: string, tempTimestampString?: string): Inp
 });
 
 const createTimestampState = (timestampString: string): TimestampState => ({
-    tp: 'timestring-state',
+    tp: 'timestamp-state',
     timestamp: parseInt(timestampString)
 });
 

@@ -2,6 +2,7 @@ import React, { ChangeEvent, ReactNode } from "react";
 import clsx from "clsx";
 import { usePatchSync } from "../exchange/patch-sync";
 import { changeToPatch, isInputState, patchToChange } from "./timepicker-exchange";
+import { createInputChange, createTimestampChange, parseStringToTime } from "./time-utils";
 
 interface TimePickerProps {
 	key: string,
@@ -20,7 +21,7 @@ interface InputState {
 }
 
 interface TimestampState {
-	tp: 'timestring-state',
+	tp: 'timestamp-state',
 	timestamp: number   // 15:30 = 15*60*60*1000 + 30*60*1000
 }
 
@@ -34,10 +35,15 @@ function TimePicker({identity, state, deferredSend = true, children}: TimePicker
         sendTempChange({ tp: 'input-state', inputValue: e.target.value });
     }
 
+    const handleBlur = () => {
+        const timestamp = isInputState(currentState) ? parseStringToTime(currentState.inputValue) : currentState.timestamp;
+        const change = timestamp ? createTimestampChange(timestamp) : createInputChange((currentState as InputState).inputValue);
+        sendFinalChange(change);
+    }
+
     return (
         <div className={clsx("inputBox")} onClick={(e) => e.stopPropagation()} >
-            <input value={inputValue} onChange={handleChange} />
-
+            <input value={inputValue} onChange={handleChange} onBlur={handleBlur} />
             {children && 
                 <div className='sideContent'>
                     {children}
@@ -54,5 +60,5 @@ function convertMsToTime(milliseconds: number) {
     return `${padTo2Digits(totalHours % 24)}:${padTo2Digits(totalMins % 60)}`;
 }
 
-export { TimePicker };
 export type { TimePickerState, TimestampState, InputState };
+export { TimePicker };
