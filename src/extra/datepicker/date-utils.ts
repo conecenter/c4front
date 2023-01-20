@@ -374,4 +374,4 @@ function getPopupDate(date: Date): PopupDate {
   }
 
 export {incrementDate, formatDate, getDate, parseStringToDate, getTimestamp, adjustDate, getPopupDate}
-export type {DateSettings}
+export type {DateSettings, RegExpExtractor, Token, TimeToken}

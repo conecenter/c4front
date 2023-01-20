@@ -11,7 +11,7 @@ function App() {
             key: "TEST",
             identity: {parent: "test"},
             state: {
-                tp: 'timestring-state',
+                tp: 'timestamp-state',
                 timestamp: 86350000
             }
     }));
