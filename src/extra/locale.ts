@@ -1,4 +1,4 @@
-import {Context, createContext, createElement, ReactNode, useContext, useMemo} from "react";
+import {createContext, createElement, ReactNode, useContext, useMemo} from "react";
 import {getOrElse, None, Option, toOption} from "../main/option";
 import TrieSearch from "trie-search";
 
@@ -31,6 +31,7 @@ interface Locale {
     weekDays: WeekDay[]
     months: Month[]
     dateTimeFormats: DateTimeFormat[]
+    timeFormats: DateTimeFormat[]
     defaultDateTimeFormatId: number
     btnNowText: string,
     btnCloseText: string,
@@ -194,7 +195,25 @@ class DefaultLocale implements Locale {
         id: 1,
         pattern: "dd/MMMM/yyyy"
     }]
-    defaultDateTimeFormatId: number = 0
+    timeFormats = [
+        {
+            id: 0,
+            pattern: "HH:00"
+        },
+        {
+            id: 1,
+            pattern: "HH:mm"
+        },
+        {
+            id: 2,
+            pattern: "HH:mm:ss"
+        },
+        {
+            id: 3,
+            pattern: "HH:mm:ss.SSS"
+        }
+    ]
+    defaultDateTimeFormatId = 0
     btnNowText = 'Now'
     btnCloseText = 'Close'
     numberFormat: NumberFormat = {
@@ -203,8 +222,9 @@ class DefaultLocale implements Locale {
     }
 }
 
-const UserLocaleContext: Context<ExtendedLocale> = createContext<ExtendedLocale>(getExtendedLocale(new DefaultLocale()))
-const useUserLocale: () => ExtendedLocale = () => useContext(UserLocaleContext)
+const UserLocaleContext = createContext<ExtendedLocale>(getExtendedLocale(new DefaultLocale()))
+UserLocaleContext.displayName = 'UserLocaleContext'
+const useUserLocale = () => useContext(UserLocaleContext)
 
 interface UserLocaleProviderProps {
     key: string,
