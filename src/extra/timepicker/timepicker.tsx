@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { usePatchSync } from "../exchange/patch-sync";
 import { changeToPatch, patchToChange } from "./timepicker-exchange";
 import { createInputChange, createTimestampChange, parseStringToTime, isInputState, formatTimestamp, getCurrentFMTChar, getAdjustedTime } from "./time-utils";
-import { ARROW_DOWN_KEY, ARROW_UP_KEY } from "../../main/keyboard-keys";
+import { ARROW_DOWN_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY } from "../../main/keyboard-keys";
 import { useSelectionEditableInput } from "../datepicker/selection-control";
 import { useUserLocale } from "../locale";
 
@@ -31,17 +31,27 @@ interface TimestampState {
 
 function TimePicker({identity, state, offset, timestampFormatId, children}: TimePickerProps) {
     const inputRef = useRef<HTMLInputElement>(null);
+    const lastFinalState = useRef(state);
 
+    // Server exchange initialization
+    const { currentState, sendTempChange, sendFinalChange: onFinalChange } =
+        usePatchSync(identity, 'receiver', state, true, s => s, changeToPatch, patchToChange, (prev, ch) => ch);
+
+    const sendFinalChange = (change: TimePickerState) => {
+        lastFinalState.current = change;
+        onFinalChange(change);
+    }
+
+    // Getting time pattern from locale
     const locale = useUserLocale();
 	const timestampFormat = locale.timeFormats.find(format => format.id === timestampFormatId);
     const pattern = timestampFormat?.pattern || 'hh:mm';
 
-    const { currentState, sendTempChange, sendFinalChange } =
-        usePatchSync(identity, 'receiver', state, true, s => s, changeToPatch, patchToChange, (prev, ch) => ch);
-
+    // Get formatted input value
     const inputValue = isInputState(currentState) 
         ? currentState.inputValue : formatTimestamp(currentState.timestamp, pattern, offset);
-
+    
+    // Event handlers
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         sendTempChange({ tp: 'input-state', inputValue: e.target.value });
     }
@@ -58,6 +68,11 @@ function TimePicker({identity, state, offset, timestampFormatId, children}: Time
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         switch (e.key) {
+            case ENTER_KEY:
+                e.stopPropagation();
+                const input = e.currentTarget;
+                setTimeout(() => input.dispatchEvent(new CustomEvent("cTab", { bubbles: true })));
+                break;
             case ARROW_UP_KEY:
             case ARROW_DOWN_KEY:
                 if (isInputState(currentState)) break;
@@ -70,6 +85,23 @@ function TimePicker({identity, state, offset, timestampFormatId, children}: Time
                 const adjustedTime = getAdjustedTime(currentState.timestamp, currentFMTChar, e.ctrlKey, increment);
                 sendTempChange(createTimestampChange(adjustedTime));
                 setSelection(pattern.indexOf(currentFMTChar), pattern.lastIndexOf(currentFMTChar) + 1);
+                break;
+            case ESCAPE_KEY:
+                /* 
+                read last final state from ref
+                sendFinalChange to this last state
+                */
+                /*const inputVal = memoInputValue.current;
+                sendFinalChange(
+                    getOrElse(
+                        mapOption(
+                            parseStringToDate(inputVal, dateSettings),
+                            timestamp => createTimestampChange(timestamp)
+                        ),
+                        createInputChange(inputVal)
+                    )
+                );
+                inputBoxRef.current?.focus();*/
         }
     }
 
