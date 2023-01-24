@@ -2,12 +2,10 @@ import React, { ChangeEvent, ReactNode, useRef } from "react";
 import clsx from "clsx";
 import { usePatchSync } from "../exchange/patch-sync";
 import { changeToPatch, patchToChange } from "./timepicker-exchange";
-import { createInputChange, createTimestampChange, parseStringToTime, isInputState, TOKEN_TO_MS, formatTimestamp } from "./time-utils";
+import { createInputChange, createTimestampChange, parseStringToTime, isInputState, formatTimestamp, getCurrentFMTChar, getAdjustedTime } from "./time-utils";
 import { ARROW_DOWN_KEY, ARROW_UP_KEY } from "../../main/keyboard-keys";
 import { useSelectionEditableInput } from "../datepicker/selection-control";
 import { useUserLocale } from "../locale";
-
-const TIME_FORMAT = 'hhhmmm';
 
 interface TimePickerProps {
 	key: string,
@@ -47,8 +45,12 @@ function TimePicker({identity, state, timestampFormatId, children}: TimePickerPr
     }
 
     const handleBlur = () => {
-        const timestamp = isInputState(currentState) ? parseStringToTime(currentState.inputValue, pattern) : currentState.timestamp;
-        const change = timestamp ? createTimestampChange(timestamp) : createInputChange((currentState as InputState).inputValue);
+        const timestamp = isInputState(currentState) 
+            ? parseStringToTime(currentState.inputValue, pattern) 
+            : currentState.timestamp;
+        const change = timestamp 
+            ? createTimestampChange(timestamp) 
+            : createInputChange((currentState as InputState).inputValue);
         sendFinalChange(change);
     }
 
@@ -59,18 +61,15 @@ function TimePicker({identity, state, timestampFormatId, children}: TimePickerPr
             case ARROW_UP_KEY:
             case ARROW_DOWN_KEY:
                 if (isInputState(currentState)) break;
-                const cycleThroughout = !e.ctrlKey;
-                const increment = e.key === ARROW_UP_KEY ? 1 : -1;
-                const cursorPosition = e.currentTarget.selectionStart || 0;
-                const currentFMTChar = TIME_FORMAT[cursorPosition] as 'h' | 'm';
-                const adjustedTime = currentState.timestamp + (increment * TOKEN_TO_MS[currentFMTChar]);
-                sendTempChange(createTimestampChange(adjustedTime));
-                // Focus adjusted part
-                const startPosition = TIME_FORMAT.indexOf(currentFMTChar);
-                const endPosition = TIME_FORMAT.lastIndexOf(currentFMTChar);
-                setSelection(startPosition, endPosition);
                 e.preventDefault();
                 e.stopPropagation();
+                const increment = e.key === ARROW_UP_KEY ? 1 : -1;
+                const cursorPosition = e.currentTarget.selectionStart || 0;
+                const currentFMTChar = getCurrentFMTChar(pattern, cursorPosition);
+                if (!currentFMTChar) break;
+                const adjustedTime = getAdjustedTime(currentState.timestamp, currentFMTChar, e.ctrlKey, increment);
+                sendTempChange(createTimestampChange(adjustedTime));
+                setSelection(pattern.indexOf(currentFMTChar), pattern.lastIndexOf(currentFMTChar) + 1);
         }
     }
 
