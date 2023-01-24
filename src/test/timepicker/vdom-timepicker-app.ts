@@ -9,12 +9,13 @@ function App() {
     const children = $('div', {key: 'wrapper', style: {width: 'max-content', margin: '7em auto'}},
         $(TimePicker, {
             key: "TEST",
-            identity: {parent: "test"},
+            identity: {parent: { key: "test" }},
             state: {
                 tp: 'timestamp-state',
-                timestamp: 86350000
+                timestamp: 3600000
             },
-            timestampFormatId: 2
+            timestampFormatId: 3,
+            // offset: 3600000
     }));
     const sender = {
         enqueue: (identity: any, patch: any) => console.log(patch)
