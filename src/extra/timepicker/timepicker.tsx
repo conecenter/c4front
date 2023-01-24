@@ -1,11 +1,21 @@
-import React, { ChangeEvent, ReactNode, useRef } from "react";
+import React, { ChangeEvent, ReactNode, useMemo, useRef } from "react";
 import clsx from "clsx";
 import { usePatchSync } from "../exchange/patch-sync";
 import { changeToPatch, patchToChange } from "./timepicker-exchange";
-import { createInputChange, createTimestampChange, parseStringToTime, isInputState, formatTimestamp, getCurrentFMTChar, getAdjustedTime } from "./time-utils";
 import { ARROW_DOWN_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY } from "../../main/keyboard-keys";
 import { useSelectionEditableInput } from "../datepicker/selection-control";
 import { useUserLocale } from "../locale";
+import { getPath, useFocusControl } from "../focus-control";
+import {
+    createInputChange,
+    createTimestampChange,
+    parseStringToTime,
+    isInputState,
+    formatTimestamp,
+    getCurrentFMTChar,
+    getAdjustedTime
+} from "./time-utils";
+
 
 interface TimePickerProps {
 	key: string,
@@ -51,6 +61,10 @@ function TimePicker({identity, state, offset, timestampFormatId, children}: Time
     const inputValue = isInputState(currentState) 
         ? currentState.inputValue : formatTimestamp(currentState.timestamp, pattern, offset);
     
+    // Input box focus functionality
+    const path = useMemo(() => getPath(identity), [identity]);
+    const { focusClass, focusHtml } = useFocusControl(path);
+
     // Event handlers
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         sendTempChange({ tp: 'input-state', inputValue: e.target.value });
@@ -106,14 +120,14 @@ function TimePicker({identity, state, offset, timestampFormatId, children}: Time
     }
 
     return (
-        <div className={clsx("inputBox")} onClick={(e) => e.stopPropagation()} >
-            <input type='text' 
-                   ref={inputRef} 
-                   value={inputValue} 
+        <div className={clsx('inputBox', focusClass)} {...focusHtml} onClick={(e) => e.stopPropagation()} >
+            <input type='text'
+                   ref={inputRef}
+                   value={inputValue}
                    onChange={(e) => sendTempChange(createInputChange(e.target.value))}
-                   onBlur={handleBlur} 
+                   onBlur={handleBlur}
                    onKeyDown={handleKeyDown} />
-            {children && 
+            {children &&
                 <div className='sideContent'>
                     {children}
                 </div>}
