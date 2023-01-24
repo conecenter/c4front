@@ -198,7 +198,7 @@ class DefaultLocale implements Locale {
     timeFormats = [
         {
             id: 0,
-            pattern: "HH:00"
+            pattern: "HH"
         },
         {
             id: 1,
