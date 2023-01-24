@@ -167,13 +167,14 @@ const HmsS: RegExpExtractor = {
         length: match[0].length
     })
 }
-const dateExtractors: RegExpExtractor[] = [HmsS, Hms, Hm, number, month]
+const dateExtractors = [HmsS, Hms, Hm, number, month]
+const timeExtractors = [HmsS, Hms, Hm, number];
 
-function tryRegexes(value: string): Option<Token> {
+function tryRegexes(value: string, timeOnly?: boolean): Option<Token> {
+    const extractors = timeOnly ? timeExtractors : dateExtractors
     let i = 0
-    while (i < dateExtractors.length) {
-        const result = tryRegex(value, dateExtractors[i])
-        console.log({result})
+    while (i < extractors.length) {
+        const result = tryRegex(value, extractors[i])
         if (nonEmpty(result)) return result
         i++
     }
@@ -187,12 +188,12 @@ function tryRegex(value: string, regexExtractor: RegExpExtractor): Option<Token>
     } else return None
 }
 
-function tokenizeString(value: string): Token[] {
+function tokenizeString(value: String, timeOnly?: boolean): Token[] {
     let currentValue = value.toLowerCase()
     const tokens: Token[] = []
 
     while (currentValue.length > 0) {
-        const tokenOpt = tryRegexes(currentValue)
+        const tokenOpt = tryRegexes(currentValue, timeOnly)
         if (nonEmpty(tokenOpt)) {
             tokens.push(tokenOpt)
             currentValue = currentValue.slice(tokenOpt.length)
@@ -370,5 +371,5 @@ function getPopupDate(date: Date): PopupDate {
     return { year: date.getFullYear(), month: date.getMonth() };
   }
 
-export {incrementDate, formatDate, getDate, parseStringToDate, getTimestamp, adjustDate, getPopupDate}
-export type {DateSettings, RegExpExtractor, Token, TimeToken}
+export {incrementDate, formatDate, getDate, parseStringToDate, getTimestamp, adjustDate, getPopupDate, tokenizeString}
+export type {DateSettings, RegExpExtractor, Token, TimeToken, NumberToken}
