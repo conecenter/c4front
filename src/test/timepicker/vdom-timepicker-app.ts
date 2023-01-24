@@ -13,7 +13,8 @@ function App() {
             state: {
                 tp: 'timestamp-state',
                 timestamp: 86350000
-            }
+            },
+            timestampFormatId: 2
     }));
     const sender = {
         enqueue: (identity: any, patch: any) => console.log(patch)

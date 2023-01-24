@@ -1,7 +1,6 @@
 import { Patch, PatchHeaders } from "../exchange/patch-sync";
+import { isInputState } from "./time-utils";
 import { TimePickerState, InputState, TimestampState } from "./timepicker";
-
-const isInputState = (state: TimestampState | InputState): state is InputState => state.tp === 'input-state';
 
 // Change to patch
 function getHeaders(ch: TimePickerState): PatchHeaders {
@@ -48,4 +47,4 @@ function patchToChange(patch: Patch): TimePickerState {
         : createTimestampState(timestampString)
 }
 
-export { changeToPatch, patchToChange, isInputState }
+export { changeToPatch, patchToChange }
