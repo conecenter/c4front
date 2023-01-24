@@ -65,10 +65,10 @@ const FORMAT_TO_TOKEN: { [index: string]: (ms: number) => string } = {
 
 const padTo2Digits = (num: number) =>  num.toString().padStart(2, '0');
 
-function formatTimestamp(milliseconds: number, pattern: string) {
+function formatTimestamp(milliseconds: number, pattern: string, offset = 0) {
+    const offsetTimestamp = milliseconds + offset;
     const formattedParts = TIME_TOKENS.reduce((acc: string[], token) => pattern.includes(token) 
-            ? [...acc, FORMAT_TO_TOKEN[token](milliseconds)] 
-            : acc, []);
+            ? [...acc, FORMAT_TO_TOKEN[token](offsetTimestamp)] : acc, []);
     return formattedParts.join('');
 }
 

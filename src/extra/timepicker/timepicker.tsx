@@ -11,6 +11,7 @@ interface TimePickerProps {
 	key: string,
 	identity: Object,
 	state: TimePickerState,
+    offset?: number,
     timestampFormatId: number,
 	children?: ReactNode[]
 }
@@ -28,7 +29,7 @@ interface TimestampState {
 	timestamp: number
 }
 
-function TimePicker({identity, state, timestampFormatId, children}: TimePickerProps) {
+function TimePicker({identity, state, offset, timestampFormatId, children}: TimePickerProps) {
     const inputRef = useRef<HTMLInputElement>(null);
 
     const locale = useUserLocale();
@@ -38,7 +39,8 @@ function TimePicker({identity, state, timestampFormatId, children}: TimePickerPr
     const { currentState, sendTempChange, sendFinalChange } =
         usePatchSync(identity, 'receiver', state, true, s => s, changeToPatch, patchToChange, (prev, ch) => ch);
 
-    const inputValue = isInputState(currentState) ? currentState.inputValue : formatTimestamp(currentState.timestamp, pattern);
+    const inputValue = isInputState(currentState) 
+        ? currentState.inputValue : formatTimestamp(currentState.timestamp, pattern, offset);
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         sendTempChange({ tp: 'input-state', inputValue: e.target.value });
@@ -46,11 +48,9 @@ function TimePicker({identity, state, timestampFormatId, children}: TimePickerPr
 
     const handleBlur = () => {
         const timestamp = isInputState(currentState) 
-            ? parseStringToTime(currentState.inputValue, pattern) 
-            : currentState.timestamp;
+            ? parseStringToTime(currentState.inputValue, pattern) : currentState.timestamp;
         const change = timestamp 
-            ? createTimestampChange(timestamp) 
-            : createInputChange((currentState as InputState).inputValue);
+            ? createTimestampChange(timestamp) : createInputChange((currentState as InputState).inputValue);
         sendFinalChange(change);
     }
 
