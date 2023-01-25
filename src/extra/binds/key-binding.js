@@ -1,10 +1,9 @@
-import React, { useMemo, useState, useContext, useEffect } from 'react'
+import React, { createElement as $, useMemo, useState, useContext, useEffect } from 'react'
 import { BindingElement } from './binds-elements'
 import { findFirstParent } from "../../main/vdom-util.js"
 
-
-const $ = React.createElement
-const KeyBindContext = React.createContext()
+ /** @type {Object} */
+const KeyBindContext = React.createContext({})
 
 const useBinds = () => {
   return useContext(KeyBindContext)

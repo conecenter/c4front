@@ -19,4 +19,11 @@ export {
   alignSelfStyle,
 }
 
+
+export interface FlexibleChildAlign {
+  props: {
+    align?: FlexibleAlign
+  }
+}
+
 export type {FlexibleAlign}

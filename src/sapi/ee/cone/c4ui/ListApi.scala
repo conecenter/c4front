@@ -138,9 +138,6 @@ case class NoReceiver[C]() extends Receiver[C] {
   @c4el("FilterButtonExpander") def filterButtonExpander(
     key: String,
     area: FilterButtonArea,
-    className: CSSClassName = NoCSSClassName,
-    popupClassName: CSSClassName = NoCSSClassName,
-    popupItemClassName: CSSClassName = NoCSSClassName,
     children: ViewRes = Nil,
     openedChildren: ViewRes = Nil,
     optButtons: ElList[FilterButton] = Nil,

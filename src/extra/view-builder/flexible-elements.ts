@@ -1,5 +1,5 @@
 import React, {createElement as el, HTMLAttributes, ReactNode} from "react";
-import {FlexibleAlign, FlexibleSizes} from "./flexible-api";
+import {FlexibleAlign, FlexibleChildAlign, FlexibleSizes} from "./flexible-api";
 import {
   FLEXIBLE_ACCENTED_GROUPBOX_CLASSNAME,
   FLEXIBLE_CELL_CLASSNAME,
@@ -41,7 +41,7 @@ function FlexibleColumn({key, sizes, className, align, children}: FlexibleColumn
     key,
     className: clsx(FLEXIBLE_COLUMN_CLASSNAME, className),
     style: {
-      flexGrow: align && !sizes?.max ? 0 : 1,
+      ...align && !sizes?.max && { flexGrow: 0 },
       ...sizes && {
         minWidth: `${sizes.min}em`,
         maxWidth: sizes.max ? `${sizes.max}em` : undefined
@@ -88,17 +88,12 @@ function FlexibleGroupbox({key, label, displayMode, sizes, children}: FlexibleGr
   }, createLabel(label, children))
 }
 
-interface FlexibleChildAlign {
-  props: {
-    align?: FlexibleAlign
-  }
-}
-
 interface FlexibleRow {
   key: string
   sizes?: FlexibleSizes
+  align?: FlexibleAlign
   className?: string  // TODO: remove on the next step
-  children: (ReactNode & FlexibleChildAlign)[]
+  children: (ReactNode & FlexibleChildAlign)
 }
 
 function correctNext(prev: FlexibleAlign, next: FlexibleAlign): boolean {
@@ -116,7 +111,7 @@ function correctNext(prev: FlexibleAlign, next: FlexibleAlign): boolean {
 
 const spacer = el("div", {style: {marginLeft: "auto", marginRight: "auto"}})
 
-function separateChildren(children: (ReactNode & FlexibleChildAlign)[]): React.ReactNode[][] {
+function separateChildren(children: (ReactNode & FlexibleChildAlign)): React.ReactNode[][] {
   const childrenArray = React.Children.toArray(children) as (ReactNode & FlexibleChildAlign)[]
   const newChildren = [[]] as ReactNode[][]
   let currentAlign: FlexibleAlign = "l"
@@ -143,12 +138,15 @@ function wrapInRow(key: string, props: HTMLAttributes<HTMLDivElement>, children:
   return el("div", {key, ...props}, children)
 }
 
-function FlexibleRow({key, sizes, className, children}: FlexibleRow) {
+function FlexibleRow({key, sizes, className, align, children}: FlexibleRow) {
   const props: HTMLAttributes<HTMLDivElement> = {
     className: clsx(FLEXIBLE_ROW_CLASSNAME, className),
-    style: sizes && {
-      minWidth: `${sizes.min}em`,
-      maxWidth: sizes.max ? `${sizes.max}em` : undefined,
+    style: {
+      ...align && !sizes?.max && { flexGrow: 0 },
+      ...sizes && {
+        minWidth: `${sizes.min}em`,
+        maxWidth: sizes.max ? `${sizes.max}em` : undefined
+      }
     }
   }
   const separated = separateChildren(children).map((list, ind) => wrapInRow(`${key}-${ind}`, props, list)) 
@@ -167,17 +165,16 @@ interface FlexibleCell {
   key: string
   align?: FlexibleAlign
   sizes?: FlexibleSizes
-  grow?: boolean  // TODO: remove after sizes implementation
-  className?: string  // TODO: remove on the next step
+  className?: string
   children: ReactNode[]
 }
 
-function FlexibleCell({key, sizes, grow, className, children}: FlexibleCell) {
+function FlexibleCell({key, align, sizes, className, children}: FlexibleCell) {
   return el("div", {
     key,
     className: clsx(FLEXIBLE_CELL_CLASSNAME, className),
     style: {
-      flexGrow: grow || sizes?.max ? 1 : undefined,
+      ...align && !sizes?.max && { flexGrow: 0 },
       ...sizes && {
         minWidth: `${sizes.min}em`,
         maxWidth: sizes.max ? `${sizes.max}em` : undefined

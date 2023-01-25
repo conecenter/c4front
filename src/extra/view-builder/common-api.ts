@@ -1,14 +1,16 @@
-import {CSSProperties, HTMLAttributes} from "react";
+import {CSSProperties} from "react";
 
-interface ColorDef {
+type ColorDef = PaletteColor | RawColor
+
+interface ColorType {
     tp: "p" | "r"
 }
 
-interface PaletteColor extends ColorDef {
+interface PaletteColor extends ColorType {
     cssClass: string
 }
 
-interface RawColor extends ColorDef {
+interface RawColor extends ColorType {
     bgColor: string
     textColor: string
 }
@@ -18,8 +20,8 @@ interface ColorProps {
     style?: CSSProperties
 }
 
-export function colorToProps<T>(color: ColorDef): ColorProps {
-    switch (color.tp) {
+export function colorToProps<T>(color?: ColorDef): ColorProps {
+    switch (color?.tp) {
         case "p":
             return {
                 className: (<PaletteColor>color).cssClass

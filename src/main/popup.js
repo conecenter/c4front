@@ -29,12 +29,12 @@ const fit2D = (prim, sec) => (
     prim.makePos(prim.lim/2, sec.lim/2)
 )
 
-const prepCheckUpdPopupPos = (element,lrMode) => {
+const prepCheckUpdPopupPos = (element,lrMode,baseElement) => {
     if(!element) return was=>hiddenPosition
     const {width:popupWidth,height:popupHeight} =
         element.getBoundingClientRect()
     const {width:parentWidth,height:parentHeight,top:parentTop,left:parentLeft} =
-        element.parentElement.getBoundingClientRect()
+        (baseElement || element.parentElement).getBoundingClientRect()
     const {clientWidth,clientHeight} = element.ownerDocument.documentElement
     const xData = {
         lim: clientWidth - popupWidth, popupSize: popupWidth,
@@ -55,12 +55,13 @@ const prepCheckUpdPopupPos = (element,lrMode) => {
 /**
  * @param {Element | null} element
  * @param {boolean} [lrMode]
+ * @param {Element | null} [baseElement]
  * @returns {[{position: 'fixed', top: number, left: number, visibility?: 'hidden', width?: number, minWidth?: number}]}
  */
-export const usePopupPos = (element,lrMode) => {
+export const usePopupPos = (element,lrMode,baseElement) => {
     const [position,setPosition] = useState(hiddenPosition)
     const checkUpdPos = useCallback(()=>{
-        setPosition(prepCheckUpdPopupPos(element,lrMode))
+        setPosition(prepCheckUpdPopupPos(element,lrMode,baseElement))
     },[element,setPosition,lrMode])
     useLayoutEffect(()=>{ checkUpdPos() },[checkUpdPos])
     useAnimationFrame(element,checkUpdPos)

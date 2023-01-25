@@ -9,7 +9,7 @@ import {ESCAPE_KEY} from "./keyboard-keys"
 import {useFocusControl} from "../extra/focus-control.ts"
 import {BindGroupElement} from "../extra/binds/binds-elements"
 import {HoverExpander} from "../extra/hover-expander"
-import {isSelColElement} from "../extra/dom-utils"
+import {InputsSizeContext, isButtonElement, isSelColElement} from "../extra/dom-utils"
 
 const dragRowIdOf = identityAt('dragRow')
 const dragColIdOf = identityAt('dragCol')
@@ -110,7 +110,7 @@ export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, spanRi
     const style = { ...props.style, gridRow, gridColumn }
     const expanderProps = expanding==="expander" ? { 'data-expander': expander || 'passive' } : {}
     const { focusClass, focusHtml } = useFocusControl(path);
-    const className = clsx(argClassNames, !noDefCellClass && GRID_CLASS_NAMES.CELL, focusClass);
+    const className = clsx(argClassNames, !noDefCellClass && GRID_CLASS_NAMES.CELL, focusClass, dragHandle && 'gridDragCell');
     const cellContent = needsHoverExpander ? $(HoverExpander, { children }) : children;
     return $("div", { ...props, ...expanderProps, 'data-col-key': colKey, 'data-row-key': rowKey, "data-drag-handle": dragHandle, ...focusHtml, style, className }, cellContent)
 }
@@ -187,7 +187,7 @@ const getCellDataAttrs = element => {
 const useGridClickAction = identity => {
     const [clickActionPatches, enqueueClickActionPatch] = useSync(clickActionIdOf(identity))
     return useCallback(ev => {
-        if (isSelColElement(ev.target)) return;
+        if (isSelColElement(ev.target) || isButtonElement(ev.target)) return;
         const cellDataKeys = findFirstParent(getCellDataAttrs)(ev.target)
         if (cellDataKeys && cellDataKeys.rowKey && cellDataKeys.colKey) {
             const headers = {
@@ -265,9 +265,11 @@ export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey 
         ref
     }, dragBGEl, ...allChildren)
     const dragCSSEl = $("style",{dangerouslySetInnerHTML: { __html: dragCSSContent}})
-    return $(NoCaptionContext.Provider,{value:true},[
-        $(BindGroupElement,{groupId:'grid-list-bind'},dragCSSEl,res)
-    ])
+    return $(NoCaptionContext.Provider,{value:true},
+        $(InputsSizeContext.Provider,{value:50},
+            $(BindGroupElement,{groupId:'grid-list-bind'},dragCSSEl,res)
+        )
+    )
 }
 
 const getAllChildren = ({children,rows,cols,hasHiddenCols,hideElementsForHiddenCols,dragRowKey}) => {
@@ -281,6 +283,7 @@ const getAllChildren = ({children,rows,cols,hasHiddenCols,hideElementsForHiddenC
             rowKey,
             rowKeyMod: "-expanded",
             style: { display: "flex", flexFlow: "row wrap", visibility: dragRowKey?"hidden":null },
+            needsHoverExpander: false,
             children: pairs.map(([col, cell]) => $("div",{
                 key: cell.key,
                 style: cell.props.children ? { flexBasis:  `${col.width.min}em` } : undefined,

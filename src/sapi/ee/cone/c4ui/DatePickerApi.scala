@@ -10,6 +10,7 @@ trait DatePickerProps extends ToChildPair
 @c4tagSwitch("FrontApp") trait WeekDay extends ToJson
 @c4tagSwitch("FrontApp") trait Month extends ToJson
 @c4tagSwitch("FrontApp") trait DateTimeFormat extends ToJson
+@c4tagSwitch("FrontApp") trait TimeFormat extends ToJson
 
 sealed trait DatepickerChange extends ToJson
 
@@ -54,6 +55,7 @@ sealed trait DatePickerServerState extends ToJson
     weekDays: List[WeekDay],
     months: List[Month],
     dateTimeFormats: List[DateTimeFormat],
+    timeFormats: List[TimeFormat],
     defaultDateTimeFormatId: Int
   ): Locale
 
@@ -73,4 +75,9 @@ sealed trait DatePickerServerState extends ToJson
     id: Int,
     pattern: String
   ): DateTimeFormat
+
+  @c4val def timeFormat(
+    id: Int,
+    pattern: String,
+  ): TimeFormat
 }
