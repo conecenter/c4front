@@ -51,7 +51,7 @@ const createInputChange = (inputValue: string, tempTimestamp?: number): InputSta
 
 const createTimestampChange = (timestamp: number): TimestampState => ({
     tp: 'timestamp-state',
-    timestamp: timestamp % MAX_TIMESTAMP
+    timestamp
 });
 
 
@@ -131,5 +131,6 @@ export {
     createTimestampChange,
     isInputState,
     getCurrentFMTChar,
-    getAdjustedTime
+    getAdjustedTime,
+    MAX_TIMESTAMP
 }

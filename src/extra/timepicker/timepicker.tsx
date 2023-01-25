@@ -1,4 +1,4 @@
-import React, { ChangeEvent, ReactNode, useMemo, useRef } from "react";
+import React, { ReactNode, useMemo, useRef } from "react";
 import clsx from "clsx";
 import { usePatchSync } from "../exchange/patch-sync";
 import { changeToPatch, patchToChange } from "./timepicker-exchange";
@@ -13,7 +13,8 @@ import {
     isInputState,
     formatTimestamp,
     getCurrentFMTChar,
-    getAdjustedTime
+    getAdjustedTime,
+    MAX_TIMESTAMP
 } from "./time-utils";
 
 
@@ -41,7 +42,8 @@ interface TimestampState {
 
 function TimePicker({identity, state, offset, timestampFormatId, children}: TimePickerProps) {
     const inputRef = useRef<HTMLInputElement>(null);
-    const lastFinalState = useRef(state);
+    const inputBoxRef = useRef<HTMLInputElement>(null);
+    const lastFinalState = useRef(state);  // return last final state on Esc
 
     // Server exchange initialization
     const { currentState, sendTempChange, sendFinalChange: onFinalChange } =
@@ -61,31 +63,32 @@ function TimePicker({identity, state, offset, timestampFormatId, children}: Time
     const inputValue = isInputState(currentState) 
         ? currentState.inputValue : formatTimestamp(currentState.timestamp, pattern, offset);
     
-    // Input box focus functionality
+    // Focus functionality
     const path = useMemo(() => getPath(identity), [identity]);
     const { focusClass, focusHtml } = useFocusControl(path);
 
-    // Event handlers
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        sendTempChange({ tp: 'input-state', inputValue: e.target.value });
+    const setSelection = useSelectionEditableInput(inputRef);
+
+    // Helper functions
+    const createFinalChange = (state: TimePickerState) => {
+        const timestamp = isInputState(state) ? parseStringToTime(state.inputValue, pattern) : state.timestamp;
+        return timestamp 
+            ? createTimestampChange(timestamp % MAX_TIMESTAMP) 
+            : createInputChange((state as InputState).inputValue);
     }
 
+    // Event handlers
     const handleBlur = () => {
-        const timestamp = isInputState(currentState) 
-            ? parseStringToTime(currentState.inputValue, pattern) : currentState.timestamp;
-        const change = timestamp 
-            ? createTimestampChange(timestamp) : createInputChange((currentState as InputState).inputValue);
+        const change = createFinalChange(currentState);
         sendFinalChange(change);
     }
-
-    const setSelection = useSelectionEditableInput(inputRef);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         switch (e.key) {
             case ENTER_KEY:
                 e.stopPropagation();
                 const input = e.currentTarget;
-                setTimeout(() => input.dispatchEvent(new CustomEvent("cTab", { bubbles: true })));
+                input.dispatchEvent(new CustomEvent("cTab", { bubbles: true }));
                 break;
             case ARROW_UP_KEY:
             case ARROW_DOWN_KEY:
@@ -101,26 +104,14 @@ function TimePicker({identity, state, offset, timestampFormatId, children}: Time
                 setSelection(pattern.indexOf(currentFMTChar), pattern.lastIndexOf(currentFMTChar) + 1);
                 break;
             case ESCAPE_KEY:
-                /* 
-                read last final state from ref
-                sendFinalChange to this last state
-                */
-                /*const inputVal = memoInputValue.current;
-                sendFinalChange(
-                    getOrElse(
-                        mapOption(
-                            parseStringToDate(inputVal, dateSettings),
-                            timestamp => createTimestampChange(timestamp)
-                        ),
-                        createInputChange(inputVal)
-                    )
-                );
-                inputBoxRef.current?.focus();*/
+                const change = createFinalChange(lastFinalState.current);
+                sendTempChange(change);
+                setTimeout(() => inputBoxRef.current?.focus());
         }
     }
 
     return (
-        <div className={clsx('inputBox', focusClass)} {...focusHtml} onClick={(e) => e.stopPropagation()} >
+        <div ref={inputBoxRef} className={clsx('inputBox', focusClass)} {...focusHtml} onClick={(e) => e.stopPropagation()} >
             <input type='text'
                    ref={inputRef}
                    value={inputValue}
