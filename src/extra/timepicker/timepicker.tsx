@@ -111,17 +111,20 @@ function TimePicker({identity, state, offset, timestampFormatId, children}: Time
     }
 
     return (
-        <div ref={inputBoxRef} className={clsx('inputBox', focusClass)} {...focusHtml} onClick={(e) => e.stopPropagation()} >
+        <div ref={inputBoxRef} 
+             className={clsx('inputBox', focusClass)} 
+             onClick={(e) => e.stopPropagation()} 
+             {...focusHtml} >
+
             <input type='text'
                    ref={inputRef}
                    value={inputValue}
                    onChange={(e) => sendTempChange(createInputChange(e.target.value))}
                    onBlur={handleBlur}
                    onKeyDown={handleKeyDown} />
+                   
             {children &&
-                <div className='sideContent'>
-                    {children}
-                </div>}
+                <div className='sideContent'>{children}</div>}
         </div>
     );
 }
