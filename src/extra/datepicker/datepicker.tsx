@@ -186,7 +186,7 @@ export function DatePickerInputElement({
 
 			<button 
 				type='button' 
-				className={`${currentState.popupDate ? 'rotate180deg ' : ''}btnCalendar`} 
+				className={clsx(currentState.popupDate && 'rotate180deg', 'btnCalendar')} 
 				onClick={onPopupToggle} />
 
 			<div className='sideContent'>
@@ -196,7 +196,6 @@ export function DatePickerInputElement({
 			{currentState.popupDate &&
 				<DatepickerCalendar { ...{currentState, currentDateOpt, dateSettings, sendFinalChange, inputRef} } />}
 		</div>
-
 	);
 }
 
