@@ -258,7 +258,6 @@ export function DatePickerInputElement({
 				}} />}
 			</PopupElement>}
 		</div>
-
 	);
 }
 
