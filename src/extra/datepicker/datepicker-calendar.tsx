@@ -6,11 +6,13 @@ import { adjustDate, DateSettings, getDate, getTimestamp, getPopupDate } from ".
 import { createPopupChange, createTimestampChange, DatepickerChange, DatePickerState, PopupDate } from "./datepicker-exchange";
 import { PopupElement } from "../popup-elements/popup-element";
 import { usePopupState } from "../popup-elements/popup-manager";
+import { createArray } from "../utils";
 
 const WEEKS_TO_SHOW = 6;
 
 const CALENDAR_CLASSNAME = 'dpCalendar';
 const MONTHS_POPUP_KEY = "datePicker-months";
+
 
 interface DatepickerCalendarProps {
   currentState: DatePickerState,
@@ -244,10 +246,6 @@ export function DatepickerCalendar({
       </div>
     </div>
   );
-}
-
-function createArray(start: number, end: number) {
-  return Array.from({length: end - start + 1}, (_, i) => i + start);
 }
 
 function getSpan(value: number | string, className?: string, dataset?: string) {

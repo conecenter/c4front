@@ -1737,3 +1737,26 @@ button {
 .editMode .react-grid-item {
   cursor: move;
 }
+
+/***********************Timepicker**************************/
+
+.timepickerPopupBox {
+  display: flex;
+
+  .timeSlider {
+    max-height: 100%;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    > div {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      scroll-snap-align: start;
+    }
+  }
+}

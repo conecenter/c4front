@@ -51,4 +51,8 @@ function escapeRegex(string: string) {
     return string.replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&');
 }
 
-export { copyToClipboard, inRange, clamp, throttleWithTrailing, escapeRegex }
+function createArray(start: number, end: number) {
+    return Array.from({length: end - start + 1}, (_, i) => i + start);
+}
+
+export { copyToClipboard, inRange, clamp, throttleWithTrailing, escapeRegex, createArray }

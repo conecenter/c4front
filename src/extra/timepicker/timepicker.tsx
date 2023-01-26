@@ -1,4 +1,4 @@
-import React, { ReactNode, useMemo, useRef } from "react";
+import React, { ReactNode, useEffect, useMemo, useRef } from "react";
 import clsx from "clsx";
 import { usePatchSync } from "../exchange/patch-sync";
 import { changeToPatch, patchToChange } from "./timepicker-exchange";
@@ -6,6 +6,7 @@ import { ARROW_DOWN_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY } from "../../main/
 import { useSelectionEditableInput } from "../datepicker/selection-control";
 import { useUserLocale } from "../locale";
 import { getPath, useFocusControl } from "../focus-control";
+import { NewPopupElement } from "../popup-elements/popup-element";
 import {
     createInputChange,
     createTimestampChange,
@@ -16,6 +17,8 @@ import {
     getAdjustedTime,
     MAX_TIMESTAMP
 } from "./time-utils";
+import { createArray } from "../utils";
+import { usePopupState } from "../popup-elements/popup-manager";
 
 
 interface TimePickerProps {
@@ -110,7 +113,11 @@ function TimePicker({identity, state, offset, timestampFormatId, children}: Time
         }
     }
 
-    return (
+    // Popup functionality
+    const [isOpened, toggle, popupDrawer] = usePopupState(identity);
+    useEffect(() => toggle(true), []);
+
+    return (<>
         <div ref={inputBoxRef} 
              className={clsx('inputBox', focusClass)} 
              onClick={(e) => e.stopPropagation()} 
@@ -125,6 +132,41 @@ function TimePicker({identity, state, offset, timestampFormatId, children}: Time
                    
             {children &&
                 <div className='sideContent'>{children}</div>}
+        </div>
+
+        <NewPopupElement identity={identity}>
+            <div className='timepickerPopupBox' style={{ height: '8em'}}>
+                <TimeSliderBlock max={23} />
+                <TimeSliderBlock max={59} />
+                <TimeSliderBlock max={59} />
+                <TimeSliderBlock max={999} />
+            </div>
+        </NewPopupElement>
+        
+    </>);
+}
+
+interface TimeSliderBlock {
+    min?: number,
+    max: number,
+    current?: number
+}
+
+function TimeSliderBlock({min = 0, max, current}: TimeSliderBlock) {
+    const mainBlock = createArray(min, max).map((i) =>
+        <div key={i} style={{width: '2em', height: '2em'}}>{i}</div>);
+    
+    const auxBlock = createArray(Math.max(max - min - 19, min), max).map((i) =>
+    <div key={`aux-${i}`} style={{width: '2em', height: '2em'}}>{i}</div>);
+
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        if (e.currentTarget.scrollTop < 40) e.currentTarget.scrollBy(0, mainBlock.length*2*16);
+        if (e.currentTarget.scrollTop > (mainBlock.length+auxBlock.length)*2*16 - 5*2*16) e.currentTarget.scrollBy(0, -mainBlock.length*2*16);
+    }
+    return (
+        <div className='timeSlider' ref={(e) => {e && e.scrollTo(0, 20*2*16)}} onScroll={handleScroll}>
+            {auxBlock}
+            {mainBlock}
         </div>
     );
 }

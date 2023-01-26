@@ -2,6 +2,7 @@ import ReactDOM from "react-dom"
 import React from "react"
 import {createSyncProviders} from "../../main/vdom-hooks";
 import { TimePicker } from "../../extra/timepicker/timepicker";
+import { PopupManager } from "../../extra/popup-elements/popup-manager";
 
 const {createElement: $} = React
 
@@ -22,7 +23,9 @@ function App() {
     }
     const ack: boolean | null = null
 
-    return createSyncProviders({sender, ack, children: [children]})
+    return createSyncProviders({sender, ack, children: 
+        $(PopupManager, null, [children])
+    })
 }
 
 const containerElement = document.createElement("div")
