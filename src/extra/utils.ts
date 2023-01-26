@@ -6,4 +6,8 @@ async function copyToClipboard(value: string) {
     }
 }
 
-export { copyToClipboard }
+function createArray(start: number, end: number) {
+    return Array.from({length: end - start + 1}, (_, i) => i + start);
+  }
+
+export { copyToClipboard, createArray }

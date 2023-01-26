@@ -6,6 +6,7 @@ import { adjustDate, DateSettings, getDate, getTimestamp, getPopupDate } from ".
 import { usePopupPos } from "../../main/popup";
 import { createPopupChange, createTimestampChange, DatepickerChange, DatePickerState, PopupDate } from "./datepicker-exchange";
 import { findFirstParent } from '../../main/vdom-util';
+import { createArray } from "../utils";
 
 interface DatepickerCalendarProps {
   currentState: DatePickerState,
@@ -246,10 +247,6 @@ export function DatepickerCalendar({
       </div>
     </div>
   );
-}
-
-function createArray(start: number, end: number) {
-  return Array.from({length: end - start + 1}, (_, i) => i + start);
 }
 
 function getSpan(value: number | string, className?: string, dataset?: string) {
