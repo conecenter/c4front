@@ -139,7 +139,12 @@ function TimePicker({identity, state, offset, timestampFormatId, children}: Time
 
         <NewPopupElement identity={identity}>
             <div className='timepickerPopupBox' style={{ height: '12em'}}>
-                {usedTokens.map(token => <TimeSliderBlock key={token} token={token} /> )}
+                {usedTokens.map(token => {
+                    const current = TOKEN_DATA[token].get(
+                        (currentState as TimestampState).timestamp ?? (currentState as InputState).tempTimestamp ?? 0
+                    );
+                    return <TimeSliderBlock key={token} token={token} current={current} />
+                })}
             </div>
         </NewPopupElement>
         
@@ -149,24 +154,36 @@ function TimePicker({identity, state, offset, timestampFormatId, children}: Time
 
 interface TimeSliderBlock {
     token: string,
-    current?: number
+    current: number
 }
 
 function TimeSliderBlock({token, current}: TimeSliderBlock) {
+    const ref = useRef<HTMLDivElement | null>(null);
+    
     const max = TOKEN_DATA[token].max - 1;
     const { formatTo } = TOKEN_DATA[token];
-    const mainBlock = createArray(0, max).map((i) =>
-        <div key={i} style={{width: '2em', height: '2em'}}>{(formatTo(i))}</div>);
-    
-    const auxBlock = createArray(Math.max(max - 19, 0), max).map((i) =>
-    <div key={`aux-${i}`} style={{width: '2em', height: '2em'}}>{formatTo(i)}</div>);
 
-    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-        if (e.currentTarget.scrollTop < 40) e.currentTarget.scrollBy(0, mainBlock.length*2*16);
-        if (e.currentTarget.scrollTop > (mainBlock.length+auxBlock.length)*2*16 - 5*2*16) e.currentTarget.scrollBy(0, -mainBlock.length*2*16);
+    const getTimeItem = (i: number) => (
+        <span key={i} className={i === current ? 'current' : undefined} style={{width: '2em', height: '2em'}}>{(formatTo(i))}</span>);
+
+    const mainBlock = createArray(0, max).map(getTimeItem);
+    const auxBlock = createArray(Math.max(max - 19, 0), max).map(getTimeItem);
+
+    useEffect(() => {
+        const scrollOffset = current < max - 8 ? 0 : -mainBlock.length;
+        ref.current?.scrollTo(0, (20 + current + scrollOffset)*2*16);
+    }, [current]);
+
+    const handleScroll = () => {
+        const elem = ref.current;
+        if (!elem) return;
+        const scrollCoeff = elem.scrollTop > (elem.scrollHeight - elem.clientHeight - 40) 
+            ? -1 : elem.scrollTop < 40 ? 1 : 0;
+        scrollCoeff && elem.scrollBy(0, scrollCoeff * mainBlock.length*2*16);
     }
+
     return (
-        <div className='timeSlider' ref={(e) => {e && e.scrollTo(0, 20*2*16)}} onScroll={handleScroll}>
+        <div ref={ref} className='timeSlider' onScroll={handleScroll}>
             {auxBlock}
             {mainBlock}
         </div>
