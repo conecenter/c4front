@@ -1236,6 +1236,7 @@ div.grid {
 
 .timepickerPopupBox {
   display: flex;
+  gap: 0.3em;
 
   .timeSlider {
     max-height: 100%;
@@ -1246,11 +1247,16 @@ div.grid {
       display: none;
     }
 
-    > div {
+    > span {
       display: flex;
       justify-content: center;
       align-items: center;
       scroll-snap-align: start;
+
+      &.current {
+        color: var(--color-body);
+        background-color: var(--color-primaryColor);
+      }
     }
   }
 }
