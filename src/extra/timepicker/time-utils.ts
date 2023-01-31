@@ -12,30 +12,46 @@ const getMinutes = (ms: number) => Math.floor(ms / TOKEN_DATA.m.ms) % 60;
 const getSeconds = (ms: number) => Math.floor(ms / TOKEN_DATA.s.ms) % 60;
 const getMilliseconds = (ms: number) => ms % TOKEN_DATA.s.ms; 
 
+const padToDigits = (num: number, padTo: number) =>  num.toString().padStart(padTo, '0');
+
 interface TokenInfo {
-    [index: string]: { ms: number, max: number, get: (ms: number) => number }
+    [index: string]: { 
+        ms: number,
+        max: number,
+        joiner: string,
+        get: (ms: number) => number,
+        formatTo: (num: number) => string
+    }
 }
 
 const TOKEN_DATA: TokenInfo = {
     H: {
         ms: milliseconds({hours: 1}), 
         max: 24,
-        get: getHours
+        joiner: '',
+        get: getHours,
+        formatTo: h => padToDigits(h, 2)
     },
     m: {
         ms: milliseconds({minutes: 1}),
         max: 60,
-        get: getMinutes
+        joiner: ':',
+        get: getMinutes,
+        formatTo: m => padToDigits(m, 2)
     },
     s: {
         ms: 1000,
         max: 60,
-        get: getSeconds
+        joiner: ':',
+        get: getSeconds,
+        formatTo: s => padToDigits(s, 2)
     },
     S: {
         ms: 1,
         max: 1000,
-        get: getMilliseconds
+        joiner: '.',
+        get: getMilliseconds,
+        formatTo: ms => padToDigits(ms, 3)
     }
 }
 
@@ -56,18 +72,12 @@ const createTimestampChange = (timestamp: number): TimestampState => ({
 
 
 // Formatting timestamp -> time string
-const FORMAT_TO_TOKEN: { [index: string]: (ms: number) => string } = {
-    H: ms => padTo2Digits(Math.floor(ms / TOKEN_DATA.H.ms) % 24),
-    m: ms => ':' + padTo2Digits(getMinutes(ms)),
-    s: ms => ':' + padTo2Digits(getSeconds(ms)),
-    S: ms => '.' + getMilliseconds(ms).toString().padStart(3, '0')
-}
-
-const padTo2Digits = (num: number) =>  num.toString().padStart(2, '0');
-
 function formatTimestamp(milliseconds: number, usedTokens: string[], offset = 0) {
     const offsetTimestamp = milliseconds + offset;
-    const formattedParts = usedTokens.map(token => FORMAT_TO_TOKEN[token]?.(offsetTimestamp));
+    const formattedParts = usedTokens.map(token => {
+        const { get, formatTo, joiner } = TOKEN_DATA[token];
+        return joiner + formatTo(get(offsetTimestamp));
+    });
     return formattedParts.join('');
 }
 
