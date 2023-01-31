@@ -15,7 +15,9 @@ import {
     formatTimestamp,
     getCurrentFMTChar,
     getAdjustedTime,
-    MAX_TIMESTAMP
+    MAX_TIMESTAMP,
+    TIME_TOKENS,
+    TOKEN_DATA
 } from "./time-utils";
 import { createArray } from "../utils";
 import { usePopupState } from "../popup-elements/popup-manager";
@@ -61,10 +63,11 @@ function TimePicker({identity, state, offset, timestampFormatId, children}: Time
     const locale = useUserLocale();
 	const timestampFormat = locale.timeFormats.find(format => format.id === timestampFormatId);
     const pattern = timestampFormat?.pattern || 'hh:mm';
+    const usedTokens = TIME_TOKENS.filter(token => pattern.includes(token));
 
     // Get formatted input value
     const inputValue = isInputState(currentState) 
-        ? currentState.inputValue : formatTimestamp(currentState.timestamp, pattern, offset);
+        ? currentState.inputValue : formatTimestamp(currentState.timestamp, usedTokens, offset);
     
     // Focus functionality
     const path = useMemo(() => getPath(identity), [identity]);
@@ -74,7 +77,7 @@ function TimePicker({identity, state, offset, timestampFormatId, children}: Time
 
     // Helper functions
     const createFinalChange = (state: TimePickerState) => {
-        const timestamp = isInputState(state) ? parseStringToTime(state.inputValue, pattern) : state.timestamp;
+        const timestamp = isInputState(state) ? parseStringToTime(state.inputValue, usedTokens) : state.timestamp;
         return timestamp 
             ? createTimestampChange(timestamp % MAX_TIMESTAMP) 
             : createInputChange((state as InputState).inputValue);
@@ -135,11 +138,8 @@ function TimePicker({identity, state, offset, timestampFormatId, children}: Time
         </div>
 
         <NewPopupElement identity={identity}>
-            <div className='timepickerPopupBox' style={{ height: '8em'}}>
-                <TimeSliderBlock max={23} />
-                <TimeSliderBlock max={59} />
-                <TimeSliderBlock max={59} />
-                <TimeSliderBlock max={999} />
+            <div className='timepickerPopupBox' style={{ height: '12em'}}>
+                {usedTokens.map(token => <TimeSliderBlock key={token} max={TOKEN_DATA[token].max - 1} /> )}
             </div>
         </NewPopupElement>
         

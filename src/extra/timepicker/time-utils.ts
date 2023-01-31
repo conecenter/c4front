@@ -65,21 +65,19 @@ const FORMAT_TO_TOKEN: { [index: string]: (ms: number) => string } = {
 
 const padTo2Digits = (num: number) =>  num.toString().padStart(2, '0');
 
-function formatTimestamp(milliseconds: number, pattern: string, offset = 0) {
+function formatTimestamp(milliseconds: number, usedTokens: string[], offset = 0) {
     const offsetTimestamp = milliseconds + offset;
-    const formattedParts = TIME_TOKENS.reduce((acc: string[], token) => pattern.includes(token) 
-            ? [...acc, FORMAT_TO_TOKEN[token](offsetTimestamp)] : acc, []);
+    const formattedParts = usedTokens.map(token => FORMAT_TO_TOKEN[token]?.(offsetTimestamp));
     return formattedParts.join('');
 }
 
 
 // Time parsing functionality
-function parseStringToTime(value: string, pattern: string): number | undefined {
+function parseStringToTime(value: string, usedTokens: string[]): number | undefined {
     const tokens = tokenizeString(value, true);
     if (tokens.length > 0) {
         const timeToken = <TimeToken | undefined>tokens.find((value: Token) => value.type === 'time');
         const numberTokens = tokens.filter((value): value is NumberToken => value.type !== 'time');
-        const usedTokens = TIME_TOKENS.filter(token => pattern.includes(token));
         if (timeToken) return timeTokenToMs(usedTokens, timeToken, numberTokens);
         else {
             const [H, m, s, S] = numberTokens;
@@ -121,7 +119,7 @@ function getAdjustedTime(timestamp: number, currentFMTChar: string, cycleThrough
 function getCurrentFMTChar(pattern: string, cursorPosition: number) {
     for (const pos of [cursorPosition, cursorPosition - 1]) {
         if (TIME_TOKENS.includes(pattern[pos])) return pattern[pos];
-    }            
+    }
 }
 
 export {
@@ -132,5 +130,7 @@ export {
     isInputState,
     getCurrentFMTChar,
     getAdjustedTime,
-    MAX_TIMESTAMP
+    MAX_TIMESTAMP,
+    TIME_TOKENS,
+    TOKEN_DATA
 }
