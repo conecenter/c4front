@@ -139,25 +139,27 @@ function TimePicker({identity, state, offset, timestampFormatId, children}: Time
 
         <NewPopupElement identity={identity}>
             <div className='timepickerPopupBox' style={{ height: '12em'}}>
-                {usedTokens.map(token => <TimeSliderBlock key={token} max={TOKEN_DATA[token].max - 1} /> )}
+                {usedTokens.map(token => <TimeSliderBlock key={token} token={token} /> )}
             </div>
         </NewPopupElement>
         
     </>);
 }
 
+
 interface TimeSliderBlock {
-    min?: number,
-    max: number,
+    token: string,
     current?: number
 }
 
-function TimeSliderBlock({min = 0, max, current}: TimeSliderBlock) {
-    const mainBlock = createArray(min, max).map((i) =>
-        <div key={i} style={{width: '2em', height: '2em'}}>{i}</div>);
+function TimeSliderBlock({token, current}: TimeSliderBlock) {
+    const max = TOKEN_DATA[token].max - 1;
+    const { formatTo } = TOKEN_DATA[token];
+    const mainBlock = createArray(0, max).map((i) =>
+        <div key={i} style={{width: '2em', height: '2em'}}>{(formatTo(i))}</div>);
     
-    const auxBlock = createArray(Math.max(max - min - 19, min), max).map((i) =>
-    <div key={`aux-${i}`} style={{width: '2em', height: '2em'}}>{i}</div>);
+    const auxBlock = createArray(Math.max(max - 19, 0), max).map((i) =>
+    <div key={`aux-${i}`} style={{width: '2em', height: '2em'}}>{formatTo(i)}</div>);
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
         if (e.currentTarget.scrollTop < 40) e.currentTarget.scrollBy(0, mainBlock.length*2*16);
