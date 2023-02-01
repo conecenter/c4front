@@ -433,6 +433,7 @@ div.grid {
   height: auto;
   line-height: 1;
   vertical-align: middle;
+  align-items: center;
   width: 100%;
   background: var(--color-body);
   color: var(--textColor-body);
@@ -1773,4 +1774,9 @@ button {
       }
     }
   }
+}
+
+.btnTimepicker {
+  background: no-repeat url(.\timepicker\time.svg);
+  background-size: contain;
 }
