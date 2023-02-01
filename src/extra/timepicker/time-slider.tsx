@@ -2,6 +2,8 @@ import React, { useEffect, useRef } from "react";
 import { createArray } from "../utils";
 import { TOKEN_DATA } from "./time-utils";
 
+const TIME_ITEM_HEIGHT = 2;
+
 interface TimeSliderBlock {
     token: string,
     current: number,
@@ -26,7 +28,7 @@ function TimeSliderBlock({token, current, onClick}: TimeSliderBlock) {
         <span key={i}
               onClick={() => handleClick(i, token)}
               className={i === current ? 'current' : undefined} 
-              style={{width: '2em', height: '2em'}}>
+              style={{height: `${TIME_ITEM_HEIGHT}em`}}>
             {(formatTo(i))}
         </span>
     );
@@ -60,4 +62,4 @@ function TimeSliderBlock({token, current, onClick}: TimeSliderBlock) {
     );
 }
 
-export { TimeSliderBlock }
+export { TimeSliderBlock, TIME_ITEM_HEIGHT }
