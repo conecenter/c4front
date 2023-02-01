@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useMemo, useRef } from "react";
+import React, { ReactNode, useMemo, useRef } from "react";
 import clsx from "clsx";
 import { usePatchSync } from "../exchange/patch-sync";
 import { changeToPatch, patchToChange } from "./timepicker-exchange";
@@ -9,19 +9,11 @@ import { getPath, useFocusControl } from "../focus-control";
 import { NewPopupElement } from "../popup-elements/popup-element";
 import { usePopupState } from "../popup-elements/popup-manager";
 import { TimeSliderBlock, TIME_ITEM_HEIGHT } from "./time-slider";
-import {
-    createInputChange,
-    createTimestampChange,
-    parseStringToTime,
-    isInputState,
-    formatTimestamp,
-    getCurrentFMTChar,
-    getCurrentTokenValue,
-    getAdjustedTime,
-    MAX_TIMESTAMP,
-    TIME_TOKENS,
-    TOKEN_DATA,
-} from "./time-utils";
+import { copyToClipboard } from "../utils";
+import { BACKSPACE_EVENT, COPY_EVENT, CUT_EVENT, DELETE_EVENT, ENTER_EVENT, PASTE_EVENT, useExternalKeyboardControls }
+    from "../focus-module-interface";
+import { createInputChange, createTimestampChange, parseStringToTime, isInputState, formatTimestamp, getCurrentFMTChar, 
+    getCurrentTokenValue, getAdjustedTime, MAX_TIMESTAMP, TIME_TOKENS, TOKEN_DATA } from "./time-utils";
 
 
 interface TimePickerProps {
@@ -77,6 +69,16 @@ function TimePicker({identity, state, offset, timestampFormatId, readonly, child
 
     const setSelection = useSelectionEditableInput(inputRef);
 
+    // Popup functionality
+    const [isOpened, toggle] = usePopupState(identity);
+
+    const onTimeSliderClick = (i: number, token: string) => {
+        const newTimestamp = isInputState(currentState)
+            ? TOKEN_DATA[token].ms * i
+            : currentState.timestamp - (TOKEN_DATA[token].get(currentState.timestamp) - i) * TOKEN_DATA[token].ms;
+        sendTempChange(createTimestampChange(newTimestamp));
+    }
+
     // Helper functions
     const createFinalChange = (state: TimePickerState) => {
         const timestamp = isInputState(state) ? parseStringToTime(state.inputValue, usedTokens) : state.timestamp;
@@ -119,15 +121,36 @@ function TimePicker({identity, state, offset, timestampFormatId, readonly, child
         }
     }
 
-    // Popup functionality
-    const [isOpened, toggle] = usePopupState(identity);
+    // Interaction with FocusModule - Excel-style keyboard controls
+    function focusInputEnd() {
+        const endPosition = inputRef.current?.value.length || 0;
+        setSelection(endPosition, endPosition);
+		inputRef.current?.focus();
+	}
+	function clearAndFocusInput() {
+		sendTempChange(createInputChange(''));
+		inputRef.current?.focus();
+	}
+	function handleClipboardWrite(e: CustomEvent) {
+        const input = e.currentTarget as HTMLInputElement;
+        copyToClipboard(input.value);
+        if (e.type === 'ccopy') {
+            setSelection(0, input.value.length);
+            input.focus();
+        } else sendFinalChange(createInputChange(''));
+	}
+	const handleCustomPaste = (e: CustomEvent) => sendFinalChange(createFinalChange(e.detail));
 
-    const onTimeSliderClick = (i: number, token: string) => {
-        const newTimestamp = isInputState(currentState)
-            ? TOKEN_DATA[token].ms * i
-            : currentState.timestamp - (TOKEN_DATA[token].get(currentState.timestamp) - i) * TOKEN_DATA[token].ms;
-        sendTempChange(createTimestampChange(newTimestamp));
-    }
+	const keyboardEventHandlers = {
+		[ENTER_EVENT]: focusInputEnd,
+		[DELETE_EVENT]: clearAndFocusInput,
+		[BACKSPACE_EVENT]: clearAndFocusInput,
+		[PASTE_EVENT]: handleCustomPaste,
+		[COPY_EVENT]: handleClipboardWrite,
+		[CUT_EVENT]: handleClipboardWrite
+	};
+    
+	useExternalKeyboardControls(!readonly ? inputRef.current : null, keyboardEventHandlers);
 
     return (
         <div ref={inputBoxRef} 
@@ -154,7 +177,10 @@ function TimePicker({identity, state, offset, timestampFormatId, readonly, child
 
             {isOpened && 
                 <NewPopupElement identity={identity} className='timepickerPopup'>
-                    <div className='timepickerPopupBox' style={{ height: `${7*TIME_ITEM_HEIGHT}em`}}>
+                    <div className='timepickerPopupBox' 
+                         onKeyDown={(e) => e.stopPropagation()} 
+                         style={{ height: `${7*TIME_ITEM_HEIGHT}em`}}>
+
                         {usedTokens.map(token => (
                             <TimeSliderBlock key={token} 
                                             token={token} 
