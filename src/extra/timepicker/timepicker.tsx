@@ -8,7 +8,7 @@ import { useUserLocale } from "../locale";
 import { getPath, useFocusControl } from "../focus-control";
 import { NewPopupElement } from "../popup-elements/popup-element";
 import { usePopupState } from "../popup-elements/popup-manager";
-import { TimeSliderBlock } from "./time-slider";
+import { TimeSliderBlock, TIME_ITEM_HEIGHT } from "./time-slider";
 import {
     createInputChange,
     createTimestampChange,
@@ -145,7 +145,7 @@ function TimePicker({identity, state, offset, timestampFormatId, children}: Time
                 <div className='sideContent'>{children}</div>}
 
             <NewPopupElement identity={identity}>
-                <div className='timepickerPopupBox' style={{ height: '14em'}}>
+                <div className='timepickerPopupBox' style={{ height: `${7*TIME_ITEM_HEIGHT}em`}}>
                     {usedTokens.map(token => (
                         <TimeSliderBlock key={token} 
                                         token={token} 
