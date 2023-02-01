@@ -124,7 +124,7 @@ function TimePicker({identity, state, offset, timestampFormatId, children}: Time
         const newTimestamp = isInputState(currentState)
             ? TOKEN_DATA[token].ms * i
             : currentState.timestamp - (TOKEN_DATA[token].get(currentState.timestamp) - i) * TOKEN_DATA[token].ms;
-        sendFinalChange(createTimestampChange(newTimestamp));
+        sendTempChange(createTimestampChange(newTimestamp));
     }
 
     return (
