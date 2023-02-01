@@ -7,6 +7,8 @@ import { useSelectionEditableInput } from "../datepicker/selection-control";
 import { useUserLocale } from "../locale";
 import { getPath, useFocusControl } from "../focus-control";
 import { NewPopupElement } from "../popup-elements/popup-element";
+import { usePopupState } from "../popup-elements/popup-manager";
+import { TimeSliderBlock } from "./time-slider";
 import {
     createInputChange,
     createTimestampChange,
@@ -14,13 +16,12 @@ import {
     isInputState,
     formatTimestamp,
     getCurrentFMTChar,
+    getCurrentTokenValue,
     getAdjustedTime,
     MAX_TIMESTAMP,
     TIME_TOKENS,
-    TOKEN_DATA
+    TOKEN_DATA,
 } from "./time-utils";
-import { createArray } from "../utils";
-import { usePopupState } from "../popup-elements/popup-manager";
 
 
 interface TimePickerProps {
@@ -120,7 +121,14 @@ function TimePicker({identity, state, offset, timestampFormatId, children}: Time
     const [isOpened, toggle, popupDrawer] = usePopupState(identity);
     useEffect(() => toggle(true), []);
 
-    return (<>
+    const onTimeSliderClick = (i: number, token: string) => {
+        const newTimestamp = isInputState(currentState)
+            ? TOKEN_DATA[token].ms * i
+            : currentState.timestamp - (TOKEN_DATA[token].get(currentState.timestamp) - i) * TOKEN_DATA[token].ms;
+        sendFinalChange(createTimestampChange(newTimestamp));
+    }
+
+    return (
         <div ref={inputBoxRef} 
              className={clsx('inputBox', focusClass)} 
              onClick={(e) => e.stopPropagation()} 
@@ -135,60 +143,20 @@ function TimePicker({identity, state, offset, timestampFormatId, children}: Time
                    
             {children &&
                 <div className='sideContent'>{children}</div>}
-        </div>
 
-        <NewPopupElement identity={identity}>
-            <div className='timepickerPopupBox' style={{ height: '12em'}}>
-                {usedTokens.map(token => {
-                    const current = TOKEN_DATA[token].get(
-                        (currentState as TimestampState).timestamp ?? (currentState as InputState).tempTimestamp ?? 0
-                    );
-                    return <TimeSliderBlock key={token} token={token} current={current} />
-                })}
-            </div>
-        </NewPopupElement>
-        
-    </>);
-}
-
-
-interface TimeSliderBlock {
-    token: string,
-    current: number
-}
-
-function TimeSliderBlock({token, current}: TimeSliderBlock) {
-    const ref = useRef<HTMLDivElement | null>(null);
-    
-    const max = TOKEN_DATA[token].max - 1;
-    const { formatTo } = TOKEN_DATA[token];
-
-    const getTimeItem = (i: number) => (
-        <span key={i} className={i === current ? 'current' : undefined} style={{width: '2em', height: '2em'}}>{(formatTo(i))}</span>);
-
-    const mainBlock = createArray(0, max).map(getTimeItem);
-    const auxBlock = createArray(Math.max(max - 19, 0), max).map(getTimeItem);
-
-    useEffect(() => {
-        const scrollOffset = current < max - 8 ? 0 : -mainBlock.length;
-        ref.current?.scrollTo(0, (20 + current + scrollOffset)*2*16);
-    }, [current]);
-
-    const handleScroll = () => {
-        const elem = ref.current;
-        if (!elem) return;
-        const scrollCoeff = elem.scrollTop > (elem.scrollHeight - elem.clientHeight - 40) 
-            ? -1 : elem.scrollTop < 40 ? 1 : 0;
-        scrollCoeff && elem.scrollBy(0, scrollCoeff * mainBlock.length*2*16);
-    }
-
-    return (
-        <div ref={ref} className='timeSlider' onScroll={handleScroll}>
-            {auxBlock}
-            {mainBlock}
+            <NewPopupElement identity={identity}>
+                <div className='timepickerPopupBox' style={{ height: '14em'}}>
+                    {usedTokens.map(token => (
+                        <TimeSliderBlock key={token} 
+                                        token={token} 
+                                        current={getCurrentTokenValue(currentState, token)} 
+                                        onClick={onTimeSliderClick} />))}
+                </div>
+            </NewPopupElement>
         </div>
     );
 }
+
 
 export type { TimePickerState, TimestampState, InputState };
 export { TimePicker };

@@ -1745,6 +1745,7 @@ button {
   gap: 0.3em;
 
   .timeSlider {
+    position: relative;
     max-height: 100%;
     overflow-y: scroll;
     scroll-snap-type: y mandatory;
@@ -1758,6 +1759,12 @@ button {
       justify-content: center;
       align-items: center;
       scroll-snap-align: start;
+      cursor: pointer;
+      user-select: none;
+
+      &:hover {
+        @extend .headerLighterColorCss;
+      }
 
       &.current {
         color: var(--color-body);
