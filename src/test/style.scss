@@ -455,7 +455,7 @@ div.grid {
 }
 
 .rotate180deg {
-  transform: rotate(-180deg);
+  transform: rotate(180deg);
 }
 
 .inputBox {
@@ -1278,4 +1278,5 @@ div.grid {
   background: no-repeat url(.\timepicker\time.svg);
   background-size: contain;
   margin: 0 0.2em;
+  transition: all 200ms ease;
 }

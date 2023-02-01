@@ -30,6 +30,7 @@ interface TimePickerProps {
 	state: TimePickerState,
     offset?: number,
     timestampFormatId: number,
+    readonly?: boolean,
 	children?: ReactNode[]
 }
 
@@ -46,7 +47,7 @@ interface TimestampState {
 	timestamp: number
 }
 
-function TimePicker({identity, state, offset, timestampFormatId, children}: TimePickerProps) {
+function TimePicker({identity, state, offset, timestampFormatId, readonly, children}: TimePickerProps) {
     const inputRef = useRef<HTMLInputElement>(null);
     const inputBoxRef = useRef<HTMLInputElement>(null);
     const lastFinalState = useRef(state);  // return last final state on Esc
@@ -113,6 +114,7 @@ function TimePicker({identity, state, offset, timestampFormatId, children}: Time
             case ESCAPE_KEY:
                 const change = createFinalChange(lastFinalState.current);
                 sendTempChange(change);
+                toggle(false);
                 setTimeout(() => inputBoxRef.current?.focus());
         }
     }
@@ -129,20 +131,23 @@ function TimePicker({identity, state, offset, timestampFormatId, children}: Time
 
     return (
         <div ref={inputBoxRef} 
-             className={clsx('inputBox', focusClass)} 
+             className={clsx('inputBox', focusClass)}
+             style={{...readonly && {borderColor: 'transparent'}}}
              onClick={(e) => e.stopPropagation()} 
              {...focusHtml} >
 
             <input type='text'
                    ref={inputRef}
                    value={inputValue}
+                   readOnly={readonly}
                    onChange={(e) => sendTempChange(createInputChange(e.target.value))}
-                   onBlur={handleBlur}
-                   onKeyDown={handleKeyDown} />
+                   onBlur={!readonly ? handleBlur : undefined}
+                   onKeyDown={!readonly ? handleKeyDown : undefined} />
 
-            <button type='button' 
-                    className={clsx('btnTimepicker', isOpened && 'rotate180deg')}
-                    onClick={() => toggle(!isOpened)} />
+            {!readonly && 
+                <button type='button'
+                        className={clsx('btnTimepicker', isOpened && 'rotate180deg')}
+                        onClick={() => toggle(!isOpened)} />}
                    
             {children &&
                 <div className='sideContent'>{children}</div>}
