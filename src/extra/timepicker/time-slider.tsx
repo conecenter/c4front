@@ -49,8 +49,8 @@ function TimeSliderBlock({token, current, onClick}: TimeSliderBlock) {
     const handleScroll = () => {
         const elem = ref.current;
         if (!elem) return;
-        const scrollCoeff = elem.scrollTop > (elem.scrollHeight - elem.clientHeight - 40) 
-            ? -1 : elem.scrollTop < 40 ? 1 : 0;
+        const scrollCoeff = elem.scrollTop > (elem.scrollHeight - elem.clientHeight - 50) 
+            ? -1 : elem.scrollTop < 50 ? 1 : 0;
         scrollCoeff && elem.scrollBy(0, scrollCoeff * mainBlock.length*2*16);
     }
 
