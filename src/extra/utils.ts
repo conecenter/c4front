@@ -1,3 +1,4 @@
+// On Firefox writing to the clipboard is blocked (available only from user-initiated event callbacks)
 async function copyToClipboard(value: string) {
     try {
         await navigator.clipboard.writeText(value);
