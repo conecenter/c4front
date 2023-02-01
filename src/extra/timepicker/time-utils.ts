@@ -1,16 +1,15 @@
 import { NumberToken, TimeToken, Token, tokenizeString } from "../datepicker/date-utils";
-import { InputState, TimestampState } from "./timepicker";
-import { milliseconds } from "date-fns";
+import { InputState, TimePickerState, TimestampState } from "./timepicker";
 
 // Time calculations helpers
-const MAX_TIMESTAMP = milliseconds({hours: 24});
+const MAX_TIMESTAMP = 24 * 60 * 60 * 1000;
 
 const TIME_TOKENS = ['H', 'm', 's', 'S'];
 
 const getHours = (ms: number) => Math.floor(ms / TOKEN_DATA.H.ms) % 24;
 const getMinutes = (ms: number) => Math.floor(ms / TOKEN_DATA.m.ms) % 60;
 const getSeconds = (ms: number) => Math.floor(ms / TOKEN_DATA.s.ms) % 60;
-const getMilliseconds = (ms: number) => ms % TOKEN_DATA.s.ms; 
+const getMilliseconds = (ms: number) => ms % TOKEN_DATA.s.ms;
 
 const padToDigits = (num: number, padTo: number) =>  num.toString().padStart(padTo, '0');
 
@@ -26,14 +25,14 @@ interface TokenInfo {
 
 const TOKEN_DATA: TokenInfo = {
     H: {
-        ms: milliseconds({hours: 1}), 
+        ms: 60 * 60 * 1000, 
         max: 24,
         joiner: '',
         get: getHours,
         formatTo: h => padToDigits(h, 2)
     },
     m: {
-        ms: milliseconds({minutes: 1}),
+        ms: 60 * 1000, 
         max: 60,
         joiner: ':',
         get: getMinutes,
@@ -54,6 +53,10 @@ const TOKEN_DATA: TokenInfo = {
         formatTo: ms => padToDigits(ms, 3)
     }
 }
+
+const getCurrentTokenValue = (state: TimePickerState, token: string) => TOKEN_DATA[token].get(
+    (state as TimestampState).timestamp ?? (state as InputState).tempTimestamp ?? 0
+);
 
 
 // Timepicker state helpers
@@ -140,6 +143,7 @@ export {
     isInputState,
     getCurrentFMTChar,
     getAdjustedTime,
+    getCurrentTokenValue,
     MAX_TIMESTAMP,
     TIME_TOKENS,
     TOKEN_DATA
