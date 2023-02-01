@@ -118,8 +118,7 @@ function TimePicker({identity, state, offset, timestampFormatId, children}: Time
     }
 
     // Popup functionality
-    const [isOpened, toggle, popupDrawer] = usePopupState(identity);
-    useEffect(() => toggle(true), []);
+    const [isOpened, toggle] = usePopupState(identity);
 
     const onTimeSliderClick = (i: number, token: string) => {
         const newTimestamp = isInputState(currentState)
@@ -140,6 +139,10 @@ function TimePicker({identity, state, offset, timestampFormatId, children}: Time
                    onChange={(e) => sendTempChange(createInputChange(e.target.value))}
                    onBlur={handleBlur}
                    onKeyDown={handleKeyDown} />
+
+            <button type='button' 
+                    className={clsx('btnTimepicker', isOpened && 'rotate180deg')}
+                    onClick={() => toggle(!isOpened)} />
                    
             {children &&
                 <div className='sideContent'>{children}</div>}
