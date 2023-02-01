@@ -15,7 +15,7 @@ function App() {
                 tp: 'timestamp-state',
                 timestamp: 3600000
             },
-            timestampFormatId: 3,
+            timestampFormatId: 2,
             // offset: 3600000
     }));
     const sender = {

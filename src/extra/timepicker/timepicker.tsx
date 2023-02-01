@@ -147,15 +147,16 @@ function TimePicker({identity, state, offset, timestampFormatId, children}: Time
             {children &&
                 <div className='sideContent'>{children}</div>}
 
-            <NewPopupElement identity={identity}>
-                <div className='timepickerPopupBox' style={{ height: `${7*TIME_ITEM_HEIGHT}em`}}>
-                    {usedTokens.map(token => (
-                        <TimeSliderBlock key={token} 
-                                        token={token} 
-                                        current={getCurrentTokenValue(currentState, token)} 
-                                        onClick={onTimeSliderClick} />))}
-                </div>
-            </NewPopupElement>
+            {isOpened && 
+                <NewPopupElement identity={identity} className='timepickerPopup'>
+                    <div className='timepickerPopupBox' style={{ height: `${7*TIME_ITEM_HEIGHT}em`}}>
+                        {usedTokens.map(token => (
+                            <TimeSliderBlock key={token} 
+                                            token={token} 
+                                            current={getCurrentTokenValue(currentState, token)} 
+                                            onClick={onTimeSliderClick} />))}
+                    </div>
+                </NewPopupElement>}
         </div>
     );
 }
