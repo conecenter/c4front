@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import React, { ReactNode, useCallback, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { usePopupPos } from '../../main/popup';
@@ -8,6 +9,7 @@ import { usePopupState } from './popup-manager';
 interface PopupElement {
     key?: string,
     identity: Object,
+    className?: string,
     children?: ReactNode
 }
 
@@ -20,7 +22,7 @@ const elementIsInsideElements = (target: EventTarget | null, elems: (HTMLElement
     }
 }
 
-function NewPopupElement({ identity = DEFAULT_IDENTITY, children }: PopupElement) {
+function NewPopupElement({ identity = DEFAULT_IDENTITY, className, children }: PopupElement) {
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
     
     const popupParent = useRef<HTMLElement | null>(null);
@@ -41,7 +43,7 @@ function NewPopupElement({ identity = DEFAULT_IDENTITY, children }: PopupElement
     useAddEventListener(doc, 'focusout', handleBlur);
 
     const popup = (
-        <div ref={setPopupElement} className='popupEl' style={popupStyle} tabIndex={-1} >
+        <div ref={setPopupElement} className={clsx('popupEl', className)} style={popupStyle} tabIndex={-1} >
             {children}
         </div>
     );
