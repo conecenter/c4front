@@ -16,6 +16,7 @@ function App() {
                 timestamp: 3600000
             },
             timestampFormatId: 2,
+            readonly: false
             // offset: 3600000
     }));
     const sender = {
