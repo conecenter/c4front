@@ -3,17 +3,21 @@ import type { ReactNode, Dispatch, SetStateAction } from "react";
 import { getPath } from "../focus-control";
 import { SyncedPopup } from "./synced-popup";
 import { NewPopupElement } from "./popup-element";
+import { usePatchSync } from "../exchange/patch-sync";
 
-type PopupContext = [string, Dispatch<SetStateAction<string>>, HTMLElement | undefined] | [];
+type PopupContext = [string, (change: string) => void, HTMLElement | undefined] | [];
 
 const PopupContext = createContext<PopupContext>([]);
 
 interface PopupManager {
+    identity: Object,
+    state: string,
     children: ReactNode
 }
 
-function PopupManager({children}: PopupManager) {
-    const [popup, setPopup] = useState<string>('');   // TODO: sync
+function PopupManager({identity, state, children}: PopupManager) {
+    const { currentState: popup, sendFinalChange: setPopup } =
+        usePatchSync(identity, 'receiver', state, false, s => s, (ch: string) => ({value: ch}), p => p.value, (_, ch) => ch);
 
     const popupDrawerRef = useRef<HTMLElement | undefined>();
     const popupDrawer = $('div', {ref: popupDrawerRef});
