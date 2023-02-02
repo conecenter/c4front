@@ -100,8 +100,9 @@ function TimePicker({identity, state, offset, timestampFormatId, readonly, child
                 const input = e.currentTarget;
                 input.dispatchEvent(new CustomEvent("cTab", { bubbles: true }));
                 break;
-            case ARROW_UP_KEY:
             case ARROW_DOWN_KEY:
+                if (e.altKey) return toggle(!isOpened);
+            case ARROW_UP_KEY:
                 if (isInputState(currentState)) break;
                 e.preventDefault();
                 e.stopPropagation();
