@@ -464,7 +464,7 @@ div.grid {
   line-height: 1;
   vertical-align: middle;
   align-items: center;
-  width: 350px;
+  width: 250px;
   background: var(--color-body);
   color: var(--textColor-body);
   box-sizing: border-box;
@@ -1277,6 +1277,8 @@ div.grid {
 .btnTimepicker {
   background: no-repeat url(.\timepicker\time.svg);
   background-size: contain;
-  margin: 0 0.2em;
+  margin: 0.2em;
+  min-height: 1.4em;
+  min-width: 1.4em;
   transition: all 200ms ease;
 }
