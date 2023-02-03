@@ -4,6 +4,7 @@ import { getPath } from "../focus-control";
 import { SyncedPopup } from "./synced-popup";
 import { NewPopupElement } from "./popup-element";
 import { usePatchSync } from "../exchange/patch-sync";
+import { useSync } from "../../main/vdom-hooks";
 
 type PopupContext = [string, (change: string) => void, HTMLElement | undefined] | [];
 
@@ -16,6 +17,7 @@ interface PopupManager {
 }
 
 function PopupManager({identity, state, children}: PopupManager) {
+    //const [_, sendClosePopupPatch] = useSync(popupActionIdOf(identity)) as [Patch[], (patch: Patch) => void];
     const { currentState: popup, sendFinalChange: setPopup } =
         usePatchSync(identity, 'receiver', state, false, s => s, (ch: string) => ({value: ch}), p => p.value, (_, ch) => ch);
 
