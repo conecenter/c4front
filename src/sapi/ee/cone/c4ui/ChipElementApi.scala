@@ -13,6 +13,7 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, c4el, c4tags}
     link: String = "",
     receiver: Receiver[C] = NoReceiver[C],
     withDelete: Boolean = false,
+    children: ViewRes = Nil,
   ): ToChildPair
 
   @c4el("RouteElement") def routeElement(
