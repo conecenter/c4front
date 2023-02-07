@@ -16,10 +16,4 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, c4el, c4tags}
     withDelete: Boolean = false,
     children: ViewRes = Nil,
   ): ToChildPair
-
-  @c4el("RouteElement") def routeElement(
-    key: String,
-    routeParts: ViewRes = Nil, // ChipElement
-    compact: Boolean = false,
-  ): ToChildPair
 }
