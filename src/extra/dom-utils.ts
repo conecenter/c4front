@@ -102,5 +102,6 @@ InputsSizeContext.displayName = 'InputsSizeContext';
 
 const isSelColElement = (elem: Element) => elem?.matches('.selCol :is(.checkBox, .checkBox :scope)');
 const isButtonElement = (elem: Element) => elem?.matches('button, button :scope');
+const isInsidePopup = (elem: Element) => !!elem.closest('.popupEl');
 
-export { findClosestNode, isSelColElement, isButtonElement, InputsSizeContext };
+export { findClosestNode, isSelColElement, isButtonElement, InputsSizeContext, isInsidePopup };

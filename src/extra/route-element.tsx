@@ -1,9 +1,10 @@
-import React, { ReactElement, useMemo, useRef } from 'react';
+import React, { ReactElement, useMemo, useRef, MouseEvent } from 'react';
 import clsx from 'clsx';
 import { useAddEventListener } from './custom-hooks';
 import { COPY_EVENT } from './focus-module-interface';
 import { NoFocusContext } from './labeled-element';
 import { getPath, useFocusControl } from './focus-control';
+import { isInsidePopup } from './dom-utils';
 
 
 interface RouteElementProps {
@@ -31,13 +32,13 @@ function RouteElement({identity, compact, routeParts}: RouteElementProps) {
 		try {
             const wholeCode = routeParts.reduce((accum, elem) => accum + (elem.props?.value ?? ''), '');
 			await navigator.clipboard.writeText(wholeCode);
-		} catch(err) {
-			console.log(err);
-		}
-	}
+
+    function preventFocusInsidePopup(e: MouseEvent) {
+        if (isInsidePopup(e.target as HTMLElement)) e.preventDefault();
+    }
 
     return (
-        <div ref={routeElemRef} {...focusHtml} className={className} >
+        <div ref={routeElemRef} {...focusHtml} className={className} onMouseDownCapture={preventFocusInsidePopup} >
             <NoFocusContext.Provider value={true} >
                 {routeParts}
             </NoFocusContext.Provider>
