@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import { useAddEventListener } from './custom-hooks';
 import { COPY_EVENT } from './focus-module-interface';
 import { NoFocusContext } from './labeled-element';
+import { copyToClipboard } from './utils';
 import { getPath, useFocusControl } from './focus-control';
 import { isInsidePopup } from './dom-utils';
 
@@ -24,14 +25,13 @@ function RouteElement({identity, compact, routeParts}: RouteElementProps) {
     const className = clsx('routeElement focusFrameProvider', focusClass, compact && 'compact');
 
     // Copy on Ctrl+C functionality
-	useAddEventListener(routeElemRef.current, COPY_EVENT, handleClipboardWrite);
+	useAddEventListener(routeElemRef.current, COPY_EVENT, copyRouteToClipboard);
 
-    async function handleClipboardWrite(e: CustomEvent) {
-		// On Firefox writing to the clipboard is blocked for non user-initiated event callbacks
+    function copyRouteToClipboard(e: CustomEvent) {
         e.stopPropagation();
-		try {
-            const wholeCode = routeParts.reduce((accum, elem) => accum + (elem.props?.value ?? ''), '');
-			await navigator.clipboard.writeText(wholeCode);
+        const wholeCode = routeParts.reduce((accum, elem) => accum + (elem.props?.text ?? ''), '');
+		copyToClipboard(wholeCode);
+	}
 
     function preventFocusInsidePopup(e: MouseEvent) {
         if (isInsidePopup(e.target as HTMLElement)) e.preventDefault();
