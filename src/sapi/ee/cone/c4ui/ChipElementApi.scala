@@ -20,5 +20,6 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, c4el, c4tags}
     key: String,
     routeParts: ViewRes = Nil, // ChipElement
     compact: Boolean = false,
+    receiver: Receiver[C] = NoReceiver[C],
   ): ToChildPair
 }
