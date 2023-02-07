@@ -1,12 +1,14 @@
 import React, { ReactElement, useMemo, useRef, MouseEvent } from 'react';
 import clsx from 'clsx';
-import { useAddEventListener } from './custom-hooks';
-import { COPY_EVENT } from './focus-module-interface';
+import { COPY_EVENT, CUT_EVENT, PASTE_EVENT, useExternalKeyboardControls } from './focus-module-interface';
 import { NoFocusContext } from './labeled-element';
 import { copyToClipboard } from './utils';
+import { useSync } from '../main/vdom-hooks';
+import { identityAt } from '../main/vdom-util';
 import { getPath, useFocusControl } from './focus-control';
 import { isInsidePopup } from './dom-utils';
 
+const keyboardActionIdOf = identityAt('keyboardAction');
 
 interface RouteElementProps {
     key: string,
@@ -23,19 +25,29 @@ function RouteElement({identity, compact, routeParts}: RouteElementProps) {
     const { focusClass, focusHtml } = useFocusControl(path);
 
     const className = clsx('routeElement focusFrameProvider', focusClass, compact && 'compact');
+    
+    // Server sync
+    const [_, sendPatch] = useSync(keyboardActionIdOf(identity));
 
-    // Copy on Ctrl+C functionality
-	useAddEventListener(routeElemRef.current, COPY_EVENT, copyRouteToClipboard);
+    // Event handlers
+    function preventFocusInsidePopup(e: MouseEvent) {
+        if (isInsidePopup(e.target as HTMLElement)) e.preventDefault();
+    }
+
+    // External keyboard event handlers
+    const customEventHandlers = {
+		[PASTE_EVENT]: (e: CustomEvent) => sendPatch({value: e.detail, headers: {'x-r-paste': ''}}),
+		[COPY_EVENT]: copyRouteToClipboard,
+		[CUT_EVENT]: copyRouteToClipboard
+	};
+
+	useExternalKeyboardControls(routeElemRef.current, customEventHandlers);
 
     function copyRouteToClipboard(e: CustomEvent) {
         e.stopPropagation();
         const wholeCode = routeParts.reduce((accum, elem) => accum + (elem.props?.text ?? ''), '');
 		copyToClipboard(wholeCode);
 	}
-
-    function preventFocusInsidePopup(e: MouseEvent) {
-        if (isInsidePopup(e.target as HTMLElement)) e.preventDefault();
-    }
 
     return (
         <div ref={routeElemRef} {...focusHtml} className={className} onMouseDownCapture={preventFocusInsidePopup} >
