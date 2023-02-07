@@ -2,6 +2,8 @@ import React, { ReactElement, useMemo, useRef } from 'react';
 import clsx from 'clsx';
 import { useAddEventListener } from './custom-hooks';
 import { COPY_EVENT } from './focus-module-interface';
+import { NoFocusContext } from './labeled-element';
+import { getPath, useFocusControl } from './focus-control';
 
 
 interface RouteElementProps {
@@ -13,6 +15,12 @@ interface RouteElementProps {
 
 function RouteElement({identity, compact, routeParts}: RouteElementProps) {
     const routeElemRef = useRef(null);
+
+    // Focus functionality
+    const path = useMemo(() => getPath(identity), [identity]);
+    const { focusClass, focusHtml } = useFocusControl(path);
+
+    const className = clsx('routeElement focusFrameProvider', focusClass, compact && 'compact');
 
     // Copy on Ctrl+C functionality
 	useAddEventListener(routeElemRef.current, COPY_EVENT, handleClipboardWrite);
@@ -29,8 +37,10 @@ function RouteElement({identity, compact, routeParts}: RouteElementProps) {
 	}
 
     return (
-        <div ref={routeElemRef} className={clsx('routeElement', compact && 'compact')}>
-            {routeParts}
+        <div ref={routeElemRef} {...focusHtml} className={className} >
+            <NoFocusContext.Provider value={true} >
+                {routeParts}
+            </NoFocusContext.Provider>
         </div>
     );
 }
