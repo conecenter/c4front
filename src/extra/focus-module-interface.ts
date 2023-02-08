@@ -32,6 +32,7 @@ type CustomEventHandler = (e: CustomEvent) => void
 
 function useExternalKeyboardControls(element: HTMLElement | null, keyboardEventHandlers: KeyboardEventHandlers) {
 	const savedHandlers = useRef(keyboardEventHandlers);
+	
     useEffect(() => {
 		savedHandlers.current = keyboardEventHandlers;
 	}, [keyboardEventHandlers]);
@@ -39,8 +40,12 @@ function useExternalKeyboardControls(element: HTMLElement | null, keyboardEventH
 	useEffect(() => {
 		if (!element) return;
 		const cEventNames = Object.keys(savedHandlers.current) as KeyboardEventNames[];
-		cEventNames.forEach(event => element.addEventListener(event, savedHandlers.current[event]));
-		return () => cEventNames.forEach(event => element.removeEventListener(event, savedHandlers.current[event]));
+		cEventNames.forEach(event => {
+			element.addEventListener(event, (e) => savedHandlers.current[event](e))
+		});
+		return () => cEventNames.forEach(event => {
+			element.removeEventListener(event, (e) => savedHandlers.current[event](e))
+		});
 	}, [element]);
 }
 
