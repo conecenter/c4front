@@ -16,10 +16,11 @@ interface RouteElementProps {
     identity: Object,
     receiver?: boolean,
     compact?: boolean,
-    routeParts: ReactElement[]  // ChipElements
+    routeParts: ReactElement[],  // ChipElements
+    extraParts?: ReactElement[]
 }
 
-function RouteElement({identity, receiver, compact, routeParts}: RouteElementProps) {
+function RouteElement({identity, receiver, compact, routeParts, extraParts}: RouteElementProps) {
     const routeElemRef = useRef(null);
 
     const readOnly = !receiver;
@@ -55,7 +56,8 @@ function RouteElement({identity, receiver, compact, routeParts}: RouteElementPro
 
     function copyRouteToClipboard(e: CustomEvent) {
         e.stopPropagation();
-        const wholeCode = routeParts.reduce((accum, elem) => accum + (elem.props?.text ?? ''), '');
+        const allParts = [...routeParts, ...(extraParts ?? [])];
+        const wholeCode = allParts.reduce((accum, elem) => accum + (elem.props?.text ?? ''), '');
 		copyToClipboard(wholeCode);
 	}
 
@@ -71,6 +73,7 @@ function RouteElement({identity, receiver, compact, routeParts}: RouteElementPro
         >
             <NoFocusContext.Provider value={true} >
                 {routeParts}
+                {extraParts}
             </NoFocusContext.Provider>
         </div>
     );
