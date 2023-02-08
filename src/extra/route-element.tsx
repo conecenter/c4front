@@ -14,12 +14,15 @@ const keyboardActionIdOf = identityAt('keyboardAction');
 interface RouteElementProps {
     key: string,
     identity: Object,
+    receiver: boolean,
     compact?: boolean,
     routeParts: ReactElement[]  // ChipElements
 }
 
-function RouteElement({identity, compact, routeParts}: RouteElementProps) {
+function RouteElement({identity, receiver, compact, routeParts}: RouteElementProps) {
     const routeElemRef = useRef(null);
+
+    const readOnly = !receiver;
 
     // Focus functionality
     const path = useMemo(() => getPath(identity), [identity]);
@@ -37,6 +40,7 @@ function RouteElement({identity, compact, routeParts}: RouteElementProps) {
 
     function sendKeyToServer(e: KeyboardEvent | CustomEvent<{key: string, vk?: boolean}>) {
         e.stopPropagation();
+        if (readOnly || (isKeyboardEvent(e) && e.ctrlKey)) return;
         const key = isKeyboardEvent(e) ? e.key : e.detail.key;
         const isPrintableKey = /^[a-z0-9]$/i.test(key);
         if (isPrintableKey) sendPatch({value: key, headers: {'x-r-input': '1'}});
@@ -44,7 +48,7 @@ function RouteElement({identity, compact, routeParts}: RouteElementProps) {
 
     // External keyboard event handlers
     const customEventHandlers = {
-		[PASTE_EVENT]: (e: CustomEvent) => sendPatch({value: e.detail, headers: {'x-r-paste': '1'}}),
+		[PASTE_EVENT]: (e: CustomEvent) => !readOnly && sendPatch({value: e.detail, headers: {'x-r-paste': '1'}}),
 		[COPY_EVENT]: copyRouteToClipboard,
 		[CUT_EVENT]: copyRouteToClipboard
 	};
