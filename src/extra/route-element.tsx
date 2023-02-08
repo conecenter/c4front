@@ -39,12 +39,12 @@ function RouteElement({identity, compact, routeParts}: RouteElementProps) {
         e.stopPropagation();
         const key = isKeyboardEvent(e) ? e.key : e.detail.key;
         const isPrintableKey = /^[a-z0-9]$/i.test(key);
-        if (isPrintableKey) sendPatch({value: key, headers: {'x-r-input': ''}});
+        if (isPrintableKey) sendPatch({value: key, headers: {'x-r-input': '1'}});
     }
 
     // External keyboard event handlers
     const customEventHandlers = {
-		[PASTE_EVENT]: (e: CustomEvent) => sendPatch({value: e.detail, headers: {'x-r-paste': ''}}),
+		[PASTE_EVENT]: (e: CustomEvent) => sendPatch({value: e.detail, headers: {'x-r-paste': '1'}}),
 		[COPY_EVENT]: copyRouteToClipboard,
 		[CUT_EVENT]: copyRouteToClipboard
 	};
