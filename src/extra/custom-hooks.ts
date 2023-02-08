@@ -16,7 +16,7 @@ function useAddEventListener(
     }, [handler]);
 
     useEffect(() => {
-        const listener = savedHandler.current as EventListener;
+        const listener = (e: Event) => savedHandler.current(e);
         element?.addEventListener(eventName, listener, capture);
         return () => element?.removeEventListener(eventName, listener, capture);
     }, [eventName, element, ...dependencies]);
