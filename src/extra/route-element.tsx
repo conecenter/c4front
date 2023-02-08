@@ -28,7 +28,7 @@ function RouteElement({identity, receiver, compact, routeParts}: RouteElementPro
     const path = useMemo(() => getPath(identity), [identity]);
     const { focusClass, focusHtml } = useFocusControl(path);
 
-    const className = clsx('routeElement focusFrameProvider', focusClass, compact && 'compact');
+    const className = clsx('routeElement inputBox focusFrameProvider', focusClass, compact && 'compact');
     
     // Server sync
     const [_, sendPatch] = useSync(keyboardActionIdOf(identity));
