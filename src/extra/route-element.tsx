@@ -13,16 +13,16 @@ const keyboardActionIdOf = identityAt('keyboardAction');
 interface RouteElementProps {
     key: string,
     identity: Object,
-    receiver?: boolean,
+    keyboardAction?: boolean,
     compact?: boolean,
     routeParts: ReactElement[],  // ChipElements
     extraParts?: ReactElement[]
 }
 
-function RouteElement({identity, receiver, compact, routeParts, extraParts}: RouteElementProps) {
+function RouteElement({identity, keyboardAction, compact, routeParts, extraParts}: RouteElementProps) {
     const routeElemRef = useRef(null);
 
-    const readOnly = !receiver;
+    const readOnly = !keyboardAction;
 
     // Focus functionality
     const path = useMemo(() => getPath(identity), [identity]);
