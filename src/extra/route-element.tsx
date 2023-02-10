@@ -6,7 +6,6 @@ import { copyToClipboard } from './utils';
 import { useSync } from '../main/vdom-hooks';
 import { identityAt } from '../main/vdom-util';
 import { getPath, useFocusControl } from './focus-control';
-import { isInsidePopup } from './dom-utils';
 import { useAddEventListener } from './custom-hooks';
 
 const keyboardActionIdOf = identityAt('keyboardAction');
@@ -35,10 +34,6 @@ function RouteElement({identity, receiver, compact, routeParts, extraParts}: Rou
     const [_, sendPatch] = useSync(keyboardActionIdOf(identity));
 
     // Event handlers
-    function preventFocusInsidePopup(e: React.MouseEvent) {
-        if (isInsidePopup(e.target as HTMLElement)) e.preventDefault();
-    }
-
     function sendKeyToServer(e: KeyboardEvent | CustomEvent<{key: string, vk?: boolean}>) {
         e.stopPropagation();
         if (readOnly || (isKeyboardEvent(e) && e.ctrlKey)) return;
@@ -68,8 +63,7 @@ function RouteElement({identity, receiver, compact, routeParts, extraParts}: Rou
         <div ref={routeElemRef}
              className={className}
              {...focusHtml} 
-             onKeyDown={sendKeyToServer} 
-             onMouseDownCapture={preventFocusInsidePopup} 
+             onKeyDown={sendKeyToServer}
         >
             <NoFocusContext.Provider value={true} >
                 {routeParts}
@@ -81,4 +75,4 @@ function RouteElement({identity, receiver, compact, routeParts, extraParts}: Rou
 
 const isKeyboardEvent = (e: KeyboardEvent | CustomEvent): e is KeyboardEvent => e.type === 'keydown';
 
- export { RouteElement };
+export { RouteElement };
