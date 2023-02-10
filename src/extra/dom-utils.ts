@@ -96,12 +96,16 @@ function formatTo3Digits(obj: LineSegmentCoords) {
     return obj;
 }
 
+function elementHasFocus(element?: HTMLElement | null) {
+	if (!element) return false;
+	const activeElement = element.ownerDocument.activeElement;
+	return element.contains(activeElement);
+}
 
 const InputsSizeContext = createContext(20);
 InputsSizeContext.displayName = 'InputsSizeContext';
 
 const isSelColElement = (elem: Element) => elem?.matches('.selCol :is(.checkBox, .checkBox :scope)');
 const isButtonElement = (elem: Element) => elem?.matches('button, button :scope');
-const isInsidePopup = (elem: Element) => !!elem.closest('.popupEl');
 
-export { findClosestNode, isSelColElement, isButtonElement, InputsSizeContext, isInsidePopup };
+export { findClosestNode, isSelColElement, isButtonElement, InputsSizeContext, elementHasFocus };
