@@ -36,10 +36,9 @@ function NewPopupElement({ identity = DEFAULT_IDENTITY, children }: PopupElement
 
     // Prevent focus loss after closing
     useLayoutEffect(() => {
-        const preventFocusLoss = () => {
+        return () => {
             if (isOpened && elementHasFocus(popupDrawer)) focusFocusableAncestor(popupParent.current);
         }
-        return preventFocusLoss;
     }, [isOpened]);
 
     const popup = (

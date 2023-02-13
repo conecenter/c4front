@@ -42,6 +42,10 @@ function RouteElement({identity, keyboardAction, compact, routeParts, extraParts
         if (isPrintableKey) sendPatch({value: key, headers: {'x-r-input': '1'}});
     }
 
+    function preventMenuItemsFocus(e: React.MouseEvent) {
+        if ((e.target as HTMLElement).closest('.menuItem')) e.preventDefault();
+    }
+
     // External keyboard event handlers
     const customEventHandlers = {
 		[PASTE_EVENT]: (e: CustomEvent) => !readOnly && sendPatch({value: e.detail, headers: {'x-r-paste': '1'}}),
@@ -64,6 +68,7 @@ function RouteElement({identity, keyboardAction, compact, routeParts, extraParts
              className={className}
              {...focusHtml} 
              onKeyDown={sendKeyToServer}
+             onMouseDownCapture={preventMenuItemsFocus}
         >
             <NoFocusContext.Provider value={true} >
                 {routeParts}
