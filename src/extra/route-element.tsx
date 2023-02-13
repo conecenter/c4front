@@ -28,7 +28,7 @@ function RouteElement({identity, keyboardAction, compact, routeParts, extraParts
     const path = useMemo(() => getPath(identity), [identity]);
     const { focusClass, focusHtml } = useFocusControl(path);
 
-    const className = clsx('routeElement inputBox focusFrameProvider', focusClass, compact && 'compact');
+    const className = clsx('routeElement focusFrameProvider', focusClass, compact && 'compact');
     
     // Server sync
     const [_, sendPatch] = useSync(keyboardActionIdOf(identity));
@@ -66,7 +66,8 @@ function RouteElement({identity, keyboardAction, compact, routeParts, extraParts
     return (
         <div ref={routeElemRef}
              className={className}
-             {...focusHtml} 
+             {...focusHtml}
+             style={{...readOnly && {borderColor: "transparent"}}}
              onKeyDown={sendKeyToServer}
              onMouseDownCapture={preventMenuItemsFocus}
         >
