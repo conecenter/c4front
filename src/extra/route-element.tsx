@@ -73,7 +73,8 @@ function RouteElement({identity, keyboardAction, compact, routeParts, extraParts
         >
             <NoFocusContext.Provider value={true} >
                 {routeParts}
-                {extraParts}
+                {extraParts && 
+                    <span className='extraParts'>{extraParts}</span>}
             </NoFocusContext.Provider>
         </div>
     );
