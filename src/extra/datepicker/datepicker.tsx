@@ -18,6 +18,7 @@ import {
 	applyChange, 
 	changeToPatch, 
 	createInputChange, 
+	DatepickerChange, 
 	DatePickerState, 
 	patchToChange, 
 	serverStateToState
@@ -76,7 +77,9 @@ export function DatePickerInputElement({
 	const timestampFormat = getDateTimeFormat(timestampFormatId, locale)
 	const dateSettings: DateSettings = {timestampFormat: timestampFormat, locale: locale, timezoneId: timezoneId}
 
-	const { currentState, sendTempChange, sendFinalChange } = usePatchSync(
+	const dateChanged = useRef(false);
+
+	const { currentState, sendTempChange: onTempChange, sendFinalChange: onFinalChange } = usePatchSync(
         identity,
         'receiver',
         state,
@@ -86,6 +89,15 @@ export function DatePickerInputElement({
         patchToChange,
         applyChange
     );
+	const sendTempChange = (change: DatepickerChange) => {
+		dateChanged.current = true;
+		onTempChange(change);
+	}
+	const sendFinalChange = (change: DatepickerChange, force = false) => {
+		if (!force && change.tp === "dateChange" && !dateChanged.current) return;
+		onFinalChange(change);
+		dateChanged.current = false;
+	}
 
 	const memoInputValue = useRef('')
 
@@ -132,7 +144,7 @@ export function DatePickerInputElement({
 				input.setSelectionRange(0, input.value.length);
 				input.focus();
 			} else {
-				sendFinalChange(createInputChange(''));
+				sendFinalChange(createInputChange(''), true);
 				memoInputValue.current = '';
 			}
 		} catch(err) {
@@ -147,7 +159,8 @@ export function DatePickerInputElement({
 			getOrElse(
 				mapOption(parseStringToDate(inputVal, dateSettings), timestamp => createInputChange(inputVal, timestamp)),
 				createInputChange(inputVal)
-			)
+			),
+			true
 		);
 		memoInputValue.current = inputVal;
 	}
