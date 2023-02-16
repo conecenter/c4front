@@ -11,7 +11,7 @@ interface DatepickerCalendarProps {
   currentState: DatePickerState,
   currentDateOpt: Option<Date>,
   dateSettings: DateSettings,
-  sendFinalChange: (ch: DatepickerChange) => void,
+  sendFinalChange: (ch: DatepickerChange, force?: boolean) => void,
   inputRef: React.MutableRefObject<HTMLInputElement | null>
 }
 
@@ -121,7 +121,7 @@ export function DatepickerCalendar({
         ...timeSettings
     });
     focusActiveWrapper(popupCalendarRef);
-    sendFinalChange(createTimestampChange(getTimestamp(chosenDate, dateSettings)));
+    sendFinalChange(createTimestampChange(getTimestamp(chosenDate, dateSettings)), true);
     closePopup();
   }
 
@@ -161,9 +161,9 @@ export function DatepickerCalendar({
       if (!e.currentTarget.dataset.change) return;
       if (nonEmpty(currentDateOpt)) {
           const adjustedDate = adjustDate(currentDateOpt, symbol, +e.currentTarget.dataset.change, true);
-          sendFinalChange(createTimestampChange(getTimestamp(adjustedDate, dateSettings)));
+          sendFinalChange(createTimestampChange(getTimestamp(adjustedDate, dateSettings)), true);
       } 
-      else sendFinalChange(createTimestampChange(Date.now()));
+      else sendFinalChange(createTimestampChange(Date.now()), true);
     }
   }
 
@@ -171,8 +171,8 @@ export function DatepickerCalendar({
    * Now & Close buttons functionality
   */
   const onNowBtnClick = () => {
-    focusActiveWrapper(popupCalendarRef);    
-    sendFinalChange(createTimestampChange(Date.now()));
+    focusActiveWrapper(popupCalendarRef);
+    sendFinalChange(createTimestampChange(Date.now()), true);
     closePopup();
   }
 
