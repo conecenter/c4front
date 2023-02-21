@@ -100,7 +100,4 @@ function formatTo3Digits(obj: LineSegmentCoords) {
 const InputsSizeContext = createContext(20);
 InputsSizeContext.displayName = 'InputsSizeContext';
 
-const isSelColElement = (elem: Element) => elem?.matches('.selCol :is(.checkBox, .checkBox :scope)');
-const isButtonElement = (elem: Element) => elem?.matches('button, button :scope');
-
-export { findClosestNode, isSelColElement, isButtonElement, InputsSizeContext };
+export { findClosestNode, InputsSizeContext };
