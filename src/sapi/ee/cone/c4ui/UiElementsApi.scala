@@ -42,6 +42,15 @@ trait UIElement extends ToChildPair
     className: Option[String] = None,
   ): UIElement
 
+  @c4el("ScrollableColumn") def scrollableColumn(
+    key: String,
+    children: ViewRes,
+    height: Em,
+    sizes: Option[Size] = None,
+    align: Option[Align] = None,
+    className: Option[String] = None,
+  ): UIElement
+
   @c4val("accent") def groupboxAccented: GroupboxDisplay
 
   @c4el("FlexibleGroupbox") def groupbox(

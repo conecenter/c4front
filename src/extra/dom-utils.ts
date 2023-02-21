@@ -96,8 +96,13 @@ function formatTo3Digits(obj: LineSegmentCoords) {
     return obj;
 }
 
+function elementHasFocus(element?: HTMLElement | null) {
+	if (!element) return false;
+	const activeElement = element.ownerDocument.activeElement;
+	return element.contains(activeElement);
+}
 
 const InputsSizeContext = createContext(20);
 InputsSizeContext.displayName = 'InputsSizeContext';
 
-export { findClosestNode, InputsSizeContext };
+export { findClosestNode, InputsSizeContext, elementHasFocus };

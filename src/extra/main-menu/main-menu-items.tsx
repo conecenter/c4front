@@ -28,6 +28,11 @@ function MenuExecutableItem({identity, name, current, path, icon, bindSrcId}: Me
 
     const { isBindMode } = useBinds();
 
+    const handleClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onClick();
+    }
+
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === ENTER_KEY) {
             e.stopPropagation();
@@ -38,7 +43,7 @@ function MenuExecutableItem({identity, name, current, path, icon, bindSrcId}: Me
     return (
         <div className={clsx('menuItem', current && 'isCurrent', clicked && 'executeAnim', focusClass)}
              {...focusHtml}
-             onClick={onClick}
+             onClick={handleClick}
              onKeyDown={handleKeyDown} 
         >
             {isBindMode && <BindingElement bindSrcId={bindSrcId} onChange={onClick} />}

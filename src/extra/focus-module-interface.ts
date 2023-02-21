@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 const SEL_FOCUSABLE = '.focusWrapper';
 const SEL_FOCUSABLE_ATTR = '[data-path]';
@@ -23,31 +23,30 @@ declare global {
 }
 
 interface KeyboardEventHandlers {
-	[ENTER_EVENT]?: CustomEventHandler,
-	[DELETE_EVENT]?: CustomEventHandler,
-	[BACKSPACE_EVENT]?: CustomEventHandler,
-	[PASTE_EVENT]?: CustomEventHandler,
-	[COPY_EVENT]?: CustomEventHandler,
-	[CUT_EVENT]?: CustomEventHandler
+	[index: string]: CustomEventHandler
 }
 
 type KeyboardEventNames = 'enter' | 'delete' | 'backspace' | 'cpaste' | 'ccopy' | 'ccut';
 
 type CustomEventHandler = (e: CustomEvent) => void
 
-function useExternalKeyboardControls(
-	ref: React.MutableRefObject<HTMLElement | null>, 
-	keyboardEventHandlers: KeyboardEventHandlers
-) {
+function useExternalKeyboardControls(element: HTMLElement | null, keyboardEventHandlers: KeyboardEventHandlers) {
+	const savedHandlers = useRef(keyboardEventHandlers);
+	
+    useEffect(() => {
+		savedHandlers.current = keyboardEventHandlers;
+	}, [keyboardEventHandlers]);
+
 	useEffect(() => {
-		const element = ref.current;
 		if (!element) return;
-		const cEventNames = Object.keys(keyboardEventHandlers) as KeyboardEventNames[];
-		cEventNames
-			.forEach(event => element.addEventListener(event, keyboardEventHandlers[event] as CustomEventHandler));
-		return () => cEventNames
-			.forEach(event => element.removeEventListener(event, keyboardEventHandlers[event] as CustomEventHandler));
-	});
+		const cEventNames = Object.keys(savedHandlers.current) as KeyboardEventNames[];
+		cEventNames.forEach(event => {
+			element.addEventListener(event, (e) => savedHandlers.current[event](e))
+		});
+		return () => cEventNames.forEach(event => {
+			element.removeEventListener(event, (e) => savedHandlers.current[event](e))
+		});
+	}, [element]);
 }
 
 export {

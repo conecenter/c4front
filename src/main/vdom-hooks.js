@@ -5,9 +5,18 @@ import {createElement,useState,useContext,createContext,useCallback,useEffect} f
 
 const NoContext = createContext()
 const AckContext = createContext()
+AckContext.displayName = "AckContext"
+
 const SenderContext = createContext()
+SenderContext.displayName = "SenderContext"
+
 const nonMerged = ack => aPatch => !(aPatch && ack && aPatch.sentIndex <= ack.index)
 export const useSender = () => useContext(SenderContext)
+
+/**
+ * @param {Object} identity
+ * @returns {[SendPatch[], (patch: SendPatch) => void]}
+ */
 export const useSync = identity => {
     const [patches,setPatches] = useState([])
     const sender = useSender()

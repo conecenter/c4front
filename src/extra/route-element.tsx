@@ -1,87 +1,85 @@
-import React, { ReactNode, useMemo, useRef } from 'react';
+import React, { ReactElement, useMemo, useRef, KeyboardEvent } from 'react';
 import clsx from 'clsx';
+import { COPY_EVENT, CUT_EVENT, DELETE_EVENT, PASTE_EVENT, useExternalKeyboardControls } from './focus-module-interface';
+import { NoFocusContext } from './labeled-element';
+import { copyToClipboard } from './utils';
+import { useSync } from '../main/vdom-hooks';
+import { identityAt } from '../main/vdom-util';
 import { getPath, useFocusControl } from './focus-control';
-import { usePatchSync } from './exchange/patch-sync';
 import { useAddEventListener } from './custom-hooks';
-import { COPY_EVENT } from './focus-module-interface';
 
+const keyboardActionIdOf = identityAt('keyboardAction');
 
 interface RouteElementProps {
     key: string,
     identity: Object,
+    keyboardAction?: boolean,
     compact?: boolean,
-    routeParts: RoutePartData[]
- }
- 
- interface RoutePartData {
-    text: string,
-    done: boolean,
-    hint?: string,
-    children?: ReactNode[]
+    routeParts: ReactElement[],  // ChipElements
+    extraParts?: ReactElement[]
 }
 
-function RouteElement({identity, compact, routeParts}: RouteElementProps) {
-    const lastDone = routeParts.findIndex(part => !part.done) - 1;
-    const path = useMemo(() => getPath(identity), [identity]);
-
-    const { handleClick } = useRouteElementSync(identity, 'receiver');
-
-    // Copy on Ctrl+C functionality
+function RouteElement({identity, keyboardAction, compact, routeParts, extraParts}: RouteElementProps) {
     const routeElemRef = useRef(null);
-	useAddEventListener(routeElemRef.current, COPY_EVENT, handleClipboardWrite);
 
-    async function handleClipboardWrite(e: CustomEvent) {
-		// On Firefox writing to the clipboard is blocked for non user-initiated event callbacks
+    const readOnly = !keyboardAction;
+
+    // Focus functionality
+    const path = useMemo(() => getPath(identity), [identity]);
+    const { focusClass, focusHtml } = useFocusControl(path);
+
+    const className = clsx('routeElement focusFrameProvider', focusClass, compact && 'compact');
+    
+    // Server sync
+    const [_, sendPatch] = useSync(keyboardActionIdOf(identity));
+
+    // Event handlers
+    function sendKeyToServer(e: KeyboardEvent | CustomEvent<{key: string, vk?: boolean}>) {
         e.stopPropagation();
-		try {
-            const wholeCode = routeParts.reduce((accum, part) => accum + part.text, '');
-			await navigator.clipboard.writeText(wholeCode);
-		} catch(err) {
-			console.log(err);
-		}
+        if (readOnly || (isKeyboardEvent(e) && e.ctrlKey)) return;
+        const key = isKeyboardEvent(e) ? e.key : e.detail.key;
+        const isPrintableKey = /^[a-z0-9]$/i.test(key);
+        if (isPrintableKey) sendPatch({value: key, headers: {'x-r-input': '1'}});
+    }
+
+    function preventMenuItemsFocus(e: React.MouseEvent) {
+        if ((e.target as HTMLElement).closest('.menuItem')) e.preventDefault();
+    }
+
+    // External keyboard event handlers
+    const customEventHandlers = {
+		[PASTE_EVENT]: (e: CustomEvent) => !readOnly && sendPatch({value: e.detail, headers: {'x-r-paste': '1'}}),
+		[COPY_EVENT]: copyRouteToClipboard,
+		[CUT_EVENT]: copyRouteToClipboard
+	};
+
+    function copyRouteToClipboard(e: CustomEvent) {
+        e.stopPropagation();
+        const allParts = [...routeParts, ...(extraParts ?? [])];
+        const wholeCode = allParts.reduce((accum, elem) => accum + (elem.props?.text ?? ''), '');
+		copyToClipboard(wholeCode);
 	}
 
-    return (
-        <div ref={routeElemRef} className={clsx('routeElement', compact && 'compact')}>
-            {routeParts.map((part, ind) => {
-                const { text, hint, done } = part;
-                const isLastDone = ind === lastDone;
+	useExternalKeyboardControls(routeElemRef.current, customEventHandlers);
+    useAddEventListener(routeElemRef.current, DELETE_EVENT, sendKeyToServer, true);
 
-                const partPath = `${path}/part-${ind}`;
-                const { focusClass, focusHtml } = useFocusControl(partPath);
-                return (
-                    <div key={`${ind}`}
-                         {...focusHtml}
-                         className={clsx(done && 'routePartDone', isLastDone && 'isLastDone', focusClass)}
-                         // style={onClick ? {cursor: 'pointer'} : undefined}
-                         title={hint}
-                         onClick={() => handleClick(ind)} >
-                        {text}
-                    </div>
-                );
-            })}
+    return (
+        <div ref={routeElemRef}
+             className={className}
+             {...focusHtml}
+             style={{...readOnly && {borderColor: "transparent"}}}
+             onKeyDown={sendKeyToServer}
+             onMouseDownCapture={preventMenuItemsFocus}
+        >
+            <NoFocusContext.Provider value={true} >
+                {routeParts}
+                {extraParts && 
+                    <span className='extraParts'>{extraParts}</span>}
+            </NoFocusContext.Provider>
         </div>
     );
 }
 
-function useRouteElementSync(
-    identity: Object,
-    receiverName: string
-) {
-    const {sendFinalChange} = usePatchSync<string, string, string>(
-        identity,
-        receiverName,
-        '',
-        false,
-        (b) => b,
-        (b) => ({
-            headers: {"x-r-clicked-part": b},
-            value: ""
-        }),
-        (p) => '',
-        (prevState, ch) => ch
-    );
-    return { handleClick: (index: number) => sendFinalChange(String(index)) }
-  }
+const isKeyboardEvent = (e: KeyboardEvent | CustomEvent): e is KeyboardEvent => e.type === 'keydown';
 
- export { RouteElement };
+export { RouteElement };

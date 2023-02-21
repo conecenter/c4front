@@ -1,10 +1,12 @@
 import React, {ReactNode, useMemo, useRef} from "react";
+import clsx from 'clsx';
 import {getDateTimeFormat, useUserLocale} from "../locale";
 import {DateSettings, formatDate, getDate, parseStringToDate} from "./date-utils";
 import {getOrElse, mapOption, None, nonEmpty, Option} from "../../main/option";
 import {useSelectionEditableInput} from "./selection-control";
 import {DatepickerCalendar} from "./datepicker-calendar";
 import { usePatchSync } from '../exchange/patch-sync';
+import { useFocusControl } from '../focus-control';
 import {
 	BACKSPACE_EVENT, 
 	COPY_EVENT, 
@@ -31,8 +33,6 @@ import {
 	getOnPopupToggle, 
 	getOnInputBoxBlur
 } from "./datepicker-actions";
-import { useFocusControl } from '../focus-control';
-import clsx from 'clsx';
 
 
 type DatePickerServerState = TimestampServerState | InputServerState
@@ -165,7 +165,7 @@ export function DatePickerInputElement({
 		memoInputValue.current = inputVal;
 	}
 
-	useExternalKeyboardControls(inputRef, keyboardEventHandlers);
+	useExternalKeyboardControls(inputRef.current, keyboardEventHandlers);
 
 	const setSelection: (from: number, to: number) => void = useSelectionEditableInput(inputRef)
 	const onTimestampChange: (timestamp: number) => void = onTimestampChangeAction(currentState, dateSettings, sendTempChange)
