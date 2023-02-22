@@ -1,10 +1,12 @@
 import React, {ReactNode, useMemo, useRef} from "react";
+import clsx from 'clsx';
 import {getDateTimeFormat, useUserLocale} from "../locale";
 import {DateSettings, formatDate, getDate, parseStringToDate} from "./date-utils";
 import {getOrElse, mapOption, None, nonEmpty, Option} from "../../main/option";
 import {useSelectionEditableInput} from "./selection-control";
 import {DatepickerCalendar} from "./datepicker-calendar";
 import { usePatchSync } from '../exchange/patch-sync';
+import { useFocusControl } from '../focus-control';
 import {
 	BACKSPACE_EVENT, 
 	COPY_EVENT, 
@@ -18,6 +20,7 @@ import {
 	applyChange, 
 	changeToPatch, 
 	createInputChange, 
+	DatepickerChange, 
 	DatePickerState, 
 	patchToChange, 
 	serverStateToState
@@ -30,8 +33,6 @@ import {
 	getOnPopupToggle, 
 	getOnInputBoxBlur
 } from "./datepicker-actions";
-import { useFocusControl } from '../focus-control';
-import clsx from 'clsx';
 
 
 type DatePickerServerState = TimestampServerState | InputServerState
@@ -76,7 +77,9 @@ export function DatePickerInputElement({
 	const timestampFormat = getDateTimeFormat(timestampFormatId, locale)
 	const dateSettings: DateSettings = {timestampFormat: timestampFormat, locale: locale, timezoneId: timezoneId}
 
-	const { currentState, sendTempChange, sendFinalChange } = usePatchSync(
+	const dateChanged = useRef(false);
+
+	const { currentState, sendTempChange: onTempChange, sendFinalChange: onFinalChange } = usePatchSync(
         identity,
         'receiver',
         state,
@@ -86,6 +89,15 @@ export function DatePickerInputElement({
         patchToChange,
         applyChange
     );
+	const sendTempChange = (change: DatepickerChange) => {
+		dateChanged.current = true;
+		onTempChange(change);
+	}
+	const sendFinalChange = (change: DatepickerChange, force = false) => {
+		if (!force && change.tp === "dateChange" && !dateChanged.current) return;
+		onFinalChange(change);
+		dateChanged.current = false;
+	}
 
 	const memoInputValue = useRef('')
 
@@ -132,7 +144,7 @@ export function DatePickerInputElement({
 				input.setSelectionRange(0, input.value.length);
 				input.focus();
 			} else {
-				sendFinalChange(createInputChange(''));
+				sendFinalChange(createInputChange(''), true);
 				memoInputValue.current = '';
 			}
 		} catch(err) {
@@ -147,12 +159,13 @@ export function DatePickerInputElement({
 			getOrElse(
 				mapOption(parseStringToDate(inputVal, dateSettings), timestamp => createInputChange(inputVal, timestamp)),
 				createInputChange(inputVal)
-			)
+			),
+			true
 		);
 		memoInputValue.current = inputVal;
 	}
 
-	useExternalKeyboardControls(inputRef, keyboardEventHandlers);
+	useExternalKeyboardControls(inputRef.current, keyboardEventHandlers);
 
 	const setSelection: (from: number, to: number) => void = useSelectionEditableInput(inputRef)
 	const onTimestampChange: (timestamp: number) => void = onTimestampChangeAction(currentState, dateSettings, sendTempChange)

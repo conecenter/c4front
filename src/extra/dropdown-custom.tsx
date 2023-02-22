@@ -73,9 +73,7 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 
 	// Keyboard events sync
 	const keyboardActionIdOf = identityAt('keyboardAction');
-	const [_, enqueueKeyboardActionPatch] = (
-		useSync(keyboardActionIdOf(identity)) as [Patch[], (patch: Patch) => void]
-	);
+	const [_, enqueueKeyboardActionPatch] = useSync(keyboardActionIdOf(identity));
 
 	// Interaction with FocusModule (c4e\client\src\extra\focus-module.js) - Excel-style keyboard controls
 	function handleCustomDelete(e: CustomEvent) {
@@ -106,7 +104,7 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 		[CUT_EVENT]: handleClipboardWrite
 	};
 
-	useExternalKeyboardControls(dropdownBoxRef, customEventHandlers);
+	useExternalKeyboardControls(dropdownBoxRef.current, customEventHandlers);
 
 	// Event handlers
 	function handleBlur(e: React.FocusEvent) {

@@ -55,7 +55,7 @@ interface ScrollableColumn extends FlexibleColumn {
 }
 
 function ScrollableColumn({height, ...props}: ScrollableColumn) {
-  return el('div', { style: {height: `${height}em`, overflowY: 'scroll'} }, FlexibleColumn(props));
+  return el('div', { style: {maxHeight: `${height}em`, overflowY: 'auto'} }, FlexibleColumn(props));
 }
 
 type GroupboxDisplayMode = 'accent'

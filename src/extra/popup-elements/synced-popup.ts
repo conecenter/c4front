@@ -1,7 +1,6 @@
 import { createElement as $, ReactNode, useEffect, useLayoutEffect } from 'react';
 import { useSync } from '../../main/vdom-hooks';
 import { identityAt } from '../../main/vdom-util';
-import { Patch } from '../exchange/patch-sync';
 import { NewPopupElement } from './popup-element';
 import { usePopupState } from './popup-manager';
 
@@ -23,7 +22,7 @@ function SyncedPopup({ identity, children }: SyncedPopup) {
     useLayoutEffect(() => { toggle(true) }, []);
 
     // Popup server sync
-    const [_, sendClosePopupPatch] = useSync(popupActionIdOf(identity)) as [Patch[], (patch: Patch) => void];
+    const [_, sendClosePopupPatch] = useSync(popupActionIdOf(identity));
     useEffect(() => {
         return () => { isOpened && sendClosePopupPatch(closePopupPatch); }
     }, [isOpened]);
