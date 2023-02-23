@@ -1,7 +1,7 @@
 import { createElement as $, createContext, useMemo, useRef, useContext, useEffect, ReactNode } from "react";
 import { PathContext } from "../focus-control";
 import { SyncedPopup } from "./synced-popup";
-import { NewPopupElement } from "./popup-element";
+import { PopupElement } from "./popup-element";
 import { usePatchSync } from "../exchange/patch-sync";
 
 interface PopupContext {
@@ -54,4 +54,4 @@ function PopupManager({identity, popupPath = '', children}: PopupManager) {
 }
 
 export { PopupManager, PopupContext }
-export const popupComponents = { PopupManager, NewPopupElement, SyncedPopup };
+export const popupComponents = { PopupManager, PopupElement, SyncedPopup };
