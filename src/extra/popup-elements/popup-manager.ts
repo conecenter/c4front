@@ -5,17 +5,17 @@ import { usePatchSync } from "../exchange/patch-sync";
 
 interface PopupContext {
     isOpened: (path: string) => boolean,
-    toggle: (path: string) => void,
+    togglePopup: (path: string) => void,
     popupDrawer?: HTMLElement
 };
 
 const defaultPopupContext: PopupContext = {
     isOpened: () => false,
-    toggle: () => undefined
+    togglePopup: () => undefined
 };
 
 const PopupContext = createContext(defaultPopupContext);
-
+const NoContext = createContext({});
 
 interface PopupManager {
     identity: Object,
@@ -43,14 +43,14 @@ function PopupManager({identity, popupPath = '', children}: PopupManager) {
 
     const isOpened = (path: string) => popup.includes(path);
     // TODO: find closest ':popup' key from the end of popup and make it new popup
-    const toggle = (path: string) => setPopup(isOpened(path) ? '' : path);
+    const togglePopup = (path: string) => setPopup(isOpened(path) ? '' : path);
 
     const value: PopupContext = useMemo(() => {
-        return { isOpened, toggle, popupDrawer: popupDrawerRef.current };
+        return { isOpened, togglePopup, popupDrawer: popupDrawerRef.current };
     }, [popup]);
 
     return $(PopupContext.Provider, { value }, children, popupDrawer);
 }
 
-export { PopupManager, PopupContext }
+export { PopupManager, PopupContext, NoContext }
 export const popupComponents = { PopupManager, PopupElement };
