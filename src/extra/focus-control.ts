@@ -39,9 +39,9 @@ interface Identity {
     parent?: Identity,
 }
 
-function getPath(identity: Identity) {
+function getPath(identity?: Identity) {
     let path = '';
-    let element: Identity | undefined = identity.parent;
+    let element: Identity | undefined = identity?.parent;
     while (element) {
         if (element.key) path = `/${element.key}` + path;
         element = element.parent;
@@ -49,5 +49,5 @@ function getPath(identity: Identity) {
     return path;
 }
 
-export type { FocusControlObj };
+export type { FocusControlObj, Identity };
 export { PathContext, useFocusControl, Focusable, getPath, isCurrentlyFocused };
