@@ -1,19 +1,21 @@
-import React, { ReactNode, useCallback, useContext, useLayoutEffect, useRef, useState } from 'react';
+import React, { ReactNode, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { usePopupPos } from '../../main/popup';
-import { NoCaptionContext } from '../../main/vdom-hooks';
-import { elementHasFocus } from '../dom-utils';
+import { getPath, Identity, PathContext } from '../focus-control';
 import { PopupContext } from './popup-manager';
 
 interface PopupElement {
-    key?: string,
+    key: string,
+    identity: Identity,
+    popupKey: string,
     children?: ReactNode
 }
 
-function PopupElement({ key = ':popup', children }: PopupElement) {
+function PopupElement({ identity, popupKey, children }: PopupElement) {
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
 
-    const { popupDrawer } = useContext(PopupContext);
+    const { isOpened, togglePopup, popupDrawer } = useContext(PopupContext);
+    const focusPath = useContext(PathContext);
 
     // Popup positioning
     const popupParent = useRef<HTMLElement | null>(null);
@@ -21,10 +23,16 @@ function PopupElement({ key = ':popup', children }: PopupElement) {
 
     const [popupStyle] = usePopupPos(popupElement, false, popupParent.current);
 
+    // Close popup when parent loses focus
+    const parentPath = useMemo(() => getPath(identity.parent), []);
+    useEffect(() => {
+        if (isOpened(popupKey) && !focusPath?.includes(parentPath)) togglePopup(popupKey);
+    }, [focusPath]);
+
     // Prevent focus loss after closing
     useLayoutEffect(() => {
         return () => {
-            if (elementHasFocus(popupElement)) popupParent.current?.focus();
+            if (focusPath?.includes(popupKey)) popupParent.current?.focus();
         }
     }, []);
 
@@ -35,10 +43,10 @@ function PopupElement({ key = ':popup', children }: PopupElement) {
     );
 
     return (
-        <NoCaptionContext.Provider value={false} >
-            {popupDrawer && createPortal(popup, popupDrawer)}
+        <>
+            {isOpened(popupKey) && popupDrawer && createPortal(popup, popupDrawer)}
             <span ref={setPopupParent} style={{display: 'none'}}></span>
-        </NoCaptionContext.Provider>
+        </>
     );
 }
 
