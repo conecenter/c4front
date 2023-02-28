@@ -58,7 +58,7 @@ function NewPopupElement({ popupKey, children }: PopupElement) {
     }, [isOpened]);
 
     const popup = (
-        <div ref={setPopupElement} className='popupEl' style={popupStyle} tabIndex={-1} >
+        <div ref={setPopupElement} className='popupEl' style={popupStyle} onClick={(e)=>e.stopPropagation()} tabIndex={-1} >
             {children}
         </div>
     );
