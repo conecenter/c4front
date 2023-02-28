@@ -1,68 +1,71 @@
-import { createElement as $, createContext, useMemo, useRef, useContext, ReactNode } from "react";
-import { PathContext } from "../focus-control";
-import { PopupElement } from "./popup-element";
+import { createElement as $, useMemo, useRef, useContext, ReactNode } from "react";
+import { NewPopupElement } from "./popup-element";
 import { Patch, usePatchSync } from "../exchange/patch-sync";
 import { NoCaptionContext } from "../../main/vdom-hooks";
-
-// Popup Context
-interface PopupContext {
-    isOpened: (popupKey: string) => boolean,
-    togglePopup: (popupKey: string) => void,
-    popupDrawer?: HTMLElement
-};
-
-const defaultPopupContext: PopupContext = {
-    isOpened: () => false,
-    togglePopup: () => undefined
-};
-
-const PopupContext = createContext(defaultPopupContext);
-const NoContext = createContext({});
-
-// Popup Manager
-type PopupStack = string[];
+import { PopupContext, PopupStack } from "./popup-context";
 
 interface PopupManager {
     identity: Object,
-    openedPopups: string,
+    openedPopups: PopupStack,
     children: ReactNode
 }
 
-// Server sync functions
-const changeToPatch = (ch: string): Patch => ({
-    value: '',
-    headers: { 'x-r-popups': ch }
-});
-
-const patchToChange = (p: Patch) => p.headers!['x-r-popups'];
-
-
 function PopupManager({identity, openedPopups, children}: PopupManager) {
     const { currentState, sendFinalChange } = 
-        usePatchSync(identity, 'receiver', openedPopups, false, s => s, changeToPatch, patchToChange, (_, ch) => ch);
-
-    const focusPath = useContext(PathContext);
+        usePatchSync(identity, 'receiver', openedPopups, false, s => s, changeToPatch, patchToChange, applyChange);
 
     // Popup drawer element ref for Portal
     const popupDrawerRef = useRef<HTMLElement | undefined>();
     const popupDrawer = $(NoCaptionContext.Provider, {value: false}, $('div', {ref: popupDrawerRef}));
-
-    const isOpened = (popupKey: string) => currentState.includes(popupKey);
     
-    const togglePopup = (popupKey: string) => {
-        const popupsArray: PopupStack = JSON.parse(currentState);
-        const newPopupsArray = isOpened(popupKey)
-            ? popupsArray.filter(key => key === popupKey)
-            : [...popupsArray.filter(key => focusPath?.includes(key)), popupKey]
-        return sendFinalChange(JSON.stringify(newPopupsArray));
-    };
+    const togglePopup = (popupKey: string) => sendFinalChange({
+        tp: currentState.includes(popupKey) ? 'close' : 'open',
+        popupKey: popupKey
+    });
 
     const value: PopupContext = useMemo(() => {
-        return { isOpened, togglePopup, popupDrawer: popupDrawerRef.current };
-    }, [currentState, sendFinalChange]);
+        return { currentState, togglePopup, popupDrawer: popupDrawerRef.current };
+    }, [JSON.stringify(currentState)]);
 
     return $(PopupContext.Provider, { value }, children, popupDrawer);
 }
 
-export { PopupManager, PopupContext, NoContext }
-export const popupComponents = { PopupManager, PopupElement };
+
+// Server sync functions
+interface PopupChange {
+    tp: 'open' | 'close',
+    popupKey: string
+}
+
+function changeToPatch(ch: PopupChange): Patch {
+    return {
+        value: ch.tp,
+        headers: { 'x-r-popupKey': ch.popupKey }
+    }
+};
+
+function patchToChange(p: Patch): PopupChange {
+    return {
+        tp: p.value as 'open' | 'close',
+        popupKey: p.headers!['x-r-popupKey']
+    }
+};
+
+const applyChange = (prevState: PopupStack, ch: PopupChange): PopupStack => {
+    return ch.tp === 'open' 
+        ? prevState.concat(ch.popupKey) 
+        : prevState.filter(key => key === ch.popupKey);
+}
+
+
+const usePopupState = (popupKey: string) => {
+    const { currentState, togglePopup } = useContext(PopupContext);
+    const isOpened = currentState.includes(popupKey);
+    const toggle = (on: boolean) => {
+        if (on && !isOpened || !on && isOpened) togglePopup(popupKey);
+    };
+    return { isOpened, toggle };
+}
+
+export { PopupManager, usePopupState }
+export const popupComponents = { PopupManager, NewPopupElement };
