@@ -41,7 +41,7 @@ interface Identity {
 
 function getPath(identity?: Identity) {
     let path = '';
-    let element: Identity | undefined = identity?.parent;
+    let element: Identity | undefined = identity?.parent?.parent;
     while (element) {
         if (element.key) path = `/${element.key}` + path;
         element = element.parent;
