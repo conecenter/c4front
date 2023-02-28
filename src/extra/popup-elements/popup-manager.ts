@@ -10,7 +10,7 @@ interface PopupManager {
     children: ReactNode
 }
 
-function PopupManager({identity, openedPopups, children}: PopupManager) {
+function PopupManager({identity, openedPopups=[], children}: PopupManager) {
     const { currentState, sendFinalChange } = 
         usePatchSync(identity, 'receiver', openedPopups, false, s => s, changeToPatch, patchToChange, applyChange);
 

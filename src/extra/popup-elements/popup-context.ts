@@ -14,6 +14,7 @@ const defaultPopupContext: PopupContext = {
 };
 
 const PopupContext = createContext(defaultPopupContext);
+PopupContext.displayName = 'PopupContext';
 
 export type { PopupStack };
 export { PopupContext }
