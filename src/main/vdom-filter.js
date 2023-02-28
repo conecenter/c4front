@@ -1,10 +1,12 @@
 
-import {createElement as $,cloneElement} from "react"
+import {createElement as $,cloneElement,useMemo} from "react"
 import {em,sum} from "./vdom-util.js"
 import {useWidths} from "../main/sizes.js"
 import {NoCaptionContext} from "./vdom-hooks.js"
 import {usePopupState} from "../extra/popup-elements/popup-manager"
 import {NewPopupElement} from "../extra/popup-elements/popup-element"
+import { getKeyFromIdentity } from "../extra/utils"
+import { getPath, useFocusControl } from "../extra/focus-control"
 
 //// non-shared
 
@@ -121,13 +123,19 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
 
 ////
 
-export function FilterButtonExpander({identity,optButtons:rawOptButtons,className,children,openedChildren}){
+export function FilterButtonExpander({identity,optButtons:rawOptButtons,children,openedChildren}){
     const optButtons = rawOptButtons || []
-    const [isOpened,toggle] = usePopupState(identity)
-    return $("div", {className,style:{maxHeight:"2em"},onClick:ev=>toggle(!isOpened)},
+
+    const path = useMemo(() => getPath(identity), [identity])
+    const {focusClass,focusHtml} = useFocusControl(path)
+
+    const popupKey = `popup-${getKeyFromIdentity(identity)}`
+    const {isOpened,toggle} = usePopupState(popupKey)
+
+    return $("div", {...focusHtml,className:focusClass,style:{maxHeight:"2em"},onClick:ev=>toggle(!isOpened)},
         isOpened ? [
             openedChildren ?? children,
-            $(NewPopupElement,{identity},optButtons.map(btn=>{
+            $(NewPopupElement,{popupKey},optButtons.map(btn=>{
                 return $("div",{key:btn.key,className:'gridPopupItem'}, 
                     $(NoCaptionContext.Provider,{value:true},btn.props.children))
             }))

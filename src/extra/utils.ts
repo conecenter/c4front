@@ -1,3 +1,5 @@
+import { Identity } from "./focus-control";
+
 async function copyToClipboard(value: string) {
     try {
         await navigator.clipboard.writeText(value);
@@ -8,4 +10,6 @@ async function copyToClipboard(value: string) {
     }
 }
 
-export { copyToClipboard }
+const getKeyFromIdentity = (identity: Identity) => identity.parent?.parent?.key || '';
+
+export { copyToClipboard, getKeyFromIdentity }
