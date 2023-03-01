@@ -1,4 +1,4 @@
-import React, { createElement as $, useContext, useState, useEffect } from 'react'
+import { createElement as $, useContext, useState, useEffect } from 'react'
 import clsx from 'clsx'
 
 import { useBinds, BindKeyData, useProvideBinds, OnPageBindContext } from './key-binding'
@@ -138,11 +138,12 @@ const BindingElement = (props) => {
 		setKeyCode((keyData !== null) ? keyData.keyCode : null)
 	}, [keyData])
 
-	const callBack = (event) => {
-		log(elem)("bind", "do", keyCode)
-		// console.log("BindKey do: " + keyCode)
-		onChange && onChange({ target: { headers: { "x-r-action": "change" }, value: "1" } })
-	}
+	const callBack = () => onChange?.({
+		target: {
+			headers: { "x-r-action": "change" },
+			value: "1" 
+		}
+	})
 
 	const findFirstParent2 = get => el => el && get(el) || el && findFirstParent2(get)(el.parentElement)
 
@@ -154,33 +155,18 @@ const BindingElement = (props) => {
 	}, [elem]) */
 
 	useEffect(() => {
-		// if (keyCode == "F1") console.log("set F1, elCheck=" + elCheck + ", isValid=" + isValid + " prioritized=" + prioritized)
 		if (elem !== null && isValid) KeyBinder.bind(elem, keyCode, callBack, prioritized)
-		//console.log("groupContext for " + bindSrcId + " is: " + groupContext + ", isValid: " + isValid)
 		return () => {
 			KeyBinder.unbind(callBack)
-			// if (keyCode == "F1") console.log("unbind F1, elCheck=" + elCheck + ", isValid=" + isValid + " prioritized=" + prioritized)
-			log(elem)("unbind", keyCode)
 		}
-	}, [elem, keyCode, callBack, isValid]) //groupContext, bindSrcId,
+	}, [elem, keyCode, callBack, isValid])
 
 	const buttonText = isValid ? GetButtonCaption(keyData, buttonCaption) : [buttonCaption]
 
-	// const customOnClick = (normalOnClick) => {
-	// 	return (event) => {
-	// 		if (normalOnClick) normalOnClick(event)
-	// 		if (event.stopPropagation) event.stopPropagation()
-	// 	}
-	// }
-	// const updateOnClick = (typeof props.onClick === "undefined") ? { onClick: customOnClick() } : { onClick: customOnClick(props.onClick) }
-	/*
-	useEffect(() => {
-		setCheckedChildren(NVL(children, []))
-	}, [children])
-	*/
 	const checkedChildren = NVL(children, [])
 	const drawNormal = !isValid && checkedChildren === []
-	const className = clsx(props.className, focusClass, !drawNormal && 'shortButton')
+	const noAction = !(onClick || onChange)
+	const className = clsx(props.className, focusClass, !drawNormal && 'shortButton', noAction && 'noAction')
 	// const isEmptyButton = !buttonText.every((e) => e == "") && actionElemType === ButtonElement
 	// const spanElem = isEmptyButton ? null : $("span", { ref: setElem }, [$(actionElemType, { ...btnPtops }, [...buttonText, ...checkedChildren])])
 	return $('button', { ref: setElem, className, ...focusHtml, onClick: onClick || onChange }, [...buttonText, ...checkedChildren])
