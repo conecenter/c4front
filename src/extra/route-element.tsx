@@ -1,4 +1,4 @@
-import React, { ReactElement, useMemo, useRef, KeyboardEvent } from 'react';
+import React, { ReactElement, useMemo, useRef } from 'react';
 import clsx from 'clsx';
 import { COPY_EVENT, CUT_EVENT, DELETE_EVENT, PASTE_EVENT, useExternalKeyboardControls } from './focus-module-interface';
 import { NoFocusContext } from './labeled-element';
@@ -34,14 +34,6 @@ function RouteElement({identity, keyboardAction, compact, routeParts, extraParts
     const [_, sendPatch] = useSync(keyboardActionIdOf(identity));
 
     // Event handlers
-    function sendKeyToServer(e: KeyboardEvent | CustomEvent<{key: string, vk?: boolean}>) {
-        e.stopPropagation();
-        if (readOnly || (isKeyboardEvent(e) && e.ctrlKey)) return;
-        const key = isKeyboardEvent(e) ? e.key : e.detail.key;
-        const isPrintableKey = /^[a-z0-9]$/i.test(key);
-        if (isPrintableKey) sendPatch({value: key, headers: {'x-r-input': '1'}});
-    }
-
     function preventMenuItemsFocus(e: React.MouseEvent) {
         if ((e.target as HTMLElement).closest('.menuItem')) e.preventDefault();
     }
@@ -60,6 +52,10 @@ function RouteElement({identity, keyboardAction, compact, routeParts, extraParts
 		copyToClipboard(wholeCode);
 	}
 
+    function sendKeyToServer(e: CustomEvent<{key: string, vk?: boolean}>) {
+        if (!readOnly) sendPatch({value: e.detail.key, headers: {'x-r-input': '1'}});
+    }
+
 	useExternalKeyboardControls(routeElemRef.current, customEventHandlers);
     useAddEventListener(routeElemRef.current, DELETE_EVENT, sendKeyToServer, true);
 
@@ -68,7 +64,6 @@ function RouteElement({identity, keyboardAction, compact, routeParts, extraParts
              className={className}
              {...focusHtml}
              style={{...readOnly && {borderColor: "transparent"}}}
-             onKeyDown={sendKeyToServer}
              onMouseDownCapture={preventMenuItemsFocus}
         >
             <NoFocusContext.Provider value={true} >
@@ -79,7 +74,5 @@ function RouteElement({identity, keyboardAction, compact, routeParts, extraParts
         </div>
     );
 }
-
-const isKeyboardEvent = (e: KeyboardEvent | CustomEvent): e is KeyboardEvent => e.type === 'keydown';
 
 export { RouteElement };
