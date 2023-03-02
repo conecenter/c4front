@@ -4,6 +4,7 @@ import { usePopupPos } from '../../main/popup';
 import { NoCaptionContext } from '../../main/vdom-hooks';
 import { useAddEventListener } from '../custom-hooks';
 import { elementHasFocus } from '../dom-utils';
+import { NoFocusContext } from '../labeled-element';
 import { usePopupState } from './popup-manager';
 
 interface PopupElement {
@@ -49,8 +50,10 @@ function NewPopupElement({ identity = DEFAULT_IDENTITY, children }: PopupElement
 
     return (
         <NoCaptionContext.Provider value={false} >
-            {isOpened && popupDrawer ? createPortal(popup, popupDrawer) : null}
-            <span ref={setPopupParent} style={{display: 'none'}}></span>
+            <NoFocusContext.Provider value={false} >
+                {isOpened && popupDrawer ? createPortal(popup, popupDrawer) : null}
+                <span ref={setPopupParent} style={{display: 'none'}}></span>
+            </NoFocusContext.Provider>
         </NoCaptionContext.Provider>
     );
 }
