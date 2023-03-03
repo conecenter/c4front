@@ -124,7 +124,7 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
 export function FilterButtonExpander({identity,optButtons:rawOptButtons,children,openedChildren}){
     const optButtons = rawOptButtons || []
     const [isOpened,toggle] = usePopupState(identity)
-    return $("div", {className:'filterButtonExpander',style:{maxHeight:"2em"},onClick:ev=>toggle(!isOpened)},
+    return $("div", {className:'filterButtonExpander',onClick:ev=>toggle(!isOpened)},
         isOpened ? [
             openedChildren ?? children,
             $(NewPopupElement,{identity},optButtons.map(btn=>{
