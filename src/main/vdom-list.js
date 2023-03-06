@@ -59,12 +59,13 @@ const calcHiddenCols = (cols, outerWidth) => {
 
 const getExpandedForRows = rows => Object.fromEntries(rows.filter(row=>row.isExpanded).map(row=>[row.rowKey,true]))
 
-const setupExpanderElements = rows => {
+const setupExpanderElements = (rows, rowsWithHiddenContent) => {
     const expanded = getExpandedForRows(rows)
     return children => children.map(c => {
         const { expanding, rowKey } = c.props
         return expanding==="expander" && rowKey ? cloneElement(c, {
-            expander: expanded[rowKey] ? 'expanded' : 'collapsed',
+            expander: !rowsWithHiddenContent.has(rowKey) ? 'passive' : expanded[rowKey]
+                ? 'expanded' : 'collapsed'
         }) : c
     })
 }
@@ -108,7 +109,10 @@ export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, spanRi
     const gridRow = argGridRow || getGridRow({ rowKey, rowKeyMod })
     const gridColumn = argGridColumn || getGridCol({ colKey }) + (spanRightTo ? " / "+spanRightTo : "")
     const style = { ...props.style, gridRow, gridColumn }
-    const expanderProps = expanding==="expander" ? { 'data-expander': expander || 'passive' } : {}
+    const expanderProps = expanding === "expander" && {
+        'data-expander': expander,
+        ...expander === 'passive' && {onClickCapture: (e) => e.stopPropagation()}
+    }
     const { focusClass, focusHtml } = useFocusControl(path);
     const className = clsx(argClassNames, !noDefCellClass && GRID_CLASS_NAMES.CELL, focusClass, dragHandle && 'gridDragCell');
     const cellContent = needsHoverExpander ? $(HoverExpander, { children }) : children;
@@ -273,29 +277,33 @@ export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey 
 }
 
 const getAllChildren = ({children,rows,cols,hasHiddenCols,hideElementsForHiddenCols,dragRowKey}) => {
+    const rowsWithHiddenContent = new Set();
+    hideElementsForHiddenCols(true,c=>c.props.colKey)(children).forEach(cell => {
+        if (cell.props.children) rowsWithHiddenContent.add(cell.props.rowKey);
+    });
     const expandedElements = getExpandedCells({
         cols: hideElementsForHiddenCols(true,col=>col.colKey)(cols),
         rows, //: dragRowKey ? rows.filter(row=>row.rowKey!==dragRowKey) : rows,
         children,
-    }).map(([rowKey, pairs]) => {
-        const res = $(GridCell, {
+    }).reduce((res, [rowKey, pairs]) => {
+        const cellWithContent = rowsWithHiddenContent.has(rowKey) && $(GridCell, {
+            key:`${rowKey}-expanded`,
             gridColumn: spanAll,
-            rowKey,
-            rowKeyMod: "-expanded",
-            style: { display: "flex", flexFlow: "row wrap", visibility: dragRowKey?"hidden":null },
+            rowKey, rowKeyMod: "-expanded",
+            'data-expanded-cell': '',
+            style: {display: "flex", flexFlow: "row wrap", visibility: dragRowKey?"hidden":null},
             needsHoverExpander: false,
-            children: pairs.map(([col, cell]) => $("div",{
+            children: $(NoCaptionContext.Provider, {value:false}, pairs.map(([col, cell]) => $("div",{
                 key: cell.key,
-                style: cell.props.children ? { flexBasis:  `${col.width.min}em` } : undefined,
+                style: cell.props.children ? {flexBasis: `${col.width.min}em`} : undefined,
                 className: "inputLike",
                 'data-expanded-col-key': col.colKey,
                 children: cell.props.children,
-            })),
-            'data-expanded-cell': ''
-        })
-        return $(NoCaptionContext.Provider,{value:false, key:`${rowKey}-expanded`},res)
-    })
-    const toExpanderElements = hasHiddenCols ? setupExpanderElements(rows) : hideExpanderElements(cols)
+            })))
+        });
+        return cellWithContent ? res.concat(cellWithContent) : res;
+    }, [])
+    const toExpanderElements = hasHiddenCols ? setupExpanderElements(rows, rowsWithHiddenContent) : hideExpanderElements(cols)
     const allChildren = spanRightElements(cols, toExpanderElements(hideElementsForHiddenCols(false,cell=>cell.props.colKey)([
         ...children, ...expandedElements
     ])))
