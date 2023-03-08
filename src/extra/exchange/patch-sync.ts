@@ -7,7 +7,7 @@ interface PatchHeaders {
 }
 
 interface Patch {
-    headers: PatchHeaders
+    headers?: PatchHeaders
     value: string
 }
 
@@ -21,11 +21,11 @@ interface SendPatchHeaders extends PatchHeaders {
 }
 
 interface SendPatch {
-    headers: SendPatchHeaders
+    headers?: SendPatchHeaders
     value: string
-    skipByPath: boolean
-    retry: boolean
-    defer: boolean
+    skipByPath?: boolean
+    retry?: boolean
+    defer?: boolean
 }
 
 const receiverId = (name: string) => identityAt(name)
@@ -39,7 +39,7 @@ function stateToSendPatch(patch: Patch, changing: boolean, deferredSend: boolean
     return {
         value: patch.value,
         headers: headers,
-        skipByPath: true,
+        skipByPath: changing,
         retry: true,
         defer: deferredSend
     }
@@ -73,4 +73,4 @@ function usePatchSync<ServerState, State, StateChange>(
 }
 
 export {usePatchSync}
-export type {Patch, PatchHeaders}
+export type {Patch, PatchHeaders, SendPatch}

@@ -5,37 +5,12 @@ import { RouteElement } from "../extra/route-element";
 
 
 function App() {
-    const child = $(RouteElement, {
+    const child = $('div', {style: { margin: '3em', width: 'max-content' }}, $(RouteElement, {
         key: "TEST1",
-        routeParts: [
-            {
-                text: '●',
-                hint: 'hello world',
-                done: true,
-                onClick: () => console.log('click handler')
-            },
-            {
-                text: 'RUVVO ➝ RUMAG',
-                hint: 'abc route part',
-                done: true
-            },
-            {
-                text: '●',
-                hint: 'cargo movement',
-                done: true
-            },
-            {
-                text: 'RUMAG ➝ RUVVO',
-                hint: 'cargo movement',
-                done: false
-            },
-            {
-                text: '●',
-                hint: 'cargo movement',
-                done: false
-            }
-        ]        
-    })
+        identity: {parent: "TEST_1"},
+        compact: false,
+        routeParts: []  
+    }))
     const sender = {
         enqueue: (identity: any, patch: any) => console.log(patch)
     }

@@ -4,43 +4,49 @@ import ee.cone.c4di._
 import ee.cone.c4vdom.Types._
 import ee.cone.c4vdom._
 
-trait DatePicker extends ToChildPair
+trait DatePickerProps extends ToChildPair
 
 @c4tagSwitch("FrontApp") trait Locale extends ToJson
 @c4tagSwitch("FrontApp") trait WeekDay extends ToJson
 @c4tagSwitch("FrontApp") trait Month extends ToJson
 @c4tagSwitch("FrontApp") trait DateTimeFormat extends ToJson
+@c4tagSwitch("FrontApp") trait TimeFormat extends ToJson
 
-@c4tagSwitch("FrontApp") trait DatePickerState extends ToJson
+sealed trait DatepickerChange extends ToJson
+
+sealed trait DatePickerServerState extends ToJson
+@c4tagSwitch("FrontApp") trait PopupServerState extends DatePickerServerState
+@c4tagSwitch("FrontApp") trait TimestampServerState extends PopupServerState
+@c4tagSwitch("FrontApp") trait InputServerState extends PopupServerState
 
 @c4tags("FrontApp") trait DatePickerTags[C] {
-  @c4el("DatePickerInputElement") def datePicker(
+  @c4elPath("DatePickerInputElement") def datePicker(
     key: String,
-    state: DatePickerState,
+    state: PopupServerState,
     timestampFormatId: Int,
     receiver: Receiver[C],
     userTimezoneId: String = "",
     deferredSend: Boolean = false,
-    children: ChildPairList[OfDiv] = Nil,
-  ): DatePicker
+    children: ViewRes = Nil,
+  ): DatePickerProps
 
   @c4val("timestamp-state") def timeStampState(
     timestamp: String,
     popupDate: String = "",
-  ): DatePickerState
+  ): TimestampServerState
 
   @c4val("input-state") def inputState(
     inputValue: String,
     tempTimestamp: String = "",
     popupDate: String = "",
-  ): DatePickerState
+  ): InputServerState
 }
 
 @c4tags("FrontApp") trait LocaleTags {
   @c4el("UserLocaleProvider") def localeProvider(
     key: String,
     locale: Locale,
-    children: ChildPairList[OfDiv] = Nil,
+    children: ViewRes = Nil,
   ): ToChildPair
 
   @c4val def locale(
@@ -49,6 +55,7 @@ trait DatePicker extends ToChildPair
     weekDays: List[WeekDay],
     months: List[Month],
     dateTimeFormats: List[DateTimeFormat],
+    timeFormats: List[TimeFormat],
     defaultDateTimeFormatId: Int
   ): Locale
 
@@ -68,4 +75,9 @@ trait DatePicker extends ToChildPair
     id: Int,
     pattern: String
   ): DateTimeFormat
+
+  @c4val def timeFormat(
+    id: Int,
+    pattern: String,
+  ): TimeFormat
 }

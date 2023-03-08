@@ -1,11 +1,30 @@
 import React, {ReactNode, useMemo, useRef} from "react";
+import clsx from 'clsx';
 import {getDateTimeFormat, useUserLocale} from "../locale";
-import {createInputState, DatePickerState, useDatePickerStateSync} from "./datepicker-exchange";
 import {DateSettings, formatDate, getDate, parseStringToDate} from "./date-utils";
 import {getOrElse, mapOption, None, nonEmpty, Option} from "../../main/option";
 import {useSelectionEditableInput} from "./selection-control";
 import {DatepickerCalendar} from "./datepicker-calendar";
-import {useExternalKeyboardControls} from '../focus-module-interface';
+import { usePatchSync } from '../exchange/patch-sync';
+import { useFocusControl } from '../focus-control';
+import {
+	BACKSPACE_EVENT, 
+	COPY_EVENT, 
+	CUT_EVENT, 
+	DELETE_EVENT, 
+	ENTER_EVENT, 
+	PASTE_EVENT, 
+	useExternalKeyboardControls
+} from '../focus-module-interface';
+import {
+	applyChange, 
+	changeToPatch, 
+	createInputChange, 
+	DatepickerChange, 
+	DatePickerState, 
+	patchToChange, 
+	serverStateToState
+} from "./datepicker-exchange";
 import {
 	getOnBlur, 
 	getOnChange,
@@ -15,11 +34,8 @@ import {
 	getOnInputBoxBlur
 } from "./datepicker-actions";
 
-type DatePickerServerState = TimestampServerState | InputServerState
 
-interface PopupServerState {
-	popupDate?: string | undefined
-}
+type DatePickerServerState = TimestampServerState | InputServerState
 
 interface InputServerState extends PopupServerState {
 	tp: 'input-state',
@@ -32,13 +48,18 @@ interface TimestampServerState extends PopupServerState {
 	timestamp: string
 }
 
+interface PopupServerState {
+	popupDate?: string
+}
+
 interface DatePickerProps {
 	key: string
 	identity: Object
 	state: DatePickerServerState
 	timestampFormatId: number
 	userTimezoneId?: string
-	deferredSend?: boolean
+	deferredSend?: boolean,
+	path?: string,
 	children?: ReactNode[]
 }
 
@@ -48,17 +69,35 @@ export function DatePickerInputElement({
 		timestampFormatId,
 		userTimezoneId,
 		deferredSend,
+		path,
 		children
 }: DatePickerProps) {
 	const locale = useUserLocale()
 	const timezoneId = userTimezoneId ? userTimezoneId : locale.timezoneId
 	const timestampFormat = getDateTimeFormat(timestampFormatId, locale)
 	const dateSettings: DateSettings = {timestampFormat: timestampFormat, locale: locale, timezoneId: timezoneId}
-	const {
-		currentState,
-		setTempState,
-		setFinalState
-	} = useDatePickerStateSync(identity, state, dateSettings, deferredSend || false)
+
+	const dateChanged = useRef(false);
+
+	const { currentState, sendTempChange: onTempChange, sendFinalChange: onFinalChange } = usePatchSync(
+        identity,
+        'receiver',
+        state,
+        !!deferredSend,
+        serverStateToState,
+        changeToPatch,
+        patchToChange,
+        applyChange
+    );
+	const sendTempChange = (change: DatepickerChange) => {
+		dateChanged.current = true;
+		onTempChange(change);
+	}
+	const sendFinalChange = (change: DatepickerChange, force = false) => {
+		if (!force && change.tp === "dateChange" && !dateChanged.current) return;
+		onFinalChange(change);
+		dateChanged.current = false;
+	}
 
 	const memoInputValue = useRef('')
 
@@ -73,12 +112,12 @@ export function DatePickerInputElement({
 
 	// Interaction with FocusModule (c4e\client\src\extra\focus-module.js) - Excel-style keyboard controls
 	const keyboardEventHandlers = {
-		enter: handleCustomEnter,
-		delete: handleCustomDelete,
-		backspace: handleCustomDelete,
-		cpaste: handleCustomPaste,
-		ccopy: handleClipboardWrite,
-		ccut: handleClipboardWrite
+		[ENTER_EVENT]: handleCustomEnter,
+		[DELETE_EVENT]: handleCustomDelete,
+		[BACKSPACE_EVENT]: handleCustomDelete,
+		[PASTE_EVENT]: handleCustomPaste,
+		[COPY_EVENT]: handleClipboardWrite,
+		[CUT_EVENT]: handleClipboardWrite
 	};
 
 	function handleCustomEnter(e: CustomEvent) {
@@ -91,7 +130,7 @@ export function DatePickerInputElement({
 
 	function handleCustomDelete(e: CustomEvent) {
 		if (isFocusedInside(inputBoxRef.current)) return;
-		setTempState(createInputState(''));
+		sendTempChange(createInputChange(''));
 		(e.currentTarget as HTMLInputElement).focus();
 	}
 
@@ -105,7 +144,7 @@ export function DatePickerInputElement({
 				input.setSelectionRange(0, input.value.length);
 				input.focus();
 			} else {
-				setFinalState(createInputState(''));
+				sendFinalChange(createInputChange(''), true);
 				memoInputValue.current = '';
 			}
 		} catch(err) {
@@ -116,50 +155,64 @@ export function DatePickerInputElement({
 	function handleCustomPaste(e: CustomEvent) {
 		if (isFocusedInside(inputBoxRef.current)) return;
 		const inputVal = e.detail;
-		setFinalState(
+		sendFinalChange(
 			getOrElse(
-				mapOption(parseStringToDate(inputVal, dateSettings), timestamp => createInputState(inputVal, timestamp)),
-				createInputState(inputVal)
-			)
+				mapOption(parseStringToDate(inputVal, dateSettings), timestamp => createInputChange(inputVal, timestamp)),
+				createInputChange(inputVal)
+			),
+			true
 		);
 		memoInputValue.current = inputVal;
 	}
 
-	useExternalKeyboardControls(inputRef, keyboardEventHandlers);
+	useExternalKeyboardControls(inputRef.current, keyboardEventHandlers);
 
 	const setSelection: (from: number, to: number) => void = useSelectionEditableInput(inputRef)
-	const onTimestampChange: (timestamp: number) => void = onTimestampChangeAction(setTempState)
-	const onInputBlur = getOnBlur(currentState, memoInputValue, setFinalState, inputBoxRef)
-	const onInputBoxBlur = getOnInputBoxBlur(currentState, setFinalState)
-	const onChange = getOnChange(dateSettings, setTempState)
-	const onPopupToggle = getOnPopupToggle(currentDateOpt, currentState, dateSettings, setFinalState)
+	const onTimestampChange: (timestamp: number) => void = onTimestampChangeAction(currentState, dateSettings, sendTempChange)
+	const onInputBlur = getOnBlur(currentState, memoInputValue, sendFinalChange, inputBoxRef, dateSettings)
+	const onInputBoxBlur = getOnInputBoxBlur(currentState, sendFinalChange)
+	const onChange = getOnChange(dateSettings, sendTempChange)
+	const onPopupToggle = getOnPopupToggle(currentDateOpt, currentState, dateSettings, sendFinalChange)
 	const onKeyDown = getOnKeyDown(
-		currentDateOpt, 
-		dateFormat, 
-		dateSettings, 
-		memoInputValue, 
-		onTimestampChange, 
-		setSelection, 
-		setFinalState
-	)	
+		currentDateOpt,
+		dateFormat,
+		dateSettings,
+		memoInputValue,
+		onTimestampChange,
+		setSelection,
+		sendFinalChange,
+		inputBoxRef
+	)
+
+	const { focusClass, focusHtml } = useFocusControl(path);
 
   	return (
-		<div ref={inputBoxRef} className="inputBox" onBlur={onInputBoxBlur} >
+		<div ref={inputBoxRef} 
+			 className={clsx("inputBox", focusClass)}
+			 onClick={(e) => e.stopPropagation()}
+			 onBlur={onInputBoxBlur}			 
+			 {...focusHtml} >
+
 			<div className="inputSubBox">
 				<input ref={inputRef} value={inputValue} onChange={onChange} onKeyDown={onKeyDown} onBlur={onInputBlur} />
 			</div>
+
 			<button 
 				type='button' 
 				className={`${currentState.popupDate ? 'rotate180deg ' : ''}btnCalendar`} 
 				onClick={onPopupToggle} />
-			{children}
-			{currentState.popupDate && 
+
+			<div className='sideContent'>
+				{children}
+			</div>
+
+			{currentState.popupDate &&
 				<DatepickerCalendar {...{
-					currentState, 
+					currentState,
 					currentDateOpt, 
-					dateSettings, 
-					setFinalState,
-					setTempState, 
+					dateSettings,
+					sendFinalChange,
+					sendTempChange,
 					inputRef
 				}} />}
 		</div>
@@ -191,7 +244,9 @@ function getCurrentProps(
 }
 
 function isFocusedInside(element: HTMLElement | null) {
-	if (element) return element.contains(element.ownerDocument.activeElement);
+	if (!element) return false;
+	const activeElement = element.ownerDocument.activeElement;
+	return element.contains(activeElement) && element !== activeElement;
 }
 
 export const components = {DatePickerInputElement}

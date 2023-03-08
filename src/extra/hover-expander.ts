@@ -12,11 +12,13 @@ export function HoverExpander({ children }: HoverExpanderProps) {
         if (!hovered || !hovered.parentElement) return;
         const elemRect = hovered.getBoundingClientRect();
         const parentWidth = hovered.parentElement.offsetWidth;
-        const widthDiff = elemRect.width - parentWidth;
+        const widthDiff = Math.round(elemRect.width - parentWidth);
         if (widthDiff > 0) {
             const viewportWidth = hovered.ownerDocument.documentElement.clientWidth;
-            const inlineStyle = elemRect.right > viewportWidth 
-                ? { right: Math.round(widthDiff) } : null;
+            const viewportOverflow = Math.round(elemRect.right) > viewportWidth
+                ? widthDiff 
+                : Math.round(elemRect.left) < 0 ? Math.round(elemRect.left) : undefined;
+            const inlineStyle = { right: viewportOverflow };
             return ['hoverExpander', inlineStyle];
         }
     }

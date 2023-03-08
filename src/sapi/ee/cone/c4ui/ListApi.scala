@@ -88,14 +88,16 @@ case class NoReceiver[C]() extends Receiver[C] {
     isExpander: Boolean = false,
     canDropBeside: Boolean = false,
   ): GridCol
-  @c4el("GridCell") def gridCell(
+  @c4elPath("GridCell") def gridCell(
     rowKey: String,
     colKey: String,
-    children: ChildPairList[OfDiv] = Nil,
+//    path: String,
+    children: ViewRes = Nil,
     classNames: List[CSSClassName] = Nil,
     expanding: Expanding = expandableExpanding,
     dragHandle: DragHandle = noDragHandle,
     noDefCellClass: Boolean = false,
+    needsHoverExpander: Boolean = true,
     spanRight: Boolean = false,
   ): GridCell
   @c4val("") def expandableExpanding: Expanding
@@ -109,7 +111,7 @@ case class NoReceiver[C]() extends Receiver[C] {
 
   @c4el("HoverExpander") def hoverExpander(
     key: String,
-    children: ChildPairList[OfDiv] = Nil,
+    children: ViewRes = Nil,
   ): ToChildPair
 
   @c4el("ExpandableTableHeader") def expTableHeader(
@@ -117,7 +119,7 @@ case class NoReceiver[C]() extends Receiver[C] {
     title: String,
     shortTitle: String = "",
     hoverClassNames: List[CSSClassName] = Nil,
-    children: ChildPairList[OfDiv] = Nil,
+    children: ViewRes = Nil,
   ): ToChildPair
 
   //
@@ -131,16 +133,13 @@ case class NoReceiver[C]() extends Receiver[C] {
     key: String,
     area: FilterButtonArea,
     className: CSSClassName = NoCSSClassName,
-    children: ChildPairList[OfDiv] = Nil,
+    children: ViewRes = Nil,
   ): FilterButton
   @c4el("FilterButtonExpander") def filterButtonExpander(
     key: String,
     area: FilterButtonArea,
-    className: CSSClassName = NoCSSClassName,
-    popupClassName: CSSClassName = NoCSSClassName,
-    popupItemClassName: CSSClassName = NoCSSClassName,
-    children: ChildPairList[OfDiv] = Nil,
-    openedChildren: ChildPairList[OfDiv] = Nil,
+    children: ViewRes = Nil,
+    openedChildren: ViewRes = Nil,
     optButtons: ElList[FilterButton] = Nil,
   ): FilterButton
   @c4val("lt") def leftFilterButtonArea: FilterButtonArea
@@ -151,12 +150,12 @@ case class NoReceiver[C]() extends Receiver[C] {
     maxWidth: Em,
     canHide: Boolean = false,
     className: CSSClassName = NoCSSClassName,
-    children: ChildPairList[OfDiv] = Nil,
+    children: ViewRes = Nil,
   ): FilterItem
   //
   @c4el("PopupManager") def popupManager(
     key: String,
-    children: ChildPairList[OfDiv] = Nil,
+    children: ViewRes = Nil,
   ): ToChildPair
   //
   @c4el("Highlighter") def highlighter(
@@ -180,7 +179,7 @@ case class NoReceiver[C]() extends Receiver[C] {
     colKey: String,
     rowKey: String,
     classNames: List[CSSClassName] = Nil,
-    children: ChildPairList[OfDiv] = Nil,
+    children: ViewRes = Nil,
     clickAction: Receiver[C] = NoReceiver[C],
     doubleClickAction: Receiver[C] = NoReceiver[C]
   ): PivotCell
@@ -200,6 +199,6 @@ case class NoReceiver[C]() extends Receiver[C] {
     key: String,
     caption: String,
     wrapperNeeded: Boolean = true,
-    children: ChildPairList[OfDiv] = Nil,
+    children: ViewRes = Nil,
   ): ToChildPair
 }

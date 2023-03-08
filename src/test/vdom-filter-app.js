@@ -4,7 +4,8 @@ import ReactDOM from "react-dom"
 
 const {createElement:$,useState,useMemo} = React
 
-import {FilterArea,FilterButtonExpander,FilterItem,FilterButtonPlace,PopupManager} from "../main/vdom-filter.js"
+import {FilterArea,FilterButtonExpander,FilterItem,FilterButtonPlace} from "../main/vdom-filter.js"
+import {PopupManager} from "../extra/popup-elements/popup-manager"
 
 function ModeButton({setState,dataKey}){
     return $("button",{ onClick: ev=>setState(was=>({...was,[dataKey]:!was[dataKey]})) }, dataKey)

@@ -2,7 +2,9 @@
 import {createElement as $,useState,useContext,createContext,useCallback,cloneElement,useMemo} from "react"
 import {em,sum,findLastIndex} from "./vdom-util.js"
 import {useWidths} from "../main/sizes.js"
-import {usePopupPos,usePopupMiss} from "../main/popup.js"
+import {NoCaptionContext} from "./vdom-hooks.js"
+import {usePopupState} from "../extra/popup-elements/popup-manager"
+import {NewPopupElement} from "../extra/popup-elements/popup-element"
 
 //// non-shared
 
@@ -114,47 +116,21 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
     const children = [...filterGroupElements,...btnElements]
     /* maxWidth: maxFilterAreaWidth ? em(maxFilterAreaWidth) : "100vw"*/
     const height = yRowToEm(groupedFilters.length)
-    return $("div",{className},addContainer(height,children))
+    return $(NoCaptionContext.Provider, {value: true},
+        $("div",{className},addContainer(height,children)))
 }
 
 ////
 
-
-const popupAttrName = "data-is-popup"
-const popupSkipValue = "1"
-const PopupContext = createContext()
-const usePopupState = identity => {
-    const [popup,setPopup] = useContext(PopupContext)
-    const isOpened = useCallback(p => p===identity, [identity])
-    const setOpened = useCallback(on => setPopup(on?identity:null), [setPopup,identity])
-    return [isOpened(popup),setOpened]
-}
-
-export function PopupManager({children}){
-    const [popup,setPopup] = useState(null) // todo useSync
-    const onPopupMiss = useCallback(()=>setPopup(was=>null),[setPopup])
-    const el = usePopupMiss(popupAttrName,popupSkipValue,onPopupMiss)
-    const value = useMemo(()=>[popup,setPopup],[popup,setPopup])
-    return $(PopupContext.Provider,{value},[...children,el])
-}
-
-export function FilterButtonExpander({identity,optButtons:rawOptButtons,className,popupClassName,popupItemClassName,children,openedChildren,getButtonWidth}){
+export function FilterButtonExpander({identity,optButtons:rawOptButtons,children,openedChildren}){
     const optButtons = rawOptButtons || []
-    const [popupElement,setPopupElement] = useState(null)
-    const [popupStyle,popupParentStyle] = usePopupPos(popupElement)
-    const width = em(Math.max(...optButtons.map(getButtonWidth)))
     const [isOpened,toggle] = usePopupState(identity)
-
-    //console.log("p-render-")
-    return $("div",
-        {
-            className, style:{height:"2em"}, [popupAttrName]:popupSkipValue,
-            onClick: ev => toggle(!isOpened),
-        },
+    return $("div", {className:'filterButtonExpander',onClick:ev=>toggle(!isOpened)},
         isOpened ? [
-            openedChildren,
-            $("div",{key:"popup",className:popupClassName,style:{...popupStyle,width},ref:setPopupElement},optButtons.map(btn=>{
-                return $("div",{ key: btn.key, className: popupItemClassName }, btn.props.children)
+            openedChildren ?? children,
+            $(NewPopupElement,{identity},optButtons.map(btn=>{
+                return $("div",{key:btn.key,className:'gridPopupItem'}, 
+                    $(NoCaptionContext.Provider,{value:true},btn.props.children))
             }))
         ] : children
     )
@@ -165,7 +141,8 @@ export function FilterButtonPlace({className,children}){
 }
 
 export function FilterItem({className,children}){
-    return $("div",{className},children)
+    return $(NoCaptionContext.Provider, {value: false},
+        $("div",{className},children))
 }
 
-export const components = {FilterArea,FilterButtonExpander,FilterButtonPlace,FilterItem,PopupManager}
+export const components = {FilterArea,FilterButtonExpander,FilterButtonPlace,FilterItem}

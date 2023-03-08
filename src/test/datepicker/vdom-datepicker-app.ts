@@ -2,6 +2,7 @@ import ReactDOM from "react-dom"
 import React from "react"
 import {createSyncProviders} from "../../main/vdom-hooks";
 import {DatePickerInputElement} from "../../extra/datepicker/datepicker";
+import { None } from '../../main/option';
 
 const {createElement: $} = React
 
@@ -16,7 +17,7 @@ function App() {
         // userTimezoneId: "Europe/Moscow",
         state: {
             tp: "timestamp-state",
-            timestamp: String(testTS),
+            timestamp: String(testTS)
         }
     })
     const sender = {

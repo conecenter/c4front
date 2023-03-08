@@ -1,7 +1,7 @@
-
-import {createElement} from "react"
+import {createElement as $,useCallback,useEffect,useState} from "react"
 import {useObservedChildSizes,getFontSize,useWidth} from "./sizes.js"
 import {sum,em} from "./vdom-util.js"
+import {useEventListener} from './vdom-hooks.js'
 
 const limited = (minV,v,maxV)=>Math.min(Math.max(minV,v),maxV)
 
@@ -16,7 +16,7 @@ const elementToUnscaledHeightUpdater = element => {
     return was => !was || was < height ? height : was                                  // so we only increase memorized height to avoid chatter
 }
 
-const div = attr => createElement("div",attr)
+const div = attr => $("div",attr)
 
 export const DashboardRoot = ({
     containerHeight, containerPaddingTop, containerPaddingLeft, containerStyle,
@@ -45,7 +45,7 @@ export const DashboardRoot = ({
             wasBest && scaleToFitContainer < wasBest.scaleToFitContainer ||
             wasBest && boardWidth * scaleToApply > containerInnerWidth ? // while scaleToFitContainer seems optimal, minScale can prevent fitting width at all
             wasBest : {scaleToFitContainer,scaleToApply,colCount,boardWidth,rowHeights}
-        return calcBoardSizes(colCount+1, willBest)
+        return colCount <= children.length ? calcBoardSizes(colCount+1, willBest) : wasBest;
     }
     const boardSizes = calcBoardSizes(1,undefined)
     const freeWidth =
@@ -55,13 +55,13 @@ export const DashboardRoot = ({
         ref,
         style: {
             ...containerStyle, minHeight: em(containerHeight), display: "grid",
-            padding: `${em(containerPaddingTop)} ${em(containerPaddingLeft)}`,
+            padding: `${em(containerPaddingTop)} ${em(containerPaddingLeft)}`
         },
         children: [div({
             key: "board",
             style: {
                 ...boardStyle,
-                display: "grid", justifySelf: "center"/*h*/, alignSelf: "center"/*v*/,
+                display: "grid", justifySelf: "center"/*v*/, //alignSelf: "center"/*h*/,
                 alignItems: "start",
                 rowGap: em(rowGap), columnGap: em(colGap),
                 gridTemplateColumns: `repeat(${boardSizes.colCount}, ${em(cardWidth)})`,
@@ -78,6 +78,50 @@ export const DashboardRoot = ({
             }))
         })]
     })
+}
+
+
+export const Dashboard = ({
+    minColWidth, maxColWidth, 
+    minScale, maxScale, 
+    rowGap, colGap, 
+    containerPaddingTop = 1,
+    containerPaddingLeft = 1, 
+    children
+}) => {
+    const [{elem, containerHeight}, setState] = useState({});
+
+    const setParams = useCallback(element => {
+        if (element) setState({elem: element, containerHeight: countFreeVpSpace(element)});
+    }, []);
+    const recalcParams = useCallback(() => setParams(elem), [elem]);
+
+    const win = elem?.ownerDocument.defaultView;
+    useEventListener(win, 'resize', recalcParams);
+
+    useEffect(() => {
+        if (!elem) return;
+        const observer = new ResizeObserver(entries => {entries.forEach(recalcParams)});
+        observer.observe(elem.ownerDocument.body, {box: "border-box"});
+        return () => observer.disconnect();
+    }, [elem]);
+
+    return $("div", {ref: setParams, className: 'dashboard'}, containerHeight !== undefined && $(DashboardRoot, {
+            containerHeight, containerPaddingTop, containerPaddingLeft,
+            minColWidth, maxColWidth,
+            rowGap, colGap,
+            minScale, maxScale,
+            children
+        })
+    );
+}
+
+function countFreeVpSpace(element) {
+    const vpHeight = element.ownerDocument.documentElement.clientHeight;
+    const contentHeight = element.ownerDocument.body.scrollHeight - element.scrollHeight;
+    const freeSpaceHeight = vpHeight  - contentHeight;
+    const heightEm = freeSpaceHeight < 0 ? 0 : Math.floor(freeSpaceHeight / getFontSize(element));
+    return heightEm;
 }
 
 /*

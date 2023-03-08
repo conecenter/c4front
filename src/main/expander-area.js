@@ -1,8 +1,8 @@
 
-import {createElement as $,useState,useLayoutEffect,useCallback,useMemo,useRef} from "react"
+import {createElement as $,useState,useCallback,useMemo} from "react"
 import {em} from "./vdom-util.js"
-import {useEventListener,extractedUse} from "./vdom-hooks.js"
-import {getFontSize,useWidths,useViewportHeightIntEm} from "./sizes.js"
+import {extractedUse} from "./vdom-hooks.js"
+import {useWidths,useViewportHeightIntEm} from "./sizes.js"
 
 const last = l => l && l.length>0 && l[l.length-1]
 
@@ -71,7 +71,7 @@ const getPositions = fitted => Object.fromEntries(fitted.sides.flatMap(side=>{
 const deep = body => state => body(deep(body))(state)
 //loop(next=>st=>{ console.log(st); if(st<10) next(st+1)})(0)
 
-const useMemoFitAll = extractedUse((expandTo,childWidths,addPos,outerWidth,addContainer,checkLineCount) => {
+const useMemoFitAll = extractedUse((expandTo,childWidths,addPos,outerWidth,addContainer,checkLineCount,props) => {
     const setup = items => items.map(item=>({
         key: item.key, sideName: item.props.area, width: childWidths[item.key]
     })).filter(item=>item.width)
@@ -89,8 +89,8 @@ const useMemoFitAll = extractedUse((expandTo,childWidths,addPos,outerWidth,addCo
         fitSides(setup(expandTo),1,outerWidth)
     const btnPosByKey = getPositions(fitted)
     const height = em(lineToEm(fitted.lineCount))
-    const children = getAllExpanded(expandTo).map(c=>addPos(c.key,btnPosByKey[c.key],c.props.children))
-    return addContainer(height,children)
+    const children = getAllExpanded(expandTo).map(c=>addPos(c.key,btnPosByKey[c.key],c.props.children,c.props.className))
+    return addContainer(height,children,props)
 },useMemo)
 
 /*
@@ -102,18 +102,23 @@ const useLogDep = (hint,...depList) => {
 }
 */
 
-export function ExpanderArea({expandTo,maxLineCount}){
+export function ExpanderArea({expandTo,maxLineCount,props}){
     const [theAreaElement,setAreaElement] = useState(null)
     const [vpHeight,vpRef] = useViewportHeightIntEm()
     const [childWidths,addPos,outerWidth,addContainer] = useWidths()
     const checkLineCountVP = useCallback(lineCount => lineToEm(lineCount) * 4 <= vpHeight, [vpHeight])
     const checkLineCountVal = useCallback(lineCount => lineCount <= maxLineCount, [maxLineCount])
     const checkLineCount = maxLineCount ? checkLineCountVal : checkLineCountVP
-    const res = useMemoFitAll(expandTo,childWidths,addPos,outerWidth,addContainer,checkLineCount)
+    const res = useMemoFitAll(expandTo,childWidths,addPos,outerWidth,addContainer,checkLineCount,props)
     // console.log("render "+maxLineCount)
     // useLogDep("changed "+maxLineCount,theAreaElement,childWidths,expandTo,outerWidth,childWidths,checkLineCount,vpHeight)
     return maxLineCount ? res : $("span",{ref:vpRef},res)
 }
+
+/**
+ * @param {{ children: ReactNode | ReactNode[], area?: string, expandOrder?: number, className?: string, expandTo?: ReactNode | ReactNode[] }} props
+ * @returns { ReactNode | ReactNode[] } children
+ */
 export function Expander({children}){ return children }
 
 export const components = {ExpanderArea,Expander}

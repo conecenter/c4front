@@ -1,10 +1,15 @@
 import {cloneElement, createElement as $, useCallback, useEffect, useMemo, useState} from "react"
+import clsx from 'clsx'
 
 import {findFirstParent, identityAt, never, sortedWith} from "./vdom-util.js"
 import {NoCaptionContext, useEventListener, useSync} from "./vdom-hooks.js"
 import {useWidth,useMergeRef} from "./sizes.js"
 import {useGridDrag} from "./grid-drag.js"
 import {ESCAPE_KEY} from "./keyboard-keys"
+import {useFocusControl} from "../extra/focus-control.ts"
+import {BindGroupElement} from "../extra/binds/binds-elements"
+import {HoverExpander} from "../extra/hover-expander"
+import {InputsSizeContext} from "../extra/dom-utils"
 
 const dragRowIdOf = identityAt('dragRow')
 const dragColIdOf = identityAt('dragCol')
@@ -54,12 +59,13 @@ const calcHiddenCols = (cols, outerWidth) => {
 
 const getExpandedForRows = rows => Object.fromEntries(rows.filter(row=>row.isExpanded).map(row=>[row.rowKey,true]))
 
-const setupExpanderElements = rows => {
+const setupExpanderElements = (rows, rowsWithHiddenContent) => {
     const expanded = getExpandedForRows(rows)
     return children => children.map(c => {
         const { expanding, rowKey } = c.props
         return expanding==="expander" && rowKey ? cloneElement(c, {
-            expander: expanded[rowKey] ? 'expanded' : 'collapsed',
+            expander: !rowsWithHiddenContent.has(rowKey) ? 'passive' : expanded[rowKey]
+                ? 'expanded' : 'collapsed'
         }) : c
     })
 }
@@ -99,17 +105,18 @@ const getGridCol = ({ colKey }) => colKey === GRIDCELL_COLSPAN_ALL ? spanAll : C
 
 const spanAll = "1 / -1"
 
-export function GridCell({
-    identity, children, rowKey, rowKeyMod, colKey, spanRight, spanRightTo, expanding, expander, dragHandle,
-    noDefCellClass, classNames: argClassNames, gridRow: argGridRow, gridColumn: argGridColumn, ...props
-}) {
+export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, spanRight, spanRightTo, expanding, expander, dragHandle, noDefCellClass, classNames: argClassNames, gridRow: argGridRow, gridColumn: argGridColumn, path, needsHoverExpander=true, ...props }) {
     const gridRow = argGridRow || getGridRow({ rowKey, rowKeyMod })
     const gridColumn = argGridColumn || getGridCol({ colKey }) + (spanRightTo ? " / "+spanRightTo : "")
     const style = { ...props.style, gridRow, gridColumn }
-    const expanderProps = expanding==="expander" ? { 'data-expander': expander || 'passive' } : {}
-    const argClassNamesStr = argClassNames ? argClassNames.join(" ") : ""
-    const className = noDefCellClass ? argClassNamesStr : `${argClassNamesStr} ${GRID_CLASS_NAMES.CELL}`
-    return $("div", { ...props, ...expanderProps, 'data-col-key': colKey, 'data-row-key': rowKey, "data-drag-handle": dragHandle, style, className }, children)
+    const expanderProps = expanding === "expander" && {
+        'data-expander': expander,
+        ...expander === 'passive' && {onClickCapture: (e) => e.stopPropagation()}
+    }
+    const { focusClass, focusHtml } = useFocusControl(path);
+    const className = clsx(argClassNames, !noDefCellClass && GRID_CLASS_NAMES.CELL, focusClass, dragHandle && 'gridDragCell');
+    const cellContent = needsHoverExpander ? $(HoverExpander, { children }) : children;
+    return $("div", { ...props, ...expanderProps, 'data-col-key': colKey, 'data-row-key': rowKey, "data-drag-handle": dragHandle, ...focusHtml, style, className }, cellContent)
 }
 
 const colKeysOf = children => children.map(c => c.colKey)
@@ -184,6 +191,7 @@ const getCellDataAttrs = element => {
 const useGridClickAction = identity => {
     const [clickActionPatches, enqueueClickActionPatch] = useSync(clickActionIdOf(identity))
     return useCallback(ev => {
+        if (ev.target.closest('.checkBox, button') || ev.ctrlKey && ev.target.closest('.chipItem')) return;
         const cellDataKeys = findFirstParent(getCellDataAttrs)(ev.target)
         if (cellDataKeys && cellDataKeys.rowKey && cellDataKeys.colKey) {
             const headers = {
@@ -251,42 +259,51 @@ export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey 
     const dragBGEl = $("div", { key: "gridBG", className: "gridBG", style: { gridColumn: spanAll, gridRow: spanAll }})
     const style = { display: "grid", gridTemplateRows, gridTemplateColumns }
     const res = $("div", {
-        onMouseDown, 
-        onClick: clickAction, 
-        onKeyDown: keyboardAction, 
-        style, 
-        className: "grid", 
-        "data-grid-key": gridKey, 
+        onMouseDown,
+        onClickCapture: clickAction,
+        onKeyDown: keyboardAction,
+        style,
+        className: "grid",
+        "data-grid-key": gridKey,
         "header-row-keys": headerRowKeys,
         ref
     }, dragBGEl, ...allChildren)
     const dragCSSEl = $("style",{dangerouslySetInnerHTML: { __html: dragCSSContent}})
-    return $(NoCaptionContext.Provider,{value:true},dragCSSEl,res)
+    return $(NoCaptionContext.Provider,{value:true},
+        $(InputsSizeContext.Provider,{value:50},
+            $(BindGroupElement,{groupId:'grid-list-bind'},dragCSSEl,res)
+        )
+    )
 }
 
 const getAllChildren = ({children,rows,cols,hasHiddenCols,hideElementsForHiddenCols,dragRowKey}) => {
+    const rowsWithHiddenContent = new Set();
+    hideElementsForHiddenCols(true,c=>c.props.colKey)(children).forEach(cell => {
+        if (cell.props.children) rowsWithHiddenContent.add(cell.props.rowKey);
+    });
     const expandedElements = getExpandedCells({
         cols: hideElementsForHiddenCols(true,col=>col.colKey)(cols),
         rows, //: dragRowKey ? rows.filter(row=>row.rowKey!==dragRowKey) : rows,
         children,
-    }).map(([rowKey, pairs]) => {
-        const res = $(GridCell, {
+    }).reduce((res, [rowKey, pairs]) => {
+        const cellWithContent = rowsWithHiddenContent.has(rowKey) && $(GridCell, {
+            key:`${rowKey}-expanded`,
             gridColumn: spanAll,
-            rowKey,
-            rowKeyMod: "-expanded",
-            style: { display: "flex", flexFlow: "row wrap", visibility: dragRowKey?"hidden":null },
-            children: pairs.map(([col, cell]) => $("div",{
+            rowKey, rowKeyMod: "-expanded",
+            'data-expanded-cell': '',
+            style: {display: "flex", flexFlow: "row wrap", visibility: dragRowKey?"hidden":null},
+            needsHoverExpander: false,
+            children: $(NoCaptionContext.Provider, {value:false}, pairs.map(([col, cell]) => $("div",{
                 key: cell.key,
-                style: cell.props.children ? { flexBasis:  `${col.width.min}em` } : undefined,
+                style: cell.props.children ? {flexBasis: `${col.width.min}em`} : undefined,
                 className: "inputLike",
                 'data-expanded-col-key': col.colKey,
                 children: cell.props.children,
-            })),
-            'data-expanded-cell': ''
-        })
-        return $(NoCaptionContext.Provider,{value:false, key:`${rowKey}-expanded`},res)
-    })
-    const toExpanderElements = hasHiddenCols ? setupExpanderElements(rows) : hideExpanderElements(cols)
+            })))
+        });
+        return cellWithContent ? res.concat(cellWithContent) : res;
+    }, [])
+    const toExpanderElements = hasHiddenCols ? setupExpanderElements(rows, rowsWithHiddenContent) : hideExpanderElements(cols)
     const allChildren = spanRightElements(cols, toExpanderElements(hideElementsForHiddenCols(false,cell=>cell.props.colKey)([
         ...children, ...expandedElements
     ])))
@@ -320,8 +337,8 @@ export function Highlighter({attrName, highlightClass: argHighlightClass, notHig
     }, [setKey,gridKey])
     const elemSelector = argHighlightClass ? `.${argHighlightClass}` : 'div'
     const notHighlightClass = argNotHighlightClass ? `:not(.${argNotHighlightClass})` : ''
-    const style = key 
-        ? `${gridSelector} ${elemSelector}[${attrName}="${key}"]${notHighlightClass} 
+    const style = key
+        ? `${gridSelector} ${elemSelector}[${attrName}="${key}"]${notHighlightClass}
             { background-color: var(--highlight-color); }`
         : ""
     const doc = element && element.ownerDocument

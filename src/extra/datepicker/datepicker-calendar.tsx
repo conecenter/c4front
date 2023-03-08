@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import { useUserLocale } from "../locale";
 import { addMonths, getDate as getDayOfMonth, getDaysInMonth, getWeek, isMonday, set, startOfWeek } from "date-fns";
-import { isEmpty, None, nonEmpty, Option, toOption } from '../../main/option';
-import { adjustDate, DateSettings, getDate, getTimestamp, getCalendarDate } from "./date-utils";
+import { isEmpty, nonEmpty, Option, toOption } from '../../main/option';
+import { adjustDate, DateSettings, getDate, getTimestamp, getPopupDate } from "./date-utils";
 import { usePopupPos } from "../../main/popup";
-import { createTimestampState, DatePickerState, CalendarDate } from "./datepicker-exchange";
+import { createPopupChange, createTimestampChange, DatepickerChange, DatePickerState, PopupDate } from "./datepicker-exchange";
 import { findFirstParent } from '../../main/vdom-util';
 
 interface DatepickerCalendarProps {
   currentState: DatePickerState,
   currentDateOpt: Option<Date>,
   dateSettings: DateSettings,
-  setFinalState: (state: DatePickerState) => void,
-  setTempState: (state: DatePickerState) => void,
+  sendFinalChange: (ch: DatepickerChange, force?: boolean) => void,
+  sendTempChange: (ch: DatepickerChange) => void,
   inputRef: React.MutableRefObject<HTMLInputElement | null>
 }
 
@@ -22,12 +22,12 @@ export function DatepickerCalendar({
   currentState,
   currentDateOpt,
   dateSettings,
-  setFinalState,
-  setTempState,
+  sendFinalChange,
+  sendTempChange,
   inputRef
 }: DatepickerCalendarProps) {
 
-  const popupDate = currentState.popupDate as CalendarDate;
+  const popupDate = currentState.popupDate as PopupDate;
   const { year, month } = popupDate;
 
   const pageDate = new Date(year, month);
@@ -53,7 +53,7 @@ export function DatepickerCalendar({
     const change = e.currentTarget.dataset.change;
     if (change) {
       const newDate = addMonths(new Date(year, month), Number(change));
-      setTempState({...currentState, popupDate: getCalendarDate(newDate) });
+      sendTempChange(createPopupChange(getPopupDate(newDate)));
     }
   }
 
@@ -65,7 +65,7 @@ export function DatepickerCalendar({
 
   function onMonthChoice(e: React.MouseEvent<HTMLButtonElement>) {
     const newMonth = e.currentTarget.dataset.month;
-    if (newMonth) setTempState({ ...currentState, popupDate: { year, month: +newMonth } });
+    if (newMonth) sendTempChange(createPopupChange({ year, month: Number(newMonth) }));
   }
 
   /*
@@ -75,7 +75,7 @@ export function DatepickerCalendar({
 
   function onCalendarYearChange(e: React.MouseEvent<HTMLButtonElement>) {
     const change = e.currentTarget.dataset.change;
-    if (change) setTempState({...currentState, popupDate: { month, year: year + Number(change) } });
+    if (change) sendTempChange(createPopupChange({ month, year: year + Number(change) }));
   }
 
   /*
@@ -88,7 +88,7 @@ export function DatepickerCalendar({
     const endIndex = getDaysInMonth(firstWeekStart);
     return getSpanList(
       createArray(startIndex, endIndex),
-      getCalendarDate(firstWeekStart),
+      getPopupDate(firstWeekStart),
       dateSettings,
       currentDateOpt,
       'dayPrevMonth'
@@ -101,11 +101,13 @@ export function DatepickerCalendar({
   const nextMonth = addMonths(pageDate, 1);
   const daysNextMonth = getSpanList(
     createArray(1, numDaysNextMonth), 
-    getCalendarDate(nextMonth),
+    getPopupDate(nextMonth),
     dateSettings,
     currentDateOpt,
     'dayNextMonth'
   );
+
+  const closePopup = () => sendFinalChange(createPopupChange(null)); 
 
   function onDateChoice(e: React.MouseEvent) {
     if (!(e.target instanceof HTMLSpanElement && e.target.dataset.date)) return;
@@ -121,7 +123,8 @@ export function DatepickerCalendar({
         ...timeSettings
     });
     focusActiveWrapper(popupCalendarRef);
-    setFinalState(createTimestampState(getTimestamp(chosenDate, dateSettings), None));
+    sendFinalChange(createTimestampChange(getTimestamp(chosenDate, dateSettings)), true);
+    closePopup();
   }
 
   /*
@@ -160,9 +163,9 @@ export function DatepickerCalendar({
       if (!e.currentTarget.dataset.change) return;
       if (nonEmpty(currentDateOpt)) {
           const adjustedDate = adjustDate(currentDateOpt, symbol, +e.currentTarget.dataset.change, true);
-          setTempState(createTimestampState(getTimestamp(adjustedDate, dateSettings)));
+          sendTempChange(createTimestampChange(getTimestamp(adjustedDate, dateSettings)), true);
       } 
-      else setTempState(createTimestampState(Date.now()));
+      else sendTempChange(createTimestampChange(Date.now()), true);
     }
   }
 
@@ -170,8 +173,9 @@ export function DatepickerCalendar({
    * Now & Close buttons functionality
   */
   const onNowBtnClick = () => {
-    focusActiveWrapper(popupCalendarRef);    
-    setFinalState(createTimestampState(Date.now(), None));
+    focusActiveWrapper(popupCalendarRef);
+    sendFinalChange(createTimestampChange(Date.now()), true);
+    closePopup();
   }
 
   function onCloseBtnClick() {
@@ -179,7 +183,7 @@ export function DatepickerCalendar({
       inputRef.current.focus();
       inputRef.current.setSelectionRange(100, 100);
     }
-    setFinalState({ ...currentState, popupDate: None });
+    closePopup();
   }
 
   return (
@@ -256,7 +260,7 @@ function getSpan(value: number | string, className?: string, dataset?: string) {
 
 function getSpanList(
     array: number[], 
-    dataset: CalendarDate, 
+    dataset: PopupDate, 
     dateSettings: DateSettings, 
     currentDateOpt: Option<Date>, 
     className?: string
@@ -293,5 +297,8 @@ function getArrowBtnsDiv(callback: React.MouseEventHandler) {
 function focusActiveWrapper(popupElement: HTMLDivElement | null) {
   const findActiveFocusWrapper = (el: HTMLElement) => el.classList.contains("activeFocusWrapper") ? el : null;
   const focEl = findFirstParent(findActiveFocusWrapper)(popupElement);
-  if (focEl) focEl.focus();
+  if (focEl) {
+    focEl.focus();
+    return true;
+  }
 }
