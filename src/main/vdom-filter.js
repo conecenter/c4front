@@ -1,5 +1,5 @@
 
-import {createElement as $,useState,useContext,createContext,useCallback,cloneElement,useMemo} from "react"
+import {createElement as $,cloneElement} from "react"
 import {em,sum,findLastIndex} from "./vdom-util.js"
 import {useWidths} from "../main/sizes.js"
 import {NoCaptionContext} from "./vdom-hooks.js"
