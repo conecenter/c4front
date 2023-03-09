@@ -163,9 +163,9 @@ export function DatepickerCalendar({
       if (!e.currentTarget.dataset.change) return;
       if (nonEmpty(currentDateOpt)) {
           const adjustedDate = adjustDate(currentDateOpt, symbol, +e.currentTarget.dataset.change, true);
-          sendTempChange(createTimestampChange(getTimestamp(adjustedDate, dateSettings)), true);
+          sendFinalChange(createTimestampChange(getTimestamp(adjustedDate, dateSettings)), true);
       } 
-      else sendTempChange(createTimestampChange(Date.now()), true);
+      else sendFinalChange(createTimestampChange(Date.now()), true);
     }
   }
 
