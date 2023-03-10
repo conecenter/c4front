@@ -1,9 +1,10 @@
 import React, { CSSProperties, MutableRefObject, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
-import { PathContext } from '../focus-control';
+import { getPath, PathContext } from '../focus-control';
 import { ColorDef } from '../view-builder/common-api';
 import { usePatchSync } from '../exchange/patch-sync';
 import { applyChange, changeToPatch, patchToChange, POSITIONING_STYLES, VkChange } from './vk-utils';
+import { ScrollInfoContext } from '../scroll-info-context';
 import { VKKey } from './vk-key';
 
 const SWITCHER_KEYS = ['Switcher1', 'Switcher2', 'Switcher3'];
@@ -95,6 +96,11 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
     const mode = currentVkMode ? (currentVkMode.mode - 1) : 0;
     const currentKeys = vkType?.modes[mode]?.keys || vkType?.modes[0]?.keys;
 
+    // Bottom position logic
+    const isBottomPos = position === 'bottom';
+    const path = useMemo(() => getPath(identity), [identity]);
+    const scrollInfo = useContext(ScrollInfoContext);
+
     // Positioning logic
     const [ rowsTotal, colsTotal ] = useMemo(() => (currentKeys 
         ? currentKeys.reduce(
@@ -132,12 +138,14 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
 
     return (
         <div ref={vkRef}
-            className={clsx('vkKeyboard', (position === 'bottom') && BOTTOM_ROW_CLASS)}
+            className={clsx('vkKeyboard', isBottomPos && BOTTOM_ROW_CLASS)}
             onMouseDownCapture={(e) => e.preventDefault()}
+            data-path={path}
             style={{
                 height: `${VK_ROW_HEIGHT * rowsTotal}em`,
                 width: `${VK_COL_WIDTH * colsTotal}em`,
-                ...POSITIONING_STYLES[position]
+                ...POSITIONING_STYLES[position],
+                ...isBottomPos && { bottom: scrollInfo.elementsStyles.get(path) }
             }} >
             {keys}
         </div>
