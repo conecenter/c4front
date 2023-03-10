@@ -11,6 +11,7 @@ const SWITCHER_KEYS = ['Switcher1', 'Switcher2', 'Switcher3'];
 const BOTTOM_ROW_CLASS = "bottom-row";
 const VK_COL_WIDTH = 3.2;
 const VK_ROW_HEIGHT = 3.6;
+const VK_OFFSET = 0.2;
 
 interface VirtualKeyboard {
     key: string,
@@ -120,7 +121,7 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
         const btnStyle: CSSProperties = {
             position: 'absolute',
             left: `${(column - 1) * 100 / colsTotal!}%`,
-            top: `${VK_ROW_HEIGHT * (row - 1)}em`,
+            top: `${VK_ROW_HEIGHT * (row - 1) + VK_OFFSET}em`,
             width: `${width * 100 / colsTotal!}%`,
             height: `${VK_ROW_HEIGHT * height}em`
         }
@@ -142,7 +143,7 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
             onMouseDownCapture={(e) => e.preventDefault()}
             data-path={path}
             style={{
-                height: `${VK_ROW_HEIGHT * rowsTotal}em`,
+                height: `${VK_ROW_HEIGHT * rowsTotal + 2 * VK_OFFSET}em`,
                 width: `${VK_COL_WIDTH * colsTotal}em`,
                 ...POSITIONING_STYLES[position],
                 ...isBottomPos && { bottom: scrollInfo.elementsStyles.get(path) }
