@@ -157,7 +157,8 @@ const KeyBindingsManager = ({ links, children, bindSrcId, escapeBindSrcId, noTou
   const drawBackButton = true
   const backBtn = (isBindMode && drawSwitchBtn && drawBackButton) ? [$(BindingElement, { ...backBtnProps }, ["Back"])] : []
 
-  const footer = (isBindMode && drawSwitchBtn) ? [$("div", { className: "footerForBinds bottom-row" }, [/*...backBtn,*/ ...switchBtn])] : []
+  const footer = isBindMode && drawSwitchBtn
+    ? [$("div", {className: "footerForBinds bottom-row", 'data-path': '/KeyBindingsManager/footerForBinds'}, [...switchBtn])] : []
   const overlay = (isNoTouchMode) ? [$("div", { ref: setOverlayElem, className: "noTouchOverlay" }, [])] : []
 
   const onChangeAction = (eventName, activeGroup) => {
