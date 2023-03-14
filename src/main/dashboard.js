@@ -20,7 +20,7 @@ const div = attr => $("div",attr)
 
 export const DashboardRoot = ({
     containerHeight, containerPaddingTop, containerPaddingLeft, containerStyle,
-    children, boardStyle, // board is inside container
+    children=[], boardStyle, // board is inside container
     minColWidth, maxColWidth, minScale, maxScale, cardStyles, rowGap, colGap // col widths are in em-s before scaling
 }) => {
     if(children.length <= 0) return null
