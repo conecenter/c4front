@@ -8,7 +8,7 @@ import {useGridDrag} from "./grid-drag.js"
 import {ESCAPE_KEY} from "./keyboard-keys"
 import {useFocusControl} from "../extra/focus-control.ts"
 import {BindGroupElement} from "../extra/binds/binds-elements"
-import {HoverExpander} from "../extra/hover-expander"
+import {HoverExpander, useHoverExpander} from "../extra/hover-expander"
 import {InputsSizeContext} from "../extra/dom-utils"
 
 const dragRowIdOf = identityAt('dragRow')
@@ -108,15 +108,17 @@ const spanAll = "1 / -1"
 export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, spanRight, spanRightTo, expanding, expander, dragHandle, noDefCellClass, classNames: argClassNames, gridRow: argGridRow, gridColumn: argGridColumn, path, needsHoverExpander=true, ...props }) {
     const gridRow = argGridRow || getGridRow({ rowKey, rowKeyMod })
     const gridColumn = argGridColumn || getGridCol({ colKey }) + (spanRightTo ? " / "+spanRightTo : "")
-    const style = { ...props.style, gridRow, gridColumn }
+    const align = argClassNames?.includes('gridGoRight') ? 'r' : 'l';
+    const { hoverStyle, hoverClass, ...hoverProps } = useHoverExpander(needsHoverExpander, align);
+    const style = { ...props.style, gridRow, gridColumn, ...hoverStyle }
     const expanderProps = expanding === "expander" && {
         'data-expander': expander,
         ...expander === 'passive' && {onClickCapture: (e) => e.stopPropagation()}
     }
     const { focusClass, focusHtml } = useFocusControl(path);
-    const className = clsx(argClassNames, !noDefCellClass && GRID_CLASS_NAMES.CELL, focusClass, dragHandle && 'gridDragCell');
-    const cellContent = needsHoverExpander ? $(HoverExpander, { children }) : children;
-    return $("div", { ...props, ...expanderProps, 'data-col-key': colKey, 'data-row-key': rowKey, "data-drag-handle": dragHandle, ...focusHtml, style, className }, cellContent)
+    const className = clsx(argClassNames, !noDefCellClass && GRID_CLASS_NAMES.CELL, focusClass, dragHandle && 'gridDragCell', hoverClass);
+    //const cellContent = needsHoverExpander ? $(HoverExpander, { children }) : children;
+    return $("div", { ...props, ...expanderProps, 'data-col-key': colKey, 'data-row-key': rowKey, "data-drag-handle": dragHandle, ...focusHtml, style, className, ...hoverProps }, children)
 }
 
 const colKeysOf = children => children.map(c => c.colKey)

@@ -1,8 +1,47 @@
 import { createElement as el, MouseEvent, ReactNode, useState } from "react";
 import clsx from 'clsx';
+import { FlexibleAlign } from "./view-builder/flexible-api";
 
 interface HoverExpanderProps {
     children: ReactNode[]
+}
+
+export const useHoverExpander = (needsHoverExpander: boolean, align: FlexibleAlign) => {
+    const [hovered, setHovered] = useState<HTMLElement | null>(null);
+    let ref = false;
+
+    const getOffset = () => {
+        if (!hovered) return;
+        const widthDiff = hovered.scrollWidth - hovered.clientWidth;
+        if (widthDiff > 0) {
+            const { left, right } = hovered.getBoundingClientRect();
+            let offset;
+            if (align === 'r') {
+                offset = widthDiff - left > 0 ? (widthDiff - left) - widthDiff  : -widthDiff;
+            }
+            else {
+                const viewportWidth = hovered.ownerDocument.documentElement.clientWidth;
+                offset = right + widthDiff > viewportWidth 
+                    ? -widthDiff - 1 : undefined    // account for possible rounding error
+            }
+            return { translate: offset };
+        }
+    }
+    const hoverStyle = getOffset();
+
+    return needsHoverExpander ? {
+        hoverStyle,
+        hoverClass: hoverStyle && 'hoverExpander',
+        onMouseEnter: (e: MouseEvent<HTMLElement>) => {
+            const target = e.currentTarget;
+            ref = true;
+            setTimeout(() => ref && setHovered(target), 60)
+        },
+        onMouseLeave: () => {
+            ref = false;
+            setHovered(null);
+        }
+    } : {};
 }
 
 export function HoverExpander({ children }: HoverExpanderProps) {
@@ -36,4 +75,4 @@ export function HoverExpander({ children }: HoverExpanderProps) {
     );
 }
 
-export const components = { HoverExpander }
+export const components = { HoverExpander, useHoverExpander }
