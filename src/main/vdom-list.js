@@ -1,4 +1,4 @@
-import {cloneElement, createElement as $, useCallback, useEffect, useMemo, useState} from "react"
+import {cloneElement, createElement as $, useCallback, useEffect, useMemo, useState, useRef} from "react"
 import clsx from 'clsx'
 
 import {findFirstParent, identityAt, never, sortedWith} from "./vdom-util.js"
@@ -6,7 +6,7 @@ import {NoCaptionContext, useEventListener, useSync} from "./vdom-hooks.js"
 import {useWidth,useMergeRef} from "./sizes.js"
 import {useGridDrag} from "./grid-drag.js"
 import {ESCAPE_KEY} from "./keyboard-keys"
-import {useFocusControl} from "../extra/focus-control.ts"
+import {useFocusControl, useGetPath} from "../extra/focus-control.ts"
 import {BindGroupElement} from "../extra/binds/binds-elements"
 import {useHoverExpander} from "../extra/hover-expander"
 import {InputsSizeContext} from "../extra/dom-utils"
@@ -105,19 +105,21 @@ const getGridCol = ({ colKey }) => colKey === GRIDCELL_COLSPAN_ALL ? spanAll : C
 
 const spanAll = "1 / -1"
 
-export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, spanRight, spanRightTo, expanding, expander, dragHandle, noDefCellClass, classNames: argClassNames, gridRow: argGridRow, gridColumn: argGridColumn, path, needsHoverExpander=true, ...props }) {
+export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, spanRight, spanRightTo, expanding, expander, dragHandle, noDefCellClass, classNames: argClassNames, gridRow: argGridRow, gridColumn: argGridColumn, needsHoverExpander=true, ...props }) {
+    const ref = useRef(null)
+    const path = useGetPath(identity)
     const gridRow = argGridRow || getGridRow({ rowKey, rowKeyMod })
     const gridColumn = argGridColumn || getGridCol({ colKey }) + (spanRightTo ? " / "+spanRightTo : "")
     const align = argClassNames?.includes('gridGoRight') ? 'r' : 'l';
-    const { hoverStyle, hoverClass, ...hoverProps } = useHoverExpander(align, needsHoverExpander);
-    const style = { ...props.style, gridRow, gridColumn, ...hoverStyle }
+    const {hoverStyle, hoverClass, ...hoverProps} = useHoverExpander(path, ref, align, needsHoverExpander);
+    const style = {...props.style, gridRow, gridColumn, ...hoverStyle}
     const expanderProps = expanding === "expander" && {
         'data-expander': expander,
         ...expander === 'passive' && {onClickCapture: (e) => e.stopPropagation()}
     }
-    const { focusClass, focusHtml } = useFocusControl(path);
+    const {focusClass, focusHtml} = useFocusControl(path);
     const className = clsx(argClassNames, !noDefCellClass && GRID_CLASS_NAMES.CELL, focusClass, dragHandle && 'gridDragCell', hoverClass);
-    return $("div", { ...props, ...expanderProps, 'data-col-key': colKey, 'data-row-key': rowKey, "data-drag-handle": dragHandle, ...focusHtml, style, className, ...hoverProps }, children)
+    return $("div", {ref, ...props, ...expanderProps, 'data-col-key': colKey, 'data-row-key': rowKey, "data-drag-handle": dragHandle, ...focusHtml, style, className, ...hoverProps}, children)
 }
 
 const colKeysOf = children => children.map(c => c.colKey)

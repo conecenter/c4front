@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import clsx from 'clsx';
 import { NoFocusContext } from './labeled-element';
 
@@ -39,6 +39,20 @@ interface Identity {
     parent?: Identity,
 }
 
+function useGetPath(identity: Identity) {
+    const getPath = (identity: Identity) => {
+        let path = '';
+        let element: Identity | undefined = identity?.parent?.parent;
+        while (element) {
+            if (element.key) path = `/${element.key}` + path;
+            element = element.parent;
+        }
+        return path;
+    }
+    const path = useMemo(() => getPath(identity), []);
+    return path;
+}
+
 function getPath(identity: Identity) {
     let path = '';
     let element: Identity | undefined = identity?.parent?.parent;
@@ -50,4 +64,4 @@ function getPath(identity: Identity) {
 }
 
 export type { FocusControlObj };
-export { PathContext, useFocusControl, Focusable, getPath, isCurrentlyFocused };
+export { PathContext, useFocusControl, Focusable, getPath, useGetPath, isCurrentlyFocused };
