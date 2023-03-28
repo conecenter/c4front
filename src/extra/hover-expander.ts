@@ -1,4 +1,5 @@
 import { MutableRefObject, useContext, useEffect, useMemo, useState } from "react";
+import { useAddEventListener } from "./custom-hooks";
 import { PathContext } from "./focus-control";
 import { FlexibleAlign } from "./view-builder/flexible-api";
 
@@ -30,6 +31,15 @@ export const useHoverExpander = (
         setHovered(null);
     }
 
+    // Touch functionality
+    const doc = ref.current?.ownerDocument;
+    const onTouchStart = (e: TouchEvent) => {
+        if (ref.current?.contains(e.target as Node) && !hovered) setHovered(ref.current);
+        else if (!ref.current?.contains(e.target as Node) && hovered && !focusInside) setHovered(null);
+    }
+    useAddEventListener(doc, 'touchstart', onTouchStart);
+
+    // Offset calculation
     const getOffset = () => {
         if (!hovered) return;
         const widthDiff = hovered.scrollWidth - hovered.clientWidth;
@@ -51,8 +61,6 @@ export const useHoverExpander = (
         hoverStyle,
         hoverClass: hoverStyle && 'hoverExpander',
         onMouseEnter,
-        onMouseLeave,
-        onTouchStart: onMouseEnter,
-        onTouchEnd: () => setTimeout(onMouseLeave, 1200)
+        onMouseLeave
     } : {};
 }
