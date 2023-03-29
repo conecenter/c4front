@@ -107,7 +107,7 @@ export function DatepickerCalendar({
     'dayNextMonth'
   );
 
-  const closePopup = () => sendFinalChange(createPopupChange(null)); 
+  const closePopup = () => sendTempChange(createPopupChange(null)); 
 
   function onDateChoice(e: React.MouseEvent) {
     if (!(e.target instanceof HTMLSpanElement && e.target.dataset.date)) return;
@@ -123,8 +123,8 @@ export function DatepickerCalendar({
         ...timeSettings
     });
     focusActiveWrapper(popupCalendarRef);
-    sendFinalChange(createTimestampChange(getTimestamp(chosenDate, dateSettings)), true);
     closePopup();
+    sendFinalChange(createTimestampChange(getTimestamp(chosenDate, dateSettings)), true);
   }
 
   /*
@@ -163,9 +163,9 @@ export function DatepickerCalendar({
       if (!e.currentTarget.dataset.change) return;
       if (nonEmpty(currentDateOpt)) {
           const adjustedDate = adjustDate(currentDateOpt, symbol, +e.currentTarget.dataset.change, true);
-          sendFinalChange(createTimestampChange(getTimestamp(adjustedDate, dateSettings)), true);
+          sendTempChange(createTimestampChange(getTimestamp(adjustedDate, dateSettings)));
       } 
-      else sendFinalChange(createTimestampChange(Date.now()), true);
+      else sendTempChange(createTimestampChange(Date.now()));
     }
   }
 
@@ -174,8 +174,8 @@ export function DatepickerCalendar({
   */
   const onNowBtnClick = () => {
     focusActiveWrapper(popupCalendarRef);
-    sendFinalChange(createTimestampChange(Date.now()), true);
     closePopup();
+    sendFinalChange(createTimestampChange(Date.now()), true);
   }
 
   function onCloseBtnClick() {

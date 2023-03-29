@@ -20,6 +20,7 @@ import {
 	applyChange, 
 	changeToPatch, 
 	createInputChange, 
+	createTimestampChange,
 	DatepickerChange, 
 	DatePickerState, 
 	patchToChange, 
@@ -90,7 +91,7 @@ export function DatePickerInputElement({
         applyChange
     );
 	const sendTempChange = (change: DatepickerChange) => {
-		dateChanged.current = true;
+		if (change.tp === 'dateChange') dateChanged.current = true;
 		onTempChange(change);
 	}
 	const sendFinalChange = (change: DatepickerChange, force = false) => {
@@ -108,7 +109,7 @@ export function DatePickerInputElement({
 	} = useMemo(() => getCurrentProps(currentState, dateSettings, memoInputValue), [currentState, dateSettings])
 
 	const inputRef = useRef<HTMLInputElement>(null)
-	const inputBoxRef = useRef(null)
+	const inputBoxRef = useRef<HTMLDivElement>(null)
 
 	// Interaction with FocusModule (c4e\client\src\extra\focus-module.js) - Excel-style keyboard controls
 	const keyboardEventHandlers = {
@@ -130,8 +131,8 @@ export function DatePickerInputElement({
 
 	function handleCustomDelete(e: CustomEvent) {
 		if (isFocusedInside(inputBoxRef.current)) return;
-		sendTempChange(createInputChange(''));
 		(e.currentTarget as HTMLInputElement).focus();
+		sendTempChange(createInputChange(''));
 	}
 
 	async function handleClipboardWrite(e: CustomEvent) {
@@ -157,7 +158,7 @@ export function DatePickerInputElement({
 		const inputVal = e.detail;
 		sendFinalChange(
 			getOrElse(
-				mapOption(parseStringToDate(inputVal, dateSettings), timestamp => createInputChange(inputVal, timestamp)),
+				mapOption(parseStringToDate(inputVal, dateSettings), timestamp => createTimestampChange(timestamp)),
 				createInputChange(inputVal)
 			),
 			true
@@ -169,10 +170,10 @@ export function DatePickerInputElement({
 
 	const setSelection: (from: number, to: number) => void = useSelectionEditableInput(inputRef)
 	const onTimestampChange: (timestamp: number) => void = onTimestampChangeAction(currentState, dateSettings, sendTempChange)
-	const onInputBlur = getOnBlur(currentState, memoInputValue, sendFinalChange, inputBoxRef, dateSettings)
-	const onInputBoxBlur = getOnInputBoxBlur(currentState, sendFinalChange)
+	const onInputBlur = getOnBlur(currentState, memoInputValue, sendTempChange, inputBoxRef, dateSettings)
+	const onInputBoxBlur = getOnInputBoxBlur(currentState, memoInputValue, sendTempChange, sendFinalChange)
 	const onChange = getOnChange(dateSettings, sendTempChange)
-	const onPopupToggle = getOnPopupToggle(currentDateOpt, currentState, dateSettings, sendFinalChange)
+	const onPopupToggle = getOnPopupToggle(currentDateOpt, currentState, dateSettings, sendTempChange)
 	const onKeyDown = getOnKeyDown(
 		currentDateOpt,
 		dateFormat,
@@ -180,8 +181,9 @@ export function DatePickerInputElement({
 		memoInputValue,
 		onTimestampChange,
 		setSelection,
-		sendFinalChange,
-		inputBoxRef
+		sendTempChange,
+		inputBoxRef,
+		currentState
 	)
 
 	const { focusClass, focusHtml } = useFocusControl(path);
@@ -193,13 +195,11 @@ export function DatePickerInputElement({
 			 onBlur={onInputBoxBlur}			 
 			 {...focusHtml} >
 
-			<div className="inputSubBox">
-				<input ref={inputRef} value={inputValue} onChange={onChange} onKeyDown={onKeyDown} onBlur={onInputBlur} />
-			</div>
+			<input ref={inputRef} value={inputValue} onChange={onChange} onKeyDown={onKeyDown} onBlur={onInputBlur} />
 
 			<button 
 				type='button' 
-				className={`${currentState.popupDate ? 'rotate180deg ' : ''}btnCalendar`} 
+				className={clsx('btnCalendar', currentState.popupDate && 'rotate180deg')}
 				onClick={onPopupToggle} />
 
 			<div className='sideContent'>
