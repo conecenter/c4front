@@ -62,6 +62,10 @@ function getOnKeyDown(
                 setTimeout(() => currTarget.dispatchEvent(new CustomEvent("cTab", { bubbles: true })));
                 break;
             case ARROW_DOWN_KEY:
+                if (e.altKey) {
+                    getOnPopupToggle(currentDateOpt, currentState, dateSettings, sendTempChange)();
+                    break;
+                }
             case ARROW_UP_KEY:
                 if (nonEmpty(currentDateOpt) && nonEmpty(dateFormat)) {
                     const cycleThroughout = !e.ctrlKey;
