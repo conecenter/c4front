@@ -19,6 +19,7 @@ export interface PivotField {
     id: string,
     name: string,
     selected: boolean,
+    type?: string,
     invalid?: boolean
 }
 
@@ -176,8 +177,8 @@ interface PivotFieldProps {
 }
 
 export function PivotField({origin, type, field, dropAction, clickAction}: PivotFieldProps) {
-    const accepts = type !== ItemTypes.FIELD ? [type] : []
-    const [{}, drop] = useDrop({
+    const accepts = origin !== PartNames.FIELDS ? [type] : []
+    const [_, drop] = useDrop({
         accept: accepts,
         hover(item: PivotDragItem, monitor) {
             dropAction(item, origin, monitor.getClientOffset(), true)
