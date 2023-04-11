@@ -19,7 +19,7 @@ export interface PivotField {
     id: string,
     name: string,
     selected: boolean,
-    type?: string,
+    fieldType?: string,
     invalid?: boolean
 }
 
@@ -225,7 +225,7 @@ export function PivotFieldsGroup({ groupName, dropAction, fields }: PivotFieldsG
                 el('span', null, groupName),
             ),
             el('div', null, fields.map(item => el
-                (PivotField, {key: item.id, type: ItemTypes.FIELD, origin: PartNames.FIELDS, field: item, dropAction}))
+                (PivotField, {key: item.id, type: item.fieldType || ItemTypes.FIELD, origin: PartNames.FIELDS, field: item, dropAction}))
             )
         )
     )
