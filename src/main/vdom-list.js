@@ -10,6 +10,7 @@ import {useFocusControl, useGetPath} from "../extra/focus-control.ts"
 import {BindGroupElement} from "../extra/binds/binds-elements"
 import {useHoverExpander} from "../extra/hover-expander"
 import {InputsSizeContext} from "../extra/dom-utils"
+import {useAddEventListener} from "../extra/custom-hooks"
 
 const dragRowIdOf = identityAt('dragRow')
 const dragColIdOf = identityAt('dragCol')
@@ -27,6 +28,8 @@ const GRID_CLASS_NAMES = {
 }
 
 const GRIDCELL_COLSPAN_ALL = 'gridcell-colspan-all'
+
+const NO_PRINT_COLS = ['sel-col', 'expander-col']
 
 //// col hiding
 
@@ -134,8 +137,6 @@ const getGridTemplateColumns = columns => columns.map(col => {
     return `[${key}] ${width}`
 }).join(" ")
 
-const noChildren = []
-
 //todo: for multi grids with overlapping keys per page implement: rootSelector
 // see: x-r-sort-obj-key x-r-sort-order-*
 
@@ -225,8 +226,11 @@ const useValueToServer = (identity, value) => {
     },[value,enqueuePatch])
 }
 
-export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey }) {
-    const children = rawChildren || noChildren//Children.toArray(rawChildren)
+export function GridRoot({ identity, rows: argRows, cols: argCols, children: rawChildren = [], gridKey }) {
+    const [printMode, setPrintMode] = useState(false)
+    const rows = printMode ? argRows.map(row => ({...row, isExpanded: true})) : argRows
+    const cols = printMode ? argCols.filter(col => NO_PRINT_COLS.every(key => !col.colKey.includes(key))) : argCols
+    const children = printMode ? rawChildren.filter(child => NO_PRINT_COLS.every(key => !child.props.colKey.includes(key))) : rawChildren
 
     const [dragData,dragCSSContent,onMouseDown] = useSyncGridDrag({ identity, rows, cols, gridKey })
     const clickAction = useGridClickAction(identity)
@@ -256,7 +260,7 @@ export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey 
 
     const allChildren = useMemo(()=>getAllChildren({
         children,rows,cols,hasHiddenCols,hideElementsForHiddenCols,dragRowKey
-    }),[children,rows,cols,hasHiddenCols,hideElementsForHiddenCols,dragRowKey])
+    }),[children,rows,cols,hasHiddenCols,hideElementsForHiddenCols,dragRowKey,printMode])
 
     const headerRowKeys = rows.filter(row => row.isHeader).map(row => row.rowKey).join(' ')
     const dragBGEl = $("div", { key: "gridBG", className: "gridBG", style: { gridColumn: spanAll, gridRow: spanAll }})
@@ -271,7 +275,14 @@ export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey 
         "header-row-keys": headerRowKeys,
         ref
     }, dragBGEl, ...allChildren)
-    const dragCSSEl = $("style",{dangerouslySetInnerHTML: { __html: dragCSSContent}})
+
+    const domRef = useRef(null);
+    const dragCSSEl = $("style",{ref: domRef, dangerouslySetInnerHTML: { __html: dragCSSContent}})
+
+    const window = domRef.current?.ownerDocument.defaultView;
+    useAddEventListener(window, 'beforeprint', () => setPrintMode(true))
+    useAddEventListener(window, 'afterprint', () => setPrintMode(false))
+
     return $(NoCaptionContext.Provider,{value:true},
         $(InputsSizeContext.Provider,{value:50},
             $(BindGroupElement,{groupId:'grid-list-bind'},dragCSSEl,res)
