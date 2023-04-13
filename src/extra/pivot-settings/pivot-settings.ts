@@ -140,7 +140,7 @@ interface PivotSettingsPartProps {
 
 function PivotSettingsPart({className, state, label, dropAction, clickAction, accepts}: PivotSettingsPartProps) {
     const [{canDrop}, drop] = useDrop(() => ({
-        accept: [ItemTypes.FIELD, accepts],
+        accept: [ItemTypes.FIELD, ...Object.values(ItemTypes).filter(val => val.includes(accepts))],
         canDrop: (pivotItem: PivotDragItem) => 
             pivotItem.dragOrigin !== 'pivotFields' && pivotItem.item.invalid ? false : true,
         drop: (item: PivotDragItem, monitor) => {
