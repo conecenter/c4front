@@ -264,7 +264,7 @@ export function GridRoot({ identity, rows: argRows, cols: argCols, children: raw
 
     const headerRowKeys = rows.filter(row => row.isHeader).map(row => row.rowKey).join(' ')
     const dragBGEl = $("div", { key: "gridBG", className: "gridBG", style: { gridColumn: spanAll, gridRow: spanAll }})
-    const style = { display: "grid", gridTemplateRows, gridTemplateColumns }
+    const style = { display: "grid", gridTemplateRows, gridTemplateColumns, ...printMode && {fontSize: '1vw'} }
     const res = $("div", {
         onMouseDown,
         onClickCapture: clickAction,
