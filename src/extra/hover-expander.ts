@@ -49,8 +49,10 @@ export const useHoverExpander = (
         if (align === 'r') offset = widthDiff - left > 0 ? -left : -widthDiff;
         else {
             const viewportWidth = hovered.ownerDocument.documentElement.clientWidth;
-            offset = right + widthDiff > viewportWidth
-                ? -widthDiff - 1 : undefined    // account for possible rounding error
+            offset = right + widthDiff <= viewportWidth
+                ? undefined : left - widthDiff >= 0
+                    ? -widthDiff - 1 : viewportWidth - hovered.scrollWidth < 0
+                        ? -left : viewportWidth - (right + widthDiff)   // -1 accounts for possible rounding error
         }
         return { translate: offset };
     }
