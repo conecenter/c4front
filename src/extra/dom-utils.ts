@@ -1,7 +1,9 @@
 import { createContext } from "react";
 
 const CONE_ANGLE = 0.52;  // 0.52rad ~ 30deg
-const DIRECTION_BONUS = 0.25;
+const DIRECTION_BONUS = 0.2;
+const INTERSECTION_BONUS = 0.25;
+const delta = 2;
 
 interface LineSegmentCoords {
     y: number,
@@ -17,8 +19,11 @@ function calcDistance(from: LineSegmentCoords, to: LineSegmentCoords, coneAngle:
 
     // check if on the same level
     const range = [from.x0, from.x1];
-    if (inRange(to.x0, range) || inRange(to.x1, range) || (to.x0 <= from.x0 && to.x1 >= from.x1)) {
+    if ((to.x0 <= from.x0 && to.x1 >= from.x1) || (to.x0 >= from.x0 - delta && to.x1 <= from.x1 + delta)) {
         return DIRECTION_BONUS * to.y;
+    }
+    if (inRange(to.x0, range) || inRange(to.x1, range)) {
+        return INTERSECTION_BONUS * to.y;
     }
 
     // check if inside the angle

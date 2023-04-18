@@ -46,7 +46,7 @@ export const useHoverExpander = (
         if (widthDiff <= 0) return;
         const { left, right } = hovered.getBoundingClientRect();
         let offset;
-        if (align === 'r') offset = widthDiff - left > 0 ? -left : -widthDiff;
+        if (align === 'r') offset = widthDiff - left > 0 ? -left : -widthDiff - 1;
         else {
             const viewportWidth = hovered.ownerDocument.documentElement.clientWidth;
             offset = right + widthDiff <= viewportWidth
