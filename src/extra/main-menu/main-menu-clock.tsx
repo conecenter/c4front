@@ -24,11 +24,11 @@ interface MainMenuClock {
 const SYNC_INTERVAL = 600000;
 
 const calcOffset = (timestamp: number) => timestamp - Date.now();
-const getInitialState = (offset: number) => Math.abs(offset) < 1000 ? (Date.now() + offset) : null;
 
 function MainMenuClock({identity, serverTime, timestampFormatId, path}: MainMenuClock) {
   const localOffsetRef = useRef(calcOffset(Number(serverTime)));
-  const [timestamp, setTimestamp] = useState<number | null>(getInitialState(localOffsetRef.current));
+  const [isSynced, setIsSynced] = useState(Math.abs(localOffsetRef.current) < 1000);
+  const [timestamp, setTimestamp] = useState(isSynced ? (Date.now() + localOffsetRef.current) : null);
   
   const locale = useUserLocale();
   const pattern = useMemo(() => {
@@ -36,7 +36,7 @@ function MainMenuClock({identity, serverTime, timestampFormatId, path}: MainMenu
     return `${dateFormat ? dateFormat.pattern : 'dd-MM-yyyy'}|HH:mm:ss`;
   }, [locale]);
 
-  const formattedDate = timestamp !== null 
+  const formattedDate = isSynced && timestamp
     ? formatInTimeZone(new Date(timestamp), locale.timezoneId, pattern, {locale: INTL_LOCALES[locale.shortName]})
     : '|';
 
@@ -56,15 +56,18 @@ function MainMenuClock({identity, serverTime, timestampFormatId, path}: MainMenu
 
   // Offset correction after server sync
   useEffect(() => {
-    localOffsetRef.current = calcOffset(Number(serverTime))
+    localOffsetRef.current = calcOffset(Number(serverTime));
+    return () => { setIsSynced(true) };
   }, [serverTime]);
 
   // Clock ticking functionality
   useEffect(() => {
+    if (!isSynced) return;
     const tick = () => setTimestamp(Date.now() + localOffsetRef.current);
     const id = setInterval(tick, 1000);
+    tick();
     return () => clearInterval(id);
-  }, []);
+  }, [isSynced]);
 
   const { focusClass, focusHtml } = useFocusControl(path);
 
