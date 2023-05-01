@@ -1,4 +1,4 @@
-import {cloneElement, createElement as $, useCallback, useEffect, useMemo, useState, useRef} from "react"
+import {cloneElement, createElement as $, useCallback, useEffect, useMemo, useState, useRef, useContext} from "react"
 import clsx from 'clsx'
 
 import {findFirstParent, identityAt, never, sortedWith} from "./vdom-util.js"
@@ -10,7 +10,7 @@ import {useFocusControl, useGetPath} from "../extra/focus-control.ts"
 import {BindGroupElement} from "../extra/binds/binds-elements"
 import {useHoverExpander} from "../extra/hover-expander"
 import {InputsSizeContext} from "../extra/dom-utils"
-import {useAddEventListener} from "../extra/custom-hooks"
+import { PrintContext } from "../extra/print-manager"
 
 const dragRowIdOf = identityAt('dragRow')
 const dragColIdOf = identityAt('dragCol')
@@ -227,7 +227,7 @@ const useValueToServer = (identity, value) => {
 }
 
 export function GridRoot({ identity, rows: argRows, cols: argCols, children: rawChildren = [], gridKey }) {
-    const [printMode, setPrintMode] = useState(false)
+    const printMode = useContext(PrintContext);
     const rows = printMode ? argRows.map(row => ({...row, isExpanded: true})) : argRows
     const cols = printMode ? argCols.filter(col => NO_PRINT_COLS.every(key => !col.colKey.includes(key))) : argCols
     const children = printMode ? rawChildren.filter(child => NO_PRINT_COLS.every(key => !child.props.colKey.includes(key))) : rawChildren
@@ -278,10 +278,6 @@ export function GridRoot({ identity, rows: argRows, cols: argCols, children: raw
 
     const domRef = useRef(null);
     const dragCSSEl = $("style",{ref: domRef, dangerouslySetInnerHTML: { __html: dragCSSContent}})
-
-    const window = domRef.current?.ownerDocument.defaultView;
-    useAddEventListener(window, 'beforeprint', () => setPrintMode(true))
-    useAddEventListener(window, 'afterprint', () => setPrintMode(false))
 
     return $(NoCaptionContext.Provider,{value:true},
         $(InputsSizeContext.Provider,{value:50},
