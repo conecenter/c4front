@@ -29,7 +29,7 @@ function PrintManager({ identity, children, printMode: state, printChildren }: P
 
     // Custom print from server
     useEffect(() => {
-        if (printMode) window?.print();
+        if (printMode) setTimeout(() => window?.print());
     }, [printMode]);
 
     // Make changes for print
