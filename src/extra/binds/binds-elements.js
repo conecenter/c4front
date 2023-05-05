@@ -95,12 +95,12 @@ const log = e => {
 		return () => { }
 }
 
-const GenLabel = label =>  $("span", { className: "bindLabelCssClass" }, label)
-
 const GetButtonCaption = (keyData, buttonCaption) => {
-	const getLabel = (label) => { return [GenLabel(label), buttonCaption] }
-	const buttonKeyLabel = (keyData != null && keyData.label != null && keyData.label != "") ? getLabel(keyData.label) : [buttonCaption];
-	return buttonKeyLabel;
+	const getLabel = (label) => {
+		const labelEl = $("span", { className: "bindLabelCssClass" }, label);
+		return [labelEl, label !== buttonCaption ? buttonCaption : undefined];
+	}
+	return (keyData != null && keyData.label != null && keyData.label != "") ? getLabel(keyData.label) : [buttonCaption];
 }
 
 const NVL = (data, def) => {
