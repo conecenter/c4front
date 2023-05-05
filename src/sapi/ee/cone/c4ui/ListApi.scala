@@ -157,6 +157,14 @@ case class NoReceiver[C]() extends Receiver[C] {
     children: ViewRes = Nil,
   ): ToChildPair
   //
+  @c4el("PrintManager") def printManager(
+    key: String,
+    children: ViewRes,
+    printChildren: ViewRes = Nil,
+    printMode: Boolean = false,
+    receiver: Receiver[C] = NoReceiver[C],
+  ): ToChildPair
+  //
   @c4el("Highlighter") def highlighter(
     key: String,
     attrName: HighlightByAttr,

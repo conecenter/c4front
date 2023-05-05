@@ -1,4 +1,5 @@
 
+import clsx from "clsx"
 import {createElement as $,cloneElement} from "react"
 import {em,sum,findLastIndex} from "./vdom-util.js"
 import {useWidths} from "../main/sizes.js"
@@ -91,7 +92,7 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
     const filterGroupElements = groupedFilters.flatMap(({items,leftWidth},rowIndex)=>{
         const proportion = Math.min(1,leftWidth/sum(items.map(dMinMax)))
         const getWidth = item => item.props.minWidth+dMinMax(item)*proportion
-        return items.map((item,itemIndex)=>$("div",{ key:item.key, style:{
+        return items.map((item,itemIndex)=>$("div",{key:item.key, ...item.props.canHide && {className: 'canHide'}, style:{
             position: "absolute",
             height: em(emPerRow*2),
             top: yRowToEm(rowIndex),
@@ -137,7 +138,7 @@ export function FilterButtonExpander({identity,optButtons:rawOptButtons,children
 }
 
 export function FilterButtonPlace({className,children}){
-    return $("div",{className,style:{height:"2em"}},children)
+    return $("div",{className:clsx('filterButtonPlace',className)},children)
 }
 
 export function FilterItem({className,children}){
