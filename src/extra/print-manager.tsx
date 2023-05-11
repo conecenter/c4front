@@ -40,14 +40,14 @@ function PrintManager({ identity, children, printMode: state, printChildren }: P
     useAddEventListener(window, 'afterprint', () => setIsPrinting(false));
 
     return (
-        <PrintContext.Provider value={printMode} >
+        <>
             <div ref={setElem} className='mainContent'>{children}</div>
             {isPrinting && (
                 <div className='printContent'>
                     <PrintContext.Provider value={true} children={printMode ? printChildren : children} />
                 </div>
             )}
-        </PrintContext.Provider>
+        </>
     );
 }
 
