@@ -1,6 +1,5 @@
 
 import {createElement,useState,useContext,createContext,useCallback,useEffect} from "react"
-import { PrintContext } from "../extra/print-manager"
 
 /********* sync ***************************************************************/
 
@@ -19,12 +18,10 @@ export const useSender = () => useContext(SenderContext)
  * @returns {[SendPatch[], (patch: SendPatch) => void]}
  */
 export const useSync = identity => {
-    // Temporary fix for print mode SSE connection problem
-    const disableSync = useContext(PrintContext);
     const [patches,setPatches] = useState([])
     const sender = useSender()
     const enqueuePatch = useCallback(({onAck,...aPatch})=>{
-        !disableSync && setPatches(aPatches=>[...aPatches,{onAck, ...aPatch, sentIndex: sender.enqueue(identity,aPatch)}])
+        setPatches(aPatches=>[...aPatches,{onAck, ...aPatch, sentIndex: sender.enqueue(identity,aPatch)}])
     },[sender,identity])
     const ack = useContext(patches.length>0 ? AckContext : NoContext)
     useEffect(()=>{

@@ -29,15 +29,16 @@ function PrintManager({ identity, children, printMode: state, printChildren }: P
 
     // Custom print from server
     useEffect(() => {
-        if (printMode) setTimeout(() => {
-            sendFinalChange(false);
-            window?.print();
-        });
+        if (printMode) setTimeout(() => window?.print());
     }, [printMode]);
 
     // Make changes for print
+    const onAfterPrint = () => {
+        setIsPrinting(false);
+        printMode && sendFinalChange(false);
+    }
     useAddEventListener(window, 'beforeprint', () => setIsPrinting(true));
-    useAddEventListener(window, 'afterprint', () => setIsPrinting(false));
+    useAddEventListener(window, 'afterprint', onAfterPrint);
 
     return (
         <>
