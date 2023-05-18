@@ -1,6 +1,7 @@
-import React, { ReactNode, createContext, useLayoutEffect, useRef } from 'react';
+import React, { ReactNode, createContext, useContext, useLayoutEffect, useRef } from 'react';
 import { usePatchSync, Patch } from "./exchange/patch-sync";
 import { useAddEventListener } from "./custom-hooks";
+import { RootBranchContext } from '../main/vdom-hooks';
 
 const DEFAULT_UI_TYPE = 'pointer';
 
@@ -29,11 +30,13 @@ function UiInfoProvider({identity, uiType: state, children}: UiInfoProvider) {
     const {currentState: uiType, sendFinalChange} =
         usePatchSync(identity, 'receiver', state, false, (b) => b, changeToPatch, patchToChange, (prev, ch) => ch);
 
+    const isRootBranch = useContext(RootBranchContext);
+
     const pointerMql = useRef(window.matchMedia("(any-hover: hover) and (any-pointer: fine)"));
 
     const updateUiType = () => {
         const currentUiType: UiType = pointerMql.current.matches ? 'pointer' : 'touch';
-        if (uiType !== currentUiType) sendFinalChange(currentUiType);
+        if (isRootBranch && uiType !== currentUiType) sendFinalChange(currentUiType);
     }
 
     useLayoutEffect(() => { !uiType && updateUiType() }, []);

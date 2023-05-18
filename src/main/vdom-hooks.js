@@ -11,7 +11,8 @@ AckContext.displayName = "AckContext"
 const SenderContext = createContext()
 SenderContext.displayName = "SenderContext"
 
-const RootBranchContext = createContext()
+/** @type {React.Context<boolean>} */
+export const RootBranchContext = createContext(true)
 RootBranchContext.displayName = 'RootBranchContext'
 
 const nonMerged = ack => aPatch => !(aPatch && ack && aPatch.sentIndex <= ack.index)
