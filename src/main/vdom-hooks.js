@@ -11,6 +11,9 @@ AckContext.displayName = "AckContext"
 const SenderContext = createContext()
 SenderContext.displayName = "SenderContext"
 
+const RootBranchContext = createContext()
+RootBranchContext.displayName = 'RootBranchContext'
+
 const nonMerged = ack => aPatch => !(aPatch && ack && aPatch.sentIndex <= ack.index)
 export const useSender = () => useContext(SenderContext)
 
@@ -37,9 +40,10 @@ export const useSync = identity => {
     return [patches,enqueuePatch]
 }
 
-export function createSyncProviders({sender,ack,children}){
+export function createSyncProviders({sender,ack,isRoot,children}){
     return createElement(SenderContext.Provider, {value:sender},
-        createElement(AckContext.Provider, {value:ack}, children)
+        createElement(AckContext.Provider, {value:ack}, 
+            createElement(RootBranchContext.Provider, {value: isRoot}, children))
     )
 }
 
