@@ -1,12 +1,12 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
+import clsx from 'clsx';
 import {formatInTimeZone} from 'date-fns-tz'
 import {identityAt} from '../../main/vdom-util';
 import {useSync} from '../../main/vdom-hooks';
 import {Patch} from '../exchange/input-sync';
 import {useUserLocale} from '../locale';
 import {bg, de, da, et, enGB, lt, pl, ro, ru, uk, it} from 'date-fns/locale';
-import { useFocusControl } from '../focus-control';
-import clsx from 'clsx';
+import {useFocusControl} from '../focus-control';
 
 interface IntlLocales {
   [name: string]: Locale
@@ -28,7 +28,7 @@ const calcOffset = (timestamp: number) => timestamp - Date.now();
 function MainMenuClock({identity, serverTime, timestampFormatId, path}: MainMenuClock) {
   const localOffsetRef = useRef(calcOffset(Number(serverTime)));
   const [isSynced, setIsSynced] = useState(Math.abs(localOffsetRef.current) < 1000);
-  const [timestamp, setTimestamp] = useState(isSynced ? (Date.now() + localOffsetRef.current) : null);
+  const [timestamp, setTimestamp] = useState(isSynced ? (Date.now() + localOffsetRef.current) : 0);
   
   const locale = useUserLocale();
   const pattern = useMemo(() => {
@@ -36,9 +36,12 @@ function MainMenuClock({identity, serverTime, timestampFormatId, path}: MainMenu
     return `${dateFormat ? dateFormat.pattern : 'dd-MM-yyyy'}|HH:mm:ss`;
   }, [locale]);
 
-  const formattedDate = isSynced && timestamp
-    ? formatInTimeZone(new Date(timestamp), locale.timezoneId, pattern, {locale: INTL_LOCALES[locale.shortName]})
-    : '|';
+  const formattedDate = formatInTimeZone(
+    new Date(timestamp),
+    locale.timezoneId,
+    pattern,
+    {locale: INTL_LOCALES[locale.shortName]}
+  );
 
   const [date, time] = formattedDate.split('|');
 
@@ -72,11 +75,11 @@ function MainMenuClock({identity, serverTime, timestampFormatId, path}: MainMenu
   const { focusClass, focusHtml } = useFocusControl(path);
 
   return (
-    <div className={clsx(focusClass,'menuCustomItem dateTimeClock')} {...focusHtml}>
+    <div className={clsx('menuCustomItem dateTimeClock', focusClass, !isSynced && 'unsynced')} {...focusHtml}>
       <span className='dateDisplay'>{date}</span>
       <span>{time}</span>
     </div>
   );
 }
 
-export { MainMenuClock };
+export { MainMenuClock }
