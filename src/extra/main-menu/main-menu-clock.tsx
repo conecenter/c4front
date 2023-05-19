@@ -75,7 +75,11 @@ function MainMenuClock({identity, serverTime, timestampFormatId, path}: MainMenu
   const { focusClass, focusHtml } = useFocusControl(path);
 
   return (
-    <div className={clsx('menuCustomItem dateTimeClock', focusClass, !isSynced && 'unsynced')} {...focusHtml}>
+    <div 
+      style={isSynced ? undefined : {visibility: 'hidden'}} 
+      className={clsx('menuCustomItem dateTimeClock', focusClass)}
+      {...focusHtml}
+    >
       <span className='dateDisplay'>{date}</span>
       <span>{time}</span>
     </div>
