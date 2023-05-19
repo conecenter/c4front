@@ -10,7 +10,8 @@ import {useFocusControl, useGetPath} from "../extra/focus-control.ts"
 import {BindGroupElement} from "../extra/binds/binds-elements"
 import {useHoverExpander} from "../extra/hover-expander"
 import {InputsSizeContext} from "../extra/dom-utils"
-import { PrintContext } from "../extra/print-manager"
+import {PrintContext} from "../extra/print-manager"
+import {UiInfoContext} from "../extra/ui-info-provider"
 
 const dragRowIdOf = identityAt('dragRow')
 const dragColIdOf = identityAt('dragCol')
@@ -29,7 +30,8 @@ const GRID_CLASS_NAMES = {
 
 const GRIDCELL_COLSPAN_ALL = 'gridcell-colspan-all'
 
-const NO_PRINT_COLS = ['sel-col', 'expander-col']
+const SERVICE_COLS = ['sel-col', 'expander-col']
+const isServiceCol = colKey => SERVICE_COLS.some(key => colKey.includes(key))
 
 //// col hiding
 
@@ -134,7 +136,8 @@ const getGridTemplateColumns = (columns,fixedCellsSize) => columns.map(col => {
     const getMaxStr = (width) =>
         width.tp === "bound" ? `${width.max}em` :
         width.tp === "unbound" ? "auto" : never()
-    const width = fixedCellsSize ? `minmax(${col.width.min}em,${getMaxStr(col.width)})` : 'auto'
+    const width = fixedCellsSize || isServiceCol(col.colKey)
+        ? `minmax(${col.width.min}em,${getMaxStr(col.width)})` : 'auto'
     return `[${key}] ${width}`
 }).join(" ")
 
@@ -187,8 +190,6 @@ const useColumnGap = () => { // will not react to element style changes
     return [columnGap,ref]
 }
 
-const hasPointer = () => window.matchMedia("(any-hover: hover) and (any-pointer: fine)").matches
-
 const useScrollbarWidth = (outerWidth,fixedCellsSize) => {
     const scrollbarWidth = useRef(0)
     const calcScrollbarWidth = elem => {
@@ -208,11 +209,10 @@ const getCellDataAttrs = element => {
     return rowKey && colKey ? {rowKey, colKey} : null
 }
 
-const useGridClickAction = (identity,setFixedCellsSize) => {
+const useGridClickAction = identity => {
     const [clickActionPatches, enqueueClickActionPatch] = useSync(clickActionIdOf(identity))
     return useCallback(ev => {
         if (ev.target.closest('.checkBox, button') || ev.ctrlKey && ev.target.closest('.chipItem')) return;
-        setFixedCellsSize(s => !s)
         const cellDataKeys = findFirstParent(getCellDataAttrs)(ev.target)
         if (cellDataKeys && cellDataKeys.rowKey && cellDataKeys.colKey) {
             const headers = {
@@ -246,13 +246,14 @@ const useValueToServer = (identity, value) => {
 export function GridRoot({ identity, rows: argRows, cols: argCols, children: rawChildren = [], gridKey }) {
     const printMode = useContext(PrintContext);
     const rows = printMode ? argRows.map(row => ({...row, isExpanded: true})) : argRows
-    const cols = printMode ? argCols.filter(col => NO_PRINT_COLS.every(key => !col.colKey.includes(key))) : argCols
-    const children = printMode ? rawChildren.filter(child => NO_PRINT_COLS.every(key => !child.props.colKey.includes(key))) : rawChildren
+    const cols = printMode ? argCols.filter(col => !isServiceCol(col.colKey)) : argCols
+    const children = printMode ? rawChildren.filter(child => !isServiceCol(child.props.colKey)) : rawChildren
 
-    const [fixedCellsSize, setFixedCellsSize] = useState(!hasPointer()) // TODO: remove negation
+    const uiType = useContext(UiInfoContext)
+    const fixedCellsSize = uiType === 'pointer'
 
     const [dragData,dragCSSContent,onMouseDown] = useSyncGridDrag({ identity, rows, cols, gridKey })
-    const clickAction = useGridClickAction(identity, setFixedCellsSize)
+    const clickAction = useGridClickAction(identity)
     const keyboardAction = useGridKeyboardAction(identity)
 
     const hasDragRow = useMemo(()=>children.some(c=>c.props.dragHandle==="x"),[children])
