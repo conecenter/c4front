@@ -10,7 +10,7 @@ import {useFocusControl, useGetPath} from "../extra/focus-control.ts"
 import {BindGroupElement} from "../extra/binds/binds-elements"
 import {useHoverExpander} from "../extra/hover-expander"
 import {InputsSizeContext} from "../extra/dom-utils"
-import { PrintContext } from "../extra/print-manager"
+import {PrintContext} from "../extra/print-manager"
 
 const dragRowIdOf = identityAt('dragRow')
 const dragColIdOf = identityAt('dragCol')
@@ -293,26 +293,17 @@ const getAllChildren = ({children,rows,cols,hasHiddenCols,hideElementsForHiddenC
     });
     const expandedElements = getExpandedCells({
         cols: hideElementsForHiddenCols(true,col=>col.colKey)(cols),
-        rows, //: dragRowKey ? rows.filter(row=>row.rowKey!==dragRowKey) : rows,
+        rows: rows.filter(row => rowsWithHiddenContent.has(row.rowKey)),
         children,
-    }).reduce((res, [rowKey, pairs]) => {
-        const cellWithContent = rowsWithHiddenContent.has(rowKey) && $(GridCell, {
+    }).map(([rowKey, pairs]) => $(GridCell, {
             key:`${rowKey}-expanded`,
             gridColumn: spanAll,
             rowKey, rowKeyMod: "-expanded",
             'data-expanded-cell': '',
-            style: {display: "flex", flexFlow: "row wrap", visibility: dragRowKey?"hidden":null},
+            style: dragRowKey ? {visibility: "hidden"} : undefined,
             needsHoverExpander: false,
-            children: $(NoCaptionContext.Provider, {value:false}, pairs.map(([col, cell]) => $("div",{
-                key: cell.key,
-                style: cell.props.children ? {flexBasis: `${col.width.min}em`} : undefined,
-                className: "inputLike",
-                'data-expanded-col-key': col.colKey,
-                children: cell.props.children,
-            })))
-        });
-        return cellWithContent ? res.concat(cellWithContent) : res;
-    }, [])
+            children: $(NoCaptionContext.Provider, {value:false}, pairs.map(([col, cell]) => cell.props.children))
+        }))
     const toExpanderElements = hasHiddenCols ? setupExpanderElements(rows, rowsWithHiddenContent) : hideExpanderElements(cols)
     const allChildren = spanRightElements(cols, toExpanderElements(hideElementsForHiddenCols(false,cell=>cell.props.colKey)([
         ...children, ...expandedElements
