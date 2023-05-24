@@ -36,11 +36,12 @@ function UiInfoProvider({identity, uiType: state, children}: UiInfoProvider) {
     const pointerMql = useRef(window.matchMedia("(any-hover: hover) and (any-pointer: fine)"));
 
     const updateUiType = () => {
+        if (!isRootBranch) return;
         const currentUiType: UiType = pointerMql.current.matches ? 'pointer' : 'touch';
-        if (isRootBranch && uiType !== currentUiType) sendFinalChange(currentUiType);
+        if (uiType !== currentUiType) sendFinalChange(currentUiType);
     }
 
-    useLayoutEffect(() => { !uiType && updateUiType() }, []);
+    useLayoutEffect(() => updateUiType(), []);
 
     useAddEventListener(pointerMql.current, 'change', updateUiType);
 
