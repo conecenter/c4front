@@ -11,6 +11,7 @@ import {BindGroupElement} from "../extra/binds/binds-elements"
 import {useHoverExpander} from "../extra/hover-expander"
 import {InputsSizeContext} from "../extra/dom-utils"
 import {PrintContext} from "../extra/print-manager"
+import {UiInfoContext} from "../extra/ui-info-provider"
 
 const dragRowIdOf = identityAt('dragRow')
 const dragColIdOf = identityAt('dragCol')
@@ -29,7 +30,8 @@ const GRID_CLASS_NAMES = {
 
 const GRIDCELL_COLSPAN_ALL = 'gridcell-colspan-all'
 
-const NO_PRINT_COLS = ['sel-col', 'expander-col']
+const SERVICE_COLS = ['sel-col', 'expander-col']
+const isServiceCol = colKey => SERVICE_COLS.some(key => colKey.includes(key))
 
 //// col hiding
 
@@ -47,8 +49,9 @@ const partitionVisibleCols = (cols, outerWidth) => {
 
 const sortedByHideWill = sortedWith((a, b) => a.hideWill - b.hideWill)
 
-const calcHiddenCols = (cols, outerWidth) => {
-    const [visibleCols, hiddenCols] = partitionVisibleCols(sortedByHideWill(cols), outerWidth)
+const calcHiddenCols = (cols, outerWidth, scrollbarAdjustment = 0) => {
+    // ScrollbarAdjustment fixes resize infinite loop bug when cells sizes are dynamic
+    const [visibleCols, hiddenCols] = partitionVisibleCols(sortedByHideWill(cols), outerWidth + scrollbarAdjustment)
     const hasHiddenCols = hiddenCols.length > 0
     const hiddenColSet = hasHiddenCols && new Set(colKeysOf(hiddenCols))
     const hideElementsForHiddenCols = (mode,toColKey) => (
@@ -128,12 +131,13 @@ export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, spanRi
 const colKeysOf = children => children.map(c => c.colKey)
 
 const getGidTemplateRows = rows => rows.map(o => `[${getGridRow(o)}] auto`).join(" ")
-const getGridTemplateColumns = columns => columns.map(col => {
+const getGridTemplateColumns = (columns,fixedCellsSize) => columns.map(col => {
     const key = getGridCol(col)
-    const maxStr =
-        col.width.tp === "bound" ? `${col.width.max}em` :
-        col.width.tp === "unbound" ? "auto" : never()
-    const width = `minmax(${col.width.min}em,${maxStr})`
+    const getMaxStr = (width) =>
+        width.tp === "bound" ? `${width.max}em` :
+        width.tp === "unbound" ? "auto" : never()
+    const width = fixedCellsSize || isServiceCol(col.colKey)
+        ? `minmax(${col.width.min}em,${getMaxStr(col.width)})` : 'auto'
     return `[${key}] ${width}`
 }).join(" ")
 
@@ -186,6 +190,19 @@ const useColumnGap = () => { // will not react to element style changes
     return [columnGap,ref]
 }
 
+const useScrollbarWidth = (outerWidth,fixedCellsSize) => {
+    const scrollbarWidth = useRef(0)
+    const calcScrollbarWidth = elem => {
+        const {fontSize} = getComputedStyle(elem)
+        const {defaultView: win, body} = elem.ownerDocument
+        return (win.innerWidth - body.clientWidth) / parseFloat(fontSize)
+    }
+    const ref = useCallback(gridElement=>{
+        if (gridElement) scrollbarWidth.current = calcScrollbarWidth(gridElement)
+    },[outerWidth])
+    return fixedCellsSize ? [] : [scrollbarWidth.current,ref]
+}
+
 const getCellDataAttrs = element => {
     const rowKey = element.getAttribute("data-row-key")
     const colKey = element.getAttribute("data-col-key")
@@ -229,8 +246,11 @@ const useValueToServer = (identity, value) => {
 export function GridRoot({ identity, rows: argRows, cols: argCols, children: rawChildren = [], gridKey }) {
     const printMode = useContext(PrintContext);
     const rows = printMode ? argRows.map(row => ({...row, isExpanded: true})) : argRows
-    const cols = printMode ? argCols.filter(col => NO_PRINT_COLS.every(key => !col.colKey.includes(key))) : argCols
-    const children = printMode ? rawChildren.filter(child => NO_PRINT_COLS.every(key => !child.props.colKey.includes(key))) : rawChildren
+    const cols = printMode ? argCols.filter(col => !isServiceCol(col.colKey)) : argCols
+    const children = printMode ? rawChildren.filter(child => !isServiceCol(child.props.colKey)) : rawChildren
+
+    const uiType = useContext(UiInfoContext)
+    const fixedCellsSize = uiType === 'pointer'
 
     const [dragData,dragCSSContent,onMouseDown] = useSyncGridDrag({ identity, rows, cols, gridKey })
     const clickAction = useGridClickAction(identity)
@@ -245,13 +265,16 @@ export function GridRoot({ identity, rows: argRows, cols: argCols, children: raw
 
     const [outerWidth,outerWidthRef] = useWidth()
     const [columnGap,columnGapRef] = useColumnGap()
-    const ref = useMergeRef(outerWidthRef,columnGapRef)
+    const [scrollbarWidth,scrollbarWidthRef] = useScrollbarWidth(outerWidth,fixedCellsSize)
+    const ref = useMergeRef(outerWidthRef,columnGapRef,scrollbarWidthRef)
+
     const contentWidth = outerWidth - columnGap * cols.length
     const { hasHiddenCols, hideElementsForHiddenCols } =
-        useMemo(() => calcHiddenCols(cols, contentWidth), [cols, contentWidth])
+        useMemo(() => calcHiddenCols(cols, contentWidth, scrollbarWidth), [cols, contentWidth])
     const gridTemplateColumns = useMemo(() => getGridTemplateColumns(
-        hideExpander(hasHiddenCols)(hideElementsForHiddenCols(false,col=>col.colKey)(cols))
-    ), [cols, hideElementsForHiddenCols, hasHiddenCols])
+        hideExpander(hasHiddenCols)(hideElementsForHiddenCols(false,col=>col.colKey)(cols)),
+        fixedCellsSize
+    ), [cols, hideElementsForHiddenCols, hasHiddenCols, fixedCellsSize])
 
     useValueToServer(hasHiddenColsIdOf(identity), hasHiddenCols)
 
@@ -270,14 +293,13 @@ export function GridRoot({ identity, rows: argRows, cols: argCols, children: raw
         onClickCapture: clickAction,
         onKeyDown: keyboardAction,
         style,
-        className: "grid",
+        className: clsx("grid", fixedCellsSize ? 'fixedCells' : 'dynamicCells'),
         "data-grid-key": gridKey,
         "header-row-keys": headerRowKeys,
         ref
     }, dragBGEl, ...allChildren)
 
-    const domRef = useRef(null);
-    const dragCSSEl = $("style",{ref: domRef, dangerouslySetInnerHTML: { __html: dragCSSContent}})
+    const dragCSSEl = $("style",{dangerouslySetInnerHTML: { __html: dragCSSContent}})
 
     return $(NoCaptionContext.Provider,{value:true},
         $(InputsSizeContext.Provider,{value:50},
