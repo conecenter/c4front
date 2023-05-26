@@ -1,6 +1,9 @@
-import React, {useState} from "react";
+import React from "react";
 import Lightbox, { SlideImage } from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
+import { useSync } from "../main/vdom-hooks";
+
+const PATCH = { value: '', headers: { "x-r-close": "1" }, skipByPath: false, retry: true };
 
 interface ImageViewer {
     key: string,
@@ -9,24 +12,15 @@ interface ImageViewer {
     slides?: SlideImage[]  // should be stable reference
 }
 
-function ImageViewer({}) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <>
-      <button type="button" onClick={() => setOpen(true)}>
-        Open Lightbox
-      </button>
-
-      <Lightbox
-        open={open}
-        close={() => setOpen(false)}
-        slides={[
-          { src: "./left.jpg" }
-        ]}
-      />
-    </>
-  );
+function ImageViewer({identity, open, slides}: ImageViewer) {
+    const [_, enqueuePatch] = useSync(identity);
+    return (
+        <Lightbox
+            open={open}
+            close={() => enqueuePatch(PATCH)}
+            slides={slides}
+        />
+    );
 }
 
 export {ImageViewer}

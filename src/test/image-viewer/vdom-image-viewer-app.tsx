@@ -1,20 +1,29 @@
 import ReactDOM from "react-dom";
-import {createElement as $} from "react";
+import React, {createElement as $, useState} from "react";
 import {createSyncProviders} from "../../main/vdom-hooks";
 import {ImageViewer} from "../../extra/image-viewer";
 
 function App() {
-    const children = $(ImageViewer, {
-        key: "test",
-        identity: {parent: "test"}
-    });
+    const [open, setOpen] = useState(false);
+
+    const slides = [{ src: "./left.jpg" }];
+    
+    const children = (
+      <>
+        <button type="button" onClick={() => setOpen(true)}>
+          Open Lightbox
+        </button>
+        
+        <ImageViewer key="test" identity={{parent: "test"}} open={open} slides={slides} />
+      </>
+    );
 
     const sender = {
         enqueue: (identity: any, patch: any) => console.log(patch)
     }
     const ack: boolean | null = null;
     const isRoot = true;
-
+    
     return createSyncProviders({sender, ack, isRoot, children});
 }
 
