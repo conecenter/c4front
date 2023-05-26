@@ -1,5 +1,6 @@
 import React from "react";
 import Lightbox, { SlideImage } from "yet-another-react-lightbox";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import "yet-another-react-lightbox/styles.css";
 import { useSync } from "../main/vdom-hooks";
 
@@ -19,6 +20,8 @@ function ImageViewer({identity, open, slides}: ImageViewer) {
             open={open}
             close={() => enqueuePatch(PATCH)}
             slides={slides}
+            plugins={[Zoom]}
+            zoom={{wheelZoomDistanceFactor: 500, pinchZoomDistanceFactor: 200}}
         />
     );
 }
