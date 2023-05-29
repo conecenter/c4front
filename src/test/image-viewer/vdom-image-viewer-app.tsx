@@ -6,7 +6,10 @@ import {ImageViewer} from "../../extra/image-viewer";
 function App() {
     const [open, setOpen] = useState(false);
 
-    const slides = [{ src: "./left.jpg" }];
+    const slides = [
+      { src: "./left.jpg", title: 'Left Side' },
+      { src: "./back.jpg", title: 'Back' }
+    ];
     
     const children = (
       <>
