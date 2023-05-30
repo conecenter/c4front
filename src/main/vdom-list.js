@@ -2,7 +2,7 @@ import {cloneElement, createElement as $, useCallback, useEffect, useMemo, useSt
 import clsx from 'clsx'
 
 import {findFirstParent, identityAt, never, sortedWith} from "./vdom-util.js"
-import {NoCaptionContext, useEventListener, useSync} from "./vdom-hooks.js"
+import {NoCaptionContext, RootBranchContext, useEventListener, useSync} from "./vdom-hooks.js"
 import {useWidth,useMergeRef} from "./sizes.js"
 import {useGridDrag} from "./grid-drag.js"
 import {ESCAPE_KEY} from "./keyboard-keys"
@@ -237,10 +237,11 @@ const useGridKeyboardAction = identity => {
 }
 
 const useValueToServer = (identity, value) => {
+    const isRootBranch = useContext(RootBranchContext)
     const [patches, enqueuePatch] = useSync(identity)
-    useEffect(()=>{
-        enqueuePatch({ value, skipByPath: true, retry: true })
-    },[value,enqueuePatch])
+    useEffect(() => {
+        if (isRootBranch) enqueuePatch({ value, skipByPath: true, retry: true })
+    }, [value, enqueuePatch])
 }
 
 export function GridRoot({ identity, rows: argRows, cols: argCols, children: rawChildren = [], gridKey }) {
