@@ -5,6 +5,7 @@ import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import "yet-another-react-lightbox/plugins/captions.css";
 import "yet-another-react-lightbox/styles.css";
 import { useSync } from "../main/vdom-hooks";
+import { receiverOf } from "../main/vdom-util";
 
 const PATCH = { value: '', headers: { "x-r-close": "1" }, skipByPath: false, retry: true };
 
@@ -22,7 +23,7 @@ interface ImageViewer {
 
 function ImageViewer({identity, open, slides = []}: ImageViewer) {
     const [bodyRef, setBodyRef] = useState<HTMLElement>();
-    const [_, enqueuePatch] = useSync(identity);
+    const [_, enqueuePatch] = useSync(receiverOf(identity));
     return (
         <div ref={elem => setBodyRef(elem?.ownerDocument.body)} className="imageViewerBox">
             <Lightbox
