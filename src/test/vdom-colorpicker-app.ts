@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom"
 import React from "react"
 import {createSyncProviders} from "../main/vdom-hooks";
-import { ColorPicker } from "../extra/ColorPicker";
+import {ColorPicker} from "../extra/color-picker";
 
 const {createElement: $} = React
 
