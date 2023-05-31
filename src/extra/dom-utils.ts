@@ -107,7 +107,9 @@ function elementHasFocus(element?: HTMLElement | null) {
 	return element.contains(activeElement);
 }
 
+const isInstanceOfNode = (elem: EventTarget | null): elem is Node => !!elem && 'nodeType' in elem;
+
 const InputsSizeContext = createContext(20);
 InputsSizeContext.displayName = 'InputsSizeContext';
 
-export { findClosestNode, InputsSizeContext, elementHasFocus };
+export { findClosestNode, InputsSizeContext, elementHasFocus, isInstanceOfNode };

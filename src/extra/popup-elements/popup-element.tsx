@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { usePopupPos } from '../../main/popup';
 import { NoCaptionContext } from '../../main/vdom-hooks';
 import { useAddEventListener } from '../custom-hooks';
-import { elementHasFocus } from '../dom-utils';
+import { elementHasFocus, isInstanceOfNode } from '../dom-utils';
 import { NoFocusContext } from '../labeled-element';
 import { usePopupState } from './popup-manager';
 
@@ -59,7 +59,7 @@ function NewPopupElement({ identity = DEFAULT_IDENTITY, children }: PopupElement
 }
 
 function elementIsInsideElements(target: EventTarget | null, elems: (HTMLElement | null)[]) {
-    if (!(target instanceof Node)) return;
+    if (!isInstanceOfNode(target)) return;
     for (const elem of elems) {
         if (elem?.contains(target)) return true;
     }

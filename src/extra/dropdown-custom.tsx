@@ -1,10 +1,11 @@
-import clsx from 'clsx';
 import React, { ReactNode, useRef, useState } from "react";
+import clsx from 'clsx';
 import { ARROW_DOWN_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY } from '../main/keyboard-keys';
 import { usePopupPos } from '../main/popup';
 import { useSync } from '../main/vdom-hooks';
 import { identityAt } from '../main/vdom-util';
 import { usePatchSync, Patch } from './exchange/patch-sync';
+import { isInstanceOfNode } from './dom-utils';
 import { 
 	BACKSPACE_EVENT, 
 	COPY_EVENT, 
@@ -108,7 +109,7 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 
 	// Event handlers
 	function handleBlur(e: React.FocusEvent) {
-		if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) return;
+		if (isInstanceOfNode(e.relatedTarget) && e.currentTarget.contains(e.relatedTarget)) return;
 		stableInputValue.current = inputValue;
 		sendFinalChange({ mode: 'content', popupOpen: false });
 	}

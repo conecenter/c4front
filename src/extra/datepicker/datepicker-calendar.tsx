@@ -110,8 +110,9 @@ export function DatepickerCalendar({
   const closePopup = () => sendTempChange(createPopupChange(null)); 
 
   function onDateChoice(e: React.MouseEvent) {
-    if (!(e.target instanceof HTMLSpanElement && e.target.dataset.date)) return;
-    const dateValues = e.target.dataset.date.split('-');
+    const target = e.target as HTMLElement;
+    if (!target.dataset.date) return;
+    const dateValues = target.dataset.date.split('-');
     const isDateAvailable = nonEmpty(currentDateOpt);
     const baseDate = isDateAvailable ? currentDateOpt : getDate(Date.now(), dateSettings);
     if (isEmpty(baseDate)) return;

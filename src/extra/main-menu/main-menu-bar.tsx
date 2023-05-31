@@ -11,6 +11,7 @@ import {MenuCustomItem, MenuExecutableItem, MenuItemsGroup, MenuPopupElement, Me
 import {MenuFolderItem} from "./menu-folder-item";
 import {BindGroupElement} from "../binds/binds-elements";
 import {NoCaptionContext} from "../../main/vdom-hooks";
+import {isInstanceOfNode} from "../dom-utils";
 
 const MENU_BAR_PATH = 'main-menu-bar';
 const KEY_MODIFICATOR = { ArrowLeft: -1, ArrowRight: 1 };
@@ -136,7 +137,7 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
   }
 
   function handleMenuBarBlur(e: React.FocusEvent) {
-    if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) return;
+    if (isInstanceOfNode(e.relatedTarget) && e.currentTarget.contains(e.relatedTarget)) return;
     prevFocusedPath.current = null;
     setIsFocused(false);
   }
