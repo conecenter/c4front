@@ -8,7 +8,8 @@ function App() {
 
     const slides = [
       { src: "./left.jpg", title: 'Left Side' },
-      { src: "./back.jpg", title: 'Back' }
+      { src: "./back.jpg", title: 'Back' },
+      { src: "./photo.jpg", title: 'Front' }
     ];
     
     const children = (
@@ -17,7 +18,7 @@ function App() {
           Open Lightbox
         </button>
         
-        <ImageViewer key="test" identity={{parent: "test"}} open={open} slides={slides} />
+        <ImageViewer key="test" identity={{parent: "test"}} index={1} slides={slides} />
       </>
     );
 

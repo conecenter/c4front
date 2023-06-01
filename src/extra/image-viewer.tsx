@@ -1,13 +1,11 @@
-import React, { useState } from "react";
-import Lightbox from "yet-another-react-lightbox";
+import React, { useEffect, useRef, useState } from "react";
+import Lightbox, { ControllerRef } from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
+import Inline from "yet-another-react-lightbox/plugins/inline";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import "yet-another-react-lightbox/plugins/captions.css";
 import "yet-another-react-lightbox/styles.css";
-import { useSync } from "../main/vdom-hooks";
-import { receiverOf } from "../main/vdom-util";
-
-const PATCH = { value: '', headers: { "x-r-close": "1" }, skipByPath: false, retry: true };
+import { Patch, usePatchSync } from "./exchange/patch-sync";
 
 interface Slide {
     src: string,
@@ -17,27 +15,59 @@ interface Slide {
 interface ImageViewer {
     key: string,
     identity: Object,
-    open: boolean,
+    index: number,
     slides?: Slide[]  // should be stable reference
 }
 
-function ImageViewer({identity, open, slides = []}: ImageViewer) {
+// Server exchange
+const changeToPatch = (ch: string) => ({ value: ch });
+const patchToChange = (p: Patch) => p.value;
+
+
+function ImageViewer({identity, index: state, slides = []}: ImageViewer) {
     const [bodyRef, setBodyRef] = useState<HTMLElement>();
-    const [_, enqueuePatch] = useSync(receiverOf(identity));
+
+    const {currentState: index, sendTempChange, sendFinalChange} = 
+        usePatchSync(identity, 'slideChange', state, false, s => s, changeToPatch, patchToChange, (prev, ch) => +ch);
+
+    const controller = useRef<ControllerRef>(null);
+    
+    const startingIndexRef = useRef(index);
+
+    // Slide changes in spy
+    useEffect(() => {
+        const currentIndex = controller.current?.getLightboxState().currentIndex;
+        if (currentIndex !== undefined && currentIndex !== index) {
+            const changed = index - currentIndex;
+            const direction = changed > 0 ? 'next' : 'prev';
+            controller.current?.[direction]({count: Math.abs(changed)});
+        }
+    }, [index]);
+
     return (
         <div ref={elem => setBodyRef(elem?.ownerDocument.body)} className="imageViewerBox">
             <Lightbox
-                open={open}
-                close={() => enqueuePatch(PATCH)}
+                open={true}
+                close={() => sendFinalChange('')}
                 slides={slides}
+                index={startingIndexRef.current}
+                controller={{ref: controller}}
                 portal={{ root: bodyRef }}
                 plugins={[Captions, Zoom]}
-                zoom={{ wheelZoomDistanceFactor: 500, pinchZoomDistanceFactor: 200 }}
-                styles={{ container: { backgroundColor: "rgba(0, 0, 0, .8)" } }}
+                zoom={{
+                    wheelZoomDistanceFactor: 500,
+                    pinchZoomDistanceFactor: 200
+                }}
+                styles={{
+                    container: { backgroundColor: "rgba(0, 0, 0, .8)" }
+                }}
+                on={{
+                    view: ({index: next}) => next !== index && sendTempChange(next.toString())
+                }}
                 render={{
                     buttonPrev: slides.length <= 1 ? () => null : undefined,
                     buttonNext: slides.length <= 1 ? () => null : undefined,
-                }}            
+                }}
             />
         </div>
     );
