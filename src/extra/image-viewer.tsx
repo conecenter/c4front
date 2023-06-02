@@ -58,7 +58,8 @@ function ImageViewer({identity, index: state, slides = []}: ImageViewer) {
                 plugins={[Captions, Counter, Zoom]}
                 zoom={{
                     wheelZoomDistanceFactor: 500,
-                    pinchZoomDistanceFactor: 200
+                    pinchZoomDistanceFactor: 200,
+                    maxZoomPixelRatio: 3
                 }}
                 styles={{
                     container: { backgroundColor: "rgba(0, 0, 0, .8)" }
