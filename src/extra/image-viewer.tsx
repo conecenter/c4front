@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import Lightbox, { ControllerRef } from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
 import Captions from "yet-another-react-lightbox/plugins/captions";
+import "yet-another-react-lightbox/plugins/captions.css";
+import Counter from "yet-another-react-lightbox/plugins/counter";
+import "yet-another-react-lightbox/plugins/counter.css";
 import Inline from "yet-another-react-lightbox/plugins/inline";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
-import "yet-another-react-lightbox/plugins/captions.css";
-import "yet-another-react-lightbox/styles.css";
 import { Patch, usePatchSync } from "./exchange/patch-sync";
 
 interface Slide {
@@ -53,7 +55,7 @@ function ImageViewer({identity, index: state, slides = []}: ImageViewer) {
                 index={startingIndexRef.current}
                 controller={{ref: controller}}
                 portal={{ root: bodyRef }}
-                plugins={[Captions, Zoom]}
+                plugins={[Captions, Counter, Zoom]}
                 zoom={{
                     wheelZoomDistanceFactor: 500,
                     pinchZoomDistanceFactor: 200
@@ -67,6 +69,9 @@ function ImageViewer({identity, index: state, slides = []}: ImageViewer) {
                 render={{
                     buttonPrev: slides.length <= 1 ? () => null : undefined,
                     buttonNext: slides.length <= 1 ? () => null : undefined,
+                }}
+                counter={{ 
+                    container: { style: { top: "unset", bottom: 0 } }
                 }}
             />
         </div>
