@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Lightbox, { ControllerRef } from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import Captions from "yet-another-react-lightbox/plugins/captions";
@@ -18,7 +18,7 @@ interface ImageViewer {
     key: string,
     identity: Object,
     index: number,
-    slides?: Slide[]  // should be stable reference
+    slides?: Slide[]
 }
 
 // Server exchange
@@ -31,6 +31,9 @@ function ImageViewer({identity, index: state, slides = []}: ImageViewer) {
 
     const {currentState: index, sendTempChange, sendFinalChange} = 
         usePatchSync(identity, 'slideChange', state, false, s => s, changeToPatch, patchToChange, (prev, ch) => +ch);
+
+    // Slides should have stable reference
+    const slidesMemo = useMemo(() => slides, [JSON.stringify(slides)]);
 
     const controller = useRef<ControllerRef>(null);
     
@@ -51,7 +54,7 @@ function ImageViewer({identity, index: state, slides = []}: ImageViewer) {
             <Lightbox
                 open={true}
                 close={() => sendFinalChange('')}
-                slides={slides}
+                slides={slidesMemo}
                 index={startingIndexRef.current}
                 controller={{ ref: controller }}
                 portal={{ root: bodyRef }}
