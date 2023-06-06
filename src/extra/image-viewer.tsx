@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import clsx from "clsx";
 import Lightbox, { ControllerRef } from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import Captions from "yet-another-react-lightbox/plugins/captions";
@@ -18,7 +19,8 @@ interface ImageViewer {
     key: string,
     identity: Object,
     index: number,
-    slides?: Slide[]
+    slides?: Slide[],
+    position?: 'fullscreen' | 'inline'
 }
 
 // Server exchange
@@ -26,7 +28,7 @@ const changeToPatch = (ch: string) => ({ value: ch });
 const patchToChange = (p: Patch) => p.value;
 
 
-function ImageViewer({identity, index: state, slides = []}: ImageViewer) {
+function ImageViewer({identity, index: state, slides = [], position}: ImageViewer) {
     const [bodyRef, setBodyRef] = useState<HTMLElement>();
 
     const {currentState: index, sendTempChange, sendFinalChange} = 
@@ -36,8 +38,10 @@ function ImageViewer({identity, index: state, slides = []}: ImageViewer) {
     const slidesMemo = useMemo(() => slides, [JSON.stringify(slides)]);
 
     const controller = useRef<ControllerRef>(null);
-    
+
     const startingIndexRef = useRef(index);
+
+    const inlinePos = position === 'inline';
 
     // Slide changes in spy
     useEffect(() => {
@@ -50,7 +54,7 @@ function ImageViewer({identity, index: state, slides = []}: ImageViewer) {
     }, [index]);
 
     return (
-        <div ref={elem => setBodyRef(elem?.ownerDocument.body)} className="imageViewerBox">
+        <div ref={elem => setBodyRef(elem?.ownerDocument.body)} className={clsx(inlinePos && 'inlineImageViewer')} >
             <Lightbox
                 open={true}
                 close={() => sendFinalChange('')}
@@ -58,7 +62,7 @@ function ImageViewer({identity, index: state, slides = []}: ImageViewer) {
                 index={startingIndexRef.current}
                 controller={{ ref: controller }}
                 portal={{ root: bodyRef }}
-                plugins={[Captions, Counter, Zoom]}
+                plugins={[Captions, Counter, Zoom, ...inlinePos ? [Inline] : []]}
                 zoom={{
                     wheelZoomDistanceFactor: 500,
                     pinchZoomDistanceFactor: 200,
