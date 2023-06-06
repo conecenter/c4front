@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
-import Lightbox, { ControllerRef } from "yet-another-react-lightbox";
+import Lightbox, { ControllerRef, CloseIcon, IconButton } from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import Captions from "yet-another-react-lightbox/plugins/captions";
 import "yet-another-react-lightbox/plugins/captions/captions.css";
@@ -26,13 +26,14 @@ interface ImageViewer {
 // Server exchange
 const changeToPatch = (ch: string) => ({ value: ch });
 const patchToChange = (p: Patch) => p.value;
+const applyChange = (prev: number, ch: string) => ch ? +ch : prev;
 
 
 function ImageViewer({identity, index: state, slides = [], position}: ImageViewer) {
     const [bodyRef, setBodyRef] = useState<HTMLElement>();
 
     const {currentState: index, sendTempChange, sendFinalChange} = 
-        usePatchSync(identity, 'slideChange', state, false, s => s, changeToPatch, patchToChange, (prev, ch) => +ch);
+        usePatchSync(identity, 'slideChange', state, false, s => s, changeToPatch, patchToChange, applyChange);
 
     // Slides should have stable reference
     const slidesMemo = useMemo(() => slides, [JSON.stringify(slides)]);
@@ -53,11 +54,15 @@ function ImageViewer({identity, index: state, slides = [], position}: ImageViewe
         }
     }, [index]);
 
+    const handleClose = () => {
+        controller.current?.close();
+        sendFinalChange('');
+    }
+
     return (
         <div ref={elem => setBodyRef(elem?.ownerDocument.body)} className={clsx(inlinePos && 'inlineImageViewer')} >
             <Lightbox
                 open={true}
-                close={() => sendFinalChange('')}
                 slides={slidesMemo}
                 index={startingIndexRef.current}
                 controller={{ ref: controller }}
@@ -73,8 +78,11 @@ function ImageViewer({identity, index: state, slides = [], position}: ImageViewe
                 }}
                 render={{
                     buttonPrev: slides.length <= 1 ? () => null : undefined,
-                    buttonNext: slides.length <= 1 ? () => null : undefined,
+                    buttonNext: slides.length <= 1 ? () => null : undefined
                 }}
+                toolbar={{ buttons: [
+                    <IconButton key='ACTION_CLOSE' label='Close' icon={CloseIcon} onClick={handleClose} />
+                ]}}
             />
         </div>
     );
