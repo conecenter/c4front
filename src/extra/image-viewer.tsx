@@ -53,7 +53,7 @@ function ImageViewer({identity, index: state, slides = []}: ImageViewer) {
                 close={() => sendFinalChange('')}
                 slides={slides}
                 index={startingIndexRef.current}
-                controller={{ref: controller}}
+                controller={{ ref: controller }}
                 portal={{ root: bodyRef }}
                 plugins={[Captions, Counter, Zoom]}
                 zoom={{
@@ -61,18 +61,12 @@ function ImageViewer({identity, index: state, slides = []}: ImageViewer) {
                     pinchZoomDistanceFactor: 200,
                     maxZoomPixelRatio: 3
                 }}
-                styles={{
-                    container: { backgroundColor: "rgba(0, 0, 0, .8)" }
-                }}
                 on={{
                     view: ({index: next}) => next !== index && sendTempChange(next.toString())
                 }}
                 render={{
                     buttonPrev: slides.length <= 1 ? () => null : undefined,
                     buttonNext: slides.length <= 1 ? () => null : undefined,
-                }}
-                counter={{ 
-                    container: { style: { top: "unset", bottom: 0 } }
                 }}
             />
         </div>
