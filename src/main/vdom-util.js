@@ -15,6 +15,8 @@ export const weakCache = f => {
 
 export const identityAt = key => weakCache(parent => ({ parent, key }))
 
+export const receiverOf = identityAt('receiver')
+
 export const never = o => { console.log(o); throw new Error }
 
 export const sortedWith = f => l => l && [...l].sort(f)
