@@ -53,7 +53,7 @@ function useGetPath(identity: Identity) {
     return path;
 }
 
-function getPath(identity: Identity) {
+/*function getPath(identity: Identity) {
     let path = '';
     let element: Identity | undefined = identity?.parent?.parent;
     while (element) {
@@ -61,6 +61,10 @@ function getPath(identity: Identity) {
         element = element.parent;
     }
     return path;
+}*/
+
+function getPath(ctx: Identity): string {
+    return !ctx ? "" : getPath(ctx.parent!) + (ctx.key ? "/"+ctx.key : "")
 }
 
 export type { FocusControlObj };
