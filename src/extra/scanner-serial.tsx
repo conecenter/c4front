@@ -23,7 +23,7 @@ interface ReadingParams {
     readableStreamClosed: Promise<void>
 }
 
-function ScannerSerialElement({ identity, barcodeReader, children }: ScannerSerialElement) {
+function ScannerSerialElement({ identity, barcodeReader, children=null }: ScannerSerialElement) {
     const [port, setPort] = useState<SerialPort | null>(null);
 
     const readingParamsRef = useRef<ReadingParams | null>(null);
@@ -91,12 +91,7 @@ function ScannerSerialElement({ identity, barcodeReader, children }: ScannerSeri
         barcodeReader ? enableScanner(port) : disableScanner(port);
     }, [port, barcodeReader]);
     
-    return (
-        <>
-            <h1>Serial API Test</h1>
-            {children}
-        </>
-    );
+    return <>{children}</>;
 }
 
 function isSerialSupported() {
