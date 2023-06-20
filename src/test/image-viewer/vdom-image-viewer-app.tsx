@@ -12,7 +12,7 @@ function App() {
       { src: "./photo.jpg", title: 'Front' }
     ];
     
-    const children = (
+    const children = null/*(
       <>
         <button type="button" onClick={() => setOpen(true)}>
           Open Lightbox
@@ -20,7 +20,7 @@ function App() {
         
         <ImageViewer key="test" identity={{parent: "test"}} index={1} slides={slides} />
       </>
-    );
+    );*/
 
     const sender = {
         enqueue: (identity: any, patch: any) => console.log(patch)
