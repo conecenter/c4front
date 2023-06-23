@@ -1,6 +1,7 @@
 import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { useSync } from "../main/vdom-hooks";
 import { identityAt } from "../main/vdom-util";
+import { useLatest } from "./custom-hooks";
 
 /*
  * Reference for scanner interface - OPTICON Universal menu book
@@ -26,7 +27,6 @@ interface ReadingParams {
 
 function ScannerSerialElement({ identity, barcodeReader, children=null }: ScannerSerialElement) {
     const [port, setPort] = useState<SerialPort | null>(null);
-
     const readingParamsRef = useRef<ReadingParams | null>(null);
 
     // Server sync functionality
@@ -40,9 +40,8 @@ function ScannerSerialElement({ identity, barcodeReader, children=null }: Scanne
     // Open & initialize serial port
     useEffect(() => {
         initializePort({auto: true});
-        return () => { closePort() }
     }, []);
-    
+
     async function initializePort(options?: {auto: boolean}) {
         if (!isSerialSupported()) return;
         const openedPort = await openSerialPort(options);
@@ -63,11 +62,11 @@ function ScannerSerialElement({ identity, barcodeReader, children=null }: Scanne
 
         console.log('setupDataReading');
     
-        // Listen to data coming from the serial device.
+        // Listen to data coming from the serial device
         while (true) {
             const { value, done } = await reader.read();
             if (done) {
-                // Allow the serial port to be closed later.
+                // Allow the serial port to be closed later
                 reader.releaseLock();
                 break;
             }
@@ -75,6 +74,7 @@ function ScannerSerialElement({ identity, barcodeReader, children=null }: Scanne
         }
     }
 
+    // Close serial port
     async function closePort() {
         if (!port) return;
         await disableScanner(port);
@@ -86,7 +86,13 @@ function ScannerSerialElement({ identity, barcodeReader, children=null }: Scanne
         await port.close();
         console.log('port is closed');
     }
+    const closePortLatest = useLatest(closePort);
 
+    useEffect(() => {
+        return () => { closePortLatest.current() }
+    }, []);
+
+    // Enable/disable scanner's laser
     useEffect(() => {
         if (!port) return;
         barcodeReader ? enableScanner(port) : disableScanner(port);
