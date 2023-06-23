@@ -8,6 +8,7 @@ import { identityAt } from "../main/vdom-util";
 */
 
 const initialSetupCodes = ['8C','TT','TZ','WA','WD','BAK','A0A','A0U','S1','S7','B0','R8','P'];
+const BAUDRATE = 9600;
 
 const barcodeActionIdOf = identityAt('barcodeAction');
 
@@ -38,13 +39,13 @@ function ScannerSerialElement({ identity, barcodeReader, children=null }: Scanne
 
     // Open & initialize serial port
     useEffect(() => {
-        initializePort();
+        initializePort({auto: true});
         return () => { closePort() }
     }, []);
     
-    async function initializePort() {
+    async function initializePort(options?: {auto: boolean}) {
         if (!isSerialSupported()) return;
-        const openedPort = await openSerialPort();
+        const openedPort = await openSerialPort(options);
         if (openedPort) {
             await initPortSettings(openedPort);
             setupDataReading(openedPort);
@@ -76,6 +77,7 @@ function ScannerSerialElement({ identity, barcodeReader, children=null }: Scanne
 
     async function closePort() {
         if (!port) return;
+        await disableScanner(port);
         if (readingParamsRef.current) {
             const { reader, readableStreamClosed } = readingParamsRef.current;
             reader.cancel();
@@ -86,26 +88,41 @@ function ScannerSerialElement({ identity, barcodeReader, children=null }: Scanne
     }
 
     useEffect(() => {
-        console.log('enable port', port)
         if (!port) return;
         barcodeReader ? enableScanner(port) : disableScanner(port);
     }, [port, barcodeReader]);
     
-    return <>{children}</>;
+    return (
+        <>
+            <button 
+                title='Connect to device'
+                className='btnConnectScanner'
+                style={{ opacity: port ? 0 : 0.2 }}
+                onClick={() => initializePort()}
+            >
+                <img src='/src/test/serial-scanner/connection.svg' />   {/*'/mod/main/ee/cone/core/ui/c4view/connection.svg'*/}
+            </button>
+            {children}
+        </>
+    );
 }
 
 function isSerialSupported() {
     return "serial" in navigator;
 }
 
-async function openSerialPort() {
+// Get all serial ports the user has previously granted the website access to.
+const getPermittedPort = async () => {
+    const ports = await navigator.serial.getPorts();
+    console.log('ports:', ports);
+    if (ports.length === 1) return ports[0];
+}
+
+async function openSerialPort(options?: {auto: boolean}) {
     try {
-        // Get all serial ports the user has previously granted the website access to.
-        const ports = await navigator.serial.getPorts();
-        console.log('ports:', ports);
-        const port = ports.length !== 1 ? await navigator.serial.requestPort() : ports[0];
-        await port.open({ baudRate: 9600 });
-        console.log('opened port');
+        const port = await (options?.auto ? getPermittedPort() : navigator.serial.requestPort());
+        await port?.open({ baudRate: BAUDRATE });
+        port && console.log('opened port', port);
         return port;
     }
     catch (err) {
@@ -117,12 +134,12 @@ async function initPortSettings(port: SerialPort) {
     await executeCommands(port, initialSetupCodes);
 }
 
-function enableScanner(port: SerialPort) {
-    executeCommands(port, ['Q']);
+async function enableScanner(port: SerialPort) {
+    await executeCommands(port, ['Q']);
 }
 
-function disableScanner(port: SerialPort) {
-    executeCommands(port, ['P']);
+async function disableScanner(port: SerialPort) {
+    await executeCommands(port, ['P']);
 }
 
 // TODO: error checking + check port.isOpen?
