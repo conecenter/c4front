@@ -55,22 +55,26 @@ function ScannerSerialElement({ identity, barcodeReader, children=null }: Scanne
     // Barcode reading functionality
     async function setupDataReading(port: SerialPort) {
         const textDecoder = new TextDecoderStream();
-        const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
         const reader = textDecoder.readable.getReader();
-
-        readingParamsRef.current = { reader, readableStreamClosed };
-
-        console.log('setupDataReading');
-    
-        // Listen to data coming from the serial device
-        while (true) {
-            const { value, done } = await reader.read();
-            if (done) {
-                // Allow the serial port to be closed later
-                reader.releaseLock();
-                break;
+        try {
+            const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
+            readingParamsRef.current = { reader, readableStreamClosed };
+            console.log('Setup data reading');
+            // Listen to data coming from the serial device
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) {
+                    // Allow the serial port to be closed later
+                    reader.releaseLock();
+                    break;
+                }
+                sendBarcode(value);
             }
-            sendBarcode(value);
+        } catch (err) {
+            reader.cancel()
+                .catch(err => console.log('Reader closing error:', err));
+            readingParamsRef.current?.readableStreamClosed.catch(() => { /* Ignore the error */ });
+            console.log('Serial port reading error:', err);
         }
     }
 
@@ -78,13 +82,17 @@ function ScannerSerialElement({ identity, barcodeReader, children=null }: Scanne
     async function closePort() {
         if (!port) return;
         await disableScanner(port);
-        if (readingParamsRef.current) {
-            const { reader, readableStreamClosed } = readingParamsRef.current;
-            reader.cancel();
-            await readableStreamClosed.catch(() => { /* Ignore the error */ });
+        try {
+            if (readingParamsRef.current) {
+                const { reader, readableStreamClosed } = readingParamsRef.current;
+                reader.cancel();
+                await readableStreamClosed.catch(() => { /* Ignore the error */ });
+            }
+            await port.close();
+            console.log('port is closed');
+        } catch (err) {
+            console.log('Serial port closing error:', err);
         }
-        await port.close();
-        console.log('port is closed');
     }
     const closePortLatest = useLatest(closePort);
 
@@ -148,22 +156,24 @@ async function disableScanner(port: SerialPort) {
     await executeCommands(port, ['P']);
 }
 
-// TODO: error checking + check port.isOpen?
 async function executeCommands(port: SerialPort, commands: string[]) {
     const toCommand = (str: string) => '\x1b' + str + '\r';
-
     const textEncoder = new TextEncoderStream();
-    const writableStreamClosed = textEncoder.readable.pipeTo(port.writable);
     const writer = textEncoder.writable.getWriter();
-
-    for (const str of commands) {
-        let command = toCommand(str);
-        await writer.write(command);
-        console.log('command:' + str);
+    try {
+        textEncoder.readable.pipeTo(port.writable);
+        for (const str of commands) {
+            let command = toCommand(str);
+            await writer.write(command);
+            console.log('command:' + str);
+        }
+    } catch (err) { 
+        console.log('Serial port writing error:', err);
     }
-    
-    await writer.close();
-    console.log('commands applied')
+    finally {
+        await writer.close()
+            .catch(err => console.log('Writer closing error:', err));
+    }
 }
 
 export { ScannerSerialElement }
