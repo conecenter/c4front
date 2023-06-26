@@ -44,6 +44,7 @@ function ScannerSerialElement({ identity, barcodeReader, children=null }: Scanne
 
     async function initializePort(options?: {auto: boolean}) {
         if (!isSerialSupported()) return;
+        if (port) await closePort();
         const openedPort = await openSerialPort(options);
         if (openedPort) {
             await initPortSettings(openedPort);
