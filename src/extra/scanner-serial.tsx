@@ -123,7 +123,7 @@ function ScannerSerialElement({ identity, barcodeReader, children=null }: Scanne
                 style={{ opacity: port ? 0 : 0.2 }}
                 onClick={() => initializePort()}
             >
-                <img src='/src/test/serial-scanner/connection.svg' />   {/*'/mod/main/ee/cone/core/ui/c4view/connection.svg'*/}
+                <img src='/mod/main/ee/cone/core/ui/c4view/connection.svg' />
             </button>
             {children}
         </>
