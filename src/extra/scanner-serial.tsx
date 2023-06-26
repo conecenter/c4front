@@ -10,6 +10,8 @@ import { useLatest } from "./custom-hooks";
 
 const initialSetupCodes = ['8C','TT','TZ','WA','WD','BAK','A0A','A0U','S1','S7','B0','R8','P'];
 const BAUDRATE = 9600;
+const CR_CHAR = '\r';
+const ESC_CHAR = '\x1b';
 
 const barcodeActionIdOf = identityAt('barcodeAction');
 
@@ -55,6 +57,7 @@ function ScannerSerialElement({ identity, barcodeReader, children=null }: Scanne
 
     // Barcode reading functionality
     async function setupDataReading(port: SerialPort) {
+        const isLastChunk = (value: string) => value[value.length - 1] === CR_CHAR;
         const textDecoder = new TextDecoderStream();
         const reader = textDecoder.readable.getReader();
         try {
@@ -62,6 +65,7 @@ function ScannerSerialElement({ identity, barcodeReader, children=null }: Scanne
             readingParamsRef.current = { reader, readableStreamClosed };
             console.log('Setup data reading');
             // Listen to data coming from the serial device
+            let codeValue = '';
             while (true) {
                 const { value, done } = await reader.read();
                 if (done) {
@@ -69,7 +73,11 @@ function ScannerSerialElement({ identity, barcodeReader, children=null }: Scanne
                     reader.releaseLock();
                     break;
                 }
-                sendBarcode(value);
+                codeValue += value;
+                if (isLastChunk(value)) {
+                    sendBarcode(codeValue);
+                    codeValue = '';
+                }
             }
         } catch (err) {
             reader.cancel()
@@ -158,7 +166,7 @@ async function disableScanner(port: SerialPort) {
 }
 
 async function executeCommands(port: SerialPort, commands: string[]) {
-    const toCommand = (str: string) => '\x1b' + str + '\r';
+    const toCommand = (str: string) => ESC_CHAR + str + CR_CHAR;
     const textEncoder = new TextEncoderStream();
     const writer = textEncoder.writable.getWriter();
     try {
