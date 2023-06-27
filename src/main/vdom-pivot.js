@@ -5,9 +5,9 @@ import {NoCaptionContext, useSync} from "./vdom-hooks.js";
 const fromKey = key => CSS.escape(`${key}-from`)
 const toKey = key => CSS.escape(`${key}-to`)
 
-const wrapRangeStr = (key,content) => (
+/*const wrapRangeStr = (key,content) => (
     `${fromKey(key)}${content}${toKey(key)}`
-)
+)*/
 
 const em = v => `${v}em`
 

@@ -79,21 +79,13 @@ const BindingButton = (props) => {
 	const noAction = !(props.onClick || props.onChange) ? {noop: 1} : {}
 	return $("button", {
 		...noAction,
-		title: props.hint, className, key: "btn", 
+		title: props.hint, className, key: "btn",
 		style, ref: elem, ...focusHtml,
 		onMouseOver: onMouseOver(true), onMouseOut: onMouseOver(false),
 		onTouchStart: onTouchStart(true), onTouchEnd: onTouchStart(false)
 	}, props.children)
 }
 */
-
-const log = e => {
-	if (e && e.ownerDocument && e.ownerDocument.defaultView)
-		return () => { }
-	// return e.ownerDocument.defaultView.console.log
-	else
-		return () => { }
-}
 
 const GetButtonCaption = (keyData, buttonCaption) => {
 	const getLabel = (label) => {
@@ -112,7 +104,7 @@ const NVL = (data, def) => {
 }
 
 const BindingElement = (props) => {
-	const { children, buttonCaption, bindSrcId, onChange, onClick, prioritized, elemType } = props
+	const { children, buttonCaption, bindSrcId, onChange, onClick, prioritized/*, elemType*/ } = props
 	// const actionElemType = elemType || 'button'
 	const [isValid, setIsValid] = useState(false)
 	const groupContext = useContext(OnPageBindContext)
@@ -141,11 +133,11 @@ const BindingElement = (props) => {
 	const callBack = () => onChange?.({
 		target: {
 			headers: { "x-r-action": "change" },
-			value: "1" 
+			value: "1"
 		}
 	})
 
-	const findFirstParent2 = get => el => el && get(el) || el && findFirstParent2(get)(el.parentElement)
+	// const findFirstParent2 = get => el => el && get(el) || el && findFirstParent2(get)(el.parentElement)
 
 	/* useEffect(() => {
 		if (elem !== null) {
@@ -174,7 +166,7 @@ const BindingElement = (props) => {
 
 const BindGroupElement = (props) => {
 	const { bindSrcId, groupId, showBtn, forceAtStart, additionChange, additionChangeOnClose, children } = props
-	const { activeBindGroup, updateActiveGroup, addGroup, removeGroup, escapeBindSrcId, haveBackOption,
+	const { activeBindGroup, /*updateActiveGroup,*/ addGroup, removeGroup, escapeBindSrcId, haveBackOption,
 		goBackInHistory, isBindMode } = useBinds()
 
 	if (!isBindMode) return children
@@ -193,12 +185,12 @@ const BindGroupElement = (props) => {
 		//	if (additionChange) additionChange(event)
 	}
 
-	const onFocusChangeFn = (groupId, eventName) => {
+	/*const onFocusChangeFn = (groupId, eventName) => {
 		return (event) => {
 			console.log("onFocusChange: " + eventName)
 			updateActiveGroup(groupId)
 		}
-	}
+	}*/
 
 	const getBtnProps = (bSrcId, action) => ({
 		bindSrcId: bSrcId,

@@ -149,13 +149,13 @@ const KeyBindingsManager = ({ links, children, bindSrcId, escapeBindSrcId, noTou
     children: ""
   }
   const switchBtn = (isBindMode && drawSwitchBtn) ? [$(BindingElement, { ...btnProps }, ["Switch"])] : []
-  const backBtnProps = {
+  /*const backBtnProps = {
     escapeBindSrcId,
     onChange: goBackInHistory,
     children: ""
   }
   const drawBackButton = true
-  const backBtn = (isBindMode && drawSwitchBtn && drawBackButton) ? [$(BindingElement, { ...backBtnProps }, ["Back"])] : []
+  const backBtn = (isBindMode && drawSwitchBtn && drawBackButton) ? [$(BindingElement, { ...backBtnProps }, ["Back"])] : []*/
 
   const footer = isBindMode && drawSwitchBtn
     ? [$("div", {className: "footerForBinds bottom-row", 'data-path': '/KeyBindingsManager/footerForBinds'}, [...switchBtn])] : []
