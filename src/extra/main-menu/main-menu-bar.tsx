@@ -2,7 +2,7 @@ import React, {createContext, ReactElement, useCallback, useContext, useEffect, 
 import clsx from 'clsx';
 import {Expander, ExpanderArea} from '../../main/expander-area';
 import {useInputSync} from '../exchange/input-sync';
-import {handleArrowUpDown, handleMenuBlur, patchToState, stateToPatch} from './main-menu-utils';
+import {useHandleArrowUpDown, handleMenuBlur, patchToState, stateToPatch} from './main-menu-utils';
 import {MainMenuClock} from './main-menu-clock';
 import {ScrollInfoContext} from '../scroll-info-context';
 import {PathContext, useFocusControl} from "../focus-control";
@@ -10,14 +10,14 @@ import {ARROW_DOWN_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY, M_
 import {MenuCustomItem, MenuExecutableItem, MenuItemsGroup, MenuPopupElement, MenuUserItem} from './main-menu-items';
 import {MenuFolderItem} from "./menu-folder-item";
 import {BindGroupElement} from "../binds/binds-elements";
-import {NoCaptionContext} from "../../main/vdom-hooks";
+import {NoCaptionContext, useSender} from "../../main/vdom-hooks";
 import {isInstanceOfNode} from "../dom-utils";
 
 const MENU_BAR_PATH = 'main-menu-bar';
 const KEY_MODIFICATOR = { ArrowLeft: -1, ArrowRight: 1 };
 const VISIBLE_CHILD_SEL = ':not([style*="visibility: hidden"] *)';
 
-type OnArrowLeftRight = (path: string, elem: HTMLElement, key: 'ArrowLeft' | 'ArrowRight', isOpened: boolean) => void;
+type OnArrowLeftRight = (identity: Object, elem: HTMLElement, key: 'ArrowLeft' | 'ArrowRight', isOpened: boolean) => void;
 
 interface MenuControlsContext { 
   onArrowLeftRight?: OnArrowLeftRight, 
@@ -55,6 +55,8 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
 
   const currentPath = useContext(PathContext);
   const prevFocusedPath = useRef<string | null>(null);
+
+  const { ctxToPath } = useSender();  
 
   const scrollPos = useContext(ScrollInfoContext);
 
@@ -108,7 +110,7 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
         const isBurgerMenu = domRef.current?.matches(VISIBLE_CHILD_SEL);
         if (isBurgerMenu) setFinalState({ opened: true });
         window!.scrollTo({top: 0});
-        const firstFocusablePath = leftChildren[0].props.path;
+        const firstFocusablePath = ctxToPath(leftChildren[0].props.identity);
         const pathSelector = `[data-path='${firstFocusablePath}']`;
         const firstFocusableItem: HTMLElement | null = isBurgerMenu 
             ? domRef.current!.querySelector(pathSelector)
@@ -145,19 +147,20 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
   // Handling menu items controls via ArrowLeft/ArrowRight
   const ready = useRef(true);
   const setReadyArrowLeftRight = useCallback(() => ready.current = true, []);
-  const onArrowLeftRight: OnArrowLeftRight = useCallback((path, elem, key, isOpened) => {
+  const onArrowLeftRight: OnArrowLeftRight = useCallback((identity, elem, key, isOpened) => {
     if (!ready.current) return;
     ready.current = false;
     const menuItems = [...leftChildren, ...(rightChildren || [])];
     const doc =  elem.ownerDocument;
-    const openedMenuFolderIndex = menuItems.findIndex(child => child.props.path === path);
+    const path = ctxToPath(identity);
+    const openedMenuFolderIndex = menuItems.findIndex(child => ctxToPath(child.props.identity) === path);
     if (openedMenuFolderIndex === -1 || !doc) return;
     const nextMenuItemIndex = openedMenuFolderIndex + KEY_MODIFICATOR[key];
     if (nextMenuItemIndex < 0 || nextMenuItemIndex >= menuItems.length) {
       ready.current = true;
       return;
     }
-    const nextFocusablePath = menuItems[nextMenuItemIndex].props.path;
+    const nextFocusablePath = ctxToPath(menuItems[nextMenuItemIndex].props.identity);
     const selector = `[data-path='${nextFocusablePath}']${VISIBLE_CHILD_SEL}`;
     const nextFocusableItem: HTMLElement | null = doc.querySelector(selector);
     nextFocusableItem?.focus();
@@ -227,11 +230,12 @@ interface BurgerMenu {
 }
 
 function BurgerMenu({opened, domRef, setFinalState, children}: BurgerMenu) {
-  const { focusClass, focusHtml } = useFocusControl('burgerMenu');
+  const { focusClass, focusHtml } = useFocusControl({ key: 'burgerMenu' });
 
   const currentPath = useContext(PathContext);
 
   // Keyboard controls logic
+  const handleArrowUpDown = useHandleArrowUpDown();
   const keyboardOperation = useRef(false);
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {

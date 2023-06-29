@@ -27,7 +27,6 @@ function App() {
                 current: false,
                 state: { opened: false },
                 icon: '../main-menu/main_console.svg',
-                path: 'menuFolderItem-1',
                 children: [
                     $(MenuExecutableItem, {
                         key: 'menuExecutableItem-1',
@@ -76,7 +75,6 @@ function App() {
                         name: 'Reports about finances',
                         current: false,
                         state: { opened: false },
-                        path: 'menuFolderItem-18',
                         icon: '',
                         children: [
                             $(MenuExecutableItem, {
@@ -110,7 +108,6 @@ function App() {
                 name: 'Registers',
                 current: false,
                 state: { opened: false },
-                path: 'menuFolderItem-2',
                 icon: '../main-menu/thermometer.svg'
             }),
             $(MenuFolderItem, {
@@ -119,7 +116,6 @@ function App() {
                 name: 'Reports',
                 current: false,
                 state: { opened: false },
-                path: 'menuFolderItem-3',
                 icon: ''
             }),
             $(MenuFolderItem, {
@@ -129,7 +125,6 @@ function App() {
                 current: false,
                 state: { opened: false },
                 icon: '../main-menu/train.svg',
-                path: 'menuFolderItem-4',
                 children: [
                     $(MenuFolderItem, {
                         key: 'menuFolderItem-11',
@@ -138,7 +133,6 @@ function App() {
                         current: false,
                         state: { opened: false },
                         icon: '',
-                        path: 'menuFolderItem-11',
                         children: [
                             $(MenuExecutableItem, {
                                 key: 'menuExecutableItem-1',
@@ -169,7 +163,6 @@ function App() {
                         name: 'Cargo',
                         current: false,
                         state: { opened: false },
-                        path: 'menuFolderItem-12',
                         icon: ''
                     }),
                     $(MenuFolderItem, {
@@ -178,7 +171,6 @@ function App() {
                         name: 'Service',
                         current: false,
                         state: { opened: false },
-                        path: 'menuFolderItem-13',
                         icon: ''
                     }),
                     $(MenuFolderItem, {
@@ -187,7 +179,6 @@ function App() {
                         name: 'Document Flow',
                         current: false,
                         state: { opened: false },
-                        path: 'menuFolderItem-14',
                         icon: ''
                     })
                 ]
@@ -199,7 +190,6 @@ function App() {
                 current: false,
                 state: { opened: false },
                 icon: '',
-                path: 'menuFolderItem-5',
                 children: [
                     $(MenuFolderItem, {
                         key: 'menuFolderItem-11',
@@ -208,7 +198,6 @@ function App() {
                         current: false,
                         state: { opened: false },
                         icon: '',
-                        path: 'menuFolderItem-111',
                         children: [
                             $(MenuExecutableItem, {
                                 key: 'menuExecutableItem-1',
@@ -239,7 +228,6 @@ function App() {
                         name: 'Cargo',
                         current: false,
                         state: { opened: false },
-                        path: 'menuFolderItem-12',
                         icon: ''
                     }),
                     $(MenuFolderItem, {
@@ -248,7 +236,6 @@ function App() {
                         name: 'Service',
                         current: false,
                         state: { opened: false },
-                        path: 'menuFolderItem-13',
                         icon: ''
                     }),
                     $(MenuFolderItem, {
@@ -257,7 +244,6 @@ function App() {
                         name: 'Document Flow',
                         current: false,
                         state: { opened: false },
-                        path: 'menuFolderItem-14',
                         icon: ''
                     })
                 ]
@@ -269,7 +255,6 @@ function App() {
                 current: true,
                 state: { opened: false },
                 icon: '',
-                path: 'menuFolderItem-6',
                 children: [
                     $(MenuExecutableItem, {
                         key: 'menuExecutableItem-1',
@@ -312,7 +297,6 @@ function App() {
                         name: 'Reports about finances',
                         current: false,
                         state: { opened: false },
-                        path: 'menuFolderItem-17',
                         icon: ''
                     }),
                 ]
@@ -342,7 +326,6 @@ function App() {
                 current: false,
                 state: { opened: false },
                 icon: '',
-                path: 'menuFolderItem-21',
                 children: [
                     $(MenuExecutableItem, {
                         key: 'menuExecutableItem-21',
@@ -383,7 +366,6 @@ function App() {
                 longName: 'developer',
                 current: false,
                 state: { opened: false },
-                path: 'menuFolderItem-22',
                 icon: '',
                 children: [
                     $(MenuFolderItem, {
@@ -392,7 +374,6 @@ function App() {
                         name: 'Role, Switch to',
                         current: false,
                         state: { opened: false },
-                        path: 'menuFolderItem-221',
                         icon: ''
                     }),
                     $(MenuFolderItem, {
@@ -401,7 +382,6 @@ function App() {
                         name: 'Active Role',
                         current: false,
                         state: { opened: false },
-                        path: 'menuFolderItem-222',
                         icon: '../main-menu/roles.svg'
                     }),
                     $(MenuExecutableItem, {

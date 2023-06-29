@@ -20,7 +20,7 @@ sealed trait DatePickerServerState extends ToJson
 @c4tagSwitch("FrontApp") trait InputServerState extends PopupServerState
 
 @c4tags("FrontApp") trait DatePickerTags[C] {
-  @c4elPath("DatePickerInputElement") def datePicker(
+  @c4el("DatePickerInputElement") def datePicker(
     key: String,
     state: PopupServerState,
     timestampFormatId: Int,

@@ -9,6 +9,7 @@ import { MenuFolderItem } from './menu-folder-item';
 import { BindingElement } from '../binds/binds-elements';
 import { useBinds } from '../binds/key-binding';
 import { focusFirstMenuItem } from './main-menu-utils';
+import { useSender } from '../../main/vdom-hooks';
 
 
 interface MenuExecutableItem {
@@ -16,15 +17,14 @@ interface MenuExecutableItem {
 	identity: Object,
     name: string,
     current: boolean,
-    path?: string,
     icon?: string,
     bindSrcId?: string
 }
 
-function MenuExecutableItem({identity, name, current, path, icon, bindSrcId}: MenuExecutableItem) {
+function MenuExecutableItem({identity, name, current, icon, bindSrcId}: MenuExecutableItem) {
     const { clicked, onClick } = useClickSync(identity, 'receiver');
 
-    const { focusClass, focusHtml } = useFocusControl(path);
+    const { focusClass, focusHtml } = useFocusControl(identity);
 
     const { isBindMode } = useBinds();
 
@@ -57,12 +57,11 @@ function MenuExecutableItem({identity, name, current, path, icon, bindSrcId}: Me
 interface MenuCustomItem {
     key: string,
 	identity: Object,
-    path?: string,
     children?: ReactNode
 }
 
-function MenuCustomItem({path, children}: MenuCustomItem) {
-    const { focusClass, focusHtml } = useFocusControl(path);
+function MenuCustomItem({identity, children}: MenuCustomItem) {
+    const { focusClass, focusHtml } = useFocusControl(identity);
 
     return (
         <div className={clsx(focusClass, 'menuCustomItem')} {...focusHtml} >
@@ -81,12 +80,13 @@ interface MenuPopupElement {
 function MenuPopupElement({popupLrMode, keyboardOperation, children}: MenuPopupElement) {
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
     const [popupPos] = usePopupPos(popupElement, popupLrMode);
+    const { ctxToPath } = useSender();
 
     const hasIcon = children ? children.some(hasIconProp) : false;
 
     useEffect(() => {
         if (popupPos.visibility !== 'hidden' && keyboardOperation.current) {
-            focusFirstMenuItem(popupElement, children);
+            focusFirstMenuItem(popupElement, ctxToPath, children );
             keyboardOperation.current = false;
         }
         return () => { 
@@ -134,7 +134,6 @@ interface MenuUserItem {
     longName: string,
     current: boolean,
     state: MenuItemState,
-    path: string,
     icon?: string,
     bindSrcId?: string,
     groupId?: string,

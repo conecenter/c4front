@@ -17,15 +17,14 @@ interface MainMenuClock {
   key: string,
   identity: Object,
   serverTime: string,
-  timestampFormatId: number,
-  path: string
+  timestampFormatId: number
 }
 
 const SYNC_INTERVAL = 600000;
 
 const calcOffset = (timestamp: number) => timestamp - Date.now();
 
-function MainMenuClock({identity, serverTime, timestampFormatId, path}: MainMenuClock) {
+function MainMenuClock({identity, serverTime, timestampFormatId}: MainMenuClock) {
   const localOffsetRef = useRef(calcOffset(Number(serverTime)));
   const [isSynced, setIsSynced] = useState(Math.abs(localOffsetRef.current) < 1000);
   const [timestamp, setTimestamp] = useState(isSynced ? (Date.now() + localOffsetRef.current) : 0);
@@ -72,7 +71,7 @@ function MainMenuClock({identity, serverTime, timestampFormatId, path}: MainMenu
     return () => clearInterval(id);
   }, [isSynced]);
 
-  const { focusClass, focusHtml } = useFocusControl(path);
+  const { focusClass, focusHtml } = useFocusControl(identity);
 
   return (
     <div 

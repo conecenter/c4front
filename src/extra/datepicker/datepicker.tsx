@@ -60,7 +60,6 @@ interface DatePickerProps {
 	timestampFormatId: number
 	userTimezoneId?: string
 	deferredSend?: boolean,
-	path?: string,
 	children?: ReactNode[]
 }
 
@@ -70,7 +69,6 @@ export function DatePickerInputElement({
 		timestampFormatId,
 		userTimezoneId,
 		deferredSend,
-		path,
 		children
 }: DatePickerProps) {
 	const locale = useUserLocale()
@@ -186,7 +184,7 @@ export function DatePickerInputElement({
 		currentState
 	)
 
-	const { focusClass, focusHtml } = useFocusControl(path);
+	const { focusClass, focusHtml } = useFocusControl(identity);
 
   	return (
 		<div ref={inputBoxRef} 

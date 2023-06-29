@@ -4,7 +4,7 @@ import { useInputSync } from '../exchange/input-sync';
 import { PathContext, useFocusControl } from '../focus-control';
 import { MenuItemState, MenuControlsContext } from './main-menu-bar';
 import { MenuItem, MenuItemsGroup, MenuPopupElement } from './main-menu-items';
-import { handleArrowUpDown, handleMenuBlur, stateToPatch } from './main-menu-utils';
+import { useHandleArrowUpDown, handleMenuBlur, stateToPatch } from './main-menu-utils';
 import {
     ARROW_DOWN_KEY,
     ARROW_LEFT_KEY,
@@ -15,6 +15,7 @@ import {
 } from '../../main/keyboard-keys';
 import { BindGroupElement } from '../binds/binds-elements';
 import { useBinds } from '../binds/key-binding';
+import { useSender } from '../../main/vdom-hooks';
 
 const ARROW_DOWN_URL = '/mod/main/ee/cone/core/ui/c4view/arrow-down.svg';
 const ARROW_DOWN_ICON = (
@@ -30,7 +31,6 @@ interface MenuFolderItem {
     shortName?: string,
     current: boolean,
     state: MenuItemState,
-    path: string,
     bindSrcId?: string,
     groupId?: string,
     icon?: string,
@@ -38,12 +38,14 @@ interface MenuFolderItem {
 }
 
 function MenuFolderItem(props: MenuFolderItem) {
-    const {identity, name, shortName, current, state, icon, path, bindSrcId, groupId, children} = props;
+    const {identity, name, shortName, current, state, icon, bindSrcId, groupId, children} = props;
 
     const {
         currentState: { opened },
         setFinalState
     } = useInputSync(identity, 'receiver', state, false, p => state, s => s, stateToPatch);
+
+    const { ctxToPath } = useSender();
 
     const menuFolderRef = useRef<HTMLDivElement>(null);
     const menuFolder = menuFolderRef.current;
@@ -53,13 +55,14 @@ function MenuFolderItem(props: MenuFolderItem) {
         if (isPopupChild(menuFolder)) setPopupLrMode(true);
     });
 
-    const { focusClass, focusHtml } = useFocusControl(path);
+    const { focusClass, focusHtml } = useFocusControl(identity);
     const currentPath = useContext(PathContext);
 
     // Keyboard controls logic
     const {onArrowLeftRight, setReadyArrowLeftRight} = useContext(MenuControlsContext);
     useEffect(() => { if (opened) setReadyArrowLeftRight?.() }, [opened]);
 
+    const handleArrowUpDown = useHandleArrowUpDown();
     const keyboardOperation = useRef(false);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -67,7 +70,7 @@ function MenuFolderItem(props: MenuFolderItem) {
             case ARROW_RIGHT_KEY:
                 if (!popupLrMode) {
                     e.stopPropagation();
-                    if (onArrowLeftRight && menuFolder) onArrowLeftRight(path, menuFolder, e.key, opened);
+                    if (onArrowLeftRight && menuFolder) onArrowLeftRight(identity, menuFolder, e.key, opened);
                     break;
                 }
             case ENTER_KEY:
@@ -80,7 +83,7 @@ function MenuFolderItem(props: MenuFolderItem) {
             case ARROW_LEFT_KEY:
                 if (!popupLrMode) {
                     e.stopPropagation();
-                    if (onArrowLeftRight && menuFolder) onArrowLeftRight(path, menuFolder, e.key, opened);
+                    if (onArrowLeftRight && menuFolder) onArrowLeftRight(identity, menuFolder, e.key, opened);
                     break;
                 }
             case ESCAPE_KEY:
