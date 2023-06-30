@@ -303,7 +303,7 @@ export function GridRoot({ identity, rows: argRows, cols: argCols, children: raw
     const dragCSSEl = $("style",{dangerouslySetInnerHTML: { __html: dragCSSContent}})
 
     return $(NoCaptionContext.Provider,{value:true},
-        $(InputsSizeContext.Provider,{value:50},
+        $(InputsSizeContext.Provider,{value: fixedCellsSize ? 50 : 25},
             $(BindGroupElement,{groupId:'grid-list-bind'},dragCSSEl,res)
         )
     )
