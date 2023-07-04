@@ -1,37 +1,38 @@
-import React, {ReactNode, useMemo, useRef} from "react";
+import React, {ReactNode, useContext, useMemo, useRef} from "react";
 import clsx from 'clsx';
 import {getDateTimeFormat, useUserLocale} from "../locale";
 import {DateSettings, formatDate, getDate, parseStringToDate} from "./date-utils";
 import {getOrElse, mapOption, None, nonEmpty, Option} from "../../main/option";
 import {useSelectionEditableInput} from "./selection-control";
 import {DatepickerCalendar} from "./datepicker-calendar";
-import { usePatchSync } from '../exchange/patch-sync';
-import { useFocusControl } from '../focus-control';
+import {usePatchSync} from '../exchange/patch-sync';
+import {useFocusControl} from '../focus-control';
+import {VkInfoContext} from "../ui-info-provider";
 import {
-	BACKSPACE_EVENT, 
-	COPY_EVENT, 
-	CUT_EVENT, 
-	DELETE_EVENT, 
-	ENTER_EVENT, 
-	PASTE_EVENT, 
+	BACKSPACE_EVENT,
+	COPY_EVENT,
+	CUT_EVENT,
+	DELETE_EVENT,
+	ENTER_EVENT,
+	PASTE_EVENT,
 	useExternalKeyboardControls
 } from '../focus-module-interface';
 import {
-	applyChange, 
-	changeToPatch, 
-	createInputChange, 
+	applyChange,
+	changeToPatch,
+	createInputChange,
 	createTimestampChange,
-	DatepickerChange, 
-	DatePickerState, 
-	patchToChange, 
+	DatepickerChange,
+	DatePickerState,
+	patchToChange,
 	serverStateToState
 } from "./datepicker-exchange";
 import {
-	getOnBlur, 
+	getOnBlur,
 	getOnChange,
-	getOnKeyDown, 
-	onTimestampChangeAction, 
-	getOnPopupToggle, 
+	getOnKeyDown,
+	onTimestampChangeAction,
+	getOnPopupToggle,
 	getOnInputBoxBlur
 } from "./datepicker-actions";
 
@@ -186,17 +187,25 @@ export function DatePickerInputElement({
 
 	const { focusClass, focusHtml } = useFocusControl(identity);
 
+	const { haveVk } = useContext(VkInfoContext);
+
   	return (
-		<div ref={inputBoxRef} 
+		<div ref={inputBoxRef}
 			 className={clsx("inputBox", focusClass)}
 			 onClick={(e) => e.stopPropagation()}
-			 onBlur={onInputBoxBlur}			 
+			 onBlur={onInputBoxBlur}
 			 {...focusHtml} >
 
-			<input ref={inputRef} value={inputValue} onChange={onChange} onKeyDown={onKeyDown} onBlur={onInputBlur} />
+			<input ref={inputRef}
+				value={inputValue}
+				onChange={onChange}
+				onKeyDown={onKeyDown}
+				onBlur={onInputBlur}
+				inputMode={haveVk ? 'none' : undefined}
+			/>
 
-			<button 
-				type='button' 
+			<button
+				type='button'
 				className={clsx('btnCalendar', currentState.popupDate && 'rotate180deg')}
 				onClick={onPopupToggle} />
 
@@ -207,7 +216,7 @@ export function DatePickerInputElement({
 			{currentState.popupDate &&
 				<DatepickerCalendar {...{
 					currentState,
-					currentDateOpt, 
+					currentDateOpt,
 					dateSettings,
 					sendFinalChange,
 					sendTempChange,
@@ -225,8 +234,8 @@ interface CurrentProps {
 }
 
 function getCurrentProps(
-	currentState: DatePickerState, 
-	dateSettings: DateSettings, 
+	currentState: DatePickerState,
+	dateSettings: DateSettings,
 	memoInputValue: React.MutableRefObject<string>
 ): CurrentProps {
 	switch (currentState.tp) {
