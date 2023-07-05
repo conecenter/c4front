@@ -1,8 +1,8 @@
 import { createElement as $, createContext, useMemo, useRef, useState, useContext, useCallback } from "react";
 import type { ReactNode, Dispatch, SetStateAction } from "react";
+import { getPath } from "../focus-control";
 import { SyncedPopup } from "./synced-popup";
 import { NewPopupElement } from "./popup-element";
-import { usePath } from "../../main/vdom-hooks";
 
 type PopupContext = [string, Dispatch<SetStateAction<string>>, HTMLElement | undefined] | [];
 
@@ -27,7 +27,7 @@ function PopupManager({children}: PopupManager) {
 type PopupState = [boolean, (on: boolean) => void, HTMLElement | undefined]
 
 const usePopupState = (identity: Object): PopupState => {
-    const path = usePath(identity);
+    const path = useMemo(() => getPath(identity), [identity]);
     const [popup, setPopup, popupDrawer] = useContext(PopupContext);
     const isOpened = useCallback((p?: string)=> p === path, [path]);
     const setOpened = useCallback((on: boolean) => setPopup?.(on ? path : ''), [path]);

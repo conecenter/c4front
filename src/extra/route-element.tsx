@@ -1,11 +1,11 @@
-import React, { ReactElement, useRef } from 'react';
+import React, { ReactElement, useMemo, useRef } from 'react';
 import clsx from 'clsx';
 import { COPY_EVENT, CUT_EVENT, DELETE_EVENT, PASTE_EVENT, useExternalKeyboardControls } from './focus-module-interface';
 import { NoFocusContext } from './labeled-element';
 import { copyToClipboard } from './utils';
 import { useSync } from '../main/vdom-hooks';
 import { identityAt } from '../main/vdom-util';
-import { useFocusControl } from './focus-control';
+import { getPath, useFocusControl } from './focus-control';
 import { useAddEventListener } from './custom-hooks';
 
 const keyboardActionIdOf = identityAt('keyboardAction');
@@ -25,7 +25,8 @@ function RouteElement({identity, keyboardAction, compact, routeParts, extraParts
     const readOnly = !keyboardAction;
 
     // Focus functionality
-    const { focusClass, focusHtml } = useFocusControl(identity);
+    const path = useMemo(() => getPath(identity), [identity]);
+    const { focusClass, focusHtml } = useFocusControl(path);
 
     const className = clsx('routeElement focusFrameProvider', focusClass, compact && 'compact');
     

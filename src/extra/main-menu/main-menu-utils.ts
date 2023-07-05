@@ -4,7 +4,6 @@ import { Patch, PatchHeaders } from '../exchange/input-sync';
 import { MenuItemState } from './main-menu-bar';
 import { MenuItem, MenuItemsGroup } from './main-menu-items';
 import { isInstanceOfNode } from '../dom-utils';
-import { useSender } from '../../main/vdom-hooks';
 
 // Server sync functionality
 
@@ -25,29 +24,26 @@ function handleMenuBlur(e: React.FocusEvent, setFinalState: (s: MenuItemState) =
     setFinalState({ opened: false });
 }
 
-function useHandleArrowUpDown() {
-    const { ctxToPath } = useSender();
-    return (
-        event: React.KeyboardEvent, 
-        elem: HTMLElement, 
-        currentPath: string,
-        children?: ReactElement<MenuItem | MenuItemsGroup>[]
-    ) => {
-        const flatChildren = flattenMenuChildren(children);
-        const focusedIndex = flatChildren.findIndex(child => ctxToPath(child.props.identity) === currentPath);
-        const nextFocusedIndex = getNextArrayIndex(
-            flatChildren.length, 
-            focusedIndex, 
-            KEY_TO_DIRECTION[event.key as 'ArrowUp' | 'ArrowDown']
-        );
-        if (nextFocusedIndex === undefined) return;
-        const pathToFocus = ctxToPath(flatChildren[nextFocusedIndex].props.identity);
-        const itemToFocus: HTMLElement | null = elem.querySelector(`[data-path='${pathToFocus}']`);
-        if (itemToFocus) {
-            itemToFocus.focus();
-            event.preventDefault();
-            event.stopPropagation();
-        }
+function handleArrowUpDown(
+    event: React.KeyboardEvent, 
+    elem: HTMLElement, 
+    currentPath: string, 
+    children?: ReactElement<MenuItem | MenuItemsGroup>[]
+) {
+    const flatChildren = flattenMenuChildren(children);
+    const focusedIndex = flatChildren.findIndex(child => child.props.path === currentPath);
+    const nextFocusedIndex = getNextArrayIndex(
+        flatChildren.length, 
+        focusedIndex, 
+        KEY_TO_DIRECTION[event.key as 'ArrowUp' | 'ArrowDown']
+    );
+    if (nextFocusedIndex === undefined) return;
+    const pathToFocus = flatChildren[nextFocusedIndex].props.path;
+    const itemToFocus: HTMLElement | null = elem.querySelector(`[data-path='${pathToFocus}']`);
+    if (itemToFocus) {
+        itemToFocus.focus();
+        event.preventDefault();
+        event.stopPropagation();
     }
 }
 
@@ -61,13 +57,12 @@ const getNextArrayIndex = (arrLength: number, currIndex: number, direction: stri
 }
 
 function focusFirstMenuItem(
-    elem: HTMLElement | null,
-    ctxToPath: (ctx: Object) => string,
+    elem: HTMLElement | null, 
     children?: ReactElement<MenuItem | MenuItemsGroup>[]
 ) {
     if (!elem) return;
     const flatChildren = flattenMenuChildren(children);
-    const pathToFocus = ctxToPath(flatChildren[0]?.props.identity);
+    const pathToFocus = flatChildren[0]?.props.path;
     if (pathToFocus) {
         const itemToFocus: HTMLElement | null = elem?.querySelector(`[data-path='${pathToFocus}']`);
         itemToFocus?.focus();
@@ -90,4 +85,4 @@ function flattenMenuChildren(children?: ReactElement<MenuItem | MenuItemsGroup>[
     }, [])
 }
 
-export { patchToState, stateToPatch, handleMenuBlur, getNextArrayIndex, useHandleArrowUpDown, focusFirstMenuItem };
+export { patchToState, stateToPatch, handleMenuBlur, getNextArrayIndex, handleArrowUpDown, focusFirstMenuItem };

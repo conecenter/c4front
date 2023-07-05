@@ -2,7 +2,7 @@ import React, { useContext, ReactNode, useEffect, useRef, useState, CSSPropertie
 import clsx from 'clsx';
 import { HorizontalCaptionContext, NoCaptionContext } from '../main/vdom-hooks';
 import { useClickSyncOpt } from './exchange/click-sync';
-import { useFocusControl } from './focus-control';
+import { isCurrentlyFocused, useFocusControl } from './focus-control';
 import { SEL_FOCUSABLE_ATTR } from './focus-module-interface';
 import { getUserManualUtils, useUserManual } from './user-manual';
 import { FlexibleSizes } from './view-builder/flexible-api';
@@ -13,6 +13,7 @@ NoFocusContext.displayName = "NoFocusContext";
 interface LabeledElement {
     key: string,
     identity: Object,
+    path: string,
     label: string,
     sizes?: FlexibleSizes,
     accented?: boolean,
@@ -22,13 +23,13 @@ interface LabeledElement {
     children: ReactNode
 }
 
-function LabeledElement({ identity, label, sizes, accented, clickable, labelChildren, umid, children }: LabeledElement) {
+function LabeledElement({ identity, path, label, sizes, accented, clickable, labelChildren, umid, children }: LabeledElement) {
     const showCaption = !useContext(NoCaptionContext);
     const isHorizontalCaption = useContext(HorizontalCaptionContext);
 
     const isEmptyLabel = !(label || labelChildren);
 
-    const { focusClass, focusHtml, isFocused } = useFocusControl(isEmptyLabel ? undefined : identity);
+    const { focusClass, focusHtml } = useFocusControl(isEmptyLabel ? '' : path);
 
     // Disable focusable descendants focus if LE has single childless focusable descendant
     const [disableChildFocus, setDisableChildFocus] = useState(false);
@@ -40,7 +41,7 @@ function LabeledElement({ identity, label, sizes, accented, clickable, labelChil
 
     // User manual functionality
     const userManual = useUserManual();
-    const umUrl = isFocused && userManual.has(umid) ? userManual.getUrl(umid) : null;
+    const umUrl = isCurrentlyFocused(path) && userManual.has(umid) ? userManual.getUrl(umid) : null;
     const {button: umButton, onKeyDown} = getUserManualUtils(umUrl);
 
     const { clicked, onClick } = useClickSyncOpt(identity, 'receiver', clickable);

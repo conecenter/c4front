@@ -113,7 +113,7 @@ const BindingElement = (props) => {
 	const [keyData, setKeyData] = useState(null)
 	const [keyCode, setKeyCode] = useState(null)
 
-	const { focusClass, focusHtml } = useFocusControl(props.identity)
+	const { focusClass, focusHtml } = useFocusControl(props.path)
 
 	// const [parentGroup, setParentGroup] = useState(null)
 	// const [checkedChildren, setCheckedChildren] = useState([])
