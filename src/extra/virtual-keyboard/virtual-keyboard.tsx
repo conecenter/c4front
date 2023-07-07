@@ -1,11 +1,12 @@
 import React, { CSSProperties, MutableRefObject, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
-import { getPath, PathContext } from '../focus-control';
+import { PathContext } from '../focus-control';
 import { ColorDef } from '../view-builder/common-api';
 import { usePatchSync } from '../exchange/patch-sync';
 import { applyChange, changeToPatch, patchToChange, POSITIONING_STYLES, VkChange } from './vk-utils';
 import { ScrollInfoContext } from '../scroll-info-context';
 import { VKKey } from './vk-key';
+import { usePath } from '../../main/vdom-hooks';
 
 const SWITCHER_KEYS = ['Switcher1', 'Switcher2', 'Switcher3'];
 const BOTTOM_ROW_CLASS = "bottom-row";
@@ -99,7 +100,7 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
 
     // Bottom position logic
     const isBottomPos = position === 'bottom';
-    const path = useMemo(() => getPath(identity), [identity]);
+    const path = usePath(identity);
     const scrollInfo = useContext(ScrollInfoContext);
 
     // Positioning logic

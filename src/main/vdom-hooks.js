@@ -1,5 +1,5 @@
 
-import {createElement,useState,useContext,createContext,useCallback,useEffect} from "react"
+import {createElement,useState,useContext,createContext,useCallback,useEffect,useMemo} from "react"
 
 /********* sync ***************************************************************/
 
@@ -7,6 +7,8 @@ const NoContext = createContext()
 const AckContext = createContext()
 AckContext.displayName = "AckContext"
 
+/** @typedef {{ enqueue: Function, ctxToPath: (ctx?: Object) => string }} Sender */
+/** @type {React.Context<Sender>} */
 const SenderContext = createContext()
 SenderContext.displayName = "SenderContext"
 
@@ -65,6 +67,13 @@ export const useAnimationFrame = extractedUse((element,callback) => {
     let req = requestAnimationFrame(animate,element)
     return () => cancelAnimationFrame(req)
 },useEffect)
+
+/** @param {Object} [identity] */
+export function usePath(identity) {
+    const { ctxToPath } = useSender();
+    const path = useMemo(() => ctxToPath(identity), [ctxToPath, identity]);
+    return path;
+}
 
 export const NoCaptionContext = createContext(false)
 NoCaptionContext.displayName = 'NoCaptionContext'
