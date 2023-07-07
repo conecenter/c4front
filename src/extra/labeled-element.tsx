@@ -2,7 +2,7 @@ import React, { useContext, ReactNode, useEffect, useRef, useState, CSSPropertie
 import clsx from 'clsx';
 import { HorizontalCaptionContext, NoCaptionContext } from '../main/vdom-hooks';
 import { useClickSyncOpt } from './exchange/click-sync';
-import { isCurrentlyFocused, useFocusControl } from './focus-control';
+import { useFocusControl } from './focus-control';
 import { SEL_FOCUSABLE_ATTR } from './focus-module-interface';
 import { getUserManualUtils, useUserManual } from './user-manual';
 import { FlexibleSizes } from './view-builder/flexible-api';
@@ -29,7 +29,7 @@ function LabeledElement({ identity, path, label, sizes, accented, clickable, lab
 
     const isEmptyLabel = !(label || labelChildren);
 
-    const { focusClass, focusHtml } = useFocusControl(isEmptyLabel ? '' : path);
+    const { focusClass, focusHtml, isFocused } = useFocusControl(isEmptyLabel ? '' : path);
 
     // Disable focusable descendants focus if LE has single childless focusable descendant
     const [disableChildFocus, setDisableChildFocus] = useState(false);
@@ -41,7 +41,7 @@ function LabeledElement({ identity, path, label, sizes, accented, clickable, lab
 
     // User manual functionality
     const userManual = useUserManual();
-    const umUrl = isCurrentlyFocused(path) && userManual.has(umid) ? userManual.getUrl(umid) : null;
+    const umUrl = isFocused && userManual.has(umid) ? userManual.getUrl(umid) : null;
     const {button: umButton, onKeyDown} = getUserManualUtils(umUrl);
 
     const { clicked, onClick } = useClickSyncOpt(identity, 'receiver', clickable);
