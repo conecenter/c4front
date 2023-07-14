@@ -18,7 +18,7 @@ function App() {
           Open Lightbox
         </button>
         
-        <ImageViewer key="test" identity={{parent: "test"}} index={1} slides={slides} />
+        {/*<ImageViewer key="test" identity={{parent: "test"}} index={1} slides={slides} />*/}
       </>
     );
 
