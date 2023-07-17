@@ -180,6 +180,7 @@ async function executeCommands(port: SerialPort, commands: string[]) {
         console.log('Serial port writing error:', err);
     }
     finally {
+        writer.releaseLock();
         await writer.close()
             .catch(err => console.log('Writer closing error:', err));
     }
