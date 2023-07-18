@@ -171,7 +171,8 @@ async function executeCommands(port: SerialPort, commands: string[]) {
     const writer = textEncoder.writable.getWriter();
     let writableStreamClosed;
     try {
-        writableStreamClosed = textEncoder.readable.pipeTo(port.writable);
+        writableStreamClosed = textEncoder.readable.pipeTo(port.writable)
+            .catch((err) => { console.log(err) });
         for (const str of commands) {
             let command = toCommand(str);
             await writer.write(command);
@@ -183,7 +184,7 @@ async function executeCommands(port: SerialPort, commands: string[]) {
     finally {
         writer.close()
             .catch(err => console.log('Writer closing error:', err));
-        await writableStreamClosed?.catch((err) => { console.log(err) });
+        await writableStreamClosed;
     }
 }
 
