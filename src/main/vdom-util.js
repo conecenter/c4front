@@ -28,7 +28,6 @@ export const sum = l => l.reduce((a,b)=>a+b,0)
 export const range = sz => [...Array(sz).keys()]
 
 export function findLastIndex(arr, callback, thisArg) {
-    console.log(arr, callback)
     for (let index = arr.length-1; index >= 0; index--) {
         const value = arr[index];
         if (callback.call(thisArg, value, index, arr)) {
