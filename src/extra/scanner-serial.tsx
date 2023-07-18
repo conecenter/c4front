@@ -183,7 +183,7 @@ async function executeCommands(port: SerialPort, commands: string[]) {
     finally {
         writer.close()
             .catch(err => console.log('Writer closing error:', err));
-        await writableStreamClosed?.catch(() => { /* Ignore the error */ });
+        await writableStreamClosed;
     }
 }
 
