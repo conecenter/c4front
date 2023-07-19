@@ -32,6 +32,7 @@ const GRIDCELL_COLSPAN_ALL = 'gridcell-colspan-all'
 
 const SERVICE_COLS = ['sel-col', 'expander-col']
 const isServiceCol = colKey => SERVICE_COLS.some(key => colKey.includes(key))
+const countServiceCols = cols => cols.filter(({colKey}) => isServiceCol(colKey)).length
 
 //// col hiding
 
@@ -43,7 +44,9 @@ const partitionVisibleCols = (cols, outerWidth) => {
         if (outerWidth < willWidth) return count
         return fit(count + 1, willWidth)
     }
-    const count = fit(0, 0)
+    let count = fit(0, 0)
+    // Avoid hiding last visible non-service column
+    if (count - countServiceCols(cols.slice(0, count)) < 1) count += 1
     return [cols.slice(0, count), cols.slice(count)]
 }
 
@@ -131,15 +134,18 @@ export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, spanRi
 const colKeysOf = children => children.map(c => c.colKey)
 
 const getGidTemplateRows = rows => rows.map(o => `[${getGridRow(o)}] auto`).join(" ")
-const getGridTemplateColumns = (columns,fixedCellsSize) => columns.map(col => {
-    const key = getGridCol(col)
-    const getMaxStr = (width) =>
-        width.tp === "bound" ? `${width.max}em` :
-        width.tp === "unbound" ? "auto" : never()
-    const width = fixedCellsSize || isServiceCol(col.colKey)
-        ? `minmax(${col.width.min}em,${getMaxStr(col.width)})` : 'auto'
-    return `[${key}] ${width}`
-}).join(" ")
+const getGridTemplateColumns = (columns,fixedCellsSize) => {
+    const lastVisibleCol = columns.length - countServiceCols(columns) === 1
+    return columns.map(col => {
+        const key = getGridCol(col)
+        const getMaxStr = (width) =>
+            width.tp === "bound" ? `${width.max}em` :
+            width.tp === "unbound" ? "auto" : never()
+        const width = (fixedCellsSize && !lastVisibleCol) || isServiceCol(col.colKey)
+            ? `minmax(${col.width.min}em,${getMaxStr(col.width)})` : 'auto'
+        return `[${key}] ${width}`
+    }).join(" ")
+}
 
 //todo: for multi grids with overlapping keys per page implement: rootSelector
 // see: x-r-sort-obj-key x-r-sort-order-*
