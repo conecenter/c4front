@@ -1225,3 +1225,35 @@ div.grid {
   margin: 1em 0;
   padding: 0.5em;
 }
+
+// ScannerSerialElement
+.btnConnectScanner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100000;
+
+  &:hover {
+    opacity: 1 !important;
+  }
+
+  img {
+    width: 2em;
+  }
+}
+
+// ScannerSerialElement
+.btnConnectScanner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100000;
+
+  &:hover {
+    opacity: 1 !important;
+  }
+
+  img {
+    width: 2em;
+  }
+}
