@@ -1,4 +1,5 @@
 import { createContext } from "react";
+import { inRange } from "./utils";
 
 const CONE_ANGLE = 0.52;  // 0.52rad ~ 30deg
 const DIRECTION_BONUS = 0.2;
@@ -35,12 +36,6 @@ function calcDistance(from: LineSegmentCoords, to: LineSegmentCoords, coneAngle:
             return to.y / Math.cos(angle) || 0.001; // neighbours should have advantage over other elems with distance == 0
          } 
     }
-}
-
-function inRange(num: number, range: number[], inclusive = false) {
-    return inclusive 
-        ? num >= range[0] && num <= range[1] 
-        : num > range[0] && num < range[1];
 }
 
 
