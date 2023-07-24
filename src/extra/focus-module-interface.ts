@@ -30,7 +30,11 @@ type KeyboardEventNames = 'enter' | 'delete' | 'backspace' | 'cpaste' | 'ccopy' 
 
 type CustomEventHandler = (e: CustomEvent) => void
 
-function useExternalKeyboardControls(element: HTMLElement | null, keyboardEventHandlers: KeyboardEventHandlers) {
+function useExternalKeyboardControls(
+	element: HTMLElement | null,
+	keyboardEventHandlers: KeyboardEventHandlers,
+	options?: { capture?: boolean }
+) {
 	const savedHandlers = useRef(keyboardEventHandlers);
 	
     useEffect(() => {
@@ -41,16 +45,16 @@ function useExternalKeyboardControls(element: HTMLElement | null, keyboardEventH
 		if (!element) return;
 		const cEventNames = Object.keys(savedHandlers.current) as KeyboardEventNames[];
 		cEventNames.forEach(event => {
-			element.addEventListener(event, (e) => savedHandlers.current[event](e))
+			element.addEventListener(event, (e) => savedHandlers.current[event](e), options?.capture)
 		});
 		return () => cEventNames.forEach(event => {
-			element.removeEventListener(event, (e) => savedHandlers.current[event](e))
+			element.removeEventListener(event, (e) => savedHandlers.current[event](e), options?.capture)
 		});
 	}, [element]);
 }
 
 export {
-	useExternalKeyboardControls, 
+	useExternalKeyboardControls,
 	ENTER_EVENT, 
 	DELETE_EVENT, 
 	BACKSPACE_EVENT, 
@@ -61,3 +65,5 @@ export {
 	SEL_FOCUSABLE,
 	SEL_FOCUSABLE_ATTR
 };
+
+export type { KeyboardEventNames };
