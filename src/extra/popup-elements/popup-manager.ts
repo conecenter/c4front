@@ -7,6 +7,7 @@ import { usePath } from "../../main/vdom-hooks";
 type PopupContext = [string, Dispatch<SetStateAction<string>>, HTMLElement | undefined] | [];
 
 const PopupContext = createContext<PopupContext>([]);
+PopupContext.displayName = "PopupContext";
 
 interface PopupManager {
     children: ReactNode
