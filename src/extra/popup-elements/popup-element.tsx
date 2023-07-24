@@ -1,4 +1,5 @@
 import React, { ReactNode, useCallback, useLayoutEffect, useRef, useState } from 'react';
+import clsx from 'clsx';
 import { createPortal } from 'react-dom';
 import { usePopupPos } from '../../main/popup';
 import { NoCaptionContext } from '../../main/vdom-hooks';
@@ -10,12 +11,13 @@ import { usePopupState } from './popup-manager';
 interface PopupElement {
     key?: string,
     identity: Object,
+    className?: string,
     children?: ReactNode
 }
 
 const DEFAULT_IDENTITY = { key: 'popup-element' };
 
-function NewPopupElement({ identity = DEFAULT_IDENTITY, children }: PopupElement) {
+function NewPopupElement({ identity = DEFAULT_IDENTITY, className, children }: PopupElement) {
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
     
     const popupParent = useRef<HTMLElement | null>(null);
@@ -43,7 +45,12 @@ function NewPopupElement({ identity = DEFAULT_IDENTITY, children }: PopupElement
     }, [isOpened]);
 
     const popup = (
-        <div ref={setPopupElement} className='popupEl' style={popupStyle} onClick={(e) => e.stopPropagation()} tabIndex={-1} >
+        <div ref={setPopupElement}
+            className={clsx('popupEl', className)}
+            style={popupStyle}
+            onClick={(e) => e.stopPropagation()}
+            tabIndex={-1}
+        >
             {children}
         </div>
     );
