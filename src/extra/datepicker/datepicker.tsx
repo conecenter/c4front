@@ -112,7 +112,7 @@ export function DatePickerInputElement({
 	const inputRef = useRef<HTMLInputElement>(null)
 	const inputBoxRef = useRef<HTMLDivElement>(null)
 
-	// Interaction with FocusModule (c4e\client\src\extra\focus-module.js) - Excel-style keyboard controls
+	// Interaction with FocusModule & VK
 	const keyboardEventHandlers = {
 		[ENTER_EVENT]: handleCustomEnter,
 		[DELETE_EVENT]: handleCustomDelete,
@@ -123,17 +123,42 @@ export function DatePickerInputElement({
 	};
 
 	function handleCustomEnter(e: CustomEvent) {
-		if (isFocusedInside(inputBoxRef.current)) return;
-		const input = e.currentTarget as HTMLInputElement;
-		const inputLength = input.value.length;
-		input.setSelectionRange(inputLength, inputLength);
-		input.focus();
+		if (!isFocusedInside(inputBoxRef.current)) {
+			const input = e.currentTarget as HTMLInputElement;
+			const inputLength = input.value.length;
+			input.setSelectionRange(inputLength, inputLength);
+			input.focus();
+		} else if (isVkEvent(e)) {
+			const currTarget = e.currentTarget;
+			setTimeout(() => currTarget!.dispatchEvent(new CustomEvent("cTab", { bubbles: true })));
+		}
 	}
 
-	function handleCustomDelete(e: CustomEvent) {
-		if (isFocusedInside(inputBoxRef.current)) return;
-		(e.currentTarget as HTMLInputElement).focus();
-		sendTempChange(createInputChange(''));
+	function handleCustomDelete(e: CustomEvent<{key: string, vk: boolean}>) {
+		if (!isFocusedInside(inputBoxRef.current)) {
+			(e.currentTarget as HTMLInputElement).focus();
+			const newValue = isVkEvent(e) && e.type !== 'backspace' ? e.detail.key : '';
+			sendTempChange(getOrElse(
+				mapOption(
+					parseStringToDate(newValue, dateSettings),
+					timestamp => createInputChange(newValue, timestamp)
+				),
+				createInputChange(newValue)
+			));
+		} else if (isVkEvent(e)) {
+			let command: [string, boolean?, string?];
+			switch (e.detail.key) {
+				case '':
+					command = ['forwardDelete'];
+					break;
+				case 'Backspace':
+					command = ['delete'];
+					break;
+				default:
+					command = ['insertText', false, e.detail.key];
+			}
+			inputBoxRef.current?.ownerDocument.execCommand(...command);
+		}
 	}
 
 	async function handleClipboardWrite(e: CustomEvent) {
@@ -256,6 +281,10 @@ function isFocusedInside(element: HTMLElement | null) {
 	if (!element) return false;
 	const activeElement = element.ownerDocument.activeElement;
 	return element.contains(activeElement) && element !== activeElement;
+}
+
+function isVkEvent(e: CustomEvent<{key: string, vk: boolean}>) {
+	return e.detail.vk;
 }
 
 export const components = {DatePickerInputElement}
