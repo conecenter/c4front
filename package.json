@@ -17,6 +17,7 @@
     "yet-another-react-lightbox": "3.10.1"
   },
   "devDependencies": {
+    "@types/dom-serial": "^1.0.3",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "sass": "^1.32.2",
