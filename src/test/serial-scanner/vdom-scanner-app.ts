@@ -11,7 +11,7 @@ function App() {
     const ack: boolean | null = null;
     const isRoot = true;
 
-    return createSyncProviders({sender, ack, children});
+    return createSyncProviders({sender, ack, isRoot, children});
 }
 
 const containerElement = document.createElement("div");
