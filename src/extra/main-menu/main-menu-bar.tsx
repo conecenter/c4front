@@ -160,9 +160,9 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
     const nextFocusablePath = menuItems[nextMenuItemIndex].props.path;
     const selector = `[data-path='${nextFocusablePath}']${VISIBLE_CHILD_SEL}`;
     const nextFocusableItem: HTMLElement | null = doc.querySelector(selector);
-    nextFocusableItem?.focus();
     if (isOpened && isMenuFolderType(menuItems[nextMenuItemIndex])) nextFocusableItem?.click();
     else ready.current = true;
+    nextFocusableItem?.focus();
   }, []);
 
   return (

@@ -1,9 +1,10 @@
-import { ReactElement } from 'react';
-import { KEY_TO_DIRECTION } from '../../main/keyboard-keys';
+import { ReactElement, useContext, useEffect, useState } from 'react';
+import { ARROW_DOWN_KEY, ARROW_UP_KEY, KEY_TO_DIRECTION } from '../../main/keyboard-keys';
 import { Patch, PatchHeaders } from '../exchange/input-sync';
 import { MenuItemState } from './main-menu-bar';
 import { MenuItem, MenuItemsGroup } from './main-menu-items';
 import { isInstanceOfNode } from '../dom-utils';
+import { HighlightedItemContext } from './menu-folder-item';
 
 // Server sync functionality
 
@@ -20,7 +21,7 @@ function stateToPatch({ opened }: MenuItemState): Patch {
 // Helper functions
 
 function handleMenuBlur(e: React.FocusEvent, setFinalState: (s: MenuItemState) => void) {
-    if (isInstanceOfNode(e.relatedTarget) && e.currentTarget.contains(e.relatedTarget)) return;
+    if (isInstanceOfNode(e.relatedTarget) && e.currentTarget.contains(e.relatedTarget) && e.currentTarget !== e.relatedTarget) return;
     setFinalState({ opened: false });
 }
 
@@ -84,5 +85,37 @@ function flattenMenuChildren(children?: ReactElement<MenuItem | MenuItemsGroup>[
         );
     }, [])
 }
+/////////////////////////////////////////////
+const KEY_TO_CHANGE = {
+    [ARROW_UP_KEY]: -1,
+    [ARROW_DOWN_KEY]: 1
+}
 
-export { patchToState, stateToPatch, handleMenuBlur, getNextArrayIndex, handleArrowUpDown, focusFirstMenuItem };
+function useOptionHighlighter(elems: React.ReactElement<MenuItem>[] = [], opened: boolean) {
+    const [highlightedOption, setHighlightedOption] = useState<number | null>(null);
+
+    const elemsNum = elems.length;
+
+    useEffect(() => {
+        setHighlightedOption(null);
+    }, [opened, elemsNum]);
+
+    const moveHighlighter = (key: typeof ARROW_DOWN_KEY | typeof ARROW_UP_KEY) => {
+        setHighlightedOption(ind => ind === null ? 0
+            : (ind + KEY_TO_CHANGE[key] + elemsNum) % elemsNum);
+    }
+
+    const highlightedItemPath = highlightedOption === null ? '' : elems[highlightedOption]?.props?.path || '';
+
+    return { highlightedItemPath, moveHighlighter };
+}
+
+function useItemHiglighter(ref: React.MutableRefObject<HTMLDivElement | null>, path?: string) {
+    const highlightedItemPath = useContext(HighlightedItemContext);
+
+    useEffect(() => {
+        if (path === highlightedItemPath) ref.current?.focus();
+    }, [highlightedItemPath]);
+}
+
+export { patchToState, stateToPatch, handleMenuBlur, getNextArrayIndex, handleArrowUpDown, isMenuItemsGroup, focusFirstMenuItem, flattenMenuChildren, useOptionHighlighter, useItemHiglighter };

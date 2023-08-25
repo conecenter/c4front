@@ -1,4 +1,4 @@
-import React, { ReactElement, ReactNode, useEffect, useState } from 'react';
+import React, { ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { usePopupPos } from '../../main/popup';
 import { useClickSync } from '../exchange/click-sync';
@@ -8,7 +8,7 @@ import { ENTER_KEY } from '../../main/keyboard-keys';
 import { MenuFolderItem } from './menu-folder-item';
 import { BindingElement } from '../binds/binds-elements';
 import { useBinds } from '../binds/key-binding';
-import { focusFirstMenuItem } from './main-menu-utils';
+import { focusFirstMenuItem, useItemHiglighter } from './main-menu-utils';
 
 
 interface MenuExecutableItem {
@@ -39,12 +39,16 @@ function MenuExecutableItem({identity, name, current, path, icon, bindSrcId}: Me
             onClick();
         }
     }
+
+    const ref = useRef<HTMLDivElement | null>(null);
+    useItemHiglighter(ref, path);
     
     return (
         <div className={clsx('menuItem', current && 'isCurrent', clicked && 'executeAnim', focusClass)}
              {...focusHtml}
              onClick={handleClick}
-             onKeyDown={handleKeyDown} 
+             onKeyDown={handleKeyDown}
+             ref={ref} 
         >
             {isBindMode && <BindingElement bindSrcId={bindSrcId} onChange={onClick} />}
             {icon && <img src={icon} className='rowIconSize'/>}
@@ -86,7 +90,7 @@ function MenuPopupElement({popupLrMode, keyboardOperation, children}: MenuPopupE
 
     useEffect(() => {
         if (popupPos.visibility !== 'hidden' && keyboardOperation.current) {
-            focusFirstMenuItem(popupElement, children);
+            //focusFirstMenuItem(popupElement, children);
             keyboardOperation.current = false;
         }
         return () => { 
