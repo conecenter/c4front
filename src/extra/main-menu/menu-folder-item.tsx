@@ -63,6 +63,10 @@ function MenuFolderItem(props: MenuFolderItem) {
     const keyboardOperation = useRef(false);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+        if (keyboardOperation.current) {
+            e.stopPropagation();
+            return;
+        }
         switch(e.key) {
             case ARROW_RIGHT_KEY:
                 if (!popupLrMode) {
@@ -93,10 +97,6 @@ function MenuFolderItem(props: MenuFolderItem) {
                 break;
             case ARROW_DOWN_KEY:
             case ARROW_UP_KEY:
-                if (keyboardOperation.current) {
-                    e.stopPropagation();
-                    break;
-                }
                 if (!opened || !menuFolder) break;
                 handleArrowUpDown(e, menuFolder, currentPath, children);
         }
