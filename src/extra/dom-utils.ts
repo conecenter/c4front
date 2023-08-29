@@ -39,7 +39,7 @@ function calcDistance(from: LineSegmentCoords, to: LineSegmentCoords, coneAngle:
 }
 
 
-function findClosestNode(baseElement: Element, nodes: Element[], direction: string, coneAngle = CONE_ANGLE) {
+function findClosestNode(baseElement: Element | null | undefined, nodes: Element[], direction: string, coneAngle = CONE_ANGLE) {
     if (!baseElement) return;
     const base = baseElement.getBoundingClientRect();
     const from = {
