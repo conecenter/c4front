@@ -22,6 +22,34 @@ function useAddEventListener(
     }, [eventName, element, ...dependencies]);
 }
 
+
+interface EventHandlersMap {
+	[index: string]: EventHandler
+}
+
+function useAddMultipleEventListeners(
+	element: EventTarget | null | undefined,
+	eventHandlers: EventHandlersMap,
+	options?: { capture?: boolean }
+) {
+	const savedHandlers = useRef(eventHandlers);
+
+    useEffect(() => {
+		savedHandlers.current = eventHandlers;
+	}, [eventHandlers]);
+
+	useEffect(() => {
+		if (!element) return;
+		const eventNames = Object.keys(savedHandlers.current);
+		eventNames.forEach(event => {
+			element.addEventListener(event, e => savedHandlers.current[event]?.(e), options?.capture)
+		});
+		return () => eventNames.forEach(event => {
+			element.removeEventListener(event, e => savedHandlers.current[event]?.(e), options?.capture)
+		});
+	}, [element]);
+}
+
 const useLatest = <T extends any>(current: T) => {
     const storedValue = useRef(current);
     useEffect(() => {
@@ -30,4 +58,4 @@ const useLatest = <T extends any>(current: T) => {
     return storedValue;
 }
 
-export { useAddEventListener, useLatest };
+export { useAddEventListener, useAddMultipleEventListeners, useLatest };
