@@ -166,7 +166,7 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
   }, []);
 
   return (
-    <BindGroupElement groupId='menubar' forceAtStart={true} >
+    <BindGroupElement groupId='menubar' >
       <NoCaptionContext.Provider value={true} >
         <MenuControlsContext.Provider value={{onArrowLeftRight, setReadyArrowLeftRight}}>
           <ExpanderArea key='top-bar' 
