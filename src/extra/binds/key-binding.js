@@ -1,5 +1,5 @@
 import React, { createElement as $, useMemo, useState, useContext, useEffect } from 'react'
-import { BindingElement } from './binds-elements'
+import { BindingElement, AuxBindGroup, AUX_GROUP_ID } from './binds-elements'
 import { findFirstParent } from "../../main/vdom-util.js"
 
  /** @type {Object} */
@@ -50,7 +50,6 @@ const groupBy = function (xs, key) {
 // })()
 
 const KeyBindingsManager = ({ links, children, bindSrcId, escapeBindSrcId, noTouch }) => {
-
   const [bindHistory, setBindHistory] = useState([]) //List of bind call history
   const [availableGroups, setAvailableGroups] = useState([]) //List of groups Ids
   const [activeBindGroup, setActiveBindGroup] = useState("") //Currently active group
@@ -59,7 +58,7 @@ const KeyBindingsManager = ({ links, children, bindSrcId, escapeBindSrcId, noTou
   const [isBindMode, setIsBindMode] = useState(false)
   const [isNoTouchMode, setNoTouchMode] = useState(false)
 
-  const bindMap = useMemo(() => { return groupBy(links, "bind") }, [links])
+  const bindMap = useMemo(() => groupBy(links, "bind"), [links])
 
   const keyData = BindKeyData(bindMap, bindSrcId);
   const keyCode = (keyData !== null) ? keyData.keyCode : null;
@@ -76,11 +75,7 @@ const KeyBindingsManager = ({ links, children, bindSrcId, escapeBindSrcId, noTou
     }
   }, [noTouch])
 
-  /*useEffect(() => {
-    if (isBindMode) console.log("active: " + activeBindGroup + ", groups: " + availableGroups)
-  }, [activeBindGroup, availableGroups, isBindMode])*/
-
-  const addGroupToHistory = (group) => { setBindHistory(prev => calculateNewHistoryArray(prev, group)) }
+  const addGroupToHistory = (group) => setBindHistory(prev => calculateNewHistoryArray(prev, group))
 
   const calculateUpdate = (prev, newGroup) => {
     addGroupToHistory(prev)
@@ -127,7 +122,7 @@ const KeyBindingsManager = ({ links, children, bindSrcId, escapeBindSrcId, noTou
     const nextIndex = (currentIndex + 1 > (availableGroups.length - 1)) ? 0 : (currentIndex + 1)
     const nextgroup = availableGroups[nextIndex]
     updateActiveGroup(nextgroup)
-    if (event.stopPropagation) event.stopPropagation()
+    event.stopPropagation?.()
     return false
   }
 
@@ -160,6 +155,7 @@ const KeyBindingsManager = ({ links, children, bindSrcId, escapeBindSrcId, noTou
   const footer = isBindMode && drawSwitchBtn
     ? [$("div", {className: "footerForBinds bottom-row", 'data-path': '/KeyBindingsManager/footerForBinds'}, [...switchBtn])] : []
   const overlay = (isNoTouchMode) ? [$("div", { ref: setOverlayElem, className: "noTouchOverlay" }, [])] : []
+  const auxBindGroup = isBindMode && $(AuxBindGroup, null)
 
   const onChangeAction = (eventName, activeGroup) => {
     return (event) => {
@@ -168,12 +164,11 @@ const KeyBindingsManager = ({ links, children, bindSrcId, escapeBindSrcId, noTou
         const parentGroupElement = findFirstParent(el =>
           el.classList && el.classList.contains("withBindProvider") && el
         )(element)
-        if (parentGroupElement != null) {
-          const parentGroupId = parentGroupElement.getAttribute("groupId")
-          // console.log("onChangeAction on: " + eventName + ", switch to: " + parentGroupId + ", activeGroup was: " + activeGroup)
-          updateActiveGroup(parentGroupId)
+          const parentGroupId = parentGroupElement?.getAttribute("groupId")
+          const nextActiveGroup = parentGroupId || (availableGroups.includes(AUX_GROUP_ID) && AUX_GROUP_ID)
+          // console.log("onChangeAction on: " + eventName + ", switch to: " + nextActiveGroup + ", activeGroup was: " + activeGroup)
+          if (nextActiveGroup) updateActiveGroup(nextActiveGroup)
           if (eventName == "focus") event.stopPropagation()
-        }
       }
     }
   }
@@ -207,7 +202,10 @@ const KeyBindingsManager = ({ links, children, bindSrcId, escapeBindSrcId, noTou
     }
   }, [elem, isBindMode, activeBindGroup])
 
-  return $("div", { ref: setElem }, [$(KeyBindContext.Provider, { value: contextValue }, [...children, ...footer, ...overlay])])
+  return $("div",
+    { ref: setElem },
+    $(KeyBindContext.Provider, { value: contextValue }, [...children, auxBindGroup, ...footer, ...overlay])
+  )
 }
 
 const BindKeyData = (keyMappingMap, bindSrcId) => {

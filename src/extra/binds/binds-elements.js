@@ -1,4 +1,4 @@
-import { createElement as $, useContext, useState, useEffect } from 'react'
+import { createElement as $, useContext, useState, useEffect, useCallback } from 'react'
 import clsx from 'clsx'
 
 import { useBinds, BindKeyData, useProvideBinds, OnPageBindContext } from './key-binding'
@@ -125,10 +125,10 @@ const BindGroupElement = (props) => {
 		if (elem !== null) {
 			setOnFocusGroup((prev) => {
 				const newValue = groupId === activeBindGroup
-				if (prev && !newValue && additionChangeOnClose) additionChangeOnClose()
+				if (prev && !newValue) additionChangeOnClose?.()
 				if (!prev && newValue) {
 					checkForFocus(groupId)
-					if (additionChange) additionChange()
+					additionChange?.()
 				}
 				return newValue
 			})
@@ -178,4 +178,26 @@ const BindGroupElement = (props) => {
 	])
 }
 
-export { BindingElement, BindGroupElement }
+const AUX_GROUP_ID = "auxBindGroup";
+const EDITABLE_SELECTOR = '.inputBox:not(:is(.withBindProvider *))';
+
+const AuxBindGroup = () => {
+	const [ungroupedEditable, setUngroupedEditable] = useState(null);
+
+	const checkUngroupedEditables = useCallback(elem => {
+		if (!elem) setUngroupedEditable(null);
+		else {
+			const firstUngroupedEditable = elem.ownerDocument.querySelector(EDITABLE_SELECTOR);
+			setUngroupedEditable(firstUngroupedEditable);
+		}
+	}, []);
+
+	const additionChange = () => ungroupedEditable?.focus();
+
+	return [
+		$('span', { key: 'domRefElem', ref: checkUngroupedEditables, style: { display: 'none' } }),
+		ungroupedEditable && $(BindGroupElement, { key: AUX_GROUP_ID, groupId: AUX_GROUP_ID, additionChange })
+	];
+}
+
+export { BindingElement, BindGroupElement, AuxBindGroup, AUX_GROUP_ID }
