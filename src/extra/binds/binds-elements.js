@@ -167,7 +167,7 @@ const BindGroupElement = (props) => {
 
 	return $('div', {
 		ref: setElem,
-		className: groupId + " withBindProvider",
+		className: "withBindProvider",
 		groupId,
 		style: { display: "inherit", alignItems: "center" },
 		onKeyDown: (e) => e.key === 'Tab' && tabInsideGroup(e)
