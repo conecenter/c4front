@@ -192,7 +192,10 @@ const AuxBindGroup = () => {
 		}
 	}, []);
 
-	const additionChange = () => ungroupedEditable?.focus();
+	const additionChange = () => {
+		const activeElem = ungroupedEditable?.ownerDocument.activeElement;
+		if (activeElem?.closest('.withBindProvider')) ungroupedEditable?.focus();
+	}
 
 	return [
 		$('span', { key: 'domRefElem', ref: checkUngroupedEditables, style: { display: 'none' } }),

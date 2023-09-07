@@ -1,6 +1,5 @@
 import React, { createElement as $, useMemo, useState, useContext, useEffect } from 'react'
 import { BindingElement, AuxBindGroup, AUX_GROUP_ID } from './binds-elements'
-import { findFirstParent } from "../../main/vdom-util.js"
 
  /** @type {Object} */
 const KeyBindContext = React.createContext({})
@@ -157,19 +156,15 @@ const KeyBindingsManager = ({ links, children, bindSrcId, escapeBindSrcId, noTou
   const overlay = (isNoTouchMode) ? [$("div", { ref: setOverlayElem, className: "noTouchOverlay" }, [])] : []
   const auxBindGroup = isBindMode && $(AuxBindGroup, null)
 
-  const onChangeAction = (eventName, activeGroup) => {
-    return (event) => {
-      const element = event.target
-      if (element !== null) {
-        const parentGroupElement = findFirstParent(el =>
-          el.classList && el.classList.contains("withBindProvider") && el
-        )(element)
-          const parentGroupId = parentGroupElement?.getAttribute("groupId")
-          const nextActiveGroup = parentGroupId || (availableGroups.includes(AUX_GROUP_ID) && AUX_GROUP_ID)
-          // console.log("onChangeAction on: " + eventName + ", switch to: " + nextActiveGroup + ", activeGroup was: " + activeGroup)
-          if (nextActiveGroup) updateActiveGroup(nextActiveGroup)
-          if (eventName == "focus") event.stopPropagation()
-      }
+  const onChangeAction = (event) => {
+    if (!isBindMode) return;
+    const element = event.target
+    if (element !== null) {
+      const parentGroupElement = element.closest('.withBindProvider')
+      const parentGroupId = parentGroupElement?.getAttribute("groupId")
+      const nextActiveGroup = parentGroupId || (availableGroups.includes(AUX_GROUP_ID) && AUX_GROUP_ID)
+      // console.log("onChangeAction on: " + ", switch to: " + nextActiveGroup + ", activeGroup was: " + activeGroup)
+      if (nextActiveGroup) updateActiveGroup(nextActiveGroup)
     }
   }
 
@@ -189,21 +184,7 @@ const KeyBindingsManager = ({ links, children, bindSrcId, escapeBindSrcId, noTou
     }
   }, [isNoTouchMode, overlayElem])
 
-  useEffect(() => {
-    if (elem && isBindMode) {
-      const callback = onChangeAction("click", activeBindGroup)
-      const window = elem.ownerDocument.defaultView
-      window.addEventListener("click", callback, true)
-      window.addEventListener("focus", callback, true)
-    return () => {
-      window.removeEventListener("click", callback, true)
-      window.removeEventListener("focus", callback, true)
-      }
-    }
-  }, [elem, isBindMode, activeBindGroup])
-
-  return $("div",
-    { ref: setElem },
+  return $("div", { ref: setElem, onFocus: onChangeAction, onClickCapture: onChangeAction },
     $(KeyBindContext.Provider, { value: contextValue }, [...children, auxBindGroup, ...footer, ...overlay])
   )
 }
