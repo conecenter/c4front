@@ -79,7 +79,7 @@ function getHeaders(ch: DatepickerChange): PatchHeaders {
         case "dateChange":
             const headers: PatchHeaders = isInputState(ch.dpState) 
                 ? { 
-                    "x-r-input-value": ch.dpState.inputValue, 
+                    "x-r-input-value": `'${ch.dpState.inputValue}'`,
                     ...ch.dpState.tempTimestamp ? {'x-r-temp-timestamp':  String(ch.dpState.tempTimestamp)} : {}
                 }
                 : { 'x-r-timestamp': String(ch.dpState.timestamp) };
@@ -104,7 +104,7 @@ function patchToChange(patch: Patch): DatepickerChange {
                 tp: 'dateChange',
                 dpState: isTimestampStateType(tpState) 
                     ? createTimestampState(parseInt(headers['x-r-timestamp']))
-                    : createInputState(headers["x-r-input-value"], tempTimestamp)
+                    : createInputState(headers["x-r-input-value"].slice(1,-1), tempTimestamp)
             };
         case 'popupChange':
             return {
