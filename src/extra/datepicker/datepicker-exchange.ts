@@ -69,8 +69,11 @@ function serverStateToState(serverState: DatePickerServerState): DatePickerState
 
 function changeToPatch(ch: DatepickerChange): Patch {
     return {
-        value: ch.tp,
-        headers: getHeaders(ch)
+        value: ch.tp === 'dateChange' && isInputState(ch.dpState) ? ch.dpState.inputValue : '',
+        headers: {
+            'x-r-change-type': ch.tp,
+            ...getHeaders(ch),
+        }
     };
 }
 
@@ -78,10 +81,7 @@ function getHeaders(ch: DatepickerChange): PatchHeaders {
     switch (ch.tp) {
         case "dateChange":
             const headers: PatchHeaders = isInputState(ch.dpState) 
-                ? { 
-                    "x-r-input-value": `'${ch.dpState.inputValue}'`,
-                    ...ch.dpState.tempTimestamp ? {'x-r-temp-timestamp':  String(ch.dpState.tempTimestamp)} : {}
-                }
+                ? { ...ch.dpState.tempTimestamp && {'x-r-temp-timestamp': String(ch.dpState.tempTimestamp)} }
                 : { 'x-r-timestamp': String(ch.dpState.timestamp) };
             return { 
                 "x-r-type": ch.dpState.tp,
@@ -96,7 +96,7 @@ function getHeaders(ch: DatepickerChange): PatchHeaders {
 
 function patchToChange(patch: Patch): DatepickerChange {
     const headers = patch.headers as PatchHeaders;
-    switch (patch.value) {
+    switch (headers['x-r-change-type']) {
         case 'dateChange':
             const tpState = headers["x-r-type"];
             const tempTimestamp = headers['x-r-temp-timestamp'] ? parseInt(headers['x-r-temp-timestamp']) : undefined;
@@ -104,7 +104,7 @@ function patchToChange(patch: Patch): DatepickerChange {
                 tp: 'dateChange',
                 dpState: isTimestampStateType(tpState) 
                     ? createTimestampState(parseInt(headers['x-r-timestamp']))
-                    : createInputState(headers["x-r-input-value"].slice(1,-1), tempTimestamp)
+                    : createInputState(patch.value, tempTimestamp)
             };
         case 'popupChange':
             return {
