@@ -25,6 +25,7 @@ sealed trait DropdownContent extends ToJson
   ): ToChildPair
 
   @c4val("Option") def option(
+    srcId: String,
     text: String,
     content: Option[CommonDropdownContent] = None,
     recent: Boolean = false,
