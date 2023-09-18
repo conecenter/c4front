@@ -5,10 +5,10 @@ import { useFocusControl } from './focus-control';
 import { Patch } from './exchange/patch-sync';
 
 interface ButtonElement {
-    value: '1' | '',
+    value: boolean | '1' | '',
     onClick?: (e: React.MouseEvent) => void,
     onChange?: (e: { target: Patch }) => void,
-    path: string,
+    path?: string,
     content?: string,
     children?: ReactNode,
     disabled?: boolean,

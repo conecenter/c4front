@@ -1,32 +1,19 @@
 import ReactDOM from "react-dom";
 import { createElement as $ } from "react";
 import { createSyncProviders } from "../main/vdom-hooks";
-import { RichTextElement } from "../extra/rich-text-element";
+import { FlagElement } from "../extra/flag-element";
 
 function App() {
-    const child = $('div', {tabIndex: "1", style: { height: '10em', background: "orange"}},
-        $(RichTextElement, {
-            key: "TEST3",
-            text: [
-                { row: [
-                    {text: 'def ', color: {tp: 'p', cssClass: 'darkIdeaOrangeTextCssClass'}},
-                    {text: 'keepAlive', color: {tp: 'p', cssClass: 'darkIdeaBeigeTextCssClass'}},
-                    {text: '('}]
-                },
-                { row : [
-                    {text: '\t'},
-                    {text: 'ProtoDefaultDescription$V_DefaultDescription'}, 
-                    {text: 'items:'},
-                    {text: '88663', color: {tp: 'p', cssClass: 'darkIdeaLightBlueTextCssClass'}},
-                    {text: ', keys:'},
-                    {text: '88663', color: {tp: 'p', cssClass: 'darkIdeaLightBlueTextCssClass'}}
-                ]}
-            ],
-            color: {tp: 'p', cssClass: 'darkIdeaBackGroundCssClass'}
+    const child = $('div', {style: { maxWidth: '300px', margin: '2em', fontSize: '2.5em' }},
+        $(FlagElement, {
+            identity: { key: 'test' },
+            imageSrc: './images/denmark.svg',
+            name: 'DK'
         })
     );
     const sender = {
-        enqueue: (identity: any, patch: any) => console.log(patch)
+        enqueue: (identity: any, patch: any) => console.log(patch),
+        ctxToPath: () => '/test'
     };
     const ack: boolean | null = null;
     const isRoot = true;
