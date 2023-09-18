@@ -1242,18 +1242,18 @@ div.grid {
   }
 }
 
-// ScannerSerialElement
-.btnConnectScanner {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 100000;
+/*********************** FlagElement **************************/
+.flagElement {
+  position: relative;
 
-  &:hover {
-    opacity: 1 !important;
+  .flagButton {
+    width: 100%;
+    padding: 0;
+    margin: 0;
   }
-
-  img {
-    width: 2em;
+  
+  .flagName {
+    text-align: center;
+    margin-top: 0.2em;
   }
 }
