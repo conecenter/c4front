@@ -45,8 +45,9 @@ function App() {
         enqueue: (identity: any, patch: any) => console.log(patch)
     }
     const ack: boolean | null = null
+    const isRoot = true
 
-    return createSyncProviders({sender, ack, children: child})
+    return createSyncProviders({sender, ack, isRoot, children: child})
 }
 
 const containerElement = document.createElement("div")

@@ -12,6 +12,7 @@ interface DatepickerCalendarProps {
   currentDateOpt: Option<Date>,
   dateSettings: DateSettings,
   sendFinalChange: (ch: DatepickerChange, force?: boolean) => void,
+  sendTempChange: (ch: DatepickerChange) => void,
   inputRef: React.MutableRefObject<HTMLInputElement | null>
 }
 
@@ -22,6 +23,7 @@ export function DatepickerCalendar({
   currentDateOpt,
   dateSettings,
   sendFinalChange,
+  sendTempChange,
   inputRef
 }: DatepickerCalendarProps) {
 
@@ -51,7 +53,7 @@ export function DatepickerCalendar({
     const change = e.currentTarget.dataset.change;
     if (change) {
       const newDate = addMonths(new Date(year, month), Number(change));
-      sendFinalChange(createPopupChange(getPopupDate(newDate)));
+      sendTempChange(createPopupChange(getPopupDate(newDate)));
     }
   }
 
@@ -63,7 +65,7 @@ export function DatepickerCalendar({
 
   function onMonthChoice(e: React.MouseEvent<HTMLButtonElement>) {
     const newMonth = e.currentTarget.dataset.month;
-    if (newMonth) sendFinalChange(createPopupChange({ year, month: Number(newMonth) }));
+    if (newMonth) sendTempChange(createPopupChange({ year, month: Number(newMonth) }));
   }
 
   /*
@@ -73,7 +75,7 @@ export function DatepickerCalendar({
 
   function onCalendarYearChange(e: React.MouseEvent<HTMLButtonElement>) {
     const change = e.currentTarget.dataset.change;
-    if (change) sendFinalChange(createPopupChange({ month, year: year + Number(change) }));
+    if (change) sendTempChange(createPopupChange({ month, year: year + Number(change) }));
   }
 
   /*
@@ -105,11 +107,12 @@ export function DatepickerCalendar({
     'dayNextMonth'
   );
 
-  const closePopup = () => sendFinalChange(createPopupChange(null)); 
+  const closePopup = () => sendTempChange(createPopupChange(null)); 
 
   function onDateChoice(e: React.MouseEvent) {
-    if (!(e.target instanceof HTMLSpanElement && e.target.dataset.date)) return;
-    const dateValues = e.target.dataset.date.split('-');
+    const target = e.target as HTMLElement;
+    if (!target.dataset.date) return;
+    const dateValues = target.dataset.date.split('-');
     const isDateAvailable = nonEmpty(currentDateOpt);
     const baseDate = isDateAvailable ? currentDateOpt : getDate(Date.now(), dateSettings);
     if (isEmpty(baseDate)) return;
@@ -121,8 +124,8 @@ export function DatepickerCalendar({
         ...timeSettings
     });
     focusActiveWrapper(popupCalendarRef);
-    sendFinalChange(createTimestampChange(getTimestamp(chosenDate, dateSettings)), true);
     closePopup();
+    sendFinalChange(createTimestampChange(getTimestamp(chosenDate, dateSettings)), true);
   }
 
   /*
@@ -161,9 +164,9 @@ export function DatepickerCalendar({
       if (!e.currentTarget.dataset.change) return;
       if (nonEmpty(currentDateOpt)) {
           const adjustedDate = adjustDate(currentDateOpt, symbol, +e.currentTarget.dataset.change, true);
-          sendFinalChange(createTimestampChange(getTimestamp(adjustedDate, dateSettings)), true);
+          sendTempChange(createTimestampChange(getTimestamp(adjustedDate, dateSettings)));
       } 
-      else sendFinalChange(createTimestampChange(Date.now()), true);
+      else sendTempChange(createTimestampChange(Date.now()));
     }
   }
 
@@ -172,8 +175,8 @@ export function DatepickerCalendar({
   */
   const onNowBtnClick = () => {
     focusActiveWrapper(popupCalendarRef);
-    sendFinalChange(createTimestampChange(Date.now()), true);
     closePopup();
+    sendFinalChange(createTimestampChange(Date.now()), true);
   }
 
   function onCloseBtnClick() {

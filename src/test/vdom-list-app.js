@@ -138,8 +138,9 @@ function App() {
         enqueue: (identity, patch) => console.log(patch)
     }
     const ack = null
+    const isRoot = true
 
-    return createSyncProviders({ sender, ack, children })
+    return createSyncProviders({ sender, ack, isRoot, children })
 
 }
 

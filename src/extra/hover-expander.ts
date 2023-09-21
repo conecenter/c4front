@@ -1,39 +1,68 @@
-import { createElement as el, MouseEvent, ReactNode, useState } from "react";
-import clsx from 'clsx';
+import { MutableRefObject, useContext, useEffect, useMemo, useState } from "react";
+import { useAddEventListener } from "./custom-hooks";
+import { PathContext } from "./focus-control";
+import { FlexibleAlign } from "./view-builder/flexible-api";
 
-interface HoverExpanderProps {
-    children: ReactNode[]
-}
+export const useHoverExpander = (
+    path: string,
+    ref: MutableRefObject<HTMLDivElement | null>,
+    align: FlexibleAlign,
+    needsHoverExpander: boolean
+) => {
+    const [hovered, setHovered] = useState<HTMLElement | null>(null);
+    let needAction = false;
 
-export function HoverExpander({ children }: HoverExpanderProps) {
-    const [hovered, setHovered] = useState<Element | null>(null);
+    // Hover when focus inside the cell
+    const currentPath = useContext(PathContext);
+    const focusInside = currentPath.includes(path);
+    useEffect(() => {
+        if (focusInside && !hovered) setHovered(ref.current);
+        else if (!focusInside && hovered) setHovered(null);
+    }, [focusInside]);
 
-    const getStyle = () => {
-        if (!hovered || !hovered.parentElement) return;
-        const elemRect = hovered.getBoundingClientRect();
-        const parentWidth = hovered.parentElement.offsetWidth;
-        const widthDiff = Math.round(elemRect.width - parentWidth);
-        if (widthDiff > 0) {
-            const viewportWidth = hovered.ownerDocument.documentElement.clientWidth;
-            const viewportOverflow = Math.round(elemRect.right) > viewportWidth
-                ? widthDiff 
-                : Math.round(elemRect.left) < 0 ? Math.round(elemRect.left) : undefined;
-            const inlineStyle = { right: viewportOverflow };
-            return ['hoverExpander', inlineStyle];
-        }
+    const onMouseEnter = () => {
+        needAction = true;
+        setTimeout(() => needAction && setHovered(ref.current), 50);
     }
 
-    const [ className, inlineStyle ] = getStyle() || [null, null];
+    const onMouseLeave = () => {
+        if (focusInside) return;
+        needAction = false;
+        setHovered(null);
+    }
 
-    return el("div",
-        {
-            className: clsx('hoverExpanderPassive', className),
-            onMouseEnter: (event: MouseEvent<Element>) => setHovered(event.currentTarget),
-            onMouseLeave: () => setHovered(null),
-            style: inlineStyle
-        },
-        children
-    );
+    // Touch functionality
+    const doc = ref.current?.ownerDocument;
+    const onTouchStart = (e: TouchEvent) => {
+        if (ref.current?.contains(e.target as Node) && !hovered) setHovered(ref.current);
+        else if (!ref.current?.contains(e.target as Node) && hovered && !focusInside) setHovered(null);
+    }
+    useAddEventListener(doc, 'touchstart', onTouchStart);
+
+    // Offset calculation
+    const getOffset = () => {
+        if (!hovered) return;
+        const widthDiff = hovered.scrollWidth - hovered.clientWidth;
+        if (widthDiff <= 0) return;
+        const { left, right } = hovered.getBoundingClientRect();
+        let offset;
+        if (align === 'r') offset = widthDiff - left > 0 ? -left : -widthDiff - 1;
+        else {
+            const viewportWidth = hovered.ownerDocument.documentElement.clientWidth;
+            offset = right + widthDiff <= viewportWidth
+                ? undefined : left - widthDiff >= 0
+                    ? -widthDiff - 1 : viewportWidth - hovered.scrollWidth < 0
+                        ? -left : viewportWidth - (right + widthDiff + 1)   // +/-1 accounts for possible rounding error
+        }
+        return { translate: offset };
+    }
+    
+    const hoverStyle = useMemo(() => getOffset(), [hovered]);
+
+    return needsHoverExpander ? {
+        hoverStyle,
+        hoverClass: hoverStyle && 'hoverExpander',
+        onMouseEnter,
+        onMouseLeave
+    } : {};
 }
-
-export const components = { HoverExpander }

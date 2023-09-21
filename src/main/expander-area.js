@@ -1,5 +1,5 @@
 
-import {createElement as $,useState,useCallback,useMemo} from "react"
+import {createElement as $,useCallback,useMemo} from "react"
 import {em} from "./vdom-util.js"
 import {extractedUse} from "./vdom-hooks.js"
 import {useWidths,useViewportHeightIntEm} from "./sizes.js"
@@ -103,7 +103,7 @@ const useLogDep = (hint,...depList) => {
 */
 
 export function ExpanderArea({expandTo,maxLineCount,props}){
-    const [theAreaElement,setAreaElement] = useState(null)
+    // const [theAreaElement,setAreaElement] = useState(null)
     const [vpHeight,vpRef] = useViewportHeightIntEm()
     const [childWidths,addPos,outerWidth,addContainer] = useWidths()
     const checkLineCountVP = useCallback(lineCount => lineToEm(lineCount) * 4 <= vpHeight, [vpHeight])

@@ -1,36 +1,38 @@
-import React, {ReactNode, useMemo, useRef} from "react";
+import React, {ReactNode, useContext, useMemo, useRef} from "react";
 import clsx from 'clsx';
 import {getDateTimeFormat, useUserLocale} from "../locale";
 import {DateSettings, formatDate, getDate, parseStringToDate} from "./date-utils";
 import {getOrElse, mapOption, None, nonEmpty, Option} from "../../main/option";
 import {useSelectionEditableInput} from "./selection-control";
 import {DatepickerCalendar} from "./datepicker-calendar";
-import { usePatchSync } from '../exchange/patch-sync';
-import { useFocusControl } from '../focus-control';
+import {usePatchSync} from '../exchange/patch-sync';
+import {useFocusControl} from '../focus-control';
+import {VkInfoContext} from "../ui-info-provider";
 import {
-	BACKSPACE_EVENT, 
-	COPY_EVENT, 
-	CUT_EVENT, 
-	DELETE_EVENT, 
-	ENTER_EVENT, 
-	PASTE_EVENT, 
+	BACKSPACE_EVENT,
+	COPY_EVENT,
+	CUT_EVENT,
+	DELETE_EVENT,
+	ENTER_EVENT,
+	PASTE_EVENT,
 	useExternalKeyboardControls
 } from '../focus-module-interface';
 import {
-	applyChange, 
-	changeToPatch, 
-	createInputChange, 
-	DatepickerChange, 
-	DatePickerState, 
-	patchToChange, 
+	applyChange,
+	changeToPatch,
+	createInputChange,
+	createTimestampChange,
+	DatepickerChange,
+	DatePickerState,
+	patchToChange,
 	serverStateToState
 } from "./datepicker-exchange";
 import {
-	getOnBlur, 
+	getOnBlur,
 	getOnChange,
-	getOnKeyDown, 
-	onTimestampChangeAction, 
-	getOnPopupToggle, 
+	getOnKeyDown,
+	onTimestampChangeAction,
+	getOnPopupToggle,
 	getOnInputBoxBlur
 } from "./datepicker-actions";
 
@@ -90,7 +92,7 @@ export function DatePickerInputElement({
         applyChange
     );
 	const sendTempChange = (change: DatepickerChange) => {
-		dateChanged.current = true;
+		if (change.tp === 'dateChange') dateChanged.current = true;
 		onTempChange(change);
 	}
 	const sendFinalChange = (change: DatepickerChange, force = false) => {
@@ -108,9 +110,9 @@ export function DatePickerInputElement({
 	} = useMemo(() => getCurrentProps(currentState, dateSettings, memoInputValue), [currentState, dateSettings])
 
 	const inputRef = useRef<HTMLInputElement>(null)
-	const inputBoxRef = useRef(null)
+	const inputBoxRef = useRef<HTMLDivElement>(null)
 
-	// Interaction with FocusModule (c4e\client\src\extra\focus-module.js) - Excel-style keyboard controls
+	// Interaction with FocusModule & VK
 	const keyboardEventHandlers = {
 		[ENTER_EVENT]: handleCustomEnter,
 		[DELETE_EVENT]: handleCustomDelete,
@@ -121,17 +123,42 @@ export function DatePickerInputElement({
 	};
 
 	function handleCustomEnter(e: CustomEvent) {
-		if (isFocusedInside(inputBoxRef.current)) return;
-		const input = e.currentTarget as HTMLInputElement;
-		const inputLength = input.value.length;
-		input.setSelectionRange(inputLength, inputLength);
-		input.focus();
+		if (!isFocusedInside(inputBoxRef.current)) {
+			const input = e.currentTarget as HTMLInputElement;
+			const inputLength = input.value.length;
+			input.setSelectionRange(inputLength, inputLength);
+			input.focus();
+		} else if (isVkEvent(e)) {
+			const currTarget = e.currentTarget;
+			setTimeout(() => currTarget!.dispatchEvent(new CustomEvent("cTab", { bubbles: true })));
+		}
 	}
 
-	function handleCustomDelete(e: CustomEvent) {
-		if (isFocusedInside(inputBoxRef.current)) return;
-		sendTempChange(createInputChange(''));
-		(e.currentTarget as HTMLInputElement).focus();
+	function handleCustomDelete(e: CustomEvent<{key: string, vk: boolean}>) {
+		if (!isFocusedInside(inputBoxRef.current)) {
+			(e.currentTarget as HTMLInputElement).focus();
+			const newValue = isVkEvent(e) && e.type !== 'backspace' ? e.detail.key : '';
+			sendTempChange(getOrElse(
+				mapOption(
+					parseStringToDate(newValue, dateSettings),
+					timestamp => createInputChange(newValue, timestamp)
+				),
+				createInputChange(newValue)
+			));
+		} else if (isVkEvent(e)) {
+			let command: [string, boolean?, string?];
+			switch (e.detail.key) {
+				case '':
+					command = ['forwardDelete'];
+					break;
+				case 'Backspace':
+					command = ['delete'];
+					break;
+				default:
+					command = ['insertText', false, e.detail.key];
+			}
+			inputBoxRef.current?.ownerDocument.execCommand(...command);
+		}
 	}
 
 	async function handleClipboardWrite(e: CustomEvent) {
@@ -157,7 +184,7 @@ export function DatePickerInputElement({
 		const inputVal = e.detail;
 		sendFinalChange(
 			getOrElse(
-				mapOption(parseStringToDate(inputVal, dateSettings), timestamp => createInputChange(inputVal, timestamp)),
+				mapOption(parseStringToDate(inputVal, dateSettings), timestamp => createTimestampChange(timestamp)),
 				createInputChange(inputVal)
 			),
 			true
@@ -169,10 +196,10 @@ export function DatePickerInputElement({
 
 	const setSelection: (from: number, to: number) => void = useSelectionEditableInput(inputRef)
 	const onTimestampChange: (timestamp: number) => void = onTimestampChangeAction(currentState, dateSettings, sendTempChange)
-	const onInputBlur = getOnBlur(currentState, memoInputValue, sendFinalChange, inputBoxRef, dateSettings)
-	const onInputBoxBlur = getOnInputBoxBlur(currentState, sendFinalChange)
+	const onInputBlur = getOnBlur(currentState, memoInputValue, sendTempChange, inputBoxRef, dateSettings)
+	const onInputBoxBlur = getOnInputBoxBlur(currentState, memoInputValue, sendTempChange, sendFinalChange)
 	const onChange = getOnChange(dateSettings, sendTempChange)
-	const onPopupToggle = getOnPopupToggle(currentDateOpt, currentState, dateSettings, sendFinalChange)
+	const onPopupToggle = getOnPopupToggle(currentDateOpt, currentState, dateSettings, sendTempChange)
 	const onKeyDown = getOnKeyDown(
 		currentDateOpt,
 		dateFormat,
@@ -180,26 +207,33 @@ export function DatePickerInputElement({
 		memoInputValue,
 		onTimestampChange,
 		setSelection,
-		sendFinalChange,
-		inputBoxRef
+		sendTempChange,
+		inputBoxRef,
+		currentState
 	)
 
 	const { focusClass, focusHtml } = useFocusControl(path);
 
+	const { haveVk } = useContext(VkInfoContext);
+
   	return (
-		<div ref={inputBoxRef} 
+		<div ref={inputBoxRef}
 			 className={clsx("inputBox", focusClass)}
 			 onClick={(e) => e.stopPropagation()}
-			 onBlur={onInputBoxBlur}			 
+			 onBlur={onInputBoxBlur}
 			 {...focusHtml} >
 
-			<div className="inputSubBox">
-				<input ref={inputRef} value={inputValue} onChange={onChange} onKeyDown={onKeyDown} onBlur={onInputBlur} />
-			</div>
+			<input ref={inputRef}
+				value={inputValue}
+				onChange={onChange}
+				onKeyDown={onKeyDown}
+				onBlur={onInputBlur}
+				inputMode={haveVk ? 'none' : undefined}
+			/>
 
-			<button 
-				type='button' 
-				className={`${currentState.popupDate ? 'rotate180deg ' : ''}btnCalendar`} 
+			<button
+				type='button'
+				className={clsx('btnCalendar', currentState.popupDate && 'rotate180deg')}
 				onClick={onPopupToggle} />
 
 			<div className='sideContent'>
@@ -207,7 +241,14 @@ export function DatePickerInputElement({
 			</div>
 
 			{currentState.popupDate &&
-				<DatepickerCalendar { ...{currentState, currentDateOpt, dateSettings, sendFinalChange, inputRef} } />}
+				<DatepickerCalendar {...{
+					currentState,
+					currentDateOpt,
+					dateSettings,
+					sendFinalChange,
+					sendTempChange,
+					inputRef
+				}} />}
 		</div>
 
 	);
@@ -220,8 +261,8 @@ interface CurrentProps {
 }
 
 function getCurrentProps(
-	currentState: DatePickerState, 
-	dateSettings: DateSettings, 
+	currentState: DatePickerState,
+	dateSettings: DateSettings,
 	memoInputValue: React.MutableRefObject<string>
 ): CurrentProps {
 	switch (currentState.tp) {
@@ -240,6 +281,10 @@ function isFocusedInside(element: HTMLElement | null) {
 	if (!element) return false;
 	const activeElement = element.ownerDocument.activeElement;
 	return element.contains(activeElement) && element !== activeElement;
+}
+
+function isVkEvent(e: CustomEvent<{key: string, vk: boolean}>) {
+	return e.detail.vk;
 }
 
 export const components = {DatePickerInputElement}

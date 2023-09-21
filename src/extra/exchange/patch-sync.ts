@@ -1,5 +1,5 @@
 import {useSync} from "../../main/vdom-hooks";
-import {useCallback, useMemo} from "react";
+import {useCallback, useMemo, useRef} from "react";
 import {identityAt} from "../../main/vdom-util";
 
 interface PatchHeaders {
@@ -15,6 +15,7 @@ interface SyncState<State, StateChange> {
     currentState: State,
     sendTempChange: (change: StateChange) => void,
     sendFinalChange: (change: StateChange) => void,
+    wasChanged: boolean
 }
 
 interface SendPatchHeaders extends PatchHeaders {
@@ -56,20 +57,27 @@ function usePatchSync<ServerState, State, StateChange>(
     applyChange: (prevState: State, ch: StateChange) => State,
 ): SyncState<State, StateChange> {
     const [patches, enqueuePatch] = <[SendPatch[], (patch: SendPatch) => void]>useSync(receiverId(receiverName)(identity))
+    const wasChanged = useRef(false);
     const convertedFromServer: State = useMemo(() => serverToState(serverState), [serverState])
     const patchedState: State = useMemo(
         () => patches.reduce<State>((prev, patch) => applyChange(prev, patchToChange(patch)), convertedFromServer),
         [patches, applyChange, patchToChange, convertedFromServer]
     )
     const onChange = useCallback(
-        (state: StateChange) => enqueuePatch(stateToSendPatch(changeToPatch(state), true, deferredSend)),
+        (state: StateChange) => {
+            enqueuePatch(stateToSendPatch(changeToPatch(state), true, deferredSend))
+            wasChanged.current = true
+        },
         [enqueuePatch, changeToPatch, deferredSend]
     )
     const onBlur = useCallback(
-        (state: StateChange) => enqueuePatch(stateToSendPatch(changeToPatch(state), false, false)),
+        (state: StateChange) => {
+            enqueuePatch(stateToSendPatch(changeToPatch(state), false, false))
+            wasChanged.current = false
+        },
         [enqueuePatch, changeToPatch]
     )
-    return {currentState: patchedState, sendTempChange: onChange, sendFinalChange: onBlur}
+    return {currentState: patchedState, sendTempChange: onChange, sendFinalChange: onBlur, wasChanged: wasChanged.current}
 }
 
 export {usePatchSync}

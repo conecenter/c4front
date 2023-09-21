@@ -88,10 +88,9 @@ case class NoReceiver[C]() extends Receiver[C] {
     isExpander: Boolean = false,
     canDropBeside: Boolean = false,
   ): GridCol
-  @c4elPath("GridCell") def gridCell(
+  @c4el("GridCell") def gridCell(
     rowKey: String,
     colKey: String,
-//    path: String,
     children: ViewRes = Nil,
     classNames: List[CSSClassName] = Nil,
     expanding: Expanding = expandableExpanding,
@@ -157,6 +156,14 @@ case class NoReceiver[C]() extends Receiver[C] {
     key: String,
     popupPath: String = "",
     children: ViewRes = Nil,
+  ): ToChildPair
+  //
+  @c4el("PrintManager") def printManager(
+    key: String,
+    children: ViewRes,
+    printChildren: ViewRes = Nil,
+    printMode: Boolean = false,
+    receiver: Receiver[C] = NoReceiver[C],
   ): ToChildPair
   //
   @c4el("Highlighter") def highlighter(

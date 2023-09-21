@@ -2,6 +2,7 @@ import React, {useState} from "react"
 import {Patch, useInputSync} from "./exchange/input-sync";
 import {HexColorInput, HexColorPicker} from "react-colorful";
 import {usePopupPos} from "../main/popup";
+import {isInstanceOfNode} from "./dom-utils";
 import {ENTER_KEY} from "../main/keyboard-keys";
 
 interface ColorPickerProps {
@@ -34,7 +35,7 @@ export function ColorPicker({identity, value, ro}: ColorPickerProps) {
 	 * Event handlers
 	*/
 	function handleBlur(e: React.FocusEvent) {
-		if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) return;
+		if (isInstanceOfNode(e.relatedTarget) && e.currentTarget.contains(e.relatedTarget)) return;
 		setFinalState(currentState);
 		setActive(false);
 	}

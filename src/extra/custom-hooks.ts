@@ -22,4 +22,12 @@ function useAddEventListener(
     }, [eventName, element, ...dependencies]);
 }
 
-export { useAddEventListener };
+const useLatest = <T extends any>(current: T) => {
+    const storedValue = useRef(current);
+    useEffect(() => {
+        storedValue.current = current;
+    });
+    return storedValue;
+}
+
+export { useAddEventListener, useLatest };

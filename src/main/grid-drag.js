@@ -1,7 +1,7 @@
 
-import {useState,useMemo,useCallback} from "react"
+import {useMemo,useCallback} from "react"
 import {useEventListener,useAnimationFrame} from "./vdom-hooks.js"
-import {findFirstParent,sortedWith,range} from "./vdom-util.js"
+import {findFirstParent,sortedWith} from "./vdom-util.js"
 
 const distinctBy = f => l => { //gives last?
     const entries = l.map(el => [f(el), el])

@@ -1,7 +1,10 @@
 import { createContext } from "react";
+import { inRange } from "./utils";
 
 const CONE_ANGLE = 0.52;  // 0.52rad ~ 30deg
-const DIRECTION_BONUS = 0.25;
+const DIRECTION_BONUS = 0.2;
+const INTERSECTION_BONUS = 0.25;
+const delta = 2;
 
 interface LineSegmentCoords {
     y: number,
@@ -17,8 +20,11 @@ function calcDistance(from: LineSegmentCoords, to: LineSegmentCoords, coneAngle:
 
     // check if on the same level
     const range = [from.x0, from.x1];
-    if (inRange(to.x0, range) || inRange(to.x1, range) || (to.x0 <= from.x0 && to.x1 >= from.x1)) {
+    if ((to.x0 <= from.x0 && to.x1 >= from.x1) || (to.x0 >= from.x0 - delta && to.x1 <= from.x1 + delta)) {
         return DIRECTION_BONUS * to.y;
+    }
+    if (inRange(to.x0, range) || inRange(to.x1, range)) {
+        return INTERSECTION_BONUS * to.y;
     }
 
     // check if inside the angle
@@ -32,14 +38,8 @@ function calcDistance(from: LineSegmentCoords, to: LineSegmentCoords, coneAngle:
     }
 }
 
-function inRange(num: number, range: number[], inclusive = false) {
-    return inclusive 
-        ? num >= range[0] && num <= range[1] 
-        : num > range[0] && num < range[1];
-}
 
-
-function findClosestNode(baseElement: Element, nodes: Element[], direction: string, coneAngle = CONE_ANGLE) {
+function findClosestNode(baseElement: HTMLElement | null | undefined, nodes: HTMLElement[], direction: string, coneAngle = CONE_ANGLE) {
     if (!baseElement) return;
     const base = baseElement.getBoundingClientRect();
     const from = {
@@ -47,7 +47,7 @@ function findClosestNode(baseElement: Element, nodes: Element[], direction: stri
         x0: 0,
         x1: ['up', 'down'].includes(direction) ? base.width : base.height
     }
-    const closestNode = nodes.reduce((closest: { node: Element, distance: number } | null, current: Element) => {
+    const closestNode = nodes.reduce((closest: { node: HTMLElement, distance: number } | null, current) => {
         if (current === baseElement) return closest;
         const curr = current.getBoundingClientRect();
         let to;
@@ -102,7 +102,9 @@ function elementHasFocus(element?: HTMLElement | null) {
 	return element.contains(activeElement);
 }
 
+const isInstanceOfNode = (elem: EventTarget | null): elem is Node => !!elem && 'nodeType' in elem;
+
 const InputsSizeContext = createContext(20);
 InputsSizeContext.displayName = 'InputsSizeContext';
 
-export { findClosestNode, InputsSizeContext, elementHasFocus };
+export { findClosestNode, InputsSizeContext, elementHasFocus, isInstanceOfNode };

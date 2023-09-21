@@ -224,8 +224,9 @@ function VdomListElement({maxFilterAreaWidth, setMaxFilterAreaWidth, enableDrag,
 
     const sender = { enqueue: () => { } }
     const ack = null
+    const isRoot = true
 
-    return createSyncProviders({ sender, ack, children })
+    return createSyncProviders({ sender, ack, isRoot, children })
 
 }
 

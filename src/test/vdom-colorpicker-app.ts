@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom"
 import React from "react"
 import {createSyncProviders} from "../main/vdom-hooks";
-import { ColorPicker } from "../extra/ColorPicker";
+import {ColorPicker} from "../extra/color-picker";
 
 const {createElement: $} = React
 
@@ -23,7 +23,7 @@ function App() {
     }
     const ack: boolean | null = null
 
-    return createSyncProviders({sender, ack, children: [child1, child2]})
+    return createSyncProviders({sender, ack, isRoot: true, children: [child1, child2]})
 }
 
 const containerElement = document.createElement("div")

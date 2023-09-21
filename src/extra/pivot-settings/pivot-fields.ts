@@ -15,6 +15,7 @@ export function PivotFields({fields, dropAction}: PivotFieldsProps) {
     drop: (item: PivotDragItem) => {
       dropAction(item, PartNames.FIELDS)
     },
+    canDrop: (item: PivotDragItem) => item.dragOrigin !== PartNames.FIELDS,
     collect: (monitor) => ({
       canDrop: monitor.canDrop(),
     })
@@ -28,7 +29,7 @@ export function PivotFields({fields, dropAction}: PivotFieldsProps) {
     el('span', null, 'Fields'),
     fields.map((item, index) => isPivotFieldsGroup(item)
       ? el(PivotFieldsGroup, {key: `${index}`, groupName: item.groupName, fields: item.fields, dropAction})
-      : el(PivotField, {key: item.id, type: ItemTypes.FIELD, origin: PartNames.FIELDS, field: item, dropAction})
+      : el(PivotField, {key: item.id, type: item.fieldType || ItemTypes.FIELD, origin: PartNames.FIELDS, field: item, dropAction})
     )
   )
 }

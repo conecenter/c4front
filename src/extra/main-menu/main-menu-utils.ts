@@ -3,6 +3,7 @@ import { KEY_TO_DIRECTION } from '../../main/keyboard-keys';
 import { Patch, PatchHeaders } from '../exchange/input-sync';
 import { MenuItemState } from './main-menu-bar';
 import { MenuItem, MenuItemsGroup } from './main-menu-items';
+import { isInstanceOfNode } from '../dom-utils';
 
 // Server sync functionality
 
@@ -19,7 +20,7 @@ function stateToPatch({ opened }: MenuItemState): Patch {
 // Helper functions
 
 function handleMenuBlur(e: React.FocusEvent, setFinalState: (s: MenuItemState) => void) {
-    if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) return;
+    if (isInstanceOfNode(e.relatedTarget) && e.currentTarget.contains(e.relatedTarget)) return;
     setFinalState({ opened: false });
 }
 

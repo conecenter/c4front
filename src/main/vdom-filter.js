@@ -1,6 +1,7 @@
 
-import {createElement as $,cloneElement,useMemo} from "react"
-import {em,sum} from "./vdom-util.js"
+import clsx from "clsx"
+import {createElement as $,cloneElement} from "react"
+import {em,sum,findLastIndex} from "./vdom-util.js"
 import {useWidths} from "../main/sizes.js"
 import {NoCaptionContext} from "./vdom-hooks.js"
 import {usePopupState} from "../extra/popup-elements/popup-manager"
@@ -32,7 +33,8 @@ const doFitFilters = (filters,resTemplate) => {
     const fit = (res,filter) => {
         if(!res) return null
         const w = filter.props.minWidth
-        const row = res.find(row=>row.leftWidth>=w)
+        const minRowIndex = findLastIndex(res, row=>row.items.length>0) //0 ; this prevents filter order changing; make <=0 to make filters fill the gaps
+        const row = res.find((row,j) => j>=minRowIndex && row.leftWidth>=w)
         if(!row) return null
         const leftWidth = row.leftWidth-w
         const items = [...row.items,filter]
@@ -92,7 +94,7 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
     const filterGroupElements = groupedFilters.flatMap(({items,leftWidth},rowIndex)=>{
         const proportion = Math.min(1,leftWidth/sum(items.map(dMinMax)))
         const getWidth = item => item.props.minWidth+dMinMax(item)*proportion
-        return items.map((item,itemIndex)=>$("div",{ key:item.key, style:{
+        return items.map((item,itemIndex)=>$("div",{key:item.key, ...item.props.canHide && {className: 'canHide'}, style:{
             position: "absolute",
             height: em(emPerRow*2),
             top: yRowToEm(rowIndex),
@@ -125,14 +127,8 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
 
 export function FilterButtonExpander({identity,optButtons:rawOptButtons,children,openedChildren}){
     const optButtons = rawOptButtons || []
-
-    const path = useMemo(() => getPath(identity), [identity])
-    const {focusClass,focusHtml} = useFocusControl(path)
-
-    const popupKey = `popup-${getKeyFromIdentity(identity)}`
-    const {isOpened,toggle} = usePopupState(popupKey)
-
-    return $("div", {...focusHtml,className:focusClass,style:{maxHeight:"2em"},onClick:ev=>toggle(!isOpened)},
+    const [isOpened,toggle] = usePopupState(identity)
+    return $("div", {className:'filterButtonExpander',onClick:ev=>toggle(!isOpened)},
         isOpened ? [
             openedChildren ?? children,
             $(NewPopupElement,{popupKey},optButtons.map(btn=>{
@@ -144,7 +140,7 @@ export function FilterButtonExpander({identity,optButtons:rawOptButtons,children
 }
 
 export function FilterButtonPlace({className,children}){
-    return $("div",{className,style:{height:"2em"}},children)
+    return $("div",{className:clsx('filterButtonPlace',className)},children)
 }
 
 export function FilterItem({className,children}){

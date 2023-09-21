@@ -15,6 +15,8 @@ export const weakCache = f => {
 
 export const identityAt = key => weakCache(parent => ({ parent, key }))
 
+export const receiverOf = identityAt('receiver')
+
 export const never = o => { console.log(o); throw new Error }
 
 export const sortedWith = f => l => l && [...l].sort(f)
@@ -26,3 +28,13 @@ export const em = v => `${v}em`
 export const sum = l => l.reduce((a,b)=>a+b,0)
 
 export const range = sz => [...Array(sz).keys()]
+
+export function findLastIndex(arr, callback, thisArg) {
+    for (let index = arr.length-1; index >= 0; index--) {
+        const value = arr[index];
+        if (callback.call(thisArg, value, index, arr)) {
+            return index;
+        }
+    }
+    return -1;
+}

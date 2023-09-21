@@ -19,6 +19,7 @@ export interface PivotField {
     id: string,
     name: string,
     selected: boolean,
+    fieldType?: string,
     invalid?: boolean
 }
 
@@ -139,7 +140,7 @@ interface PivotSettingsPartProps {
 
 function PivotSettingsPart({className, state, label, dropAction, clickAction, accepts}: PivotSettingsPartProps) {
     const [{canDrop}, drop] = useDrop(() => ({
-        accept: [ItemTypes.FIELD, accepts],
+        accept: [ItemTypes.FIELD, ...Object.values(ItemTypes).filter(val => val.includes(accepts))],
         canDrop: (pivotItem: PivotDragItem) => 
             pivotItem.dragOrigin !== 'pivotFields' && pivotItem.item.invalid ? false : true,
         drop: (item: PivotDragItem, monitor) => {
@@ -176,8 +177,8 @@ interface PivotFieldProps {
 }
 
 export function PivotField({origin, type, field, dropAction, clickAction}: PivotFieldProps) {
-    const accepts = type !== ItemTypes.FIELD ? [type] : []
-    const [{}, drop] = useDrop({
+    const accepts = origin !== PartNames.FIELDS ? [type] : []
+    const [_, drop] = useDrop({
         accept: accepts,
         hover(item: PivotDragItem, monitor) {
             dropAction(item, origin, monitor.getClientOffset(), true)
@@ -224,7 +225,7 @@ export function PivotFieldsGroup({ groupName, dropAction, fields }: PivotFieldsG
                 el('span', null, groupName),
             ),
             el('div', null, fields.map(item => el
-                (PivotField, {key: item.id, type: ItemTypes.FIELD, origin: PartNames.FIELDS, field: item, dropAction}))
+                (PivotField, {key: item.id, type: item.fieldType || ItemTypes.FIELD, origin: PartNames.FIELDS, field: item, dropAction}))
             )
         )
     )

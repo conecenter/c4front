@@ -1,15 +1,17 @@
-import {cloneElement, createElement as $, useCallback, useEffect, useMemo, useState} from "react"
+import {cloneElement, createElement as $, useCallback, useEffect, useMemo, useState, useRef, useContext} from "react"
 import clsx from 'clsx'
 
 import {findFirstParent, identityAt, never, sortedWith} from "./vdom-util.js"
-import {NoCaptionContext, useEventListener, useSync} from "./vdom-hooks.js"
+import {NoCaptionContext, RootBranchContext, useEventListener, useSync, usePath} from "./vdom-hooks.js"
 import {useWidth,useMergeRef} from "./sizes.js"
 import {useGridDrag} from "./grid-drag.js"
 import {ESCAPE_KEY} from "./keyboard-keys"
 import {useFocusControl} from "../extra/focus-control.ts"
 import {BindGroupElement} from "../extra/binds/binds-elements"
-import {HoverExpander} from "../extra/hover-expander"
+import {useHoverExpander} from "../extra/hover-expander"
 import {InputsSizeContext} from "../extra/dom-utils"
+import {PrintContext} from "../extra/print-manager"
+import {UiInfoContext} from "../extra/ui-info-provider"
 
 const dragRowIdOf = identityAt('dragRow')
 const dragColIdOf = identityAt('dragCol')
@@ -28,6 +30,10 @@ const GRID_CLASS_NAMES = {
 
 const GRIDCELL_COLSPAN_ALL = 'gridcell-colspan-all'
 
+const SERVICE_COLS = ['sel-col', 'expander-col']
+const isServiceCol = colKey => SERVICE_COLS.some(key => colKey.includes(key))
+const countServiceCols = cols => cols.filter(({colKey}) => isServiceCol(colKey)).length
+
 //// col hiding
 
 const partitionVisibleCols = (cols, outerWidth) => {
@@ -38,14 +44,17 @@ const partitionVisibleCols = (cols, outerWidth) => {
         if (outerWidth < willWidth) return count
         return fit(count + 1, willWidth)
     }
-    const count = fit(0, 0)
+    let count = fit(0, 0)
+    // Avoid hiding last visible non-service column
+    if (count - countServiceCols(cols.slice(0, count)) < 1) count += 1
     return [cols.slice(0, count), cols.slice(count)]
 }
 
 const sortedByHideWill = sortedWith((a, b) => a.hideWill - b.hideWill)
 
-const calcHiddenCols = (cols, outerWidth) => {
-    const [visibleCols, hiddenCols] = partitionVisibleCols(sortedByHideWill(cols), outerWidth)
+const calcHiddenCols = (cols, outerWidth, scrollbarAdjustment = 0) => {
+    // ScrollbarAdjustment fixes resize infinite loop bug when cells sizes are dynamic
+    const [visibleCols, hiddenCols] = partitionVisibleCols(sortedByHideWill(cols), outerWidth + scrollbarAdjustment)
     const hasHiddenCols = hiddenCols.length > 0
     const hiddenColSet = hasHiddenCols && new Set(colKeysOf(hiddenCols))
     const hideElementsForHiddenCols = (mode,toColKey) => (
@@ -59,12 +68,13 @@ const calcHiddenCols = (cols, outerWidth) => {
 
 const getExpandedForRows = rows => Object.fromEntries(rows.filter(row=>row.isExpanded).map(row=>[row.rowKey,true]))
 
-const setupExpanderElements = rows => {
+const setupExpanderElements = (rows, rowsWithHiddenContent) => {
     const expanded = getExpandedForRows(rows)
     return children => children.map(c => {
         const { expanding, rowKey } = c.props
         return expanding==="expander" && rowKey ? cloneElement(c, {
-            expander: expanded[rowKey] ? 'expanded' : 'collapsed',
+            expander: !rowsWithHiddenContent.has(rowKey) ? 'passive' : expanded[rowKey]
+                ? 'expanded' : 'collapsed'
         }) : c
     })
 }
@@ -104,30 +114,38 @@ const getGridCol = ({ colKey }) => colKey === GRIDCELL_COLSPAN_ALL ? spanAll : C
 
 const spanAll = "1 / -1"
 
-export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, spanRight, spanRightTo, expanding, expander, dragHandle, noDefCellClass, classNames: argClassNames, gridRow: argGridRow, gridColumn: argGridColumn, path, needsHoverExpander=true, ...props }) {
+export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, spanRight, spanRightTo, expanding, expander, dragHandle, noDefCellClass, classNames: argClassNames, gridRow: argGridRow, gridColumn: argGridColumn, needsHoverExpander=true, ...props }) {
+    const ref = useRef(null)
+    const path = usePath(identity)
     const gridRow = argGridRow || getGridRow({ rowKey, rowKeyMod })
     const gridColumn = argGridColumn || getGridCol({ colKey }) + (spanRightTo ? " / "+spanRightTo : "")
-    const style = { ...props.style, gridRow, gridColumn }
-    const expanderProps = expanding==="expander" ? { 'data-expander': expander || 'passive' } : {}
-    const { focusClass, focusHtml } = useFocusControl(path);
-    const className = clsx(argClassNames, !noDefCellClass && GRID_CLASS_NAMES.CELL, focusClass, dragHandle && 'gridDragCell');
-    const cellContent = needsHoverExpander ? $(HoverExpander, { children }) : children;
-    return $("div", { ...props, ...expanderProps, 'data-col-key': colKey, 'data-row-key': rowKey, "data-drag-handle": dragHandle, ...focusHtml, style, className }, cellContent)
+    const align = argClassNames?.includes('gridGoRight') ? 'r' : 'l';
+    const {hoverStyle, hoverClass, ...hoverProps} = useHoverExpander(path, ref, align, needsHoverExpander);
+    const style = {...props.style, gridRow, gridColumn, ...hoverStyle}
+    const expanderProps = expanding === "expander" && {
+        'data-expander': expander,
+        ...expander === 'passive' && {onClickCapture: (e) => e.stopPropagation()}
+    }
+    const {focusClass, focusHtml} = useFocusControl(path);
+    const className = clsx(argClassNames, !noDefCellClass && GRID_CLASS_NAMES.CELL, focusClass, dragHandle && 'gridDragCell', hoverClass);
+    return $("div", {ref, ...props, ...expanderProps, 'data-col-key': colKey, 'data-row-key': rowKey, "data-drag-handle": dragHandle, ...focusHtml, style, className, ...hoverProps}, children)
 }
 
 const colKeysOf = children => children.map(c => c.colKey)
 
 const getGidTemplateRows = rows => rows.map(o => `[${getGridRow(o)}] auto`).join(" ")
-const getGridTemplateColumns = columns => columns.map(col => {
-    const key = getGridCol(col)
-    const maxStr =
-        col.width.tp === "bound" ? `${col.width.max}em` :
-        col.width.tp === "unbound" ? "auto" : never()
-    const width = `minmax(${col.width.min}em,${maxStr})`
-    return `[${key}] ${width}`
-}).join(" ")
-
-const noChildren = []
+const getGridTemplateColumns = (columns,fixedCellsSize) => {
+    const lastVisibleCol = columns.length - countServiceCols(columns) === 1
+    return columns.map(col => {
+        const key = getGridCol(col)
+        const getMaxStr = (width) =>
+            width.tp === "bound" ? `${width.max}em` :
+            width.tp === "unbound" ? "auto" : never()
+        const width = (fixedCellsSize && !lastVisibleCol) || isServiceCol(col.colKey)
+            ? `minmax(${col.width.min}em,${getMaxStr(col.width)})` : 'auto'
+        return `[${key}] ${width}`
+    }).join(" ")
+}
 
 //todo: for multi grids with overlapping keys per page implement: rootSelector
 // see: x-r-sort-obj-key x-r-sort-order-*
@@ -178,6 +196,19 @@ const useColumnGap = () => { // will not react to element style changes
     return [columnGap,ref]
 }
 
+const useScrollbarWidth = (outerWidth,fixedCellsSize) => {
+    const scrollbarWidth = useRef(0)
+    const calcScrollbarWidth = elem => {
+        const {fontSize} = getComputedStyle(elem)
+        const {defaultView: win, body} = elem.ownerDocument
+        return (win.innerWidth - body.clientWidth) / parseFloat(fontSize)
+    }
+    const ref = useCallback(gridElement=>{
+        if (gridElement) scrollbarWidth.current = calcScrollbarWidth(gridElement)
+    },[outerWidth])
+    return fixedCellsSize ? [] : [scrollbarWidth.current,ref]
+}
+
 const getCellDataAttrs = element => {
     const rowKey = element.getAttribute("data-row-key")
     const colKey = element.getAttribute("data-col-key")
@@ -212,14 +243,21 @@ const useGridKeyboardAction = identity => {
 }
 
 const useValueToServer = (identity, value) => {
+    const isRootBranch = useContext(RootBranchContext)
     const [patches, enqueuePatch] = useSync(identity)
-    useEffect(()=>{
-        enqueuePatch({ value, skipByPath: true, retry: true })
-    },[value,enqueuePatch])
+    useEffect(() => {
+        if (isRootBranch) enqueuePatch({ value, skipByPath: true, retry: true })
+    }, [value, enqueuePatch])
 }
 
-export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey }) {
-    const children = rawChildren || noChildren//Children.toArray(rawChildren)
+export function GridRoot({ identity, rows: argRows, cols: argCols, children: rawChildren = [], gridKey }) {
+    const printMode = useContext(PrintContext);
+    const rows = printMode ? argRows.map(row => ({...row, isExpanded: true})) : argRows
+    const cols = printMode ? argCols.filter(col => !isServiceCol(col.colKey)) : argCols
+    const children = printMode ? rawChildren.filter(child => !isServiceCol(child.props.colKey)) : rawChildren
+
+    const uiType = useContext(UiInfoContext)
+    const fixedCellsSize = uiType === 'pointer'
 
     const [dragData,dragCSSContent,onMouseDown] = useSyncGridDrag({ identity, rows, cols, gridKey })
     const clickAction = useGridClickAction(identity)
@@ -234,13 +272,16 @@ export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey 
 
     const [outerWidth,outerWidthRef] = useWidth()
     const [columnGap,columnGapRef] = useColumnGap()
-    const ref = useMergeRef(outerWidthRef,columnGapRef)
+    const [scrollbarWidth,scrollbarWidthRef] = useScrollbarWidth(outerWidth,fixedCellsSize)
+    const ref = useMergeRef(outerWidthRef,columnGapRef,scrollbarWidthRef)
+
     const contentWidth = outerWidth - columnGap * cols.length
     const { hasHiddenCols, hideElementsForHiddenCols } =
-        useMemo(() => calcHiddenCols(cols, contentWidth), [cols, contentWidth])
+        useMemo(() => calcHiddenCols(cols, contentWidth, scrollbarWidth), [cols, contentWidth])
     const gridTemplateColumns = useMemo(() => getGridTemplateColumns(
-        hideExpander(hasHiddenCols)(hideElementsForHiddenCols(false,col=>col.colKey)(cols))
-    ), [cols, hideElementsForHiddenCols, hasHiddenCols])
+        hideExpander(hasHiddenCols)(hideElementsForHiddenCols(false,col=>col.colKey)(cols)),
+        fixedCellsSize
+    ), [cols, hideElementsForHiddenCols, hasHiddenCols, fixedCellsSize])
 
     useValueToServer(hasHiddenColsIdOf(identity), hasHiddenCols)
 
@@ -249,53 +290,50 @@ export function GridRoot({ identity, rows, cols, children: rawChildren, gridKey 
 
     const allChildren = useMemo(()=>getAllChildren({
         children,rows,cols,hasHiddenCols,hideElementsForHiddenCols,dragRowKey
-    }),[children,rows,cols,hasHiddenCols,hideElementsForHiddenCols,dragRowKey])
+    }),[children,rows,cols,hasHiddenCols,hideElementsForHiddenCols,dragRowKey,printMode])
 
     const headerRowKeys = rows.filter(row => row.isHeader).map(row => row.rowKey).join(' ')
     const dragBGEl = $("div", { key: "gridBG", className: "gridBG", style: { gridColumn: spanAll, gridRow: spanAll }})
-    const style = { display: "grid", gridTemplateRows, gridTemplateColumns }
+    const style = { display: "grid", gridTemplateRows, gridTemplateColumns, ...printMode && {fontSize: '1vw'} }
     const res = $("div", {
         onMouseDown,
         onClickCapture: clickAction,
         onKeyDown: keyboardAction,
         style,
-        className: "grid",
+        className: clsx("grid", fixedCellsSize ? 'fixedCells' : 'dynamicCells'),
         "data-grid-key": gridKey,
         "header-row-keys": headerRowKeys,
         ref
     }, dragBGEl, ...allChildren)
+
     const dragCSSEl = $("style",{dangerouslySetInnerHTML: { __html: dragCSSContent}})
+
     return $(NoCaptionContext.Provider,{value:true},
-        $(InputsSizeContext.Provider,{value:50},
+        $(InputsSizeContext.Provider,{value: fixedCellsSize ? 50 : 25},
             $(BindGroupElement,{groupId:'grid-list-bind'},dragCSSEl,res)
         )
     )
 }
 
 const getAllChildren = ({children,rows,cols,hasHiddenCols,hideElementsForHiddenCols,dragRowKey}) => {
+    const rowsWithHiddenContent = new Set();
+    hideElementsForHiddenCols(true,c=>c.props.colKey)(children).forEach(cell => {
+        if (cell.props.children) rowsWithHiddenContent.add(cell.props.rowKey);
+    });
     const expandedElements = getExpandedCells({
         cols: hideElementsForHiddenCols(true,col=>col.colKey)(cols),
-        rows, //: dragRowKey ? rows.filter(row=>row.rowKey!==dragRowKey) : rows,
+        rows: rows.filter(row => rowsWithHiddenContent.has(row.rowKey)),
         children,
-    }).map(([rowKey, pairs]) => {
-        const res = $(GridCell, {
+    }).map(([rowKey, pairs]) => $(GridCell, {
+            key:`${rowKey}-expanded`,
             gridColumn: spanAll,
-            rowKey,
-            rowKeyMod: "-expanded",
-            style: { display: "flex", flexFlow: "row wrap", visibility: dragRowKey?"hidden":null },
+            rowKey, rowKeyMod: "-expanded",
+            'data-expanded-cell': '',
+            style: dragRowKey ? {visibility: "hidden"} : undefined,
             needsHoverExpander: false,
-            children: pairs.map(([col, cell]) => $("div",{
-                key: cell.key,
-                style: cell.props.children ? { flexBasis:  `${col.width.min}em` } : undefined,
-                className: "inputLike",
-                'data-expanded-col-key': col.colKey,
-                children: cell.props.children,
-            })),
-            'data-expanded-cell': ''
-        })
-        return $(NoCaptionContext.Provider,{value:false, key:`${rowKey}-expanded`},res)
-    })
-    const toExpanderElements = hasHiddenCols ? setupExpanderElements(rows) : hideExpanderElements(cols)
+            children: $(NoCaptionContext.Provider, {value:false}, pairs.map(([col, cell]) => cell.props.children))
+        }))
+    const toExpanderElements = hasHiddenCols ? setupExpanderElements(rows, rowsWithHiddenContent) : hideExpanderElements(cols)
     const allChildren = spanRightElements(cols, toExpanderElements(hideElementsForHiddenCols(false,cell=>cell.props.colKey)([
         ...children, ...expandedElements
     ])))

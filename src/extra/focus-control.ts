@@ -6,20 +6,22 @@ const PathContext = React.createContext("path");
 
 interface FocusControlObj {
     focusClass?: string,
-    focusHtml?: { 'data-path': string, tabIndex: number }
+    focusHtml?: { 'data-path': string, tabIndex: number },
+    isFocused?: boolean
 }
 
 function useFocusControl(path: string | undefined): FocusControlObj {
     if (!path) return {};
     const noFocusCtx = useContext(NoFocusContext);
+    const isFocused = isCurrentlyFocused(path);
     const focusHtml = { 'data-path': path, tabIndex: 1 };
-    const focusClass = clsx(!noFocusCtx && 'focusWrapper', isCurrentlyFocused(path) && 'activeFocusWrapper');
-    return { focusClass, focusHtml };
+    const focusClass = clsx(!noFocusCtx && 'focusWrapper', isFocused && 'activeFocusWrapper');
+    return { focusClass, focusHtml, isFocused };
 }
 
 function isCurrentlyFocused(path: string | undefined) {
     const currentPath = useContext(PathContext);
-    return currentPath && path && currentPath === path;
+    return currentPath === path;
 }
 
 
@@ -33,21 +35,5 @@ const Focusable = ({path, children}: FocusableProps) => {
     return children(focusProps);
 }
 
-
-interface Identity {
-    key?: string
-    parent?: Identity,
-}
-
-function getPath(identity?: Identity) {
-    let path = '';
-    let element: Identity | undefined = identity?.parent?.parent;
-    while (element) {
-        if (element.key) path = `/${element.key}` + path;
-        element = element.parent;
-    }
-    return path;
-}
-
-export type { FocusControlObj, Identity };
-export { PathContext, useFocusControl, Focusable, getPath, isCurrentlyFocused };
+export type { FocusControlObj };
+export { PathContext, useFocusControl, Focusable };
