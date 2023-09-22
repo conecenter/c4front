@@ -1,4 +1,4 @@
-import React, { ReactElement, useRef } from 'react';
+import React, { ReactElement, useContext, useRef } from 'react';
 import clsx from 'clsx';
 import { COPY_EVENT, CUT_EVENT, DELETE_EVENT, PASTE_EVENT, useExternalKeyboardControls } from './focus-module-interface';
 import { NoFocusContext } from './labeled-element';
@@ -7,6 +7,7 @@ import { usePath, useSync } from '../main/vdom-hooks';
 import { identityAt } from '../main/vdom-util';
 import { useFocusControl } from './focus-control';
 import { useAddEventListener } from './custom-hooks';
+import { UiInfoContext } from './ui-info-provider';
 
 const keyboardActionIdOf = identityAt('keyboardAction');
 
@@ -28,7 +29,14 @@ function RouteElement({identity, keyboardAction, compact, routeParts, extraParts
     const path = usePath(identity);
     const { focusClass, focusHtml } = useFocusControl(path);
 
-    const className = clsx('routeElement focusFrameProvider', focusClass, compact && 'compact');
+    const uiType = useContext(UiInfoContext);
+
+    const className = clsx(
+        'routeElement focusFrameProvider',
+        focusClass,
+        compact && 'compact',
+        uiType === 'touch' && 'fingerSized'
+    );
     
     // Server sync
     const [_, sendPatch] = useSync(keyboardActionIdOf(identity));

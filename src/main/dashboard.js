@@ -73,7 +73,7 @@ export const DashboardRoot = ({
                 style: { ...cardStyles, width: em(cardWidth) },
                 children: [addObserved(c.key, {
                     key: "observed",
-                    style: { maxWidth: em(minColWidth) }, children:[c]
+                    style: { maxWidth: em(cardWidth) }, children:[c]
                 })],
             }))
         })]
