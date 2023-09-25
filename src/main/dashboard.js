@@ -2,6 +2,7 @@ import {createElement as $,useCallback,useEffect,useState} from "react"
 import {useObservedChildSizes,getFontSize,useWidth} from "./sizes.js"
 import {sum,em} from "./vdom-util.js"
 import {useEventListener} from './vdom-hooks.js'
+import {colorToProps} from "../extra/view-builder/common-api";
 
 const limited = (minV,v,maxV)=>Math.min(Math.max(minV,v),maxV)
 
@@ -20,7 +21,7 @@ const div = attr => $("div",attr)
 
 export const DashboardRoot = ({
     containerHeight, containerPaddingTop, containerPaddingLeft, containerStyle,
-    children=[], boardStyle, // board is inside container
+    children=[], cardsColor, boardStyle, // board is inside container
     minColWidth, maxColWidth, minScale, maxScale, cardStyles, rowGap, colGap // col widths are in em-s before scaling
 }) => {
     if(children.length <= 0) return null
@@ -51,6 +52,7 @@ export const DashboardRoot = ({
     const freeWidth =
         Math.max(0, containerInnerWidth / boardSizes.scaleToApply - boardSizes.boardWidth)
     const cardWidth = Math.min(maxColWidth, minColWidth + freeWidth / boardSizes.colCount)
+    const {style: cardsColorStyle, className} = colorToProps(cardsColor)
     return div({
         ref,
         style: {
@@ -69,8 +71,8 @@ export const DashboardRoot = ({
                 fontSize: `${boardSizes.scaleToApply*100}%`,
             },
             children: children.map(c=>div({
-                key: c.key,
-                style: { ...cardStyles, width: em(cardWidth) },
+                key: c.key, className,
+                style: { ...cardStyles, ...cardsColorStyle, width: em(cardWidth) },
                 children: [addObserved(c.key, {
                     key: "observed",
                     style: { maxWidth: em(cardWidth) }, children:[c]
@@ -86,8 +88,8 @@ export const Dashboard = ({
     minScale, maxScale, 
     rowGap, colGap, 
     containerPaddingTop = 1,
-    containerPaddingLeft = 1, 
-    children
+    containerPaddingLeft = 1,
+    cardsColor, children
 }) => {
     const [{elem, containerHeight}, setState] = useState({});
 
@@ -111,7 +113,7 @@ export const Dashboard = ({
             minColWidth, maxColWidth,
             rowGap, colGap,
             minScale, maxScale,
-            children
+            cardsColor, children
         })
     );
 }
