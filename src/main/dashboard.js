@@ -1,4 +1,5 @@
 import {createElement as $,useCallback,useEffect,useState} from "react"
+import clsx from "clsx";
 import {useObservedChildSizes,getFontSize,useWidth} from "./sizes.js"
 import {sum,em} from "./vdom-util.js"
 import {useEventListener} from './vdom-hooks.js'
@@ -52,7 +53,7 @@ export const DashboardRoot = ({
     const freeWidth =
         Math.max(0, containerInnerWidth / boardSizes.scaleToApply - boardSizes.boardWidth)
     const cardWidth = Math.min(maxColWidth, minColWidth + freeWidth / boardSizes.colCount)
-    const {style: cardsColorStyle, className} = colorToProps(cardsColor)
+    const {style: cardsColorStyle, className: cardsColorClass} = colorToProps(cardsColor)
     return div({
         ref,
         style: {
@@ -67,17 +68,14 @@ export const DashboardRoot = ({
                 alignItems: "start",
                 rowGap: em(rowGap), columnGap: em(colGap),
                 gridTemplateColumns: `repeat(${boardSizes.colCount}, ${em(cardWidth)})`,
-                gridTemplateRows: boardSizes.rowHeights.map(em).join(" "),
+                gridTemplateRows: boardSizes.rowHeights.map(h => h === 0 ? 'auto' : em(h)).join(" "),
                 fontSize: `${boardSizes.scaleToApply*100}%`,
             },
-            children: children.map(c=>div({
-                key: c.key, className,
-                style: { ...cardStyles, ...cardsColorStyle, width: em(cardWidth) },
-                children: [addObserved(c.key, {
-                    key: "observed",
-                    style: { maxWidth: em(cardWidth) }, children:[c]
-                })],
-            }))
+            children: children.map(c=>addObserved(c.key, {
+                    key: c.key, className: clsx('dashboardCardBox', cardsColorClass),
+                    style: { maxWidth: em(cardWidth), ...cardStyles, ...cardsColorStyle }, children:c
+                }),
+            )
         })]
     })
 }
