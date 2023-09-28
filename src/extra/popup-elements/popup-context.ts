@@ -3,14 +3,13 @@ import { createContext } from "react";
 type PopupStack = string[];
 
 interface PopupContext {
-    currentState: PopupStack,
-    togglePopup: (popupKey: string) => void,
-    popupDrawer?: HTMLElement
+    openedPopups: PopupStack,
+    sendFinalChange: (change: PopupStack) => void
 };
 
 const defaultPopupContext: PopupContext = {
-    currentState: [],
-    togglePopup: () => undefined
+    openedPopups: [],
+    sendFinalChange: () => undefined
 };
 
 const PopupContext = createContext(defaultPopupContext);
