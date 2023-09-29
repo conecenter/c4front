@@ -31,8 +31,8 @@ function NewPopupElement({ popupKey, children }: PopupElement) {
 	};
     useAddEventListener(popupElement?.ownerDocument, 'focusout', closeOnBlur);
 
-    const { openedPopups, sendFinalChange } = useContext(PopupContext);
     const popupAncestorKey = useContext(PopupAncestorKeyContext);
+    const { openedPopups, sendFinalChange } = useContext(PopupContext);
     useLayoutEffect(
         function closeRivalPopupsAfterOpening() {
             if (isOpened && openedPopups.length > 1) {
@@ -43,8 +43,8 @@ function NewPopupElement({ popupKey, children }: PopupElement) {
         [isOpened]
     );
 
-    useLayoutEffect(() => {
-        return function preventFocusLossAfterClosing() {
+    useLayoutEffect(function preventFocusLossAfterClosing() {
+        return () => {
             if (popupElement?.contains(popupElement?.ownerDocument.activeElement)) parent.current?.focus();
         }
     }, []);
