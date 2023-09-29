@@ -16,10 +16,9 @@ function NewPopupElement({ popupKey, children }: PopupElement) {
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
     const { isOpened, toggle } = usePopupState(popupKey);
 
-    const parent = useRef<HTMLElement | null>(null);
+    const parent = useRef<HTMLElement | null | undefined>(null);
     const setPopupParent = useCallback((elem: HTMLElement | null) => {
-        if (!elem) return;
-        parent.current = elem.closest<HTMLElement>(SEL_FOCUSABLE_ATTR);
+        parent.current = elem?.closest<HTMLElement>(SEL_FOCUSABLE_ATTR);
     }, []);
 
     function closeOnBlur(e: FocusEvent) {
