@@ -1,5 +1,3 @@
-import { Identity } from "./focus-control";
-
 async function copyToClipboard(value: string) {
     try {
         await navigator.clipboard.writeText(value);
@@ -9,8 +7,6 @@ async function copyToClipboard(value: string) {
         return false;
     }
 }
-
-const getKeyFromIdentity = (identity: Identity) => identity.parent?.parent?.key || '';
 
 function inRange(num: number, range: number[], inclusive = false) {
     return inclusive 
