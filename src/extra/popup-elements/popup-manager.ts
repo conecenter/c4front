@@ -19,7 +19,9 @@ function PopupManager({identity, openedPopups=[], children}: PopupManager) {
     const { currentState, sendFinalChange } =
         usePatchSync(identity, 'receiver', openedPopups, false, s => s, changeToPatch, patchToChange, applyChange);
 
-    const value: PopupContext = useMemo(() => ({ openedPopups: currentState, sendFinalChange }), [JSON.stringify(currentState)]);
+    const value = useMemo<PopupContext>(() => (
+        { openedPopups: currentState, sendFinalChange }
+    ), [JSON.stringify(currentState)]);
 
     return $(PopupContext.Provider, { value }, children);
 }
