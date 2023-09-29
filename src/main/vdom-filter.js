@@ -3,11 +3,9 @@ import clsx from "clsx"
 import {createElement as $,cloneElement} from "react"
 import {em,sum,findLastIndex} from "./vdom-util.js"
 import {useWidths} from "../main/sizes.js"
-import {NoCaptionContext} from "./vdom-hooks.js"
+import {NoCaptionContext, usePath} from "./vdom-hooks.js"
 import {usePopupState} from "../extra/popup-elements/popup-manager"
 import {NewPopupElement} from "../extra/popup-elements/popup-element"
-import { getKeyFromIdentity } from "../extra/utils"
-import { getPath, useFocusControl } from "../extra/focus-control"
 
 //// non-shared
 
@@ -127,8 +125,11 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
 
 export function FilterButtonExpander({identity,optButtons:rawOptButtons,children,openedChildren}){
     const optButtons = rawOptButtons || []
-    const [isOpened,toggle] = usePopupState(identity)
-    return $("div", {className:'filterButtonExpander',onClick:ev=>toggle(!isOpened)},
+
+    const popupKey = usePath(identity)
+    const [isOpened,toggle] = usePopupState(popupKey)
+
+    return $("div", {className:'filterButtonExpander',onClick:()=>toggle(!isOpened)},
         isOpened ? [
             openedChildren ?? children,
             $(NewPopupElement,{popupKey},optButtons.map(btn=>{
