@@ -4,8 +4,8 @@ import { Patch, usePatchSync } from "../exchange/patch-sync";
 import { PopupContext, PopupStack } from "./popup-context";
 
 // Server sync functions
-const changeToPatch = (ch: PopupStack): Patch => ({ value: ch.join('/') });
-const patchToChange = (p: Patch): PopupStack => p.value.split('/');
+const changeToPatch = (ch: PopupStack): Patch => ({ value: ch.join('|') });
+const patchToChange = (p: Patch): PopupStack => p.value.split('|');
 const applyChange = (_prevState: PopupStack, ch: PopupStack) => ch;
 
 
