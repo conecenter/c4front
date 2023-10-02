@@ -127,7 +127,7 @@ export function FilterButtonExpander({identity,optButtons:rawOptButtons,children
     const optButtons = rawOptButtons || []
 
     const popupKey = usePath(identity)
-    const [isOpened,toggle] = usePopupState(popupKey)
+    const {isOpened,toggle} = usePopupState(popupKey)
 
     return $("div", {className:'filterButtonExpander',onClick:()=>toggle(!isOpened)},
         isOpened ? [
