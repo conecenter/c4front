@@ -154,7 +154,7 @@ case class NoReceiver[C]() extends Receiver[C] {
   //
   @c4el("PopupManager") def popupManager(
     key: String,
-    popupPath: List[String],
+    openedPopups: List[String],
     children: ViewRes = Nil,
     receiver: Receiver[C] = NoReceiver[C],
   ): ToChildPair
