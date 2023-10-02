@@ -5,6 +5,7 @@ import { SEL_FOCUSABLE_ATTR } from '../focus-module-interface';
 import { PopupContext } from './popup-context';
 import { usePopupState } from './popup-manager';
 import { useAddEventListener } from '../custom-hooks';
+import { isInstanceOfNode } from '../dom-utils';
 
 interface PopupElement {
     key?: string,
@@ -16,16 +17,13 @@ function PopupElement({ popupKey, children }: PopupElement) {
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
     const { isOpened, toggle } = usePopupState(popupKey);
 
-    const parent = useRef<HTMLElement | null | undefined>(null);
+    const parent = useRef<HTMLElement | null>(null);
     const setPopupParent = useCallback((elem: HTMLElement | null) => {
-        parent.current = elem?.closest<HTMLElement>(SEL_FOCUSABLE_ATTR);
+        parent.current = elem && elem.closest<HTMLElement>(SEL_FOCUSABLE_ATTR);
     }, []);
 
     function closeOnBlur(e: FocusEvent) {
-        if (!(e.relatedTarget instanceof Node)) return;
-        for (const elem of [popupElement, parent.current]) {
-            if (elem?.contains(e.relatedTarget)) return;
-        }
+        if (elementsContainTarget([popupElement, parent.current], e.relatedTarget)) return;
         toggle(false);
 	};
     useAddEventListener(popupElement?.ownerDocument, 'focusout', closeOnBlur);
@@ -62,6 +60,13 @@ function PopupElement({ popupKey, children }: PopupElement) {
             <span ref={setPopupParent} style={{display: 'none'}}></span>
         </PopupAncestorKeyContext.Provider>
     );
+}
+
+function elementsContainTarget(elems: (HTMLElement | null)[], target: EventTarget | null) {
+    if (!isInstanceOfNode(target)) return;
+    for (const elem of elems) {
+        if (elem?.contains(target)) return true;
+    }
 }
 
 const PopupAncestorKeyContext = createContext('');
