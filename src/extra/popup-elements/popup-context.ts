@@ -4,7 +4,8 @@ type PopupStack = string[];
 
 interface PopupContext {
     openedPopups: PopupStack,
-    sendFinalChange: (change: PopupStack) => void
+    sendFinalChange: (change: PopupStack) => void,
+    popupDrawer?: HTMLElement
 };
 
 const defaultPopupContext: PopupContext = {

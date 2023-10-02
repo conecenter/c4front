@@ -17,10 +17,8 @@ function PopupElement({ popupKey, children }: PopupElement) {
     const { isOpened, toggle } = usePopupState(popupKey);
 
     const parent = useRef<HTMLElement | null | undefined>(null);
-    const portalContainer = useRef<HTMLElement | undefined>();
     const setPopupParent = useCallback((elem: HTMLElement | null) => {
         parent.current = elem?.closest<HTMLElement>(SEL_FOCUSABLE_ATTR);
-        portalContainer.current = elem?.ownerDocument.body;
     }, []);
 
     function closeOnBlur(e: FocusEvent) {
@@ -33,7 +31,7 @@ function PopupElement({ popupKey, children }: PopupElement) {
     useAddEventListener(popupElement?.ownerDocument, 'focusout', closeOnBlur);
 
     const popupAncestorKey = useContext(PopupAncestorKeyContext);
-    const { openedPopups, sendFinalChange } = useContext(PopupContext);
+    const { openedPopups, sendFinalChange, popupDrawer } = useContext(PopupContext);
     useLayoutEffect(
         function closeRivalPopupsAfterOpening() {
             if (isOpened && openedPopups.length > 1) {
@@ -60,7 +58,7 @@ function PopupElement({ popupKey, children }: PopupElement) {
 
     return (
         <PopupAncestorKeyContext.Provider value={popupKey} >
-            {isOpened && portalContainer.current && createPortal(popup, portalContainer.current)}
+            {isOpened && popupDrawer && createPortal(popup, popupDrawer)}
             <span ref={setPopupParent} style={{display: 'none'}}></span>
         </PopupAncestorKeyContext.Provider>
     );
