@@ -17,6 +17,9 @@ function PopupElement({ popupKey, children }: PopupElement) {
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
     const { isOpened, toggle } = usePopupState(popupKey);
 
+    const popupAncestorKey = useContext(PopupAncestorKeyContext);
+    const { openedPopups, sendFinalChange, popupDrawer } = useContext(PopupContext);
+
     const parent = useRef<HTMLElement | null>(null);
     const setPopupParent = useCallback((elem: HTMLElement | null) => {
         parent.current = elem && elem.closest<HTMLElement>(SEL_FOCUSABLE_ATTR);
@@ -28,8 +31,6 @@ function PopupElement({ popupKey, children }: PopupElement) {
 	};
     useAddEventListener(popupElement?.ownerDocument, 'focusout', closeOnBlur);
 
-    const popupAncestorKey = useContext(PopupAncestorKeyContext);
-    const { openedPopups, sendFinalChange, popupDrawer } = useContext(PopupContext);
     useLayoutEffect(
         function closeRivalPopupsAfterOpening() {
             if (isOpened && openedPopups.length > 1) {
@@ -48,15 +49,19 @@ function PopupElement({ popupKey, children }: PopupElement) {
 
     const [popupStyle] = usePopupPos(popupElement, false, parent.current);
 
-    const popup = (
-        <div ref={setPopupElement} className='popupEl' style={popupStyle} onClick={(e)=>e.stopPropagation()} tabIndex={-1} >
-            {children}
-        </div>
-    );
-
     return (
         <PopupAncestorKeyContext.Provider value={popupKey} >
-            {isOpened && popupDrawer && createPortal(popup, popupDrawer)}
+            {isOpened && popupDrawer && createPortal(
+                <div
+                    ref={setPopupElement}
+                    className='popupEl'
+                    style={popupStyle}
+                    onClick={(e)=>e.stopPropagation()}
+                    tabIndex={-1}
+                    children={children}
+                />,
+                popupDrawer
+            )}
             <span ref={setPopupParent} style={{display: 'none'}}></span>
         </PopupAncestorKeyContext.Provider>
     );

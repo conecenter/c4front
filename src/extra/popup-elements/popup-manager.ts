@@ -1,4 +1,4 @@
-import { createElement as $, useMemo, useContext, ReactNode, useRef } from "react";
+import { createElement as $, useMemo, useContext, ReactNode, useState } from "react";
 import { PopupElement } from "./popup-element";
 import { Patch, usePatchSync } from "../exchange/patch-sync";
 import { PopupContext, PopupStack } from "./popup-context";
@@ -19,14 +19,13 @@ function PopupManager({identity, openedPopups=[], children}: PopupManager) {
     const { currentState, sendFinalChange } =
         usePatchSync(identity, 'receiver', openedPopups, false, s => s, changeToPatch, patchToChange, applyChange);
 
-    const popupDrawerRef = useRef<HTMLElement | undefined>();
-    const popupDrawer = $('div', {ref: popupDrawerRef});
+    const [popupDrawer, setPopupDrawer] = useState<HTMLElement | undefined>();
 
     const value = useMemo<PopupContext>(() => (
-        { openedPopups: currentState, sendFinalChange,  popupDrawer: popupDrawerRef.current }
-    ), [JSON.stringify(currentState)]);
+        { openedPopups: currentState, sendFinalChange, popupDrawer }
+    ), [JSON.stringify(currentState), popupDrawer]);
 
-    return $(PopupContext.Provider, { value }, children, popupDrawer);
+    return $(PopupContext.Provider, { value }, children, $('div', {ref: setPopupDrawer}));
 }
 
 
