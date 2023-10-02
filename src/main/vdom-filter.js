@@ -5,7 +5,7 @@ import {em,sum,findLastIndex} from "./vdom-util.js"
 import {useWidths} from "../main/sizes.js"
 import {NoCaptionContext, usePath} from "./vdom-hooks.js"
 import {usePopupState} from "../extra/popup-elements/popup-manager"
-import {NewPopupElement} from "../extra/popup-elements/popup-element"
+import {PopupElement} from "../extra/popup-elements/popup-element"
 
 //// non-shared
 
@@ -132,7 +132,7 @@ export function FilterButtonExpander({identity,optButtons:rawOptButtons,children
     return $("div", {className:'filterButtonExpander',onClick:()=>toggle(!isOpened)},
         isOpened ? [
             openedChildren ?? children,
-            $(NewPopupElement,{popupKey},optButtons.map(btn=>{
+            $(PopupElement,{popupKey},optButtons.map(btn=>{
                 return $("div",{key:btn.key,className:'gridPopupItem'}, 
                     $(NoCaptionContext.Provider,{value:true},btn.props.children))
             }))

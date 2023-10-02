@@ -12,7 +12,7 @@ interface PopupElement {
     children?: ReactNode
 }
 
-function NewPopupElement({ popupKey, children }: PopupElement) {
+function PopupElement({ popupKey, children }: PopupElement) {
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
     const { isOpened, toggle } = usePopupState(popupKey);
 
@@ -69,4 +69,4 @@ function NewPopupElement({ popupKey, children }: PopupElement) {
 const PopupAncestorKeyContext = createContext('');
 PopupAncestorKeyContext.displayName = 'PopupAncestorKeyContext';
 
-export { NewPopupElement }
+export { PopupElement }

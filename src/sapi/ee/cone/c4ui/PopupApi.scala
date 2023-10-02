@@ -10,4 +10,10 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, c4elPath, c4tags}
     children: ViewRes,
     receiver: Receiver[C] = NoReceiver[C],
   ): ToChildPair
+
+  @c4elPath("PopupElement") def popupElement(
+    key: String,
+    popupKey: String,
+    children: ViewRes
+  ): ToChildPair
 }

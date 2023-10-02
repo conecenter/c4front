@@ -1,5 +1,5 @@
 import { createElement as $, useMemo, useContext, ReactNode } from "react";
-import { NewPopupElement } from "./popup-element";
+import { PopupElement } from "./popup-element";
 import { Patch, usePatchSync } from "../exchange/patch-sync";
 import { PopupContext, PopupStack } from "./popup-context";
 
@@ -38,4 +38,4 @@ const usePopupState = (popupKey: string) => {
 }
 
 export { PopupManager, usePopupState }
-export const popupComponents = { PopupManager, NewPopupElement };
+export const popupComponents = { PopupManager, PopupElement };
