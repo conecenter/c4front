@@ -17,8 +17,10 @@ function PopupElement({ popupKey, children }: PopupElement) {
     const { isOpened, toggle } = usePopupState(popupKey);
 
     const parent = useRef<HTMLElement | null | undefined>(null);
+    const portalContainer = useRef<HTMLElement | undefined>();
     const setPopupParent = useCallback((elem: HTMLElement | null) => {
         parent.current = elem?.closest<HTMLElement>(SEL_FOCUSABLE_ATTR);
+        portalContainer.current = elem?.ownerDocument.body;
     }, []);
 
     function closeOnBlur(e: FocusEvent) {
@@ -48,8 +50,6 @@ function PopupElement({ popupKey, children }: PopupElement) {
         }
     }, []);
 
-    const portalContainer = parent.current?.ownerDocument.body;
-
     const [popupStyle] = usePopupPos(popupElement, false, parent.current);
 
     const popup = (
@@ -60,7 +60,7 @@ function PopupElement({ popupKey, children }: PopupElement) {
 
     return (
         <PopupAncestorKeyContext.Provider value={popupKey} >
-            {isOpened && portalContainer && createPortal(popup, portalContainer)}
+            {isOpened && portalContainer.current && createPortal(popup, portalContainer.current)}
             <span ref={setPopupParent} style={{display: 'none'}}></span>
         </PopupAncestorKeyContext.Provider>
     );
