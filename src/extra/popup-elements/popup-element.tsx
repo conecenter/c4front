@@ -35,7 +35,7 @@ function PopupElement({ popupKey, children }: PopupElement) {
         function closeRivalPopupsAfterOpening() {
             if (isOpened && openedPopups.length > 1) {
                 const popupAncestorIndex = openedPopups.indexOf(popupAncestorKey);
-                sendFinalChange([...openedPopups.slice(0, popupAncestorIndex), popupKey]);
+                sendFinalChange([...openedPopups.slice(0, popupAncestorIndex + 1), popupKey]);
             }
         },
         [isOpened]
