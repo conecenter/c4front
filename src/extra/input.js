@@ -1,29 +1,14 @@
-import React, { createElement as $ } from 'react'
+import { createElement as $ } from 'react'
 import clsx from 'clsx'
 import { Focusable } from 'c4f/extra/focus-control.ts'
 import StatefulComponent from '../../../../extra/stateful-component'
-import { checkActivateCalls, eventManager } from '../../../../extra/utils.js'
-import { dragDropModule } from "../../../../extra/dragdrop-module"
-import folderImg from "../../../../extra/media/images/folder.svg"
-import crossImg from "../../../../extra/media/images/close.svg"
-
-import { ButtonElement } from 'c4f/extra/button-element'
-import { NoCaptionContext } from "c4f/main/vdom-hooks.js";
+import { eventManager } from '../../../../extra/utils.js'
 import { InputsSizeContext } from "c4f/extra/dom-utils";
 import { VkInfoContext } from 'c4f/extra/ui-info-provider';
-
 
 const activeElement = (e) => e&&e.ownerDocument.activeElement
 const execCopy = (e) =>  e&&e.ownerDocument.execCommand('copy')
 const execCut = (e) =>  e&&e.ownerDocument.execCommand('cut')
-const fileReader = (e)=> e&&(new e.ownerDocument.defaultView.FileReader())
-
-const ReControlledInput = "input"
-
-const ButtonInputElement = (props) => (
-    $("div", { key: "inputButton", className: "buttonEl" },
-        $(ButtonElement, { ...props, className: "inputButtonElement" }))
-);
 
 const validateInput = (inputStr, regexStr, skipInvalidSymbols, upperCase) => {
     if (!inputStr) return '';
@@ -246,7 +231,7 @@ class InputElementBase extends StatefulComponent {
         this.props.onBlur?.();
         this.prevval = this.inp.value
     }
-    onMouseDown(e) {
+    /*onMouseDown(e) {
         if (!this.props.div) return
         if (!this.props.onReorder) return
         this.dragBinding = dragDropModule.dragStartDD(e, this.inp, this.onMouseUpCall)
@@ -257,31 +242,26 @@ class InputElementBase extends StatefulComponent {
         if (!this.props.onReorder) return
         this.setState({ visibility: "" })
         this.props.onReorder("reorder", newPos.toString())
-    }
+    }*/
     render() {
         const readOnly = !this.props.onChange && !this.props.onBlur
         const inpContStyle = readOnly ? {borderColor: "transparent"} : undefined;
         const {focusClass, focusHtml} = this.props.focusProps || {};
-        const inputClassName = this.props.inputType && this.props.inputType !== "textarea" ? "roInputBox" : "inputBox"
-        const inputType = !this.props.inputType ? ReControlledInput : this.props.inputType
+        const inputType = !this.props.inputType ? "input" : this.props.inputType
         const name = this.props.typeKey || null
         const content = this.props.content
-
         const errorChildren = this.getChildrenByClass("sideContent")
-        const errors = errorChildren && errorChildren.length > 0 ? errorChildren : []
+        const errors = errorChildren?.length > 0 ? errorChildren : []
         const alignRight = !!this.props.alignRight
-        const inputStyle = alignRight ? {textAlign: "end"} : undefined
-        const errorsRight = alignRight ? [] : errors
-        const errorsLeft = !alignRight ? [] : errors
-        return $("div", { style: inpContStyle, ref: (ref) => this.cont = ref, className: clsx(inputClassName, focusClass), ...focusHtml }, [
+        return $("div", { style: inpContStyle, ref: (ref) => this.cont = ref, className: clsx("inputBox", focusClass), ...focusHtml }, [
             this.props.shadowElement ? this.props.shadowElement() : null,
-            ...errorsLeft,
+            alignRight && errors,
             $(InputsSizeContext.Consumer, null, size => this.props.drawFunc(
                 $(inputType, {
                     key: "input",
                     ref: ref => this.inp = ref,
                     name, content, size, readOnly,
-                    style: inputStyle,
+                    style: alignRight ? {textAlign: "end"} : undefined,
                     type: this.props.type,
                     value: this.props.value,
                     rows: this.props.rows,
@@ -291,8 +271,9 @@ class InputElementBase extends StatefulComponent {
                     ...name && {autoComplete: "new-password"},
                     "data-type": this.props.dataType,
                     "data-changing": this.props.changing,
-                    onChange: this.onChange, onBlur: this.onBlur, onFocus: this.props.onFocus,
-                    onKeyDown: this.onKeyDown, onMouseDown: this.onMouseDown, onTouchStart: this.onMouseDown
+                    onChange: this.onChange, onKeyDown: this.onKeyDown,
+                    onBlur: this.onBlur, onFocus: this.props.onFocus,
+                    /*onMouseDown: this.onMouseDown, onTouchStart: this.onMouseDown*/
                 },
                     content ? content : null)
                 )
@@ -300,7 +281,7 @@ class InputElementBase extends StatefulComponent {
             this.props.uploadedFileElement ? this.props.uploadedFileElement() : null,
             this.props.deleteButtonElement ? this.props.deleteButtonElement() : null,
             this.props.buttonElement ? this.props.buttonElement() : null,
-            ...errorsRight,
+            !alignRight && errors,
             this.props.popupElement ? this.props.popupElement() : null
         ]);
     }
@@ -309,6 +290,7 @@ class InputElementBase extends StatefulComponent {
         return this.props.children.filter(c => c.props.className.split(' ').includes(cl))
     }
 }
+
 InputElementBase.defaultProps = { drawFunc: _ => _, rows: "2", type: "text", placeholder: "" };
 InputElementBase.contextType = VkInfoContext;
 
@@ -316,230 +298,4 @@ const InputElement = (props) =>
         $(Focusable, {path: props.path}, focusProps =>
             $(InputElementBase, { ...props, ref: props._ref, focusProps }))
 
-
-const InputWithButtonElement = (props) => {
-    const { imgUrl, value, inputStyle, onBlur, onClick } = props
-    const buttonImageStyle = {
-        verticalAlign: "middle",
-        display: "inline",
-        //height: "100%",
-        //width: "100%",
-        transform: props.open ? "rotate(180deg)" : "rotate(0deg)",
-        transition: "all 200ms ease",
-        boxSizing: "border-box",
-        ...props.buttonImageStyle
-    }
-    const buttonImage = $("img", { key: "buttonImg", src: imgUrl, style: buttonImageStyle, className: props.className }, null)
-    const buttonElement = () => [$(ButtonInputElement, { key: "buttonEl", onClick }, buttonImage)]
-    const drawFunc = _ => _
-    const onChange = e => {
-        if (onChange) props.onChange({ target: { headers: { "x-r-action": "change" }, value: e.target.value } })
-    }
-    return $(InputElement, { ...props, drawFunc, inputStyle, value, buttonElement, onChange, onBlur })
-}
-
-const TextAreaElement = (props) => {
-    const inputStyle = {
-        whiteSpace: "pre-wrap",
-        resize: "none",
-        ...props.inputStyle
-    }
-    const onKeyDown = evt => {
-        if (evt.target.ownerDocument.activeElement.tagName == "TEXTAREA") {
-            switch (evt.keyCode) {
-                case 9:
-                    break
-                default:
-                    evt.stopPropagation()
-            }
-        }
-        return false
-    }
-    return $(InputElementBase, { ...props, onKeyDown, ref: props._ref, inputType: "textarea", inputStyle })
-}
-
-const LabeledTextElement = (props) => $(InputElementBase, {
-    ...props,
-    onKeyDown: () => false,
-    inputType: "div",
-    inputStyle: {
-        ...props.inputStyle,
-        display: "inline-block"
-    },
-    style: {
-        ...props.style,
-        backgroundColor: "transparent",
-        borderColor: "transparent",
-        lineHeight: "normal"
-    },
-    content: props.value
-})
-class MultilineTextElement extends StatefulComponent {
-    getInitialState() { return { maxItems: 0 } }
-    getMaxItems() {
-        const maxLines = parseInt(this.props.maxLines ? this.props.maxLines : 9999)
-        let line = 0
-        let bottomValue = 0
-        const maxItems = Array.from(this.el.children).filter(c => {
-            const cBottom = Math.floor(c.getBoundingClientRect().bottom)
-            if (cBottom > bottomValue) { line++; bottomValue = cBottom }
-            if (line > maxLines) return false
-            return true
-        })
-        return maxItems.length
-    }
-    check() {
-        const maxItems = this.getMaxItems()
-        if (maxItems != this.state.maxItems) this.setState({ maxItems })
-    }
-    componentDidMount() {
-        checkActivateCalls.add(this.check)
-    }
-    componentWillUnmount() {
-        checkActivateCalls.remove(this.check)
-    }
-    render() {
-        const values = this.props.value ? this.props.value.split(' ') : ""
-        const textStyle = (show) => ({
-            display: "inline-block",
-            marginRight: "0.5em",
-            minHeight: "1em",
-            visibility: !show ? "hidden" : ""
-        })
-        const children = values.map((text, index) => $('span', { key: index, style: textStyle(index < this.state.maxItems) }, (index + 1 == this.state.maxItems && values.length > index + 1) ? text + "..." : text))
-
-        return $('div', { style: this.props.styles, ref: ref => this.el = ref }, children)
-    }
-}
-const FileUploadElement = (props) => {
-    const elem = React.useRef(null)
-    const [state, setState] = React.useState({})
-
-    const onClick = e => {
-        if (elem.current)
-            elem.current.click()
-    }
-    const _arrayBufferToBase64 = (buffer, btoa) => {
-        let binary = ''
-        let bytes = new Uint8Array(buffer)
-        const len = bytes.byteLength
-        for (let i = 0; i < len; i++) {
-            binary += String.fromCharCode(bytes[i])
-        }
-        return btoa(binary)
-    }
-    const onChange = e => {
-        if (state.reading) return
-        const reader = fileReader(e.target)
-        const file = e.target.files[0];
-        const btoa = e.target.ownerDocument.defaultView.btoa
-        reader.onload = (event) => {
-            if (props.onReadySendBlob) {
-                const blob64 = _arrayBufferToBase64(event.target.result, btoa)
-                props.onReadySendBlob(elem.current.value, blob64)
-            }
-            setState({ reading: false })
-        }
-        reader.onprogress = () => setState({ reading: true })
-        reader.onerror = () => setState({ reading: false })
-
-        reader.readAsArrayBuffer(file)
-    }
-    const style = {
-        backgroundColor: (props.onReadySendBlob && !state.reading) ? "white" : "#eeeeee",
-        ...props.style
-    }
-    const buttonImageStyle = {
-        verticalAlign: "middle",
-        display: "inline",
-        boxSizing: "border-box"
-    }
-    const uploadedFileImg = props.file
-    const urlData = props.url ? props.url : folderImg;
-    const buttonImage = $("img", { key: "buttonImg", src: urlData, style: buttonImageStyle }, null);
-    const deleteButtonImage = $("img", { key: "delButtonImg", src: crossImg, style: buttonImageStyle }, null);
-    const uploadedFileImage = $("img", { key: "uploadedFileImg", src: uploadedFileImg, style: buttonImageStyle }, null);
-    //const placeholder = props.placeholder?props.placeholder:"";
-    const shadowElement = () => [$("input", { key: "0", ref: elem, onChange, type: "file", style: { visibility: "hidden", position: "absolute", height: "1px", width: "1px" } }, null)]
-    const buttonElement = () => [$(ButtonInputElement, { key: "2", onClick }, buttonImage)]
-    const deleteButtonElement = () => props.onDelete && uploadedFileImg ? [$(ButtonInputElement, { key: "3", onClick: e => props.onDelete() }, deleteButtonImage)] : []
-    const windowOpenAction = (e) => {
-        // window.location.replace(uploadedFileImg)
-        let win = window.open();
-        win.document.write('<img src="' + uploadedFileImg + '" ></img>');
-    }
-    const uploadedFileElement = () =>
-        uploadedFileImg ? [$(ButtonInputElement, { key: "uploadedFileElement", className: "uploadedFileElement", onClick: windowOpenAction }, uploadedFileImage)] : []
-
-    return $(InputElement, { ...props, style, shadowElement, uploadedFileElement, deleteButtonElement, buttonElement, onChange: () => { }, onClick: () => { } })
-}
-const FileUploadElement2 = (props) => {
-    const elem = React.useRef(null)
-    const [state, setState] = React.useState({})
-
-    const onClick = e => {
-        if (elem.current)
-            elem.current.click()
-    }
-    const onChange = e => {
-        if (state.reading) return
-        const promise = new Promise((resolve, reject) => {
-            const reader = fileReader(e.target)
-            const file = e.target.files[0];
-            reader.onload = (event) => {
-                const bytes = new Uint8Array(event.target.result)
-                const filename = file.name.split('/').reverse()[0]
-                resolve({ filename, bytes })
-            }
-            reader.onprogress = () => setState({ reading: true })
-            reader.onerror = () => reject()
-            reader.readAsArrayBuffer(file)
-        })
-        const w = e.target.ownerDocument.defaultView
-        promise
-            .then(({ filename, bytes }) => w.fetch(props.putUrl, { method: "PUT", body: bytes, headers: { "file-name": filename } }))
-            .then(response => { if (response.status != 200) throw new Error(`${response.url} | ${response.status}`); return response.text() })
-            .then(body => { if (props.onChange) props.onChange({ target: { headers: { "x-r-action": "change" }, value: body } }) })
-            .finally(() => setState({ reading: false }))
-    }
-    const style = {
-        backgroundColor: (props.onChange && !state.reading) ? "white" : "#eeeeee",
-        ...props.style
-    }
-    const buttonImageStyle = {
-        verticalAlign: "middle",
-        display: "inline",
-        height: "auto",
-        boxSizing: "border-box"
-    }
-    const urlData = props.url ? props.url : folderImg;
-    const buttonImage = $("img", { key: "buttonImg", src: urlData, style: buttonImageStyle }, null);
-    //const placeholder = props.placeholder?props.placeholder:"";
-    const shadowElement = () => [$("input", { key: "0", ref: elem, onChange, type: "file", style: { visibility: "hidden", position: "absolute", height: "1px", width: "1px" } }, null)]
-    const buttonElement = () => [$(ButtonInputElement, { key: "2", onClick }, buttonImage)]
-    let value
-    try {
-        value = JSON.parse(props.value).fileName
-    } catch (e) {
-        value = props.value
-    }
-
-    return $(InputElement, { ...props, value, style, shadowElement, buttonElement, onChange: () => { }, onClick: () => { } })
-}
-const LabelElement = ({ style, onClick, label, children }) => (
-    React.useContext(NoCaptionContext) ?
-        $("label", ...(children ? children : [])) :
-        $("label", {
-            onClick, style: {
-                cursor: onClick ? "pointer" : "inherit",
-                textTransform: "none",
-                ...style
-            }
-        }, [label ? label : null, ...(children ? children : [])])
-)
-
-export {
-    InputElement, InputWithButtonElement, TextAreaElement,
-    LabeledTextElement, MultilineTextElement, ButtonInputElement,
-    FileUploadElement, FileUploadElement2, LabelElement
-}
+export { InputElement }
