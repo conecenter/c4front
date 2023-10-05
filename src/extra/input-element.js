@@ -1,10 +1,17 @@
-import { createElement as $ } from 'react'
-import clsx from 'clsx'
-import { Focusable } from 'c4f/extra/focus-control.ts'
-import StatefulComponent from '../../../../extra/stateful-component'
-import { eventManager } from '../../../../extra/utils.js'
-import { InputsSizeContext } from "c4f/extra/dom-utils";
-import { VkInfoContext } from 'c4f/extra/ui-info-provider';
+import React, { createElement as $ } from 'react';
+import autoBind from 'react-autobind';
+import clsx from 'clsx';
+import { Focusable } from './focus-control';
+import { InputsSizeContext } from "./dom-utils";
+import { VkInfoContext } from './ui-info-provider';
+
+class StatefulComponent extends React.Component {
+	constructor(props) {
+	  super(props)
+	  this.state = this.getInitialState?.() || {}
+	  autoBind(this)
+	}
+}
 
 const activeElement = (e) => e&&e.ownerDocument.activeElement
 const execCopy = (e) =>  e&&e.ownerDocument.execCommand('copy')
@@ -20,8 +27,8 @@ const validateInput = (inputStr, regexStr, skipInvalidSymbols, upperCase) => {
 }
 
 class InputElementBase extends StatefulComponent {
-    getInitialState(){return {visibility:""}}
-    setFocus(focus){
+    // getInitialState() { return { visibility: "" } }
+    setFocus(focus) {
         if(!focus) return
         this.inp.focus()
     }
@@ -66,14 +73,15 @@ class InputElementBase extends StatefulComponent {
             inp.selectionStart = inp.value.length
         })) {
             const markerButton = this.props.mButtonEnter
+            const window = event.target.ownerDocument.defaultView
             let cEvent
             if (markerButton) {
-                cEvent = eventManager.create(event.target)("cEnter", { bubbles: true, detail: markerButton })
+                cEvent = new window.CustomEvent("cEnter", { bubbles: true, detail: markerButton })
                 if (this.props.onBlur) this.props.onBlur()
                 else this.props.onChange?.({ target: { headers: { "x-r-action": "change" }, value: this.inp.value } })
             }
             else if (!this.props.lockedFocus) {
-                cEvent = eventManager.create(event.target)("cTab", { bubbles: true })
+                cEvent = new window.CustomEvent("cTab", { bubbles: true })
             }
             cEvent && this.cont.dispatchEvent(cEvent)
         }
@@ -294,8 +302,10 @@ class InputElementBase extends StatefulComponent {
 InputElementBase.defaultProps = { drawFunc: _ => _, rows: "2", type: "text", placeholder: "" };
 InputElementBase.contextType = VkInfoContext;
 
+
 const InputElement = (props) =>
         $(Focusable, {path: props.path}, focusProps =>
             $(InputElementBase, { ...props, ref: props._ref, focusProps }))
 
-export { InputElement }
+
+export { InputElement, InputElementBase }
