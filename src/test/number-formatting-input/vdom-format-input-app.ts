@@ -1,12 +1,13 @@
 import ReactDOM from "react-dom";
-import { createElement as $ } from "react";
+import { createElement as $, ReactNode } from "react";
 import { createSyncProviders } from "../../main/vdom-hooks";
 import { NumberFormattingInput } from '../../extra/number-formatting-input';
 
 function App() {
-    const child = $('div', {style: { maxWidth: '300px', margin: '2em' }},
+    const child = $('div', {style: { maxWidth: '300px', padding: '2em' }},
         $(NumberFormattingInput, {
-            identity: { key: 'test' }
+            identity: { key: 'test' },
+            state: { number: '' }
         })
     );
     const sender = {
