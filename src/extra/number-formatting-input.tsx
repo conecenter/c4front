@@ -1,14 +1,15 @@
 import React from "react";
 import { InputElement } from "./input-element";
 import { Patch, PatchHeaders, usePatchSync } from "./exchange/patch-sync";
+import { useUserLocale } from "./locale";
 
 interface NumberFormattingInput {
     key?: string,
     identity: Object,
     state: NumberFormattingInputState,
-    //showThousandSeparator: boolean,
-    //scale: number,    // round decimal part to this many numbers RoundingMode.HALF_UP
-    //minFraction: number,    // always this many symbols after decimal separator
+    showThousandSeparator: boolean,
+    scale: number,    // round decimal part to this many numbers RoundingMode.HALF_UP
+    minFraction: number,    // min this many symbols after decimal separator
 }
 
 type NumberFormattingInputState = InputState | NumberState;
@@ -22,31 +23,52 @@ interface NumberState {
     number: number | ''
 }
 
-function createInputStateChange(inputValue: string): InputStateChange {
-    return { tp: 'inputState', inputValue, tempNumber: 1 };
-}
-
-function isInputState(state: InputState | NumberState): state is InputState {
-    return (state as InputState).inputValue !== undefined;
-}
-
-function NumberFormattingInput({identity, state}: NumberFormattingInput) {
+function NumberFormattingInput({identity, state, showThousandSeparator, scale, minFraction}: NumberFormattingInput) {
     const { currentState, sendTempChange, sendFinalChange } = usePatchSync(
-        identity, 'receiver', state, false, s => s, changeToPatch, patchToChange, (prev, ch) => ch
+        identity, 'receiver', state, false, s => s, changeToPatch, patchToChange, (_prev, ch) => ch
     );
+
+    const { numberFormat } = useUserLocale();
+    const { thousandSeparator, decimalSeparator } = numberFormat;
 
     const onChange = (ch: { target: Patch }) => sendTempChange(createInputStateChange(ch.target.value));
     const onBlur = () => {
         if (isInputState(currentState)) sendFinalChange({ tp: 'numberState', number: currentState.tempNumber });
     }
 
+    function formatNumber(number: number | ''): string {
+        const [wholePart, decimalPart] = number.toString().split(/\b(?=\.)/);
+        const formattedWholePart = showThousandSeparator ? formatWholePart(wholePart, thousandSeparator) : wholePart;
+        const formattedDecimalPart = formatDecimalPart(decimalPart, decimalSeparator, scale, minFraction);
+        return `${formattedWholePart}${formattedDecimalPart}`;
+    }
+
     return (
         <InputElement
-            value={isInputState(currentState) ? currentState.inputValue : currentState.number}
+            value={isInputState(currentState) ? currentState.inputValue : formatNumber(currentState.number)}
             onChange={onChange}
             onBlur={onBlur}
         />
     );
+}
+
+function isInputState(state: InputState | NumberState): state is InputState {
+    return (state as InputState).inputValue !== undefined;
+}
+
+function createInputStateChange(inputValue: string): InputStateChange {
+    return { tp: 'inputState', inputValue, tempNumber: 1 };
+}
+
+function formatWholePart(x: number | string, separator: string) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, separator);
+}
+
+function formatDecimalPart(x: string | undefined, separator: string, scale: number, minFraction: number) {
+    if (!x) return '';
+    let formattedNumber = (+x).toFixed(scale);
+    if (minFraction > scale) formattedNumber = (+formattedNumber).toFixed(minFraction);
+    return formattedNumber.replace('0.', separator);
 }
 
 // Server exchange
@@ -80,7 +102,7 @@ function patchToChange({ value, headers }: Patch): StateChange {
             return {
                 tp,
                 inputValue: value,
-                tempNumber: +headers!['x-r-temp-number'] 
+                tempNumber: +headers!['x-r-temp-number']
             }
         case 'numberState':
             return {

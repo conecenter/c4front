@@ -20,6 +20,11 @@ interface DateTimeFormat {
     pattern: string
 }
 
+interface NumberFormat {
+    thousandSeparator: string
+    decimalSeparator: string
+}
+
 interface Locale {
     timezoneId: string
     shortName: string
@@ -28,7 +33,8 @@ interface Locale {
     dateTimeFormats: DateTimeFormat[]
     defaultDateTimeFormatId: number
     btnNowText: string,
-    btnCloseText: string
+    btnCloseText: string,
+    numberFormat: NumberFormat
 }
 
 interface TextFormatToken {
@@ -190,6 +196,10 @@ class DefaultLocale implements Locale {
     defaultDateTimeFormatId: number = 0
     btnNowText = 'Now'
     btnCloseText = 'Close'
+    numberFormat: NumberFormat = {
+        thousandSeparator: ',',
+        decimalSeparator: '.'
+    }
 }
 
 const UserLocaleContext: Context<ExtendedLocale> = createContext<ExtendedLocale>(getExtendedLocale(new DefaultLocale()))

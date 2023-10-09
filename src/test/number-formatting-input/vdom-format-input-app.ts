@@ -7,7 +7,10 @@ function App() {
     const child = $('div', {style: { maxWidth: '300px', padding: '2em' }},
         $(NumberFormattingInput, {
             identity: { key: 'test' },
-            state: { number: '' }
+            state: { number: '' },
+            showThousandSeparator: true,
+            scale: 2,
+            minFraction: 2
         })
     );
     const sender = {
