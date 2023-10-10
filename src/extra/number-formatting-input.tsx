@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { InputElement } from "./input-element";
 import { Patch, PatchHeaders, usePatchSync } from "./exchange/patch-sync";
 import { useUserLocale } from "./locale";
@@ -24,12 +24,14 @@ interface NumberState {
 }
 
 function NumberFormattingInput({identity, state, showThousandSeparator, scale, minFraction}: NumberFormattingInput) {
+    const { numberFormat } = useUserLocale();
+    const { thousandSeparator, decimalSeparator } = numberFormat;
+
     const { currentState, sendTempChange, sendFinalChange } = usePatchSync(
         identity, 'receiver', state, false, s => s, changeToPatch, patchToChange, (_prev, ch) => ch
     );
 
-    const { numberFormat } = useUserLocale();
-    const { thousandSeparator, decimalSeparator } = numberFormat;
+    const [isFocused, setIsFocused] = useState(false);
 
     const onChange = (ch: { target: Patch }) => sendTempChange(createInputStateChange(ch.target.value));
     const onBlur = () => {
@@ -45,8 +47,11 @@ function NumberFormattingInput({identity, state, showThousandSeparator, scale, m
 
     return (
         <InputElement
-            value={isInputState(currentState) ? currentState.inputValue : formatNumber(currentState.number)}
+            value={isInputState(currentState)
+                ? currentState.inputValue
+                : isFocused ? currentState.number : formatNumber(currentState.number)}
             onChange={onChange}
+            onFocus={() => setIsFocused(true)}
             onBlur={onBlur}
         />
     );

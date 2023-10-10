@@ -98,3 +98,28 @@ describe('number formatting - decimal part (initial render)', () => {
     expect(screen.getByRole('textbox')).toHaveValue('-0.1');
   });
 });
+
+describe('number full formatting (initial render)', () => {
+  it('correctly formats complex numbers', () => {
+    renderWithProps({ ...DEFAULT_PROPS, state: { number: -1234.123 }, showThousandSeparator: true, scale: 1, minFraction: 2 });
+    expect(screen.getByRole('textbox')).toHaveValue('-1,234.10');
+  });
+});
+
+describe('focus in logic', () => {
+  it("doesn't show thousands separator", async () => {
+    const user = userEvent.setup();
+    renderWithProps({ ...DEFAULT_PROPS, state: { number: 1234 }, showThousandSeparator: true });
+    const input = screen.getByRole('textbox');
+    await user.click(input);
+    expect(input).toHaveValue('1234');
+  });
+
+  it("doesn't show trailing zeroes", async () => {
+    const user = userEvent.setup();
+    renderWithProps({ ...DEFAULT_PROPS, state: { number: 1.23 }, scale: 2, minFraction: 3 });
+    const input = screen.getByRole('textbox');
+    await user.click(input);
+    expect(input).toHaveValue('1.23');
+  });
+});
