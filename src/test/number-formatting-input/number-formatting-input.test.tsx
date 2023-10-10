@@ -1,22 +1,12 @@
-import React, { ReactNode } from "react";
-import { render, screen } from "@testing-library/react";
+import React, { PropsWithChildren } from "react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from '@testing-library/user-event';
 import { NumberFormattingInput } from "../../extra/number-formatting-input";
 import { createSyncProviders } from "../../main/vdom-hooks";
 
-interface App {
-  children: ReactNode
-}
-
-function App({ children }: App) {
-  const sender = {
-      enqueue: jest.fn(),
-      ctxToPath: () => '/test'
-  };
-  const ack: boolean | null = null;
-  const isRoot = true;
-
-  return createSyncProviders({sender, ack, isRoot, children});
+function App(props: PropsWithChildren<any>) {
+  const sender = {enqueue: jest.fn(), ctxToPath: () => '/test'};
+  return createSyncProviders({sender, ack: null, isRoot: true, children: props.children});
 }
 
 const DEFAULT_PROPS: NumberFormattingInput = {
@@ -45,7 +35,7 @@ describe('basic functionality', () => {
     const user = userEvent.setup();
     renderWithProps({ ...DEFAULT_PROPS, state: { number: '' } });
     const input = screen.getByRole('textbox');
-    await user.type(input, '123');
+    await act(() => user.type(input, '123'));
     expect(input).toHaveValue('123');
   });
 });
@@ -111,7 +101,7 @@ describe('focus in logic', () => {
     const user = userEvent.setup();
     renderWithProps({ ...DEFAULT_PROPS, state: { number: 1234 }, showThousandSeparator: true });
     const input = screen.getByRole('textbox');
-    await user.click(input);
+    await act(() => user.click(input));
     expect(input).toHaveValue('1234');
   });
 
@@ -119,7 +109,15 @@ describe('focus in logic', () => {
     const user = userEvent.setup();
     renderWithProps({ ...DEFAULT_PROPS, state: { number: 1.23 }, scale: 2, minFraction: 3 });
     const input = screen.getByRole('textbox');
-    await user.click(input);
+    await act(() => user.click(input));
     expect(input).toHaveValue('1.23');
+  });
+
+  it("keeps cursor at the same position", async () => {
+    const user = userEvent.setup();
+    renderWithProps({ ...DEFAULT_PROPS, state: { number: 1234567.12 }, showThousandSeparator: true });
+    const input = screen.getByRole<HTMLInputElement>('textbox');
+    await act(() => user.pointer({target: input, offset: 8, keys: '[MouseLeft]'}));
+    expect(screen.getByRole<HTMLInputElement>('textbox').selectionStart).toBe(6);
   });
 });

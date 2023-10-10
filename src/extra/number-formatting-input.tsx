@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState, useLayoutEffect } from "react";
 import { InputElement } from "./input-element";
 import { Patch, PatchHeaders, usePatchSync } from "./exchange/patch-sync";
 import { useUserLocale } from "./locale";
@@ -33,11 +33,35 @@ function NumberFormattingInput({identity, state, showThousandSeparator, scale, m
 
     const [isFocused, setIsFocused] = useState(false);
 
+    const inputRef = useRef<{ inp: HTMLInputElement } | null>(null);
+
+    const correctedCaretPos = useRef<number | null>(null);
+
+    // Event handlers
     const onChange = (ch: { target: Patch }) => sendTempChange(createInputStateChange(ch.target.value));
+
     const onBlur = () => {
         if (isInputState(currentState)) sendFinalChange({ tp: 'numberState', number: currentState.tempNumber });
     }
 
+    const onFocus = () => {
+        setTimeout(() => {
+            correctedCaretPos.current = calcCorrectedCaretPosition(inputRef.current!.inp, thousandSeparator);
+            setIsFocused(true);
+        });
+    }
+    /////
+
+    useLayoutEffect(
+        function correctCaretPosition() {
+            if (isFocused) {
+                const newCaretPos = correctedCaretPos.current;
+                if (newCaretPos) inputRef.current?.inp.setSelectionRange(newCaretPos, newCaretPos);
+            }
+        },
+        [isFocused]
+    );
+        
     function formatNumber(number: number | ''): string {
         const [wholePart, decimalPart] = number.toString().split(/\b(?=\.)/);
         const formattedWholePart = showThousandSeparator ? formatWholePart(wholePart, thousandSeparator) : wholePart;
@@ -47,11 +71,12 @@ function NumberFormattingInput({identity, state, showThousandSeparator, scale, m
 
     return (
         <InputElement
+            _ref={inputRef}
             value={isInputState(currentState)
                 ? currentState.inputValue
-                : isFocused ? currentState.number : formatNumber(currentState.number)}
+                : isFocused ? currentState.number.toString() : formatNumber(currentState.number)}
             onChange={onChange}
-            onFocus={() => setIsFocused(true)}
+            onFocus={onFocus}
             onBlur={onBlur}
         />
     );
@@ -74,6 +99,16 @@ function formatDecimalPart(x: string | undefined, separator: string, scale: numb
     let formattedNumber = (+x).toFixed(scale);
     if (minFraction > scale) formattedNumber = (+formattedNumber).toFixed(minFraction);
     return formattedNumber.replace('0.', separator);
+}
+
+function calcCorrectedCaretPosition(input: HTMLInputElement, separator: string) {
+    const caretPos = input.selectionStart;
+    if (!caretPos) return null;
+    const separatorRegExp = new RegExp(separator, 'g');
+    const separatorsBeforeCaret = input.value
+        .slice(0, caretPos)
+        .match(separatorRegExp)?.length;
+    return separatorsBeforeCaret ? caretPos - separatorsBeforeCaret : null;
 }
 
 // Server exchange
