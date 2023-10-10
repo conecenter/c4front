@@ -121,3 +121,13 @@ describe('focus in logic', () => {
     expect(screen.getByRole<HTMLInputElement>('textbox').selectionStart).toBe(6);
   });
 });
+
+describe('input validation logic', () => {
+  it('inhibits input of incorrect symbols', async () => {
+    const user = userEvent.setup();
+    renderWithProps({ ...DEFAULT_PROPS });
+    const input = screen.getByRole('textbox');
+    await act(() => user.type(input, '-A10. /,'));
+    expect(input).toHaveValue('-10. ,');
+  });
+});

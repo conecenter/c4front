@@ -75,6 +75,8 @@ function NumberFormattingInput({identity, state, showThousandSeparator, scale, m
             value={isInputState(currentState)
                 ? currentState.inputValue
                 : isFocused ? currentState.number.toString() : formatNumber(currentState.number)}
+            inputRegex={`[0-9 ${thousandSeparator}${decimalSeparator}-]`}
+            skipInvalidSymbols={true}
             onChange={onChange}
             onFocus={onFocus}
             onBlur={onBlur}
