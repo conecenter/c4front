@@ -26,27 +26,24 @@ interface NumberState {
 }
 
 function NumberFormattingInput({identity, state, showThousandSeparator, scale, minFraction}: NumberFormattingInput) {
-    const { numberFormat } = useUserLocale();
-    const { thousandSeparator, decimalSeparator } = numberFormat;
+    const { thousandSeparator, decimalSeparator } = useUserLocale().numberFormat;
+    const path = usePath(identity);
 
     const { currentState, sendTempChange, sendFinalChange } = usePatchSync(
         identity, 'receiver', state, false, s => s, changeToPatch, patchToChange, (_prev, ch) => ch
     );
 
-    const path = usePath(identity);
-
     const [isFocused, setIsFocused] = useState(false);
-
     const inputRef = useRef<{ inp: HTMLInputElement } | null>(null);
-
     const correctedCaretPos = useRef<number | null>(null);
 
-    // Event handlers
     const onChange = (ch: { target: Patch }) => sendTempChange(createInputStateChange(ch.target.value, decimalSeparator));
+
     const onBlur = () => {
         if (isInputState(currentState)) sendFinalChange({ tp: 'numberState', number: currentState.tempNumber });
         setIsFocused(false);
     }
+
     const onFocus = () => {
         setTimeout(() => {
             correctedCaretPos.current = calcCorrectedCaretPosition(inputRef.current!.inp, thousandSeparator);
@@ -63,7 +60,7 @@ function NumberFormattingInput({identity, state, showThousandSeparator, scale, m
         },
         [isFocused]
     );
-        
+
     function formatNumber(number: number | ''): string {
         const [wholePart, decimalPart] = number.toString().split(/\b(?=\.)/);
         const formattedWholePart = showThousandSeparator ? formatWholePart(wholePart, thousandSeparator) : wholePart;
