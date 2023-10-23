@@ -113,11 +113,11 @@ function formatDecimalPart(x: string | undefined, separator: string, scale: numb
 function calcCorrectedCaretPosition(input: HTMLInputElement, separator: string) {
     const caretPos = input.selectionStart;
     if (!caretPos) return null;
-    const separatorRegExp = new RegExp(separator, 'g');
+    const separatorRegExp = new RegExp(escapeRegex(separator), 'g');
     const separatorsBeforeCaret = input.value
         .slice(0, caretPos)
         .match(separatorRegExp)?.length;
-    return separatorsBeforeCaret ? caretPos - separatorsBeforeCaret : null;
+    return separatorsBeforeCaret ? caretPos - separatorsBeforeCaret : caretPos;
 }
 
 export type { InputState, NumberState };
