@@ -1,15 +1,15 @@
 import ReactDOM from "react-dom";
-import { createElement as $, ReactNode } from "react";
+import { createElement as $ } from "react";
 import { createSyncProviders } from "../../main/vdom-hooks";
-import { NumberFormattingInput } from '../../extra/number-formatting-input';
+import { NumberFormattingInput } from '../../extra/number-formatting-input/number-formatting-input';
 
 function App() {
     const child = $('div', {style: { maxWidth: '300px', padding: '2em' }},
         $(NumberFormattingInput, {
             identity: { key: 'test' },
-            state: { number: '' },
+            state: { number: -1234.123 },
             showThousandSeparator: true,
-            scale: 2,
+            scale: 1,
             minFraction: 2
         })
     );
