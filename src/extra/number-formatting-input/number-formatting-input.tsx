@@ -1,6 +1,7 @@
 import React, { useRef, useState, useLayoutEffect } from "react";
 import { InputElement } from "../input-element";
-import { Patch, PatchHeaders, usePatchSync } from "../exchange/patch-sync";
+import { usePatchSync, Patch } from "../exchange/patch-sync";
+import { changeToPatch, patchToChange, InputStateChange } from "./number-formatting-input-exchange";
 import { useUserLocale } from "../locale";
 import { escapeRegex } from "../utils";
 import { usePath } from "../../main/vdom-hooks";
@@ -119,44 +120,5 @@ function calcCorrectedCaretPosition(input: HTMLInputElement, separator: string) 
     return separatorsBeforeCaret ? caretPos - separatorsBeforeCaret : null;
 }
 
-// Server exchange
-type StateChange = InputStateChange | NumberStateChange;
-
-interface InputStateChange extends InputState {
-    tp: 'inputState'
-}
-
-interface NumberStateChange extends NumberState {
-    tp: 'numberState'
-}
-
-function changeToPatch(ch: StateChange): Patch {
-    const tpHeader = { 'x-r-change-tp': ch.tp };
-    function makePatch(value: string, headers: PatchHeaders): Patch {
-        return { value, headers: { ...tpHeader, ...headers } }
-    };
-    switch (ch.tp) {
-        case 'inputState':
-            return makePatch(ch.inputValue, { 'x-r-temp-number': String(ch.tempNumber) });
-        case 'numberState':
-            return makePatch('', { 'x-r-number': String(ch.number) });
-    }
-}
-
-function patchToChange({ value, headers }: Patch): StateChange {
-    const tp = headers!['x-r-change-tp'] as 'inputState' | 'numberState';
-    switch (tp) {
-        case 'inputState':
-            return {
-                tp,
-                inputValue: value,
-                tempNumber: +headers!['x-r-temp-number']
-            }
-        case 'numberState':
-            return {
-                tp,
-                number: +headers!['x-r-number'] };
-    }
-}
-
+export type { InputState, NumberState };
 export { NumberFormattingInput, parseInputValue };
