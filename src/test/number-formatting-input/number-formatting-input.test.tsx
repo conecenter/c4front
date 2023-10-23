@@ -89,10 +89,19 @@ describe('number formatting - decimal part (initial render)', () => {
   });
 });
 
-describe('number full formatting (initial render)', () => {
-  it('correctly formats complex numbers', () => {
+describe('number full formatting', () => {
+  it('correctly formats complex numbers on initial render', () => {
     renderWithProps({ ...DEFAULT_PROPS, state: { number: -1234.123 }, showThousandSeparator: true, scale: 1, minFraction: 2 });
     expect(screen.getByRole('textbox')).toHaveValue('-1,234.10');
+  });
+
+  it('correctly formats complex numbers on blur', async () => {
+    const user = userEvent.setup();
+    renderWithProps({ ...DEFAULT_PROPS, showThousandSeparator: true, scale: 1, minFraction: 2 });
+    const input = screen.getByRole('textbox');
+    await act(() => user.type(input, '-1234.123'));
+    await user.click(document.body);
+    expect(input).toHaveValue('-1,234.10');
   });
 });
 

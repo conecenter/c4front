@@ -42,6 +42,7 @@ function NumberFormattingInput({identity, state, showThousandSeparator, scale, m
     const onChange = (ch: { target: Patch }) => sendTempChange(createInputStateChange(ch.target.value, decimalSeparator));
     const onBlur = () => {
         if (isInputState(currentState)) sendFinalChange({ tp: 'numberState', number: currentState.tempNumber });
+        setIsFocused(false);
     }
     const onFocus = () => {
         setTimeout(() => {
