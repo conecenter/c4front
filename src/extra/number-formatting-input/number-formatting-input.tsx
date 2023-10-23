@@ -1,9 +1,9 @@
 import React, { useRef, useState, useLayoutEffect } from "react";
-import { InputElement } from "./input-element";
-import { Patch, PatchHeaders, usePatchSync } from "./exchange/patch-sync";
-import { useUserLocale } from "./locale";
-import { escapeRegex } from "./utils";
-import { usePath } from "../main/vdom-hooks";
+import { InputElement } from "../input-element";
+import { Patch, PatchHeaders, usePatchSync } from "../exchange/patch-sync";
+import { useUserLocale } from "../locale";
+import { escapeRegex } from "../utils";
+import { usePath } from "../../main/vdom-hooks";
 
 interface NumberFormattingInput {
     key?: string,
