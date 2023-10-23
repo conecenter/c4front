@@ -1,7 +1,7 @@
 import React, { PropsWithChildren } from "react";
 import { act, render, screen } from "@testing-library/react";
 import userEvent from '@testing-library/user-event';
-import { NumberFormattingInput } from "../../extra/number-formatting-input";
+import { NumberFormattingInput, parseInputValue } from "../../extra/number-formatting-input";
 import { createSyncProviders } from "../../main/vdom-hooks";
 
 function App(props: PropsWithChildren<any>) {
@@ -129,5 +129,37 @@ describe('input validation logic', () => {
     const input = screen.getByRole('textbox');
     await act(() => user.type(input, '-A10. /,'));
     expect(input).toHaveValue('-10. ,');
+  });
+});
+
+describe('input parsing logic', () => {
+  it('leaves "-" only in the beginning of number', () => {
+    const parsedValue = parseInputValue(' -1-2', '.');
+    expect(parsedValue).toBe(-12);
+  });
+
+  it('removes all non-digits except first decimal separator', () => {
+    const parsedValue = parseInputValue('1.2.- 3', '.');
+    expect(parsedValue).toBe(1.23);
+  });
+
+  it('replaces decimal separator for .', () => {
+    const parsedValue = parseInputValue('1,2', ',');
+    expect(parsedValue).toBe(1.2);
+  });
+
+  it('removes leading/trailing whitespace & trailing decimal 0', () => {
+    const parsedValue = parseInputValue('  10.200 ', '.');
+    expect(parsedValue).toBe(10.2);
+  });
+
+  it('correctly parses empty string', () => {
+    const parsedValue = parseInputValue('', '.');
+    expect(parsedValue).toBe('');
+  });
+
+  it('correctly parses complex input', () => {
+    const parsedValue = parseInputValue(' -12,3. 4.-50', '.');
+    expect(parsedValue).toBe(-123.45);
   });
 });

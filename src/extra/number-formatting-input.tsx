@@ -2,6 +2,7 @@ import React, { useRef, useState, useLayoutEffect } from "react";
 import { InputElement } from "./input-element";
 import { Patch, PatchHeaders, usePatchSync } from "./exchange/patch-sync";
 import { useUserLocale } from "./locale";
+import { escapeRegex } from "./utils";
 
 interface NumberFormattingInput {
     key?: string,
@@ -16,7 +17,7 @@ type NumberFormattingInputState = InputState | NumberState;
 
 interface InputState {
     inputValue: string,
-    tempNumber: number
+    tempNumber: number | ''
 }
 
 interface NumberState {
@@ -38,19 +39,16 @@ function NumberFormattingInput({identity, state, showThousandSeparator, scale, m
     const correctedCaretPos = useRef<number | null>(null);
 
     // Event handlers
-    const onChange = (ch: { target: Patch }) => sendTempChange(createInputStateChange(ch.target.value));
-
+    const onChange = (ch: { target: Patch }) => sendTempChange(createInputStateChange(ch.target.value, decimalSeparator));
     const onBlur = () => {
         if (isInputState(currentState)) sendFinalChange({ tp: 'numberState', number: currentState.tempNumber });
     }
-
     const onFocus = () => {
         setTimeout(() => {
             correctedCaretPos.current = calcCorrectedCaretPosition(inputRef.current!.inp, thousandSeparator);
             setIsFocused(true);
         });
     }
-    /////
 
     useLayoutEffect(
         function correctCaretPosition() {
@@ -72,8 +70,7 @@ function NumberFormattingInput({identity, state, showThousandSeparator, scale, m
     return (
         <InputElement
             _ref={inputRef}
-            value={isInputState(currentState)
-                ? currentState.inputValue
+            value={isInputState(currentState) ? currentState.inputValue
                 : isFocused ? currentState.number.toString() : formatNumber(currentState.number)}
             inputRegex={`[0-9 ${thousandSeparator}${decimalSeparator}-]`}
             skipInvalidSymbols={true}
@@ -88,8 +85,15 @@ function isInputState(state: InputState | NumberState): state is InputState {
     return (state as InputState).inputValue !== undefined;
 }
 
-function createInputStateChange(inputValue: string): InputStateChange {
-    return { tp: 'inputState', inputValue, tempNumber: 1 };
+function createInputStateChange(inputValue: string, decimalSeparator: string): InputStateChange {
+    return { tp: 'inputState', inputValue, tempNumber: parseInputValue(inputValue, decimalSeparator) };
+}
+
+function parseInputValue(value: string, decimalSeparator: string): number | '' {
+    const escapedSeparator = escapeRegex(decimalSeparator);
+    const regex = new RegExp(`(^\\s*-)|\\d|(?<!(${escapedSeparator}.*))${escapedSeparator}`, 'g');
+    const parsedString = value.match(regex)?.join('').replace(`${decimalSeparator}`, '.');
+    return parsedString !== undefined ? Number(parsedString) : '';
 }
 
 function formatWholePart(x: number | string, separator: string) {
@@ -153,4 +157,4 @@ function patchToChange({ value, headers }: Patch): StateChange {
     }
 }
 
-export { NumberFormattingInput };
+export { NumberFormattingInput, parseInputValue };
