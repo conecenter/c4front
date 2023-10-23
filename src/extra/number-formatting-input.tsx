@@ -3,6 +3,7 @@ import { InputElement } from "./input-element";
 import { Patch, PatchHeaders, usePatchSync } from "./exchange/patch-sync";
 import { useUserLocale } from "./locale";
 import { escapeRegex } from "./utils";
+import { usePath } from "../main/vdom-hooks";
 
 interface NumberFormattingInput {
     key?: string,
@@ -31,6 +32,8 @@ function NumberFormattingInput({identity, state, showThousandSeparator, scale, m
     const { currentState, sendTempChange, sendFinalChange } = usePatchSync(
         identity, 'receiver', state, false, s => s, changeToPatch, patchToChange, (_prev, ch) => ch
     );
+
+    const path = usePath(identity);
 
     const [isFocused, setIsFocused] = useState(false);
 
@@ -71,6 +74,7 @@ function NumberFormattingInput({identity, state, showThousandSeparator, scale, m
     return (
         <InputElement
             _ref={inputRef}
+            path={path}
             value={isInputState(currentState) ? currentState.inputValue
                 : isFocused ? currentState.number.toString() : formatNumber(currentState.number)}
             inputRegex={`[0-9 ${thousandSeparator}${decimalSeparator}-]`}
