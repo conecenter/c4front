@@ -1,7 +1,7 @@
 import React, { PropsWithChildren } from "react";
 import { act, render, screen } from "@testing-library/react";
 import userEvent from '@testing-library/user-event';
-import { NumberFormattingInput, parseInputValue } from "../../extra/number-formatting-input";
+import { NumberFormattingInput, parseInputValue } from "../../extra/number-formatting-input/number-formatting-input";
 import { createSyncProviders } from "../../main/vdom-hooks";
 
 function App(props: PropsWithChildren<any>) {
