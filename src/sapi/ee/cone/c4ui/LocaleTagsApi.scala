@@ -1,25 +1,30 @@
 package ee.cone.c4ui
 
 import ee.cone.c4di._
+import ee.cone.c4ui.Types.FNumber
 import ee.cone.c4vdom.Types._
 import ee.cone.c4vdom._
-
-trait DatePickerProps extends ToChildPair
 
 @c4tagSwitch("FrontApp") trait Locale extends ToJson
 @c4tagSwitch("FrontApp") trait WeekDay extends ToJson
 @c4tagSwitch("FrontApp") trait Month extends ToJson
 @c4tagSwitch("FrontApp") trait DateTimeFormat extends ToJson
 @c4tagSwitch("FrontApp") trait TimeFormat extends ToJson
+@c4tagSwitch("FrontApp") trait NumberFormat extends ToJson
 
-sealed trait DatepickerChange extends ToJson
-
+trait DatePickerProps extends ToChildPair
 sealed trait DatePickerServerState extends ToJson
 @c4tagSwitch("FrontApp") trait PopupServerState extends DatePickerServerState
 @c4tagSwitch("FrontApp") trait TimestampServerState extends PopupServerState
 @c4tagSwitch("FrontApp") trait InputServerState extends PopupServerState
 
-@c4tags("FrontApp") trait DatePickerTags[C] {
+trait NumberInputProps extends ToChildPair
+@c4tagSwitch("FrontApp")  trait NumberInputServerState extends ToJson
+@c4tagSwitch("FrontApp") trait InputNumberServerState extends NumberInputServerState
+@c4tagSwitch("FrontApp") trait NumberNumberServerState extends NumberInputServerState
+
+
+@c4tags("FrontApp") trait LocaleInputTags[C] {
   @c4elPath("DatePickerInputElement") def datePicker(
     key: String,
     state: PopupServerState,
@@ -40,6 +45,24 @@ sealed trait DatePickerServerState extends ToJson
     tempTimestamp: String = "",
     popupDate: String = "",
   ): InputServerState
+
+  @c4elPath("NumberFormattingInput") def numberInput(
+    key: String,
+    state: NumberInputServerState,
+    showThousandSeparator: Boolean,
+    scale: Int,
+    minFaction: Int,
+    receiver: Receiver[C],
+  ): NumberInputProps
+
+  @c4val("number-state") def numberState(
+    number: String,
+  ): NumberNumberServerState
+
+  @c4val("input-state") def inputNumberState(
+    inputValue: String,
+    tempNumber: String,
+  ): InputNumberServerState
 }
 
 @c4tags("FrontApp") trait LocaleTags {
@@ -56,7 +79,8 @@ sealed trait DatePickerServerState extends ToJson
     months: List[Month],
     dateTimeFormats: List[DateTimeFormat],
     timeFormats: List[TimeFormat],
-    defaultDateTimeFormatId: Int
+    defaultDateTimeFormatId: Int,
+    numberFormat: NumberFormat
   ): Locale
 
   @c4val def weekDay(
@@ -80,4 +104,9 @@ sealed trait DatePickerServerState extends ToJson
     id: Int,
     pattern: String,
   ): TimeFormat
+
+  @c4val def numberFormat(
+    thousandSeparator: String,
+    decimalSeparator: String
+  ): NumberFormat
 }
