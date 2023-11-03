@@ -63,9 +63,11 @@ function NumberFormattingInput({identity, state, showThousandSeparator, scale, m
     );
 
     function formatNumber(number: number | ''): string {
-        const [wholePart, decimalPart] = number.toString().split(/\b(?=\.)/);
+        if (number === '') return '';
+        const roundedNumber = roundToScale(number, scale);
+        const [wholePart, decimalPart] = roundedNumber.toString().split('.');
         const formattedWholePart = showThousandSeparator ? formatWholePart(wholePart, thousandSeparator) : wholePart;
-        const formattedDecimalPart = formatDecimalPart(decimalPart, decimalSeparator, scale, minFraction);
+        const formattedDecimalPart = formatDecimalPart(decimalPart, decimalSeparator, minFraction);
         return `${formattedWholePart}${formattedDecimalPart}`;
     }
 
@@ -99,15 +101,17 @@ function parseInputValue(value: string, decimalSeparator: string): number | '' {
     return parsedString !== undefined ? Number(parsedString) : '';
 }
 
+function roundToScale(num: number, scale: number) {
+    return Number(Math.round(+`${num}e${scale}`) + `e-${scale}`);
+}
+
 function formatWholePart(x: number | string, separator: string) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, separator);
 }
 
-function formatDecimalPart(x: string | undefined, separator: string, scale: number, minFraction: number) {
-    if (!x) return '';
-    let formattedNumber = (+x).toFixed(scale);
-    if (minFraction > scale) formattedNumber = (+formattedNumber).toFixed(minFraction);
-    return formattedNumber.replace('0.', separator);
+function formatDecimalPart(x: string | undefined, separator: string, minFraction: number) {
+    const paddedString = (x || '').padEnd(minFraction, '0');
+    return paddedString && `${separator}${paddedString}`;
 }
 
 function calcCorrectedCaretPosition(input: HTMLInputElement, separator: string) {

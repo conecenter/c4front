@@ -14,7 +14,7 @@ const DEFAULT_PROPS: NumberFormattingInput = {
   state: { number: '' },
   showThousandSeparator: false,
   scale: 2,
-  minFraction: 2
+  minFraction: 0
 }
 
 const renderWithProps = (props: NumberFormattingInput) => {
@@ -68,19 +68,24 @@ describe('number formatting logic - thousands (initial render)', () => {
 });
 
 describe('number formatting - decimal part (initial render)', () => {
-  it('scale > minFraction', () => {
-    renderWithProps({ ...DEFAULT_PROPS, state: { number: 0.123 }, scale: 2, minFraction: 1 });
-    expect(screen.getByRole('textbox')).toHaveValue('0.12');
+  it('scale limits decimal part and rounds', () => {
+    renderWithProps({ ...DEFAULT_PROPS, state: { number: 0.125 }, scale: 2 });
+    expect(screen.getByRole('textbox')).toHaveValue('0.13');
   });
 
-  it('scale === minFraction', () => {
-    renderWithProps({ ...DEFAULT_PROPS, state: { number: 0.123 }, scale: 2, minFraction: 2 });
-    expect(screen.getByRole('textbox')).toHaveValue('0.12');
+  it("scale doesn't add unneeded trailing zeroes", () => {
+    renderWithProps({ ...DEFAULT_PROPS, state: { number: 0.1 }, scale: 2, minFraction: 1 });
+    expect(screen.getByRole('textbox')).toHaveValue('0.1');
   });
 
-  it('scale < minFraction', () => {
+  it('pads zeroes when scale < minFraction', () => {
     renderWithProps({ ...DEFAULT_PROPS, state: { number: 0.123 }, scale: 1, minFraction: 2 });
     expect(screen.getByRole('textbox')).toHaveValue('0.10');
+  });
+
+  it("scale correctly rounds 0.99 type cases", () => {
+    renderWithProps({ ...DEFAULT_PROPS, state: { number: 0.99 }, scale: 1, minFraction: 1 });
+    expect(screen.getByRole('textbox')).toHaveValue('1.0');
   });
 
   it('correctly formats negative numbers', () => {
