@@ -64,7 +64,7 @@ export const DashboardRoot = ({
             key: "board",
             style: {
                 ...boardStyle,
-                display: "grid", justifySelf: "center"/*v*/, //alignSelf: "center"/*h*/,
+                display: "grid", justifySelf: "center"/*v*/, alignSelf: "start"/*h*/,
                 alignItems: "start",
                 rowGap: em(rowGap), columnGap: em(colGap),
                 gridTemplateColumns: `repeat(${boardSizes.colCount}, ${em(cardWidth)})`,
