@@ -130,9 +130,9 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
         const btnStyle: CSSProperties = {
             position: 'absolute',
             left: `${(column - 1) * 100 / colsTotal!}%`,
-            top: `${VK_ROW_HEIGHT * (row - 1) + VK_OFFSET}em`,
+            top: `calc(var(--vk-row-height) * (${row} - 1) + ${VK_OFFSET}em)`,
             width: `${width * 100 / colsTotal!}%`,
-            height: `${VK_ROW_HEIGHT * height}em`
+            height: `calc(var(--vk-row-height) * ${height})`
         }
         const isSwitcher = isSwitcherKey(key);
         const handleClick = setupType || isSwitcher
@@ -152,11 +152,13 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
             onMouseDownCapture={(e) => e.preventDefault()}
             data-path={path}
             style={{
-                height: `${VK_ROW_HEIGHT * rowsTotal + 2 * VK_OFFSET}em`,
+                '--vk-height': `clamp(${1.6 * rowsTotal}em, ${VK_ROW_HEIGHT * rowsTotal + 2 * VK_OFFSET}em, 40vh)`,
+                '--vk-row-height': `calc((var(--vk-height) - ${2 * VK_OFFSET}em) / ${rowsTotal})`,
+                height: 'var(--vk-height)',
                 width: `${VK_COL_WIDTH * colsTotal}em`,
                 ...POSITIONING_STYLES[position],
                 ...isBottomPos && { bottom: scrollInfo.elementsStyles.get(path) }
-            }} >
+            } as CSSProperties} >
             {keys}
         </div>
     );
