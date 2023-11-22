@@ -136,11 +136,10 @@ const colKeysOf = children => children.map(c => c.colKey)
 const getGidTemplateRows = rows => rows.map(o => `[${getGridRow(o)}] auto`).join(" ")
 const getGridTemplateColumns = (columns,fixedCellsSize) => {
     const lastVisibleCol = columns.length - countServiceCols(columns) === 1
-    return columns.map(col => {
+    return columns.map((col, i) => {
         const key = getGridCol(col)
-        const getMaxStr = (width) =>
-            width.tp === "bound" ? `${width.max}em` :
-            width.tp === "unbound" ? "auto" : never()
+        const getMaxStr = (width) => width.tp === "unbound" || i === columns.length - 1 ? "auto"
+            : width.tp === "bound" ? `${width.max}em` : never()
         const width = (fixedCellsSize && !lastVisibleCol) || isServiceCol(col.colKey)
             ? `minmax(${col.width.min}em,${getMaxStr(col.width)})` : 'auto'
         return `[${key}] ${width}`
