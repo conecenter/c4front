@@ -86,8 +86,9 @@ function VirtualKeyboard({ identity, hash, position, setupType, setupMode, switc
     const [vkType, setVkType] = useState<KeyboardType>();
     const currentPath = useContext(PathContext);
     useEffect(() => {
-        const inputType = setupType || getFocusedInputType(vkRef, currentPath);
-        if (keyboardTypes && inputType) {
+        const focusedInputType = getFocusedInputType(vkRef, currentPath);
+        if (keyboardTypes && (focusedInputType || setupMode)) {
+            const inputType = setupType || focusedInputType;
             const keyboardType = keyboardTypes.find(type => type.name === inputType)
                 || keyboardTypes.find(type => type.name === 'text');
             setVkType(keyboardType);
