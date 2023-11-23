@@ -21,6 +21,7 @@ interface VirtualKeyboard {
     hash: string,
     position: "left" | "right" | "bottom" | "static",
     setupType?: string,
+    setupMode?: boolean,
     switchedMode?: VkState
 }
 
@@ -50,7 +51,7 @@ interface Key {
     color?: ColorDef
 }
 
-function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: VirtualKeyboard) {
+function VirtualKeyboard({ identity, hash, position, setupType, setupMode, switchedMode }: VirtualKeyboard) {
     const vkRef = useRef<HTMLDivElement | null>(null);
 
     // Exchange with server
@@ -135,7 +136,7 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
             height: `calc(var(--vk-row-height) * ${height})`
         }
         const isSwitcher = isSwitcherKey(key);
-        const handleClick = setupType || isSwitcher
+        const handleClick = setupMode || isSwitcher
             ? () => {
                 setupType && sendFinalChange({ tp: 'keypress', key });
                 isSwitcher && sendFinalChange({ tp: 'modeChange', vkType: vkType!.name, mode: +key.slice(-1) });
