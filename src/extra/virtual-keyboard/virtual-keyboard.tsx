@@ -164,7 +164,7 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
 
  function getFocusedInputType(domRef: MutableRefObject<HTMLDivElement | null>, currentPath: string) {
     const cNode = domRef.current?.ownerDocument.querySelector(`[data-path='${currentPath}']`);
-    const input = cNode?.querySelector<HTMLInputElement>('input:not([readonly]), .mddBox');
+    const input = cNode?.querySelector<HTMLInputElement>('input:not([readonly]), textarea, .mddBox');
     return input 
         ? input.dataset?.type || 'text'
         : null;
