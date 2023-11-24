@@ -45,8 +45,8 @@ interface Key {
     key: string,
     symbol?: string,
     row: number,
-    column: number, 
-    width: number, 
+    column: number,
+    width: number,
     height: number,
     color?: ColorDef
 }
@@ -92,7 +92,7 @@ function VirtualKeyboard({ identity, hash, position, setupType, setupMode, switc
             const keyboardType = keyboardTypes.find(type => type.name === inputType)
                 || keyboardTypes.find(type => type.name === 'text');
             setVkType(keyboardType);
-        } 
+        }
         else setVkType(undefined);
     }, [currentPath, setupType, keyboardTypes]);
 
@@ -107,7 +107,7 @@ function VirtualKeyboard({ identity, hash, position, setupType, setupMode, switc
     const scrollInfo = useContext(ScrollInfoContext);
 
     // Positioning logic
-    const [ rowsTotal, colsTotal ] = useMemo(() => (currentKeys 
+    const [ rowsTotal, colsTotal ] = useMemo(() => (currentKeys
         ? currentKeys.reduce(
             (dimensions, key) => {
                 const { row, column, width = 1, height = 1 } = key;
@@ -142,9 +142,9 @@ function VirtualKeyboard({ identity, hash, position, setupType, setupMode, switc
                 setupType && sendFinalChange({ tp: 'keypress', key });
                 isSwitcher && sendFinalChange({ tp: 'modeChange', vkType: vkType!.name, mode: +key.slice(-1) });
             } : undefined;
-        return <VKKey key={`${key}-${ind}`} 
-                      style={btnStyle} 
-                      {...{ keyCode: key, symbol, color }} 
+        return <VKKey key={`${key}-${ind}`}
+                      style={btnStyle}
+                      {...{ keyCode: key, symbol, color }}
                       handleClick={handleClick} />
     }), [vkType, mode]);
 
@@ -169,9 +169,8 @@ function VirtualKeyboard({ identity, hash, position, setupType, setupMode, switc
  function getFocusedInputType(domRef: MutableRefObject<HTMLDivElement | null>, currentPath: string) {
     const cNode = domRef.current?.ownerDocument.querySelector(`[data-path='${currentPath}']`);
     const input = cNode?.querySelector<HTMLInputElement>('input:not([readonly])');
-    return input 
-        ? input.dataset?.type || 'text'
-        : null;
+    return !input || input.dataset.type === 'none' ? null
+        : input.dataset.type || 'text';
 }
 
 function getBiggerNum(a: number, b: number) {
