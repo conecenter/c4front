@@ -11,7 +11,7 @@ import {
 } from "./pivot-exchange";
 import {ItemTypes, PartNames} from "./pivot-const";
 import {HTML5Backend} from "react-dnd-html5-backend";
-import {XYCoord} from "react-dnd/lib";
+import type {XYCoord} from "react-dnd/dist";
 import {usePatchSync} from "../exchange/patch-sync";
 
 
