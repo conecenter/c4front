@@ -211,9 +211,9 @@ interface UserLocaleProviderProps {
     children: ReactNode[]
 }
 
-function UserLocaleProvider({key, children, locale}: UserLocaleProviderProps) {
+function UserLocaleProvider({children, locale}: UserLocaleProviderProps) {
     const extendedLocale = useMemo(()=>getExtendedLocale(locale),[locale])
-    return createElement(UserLocaleContext.Provider, {key: key, value: getExtendedLocale(locale)}, children)
+    return createElement(UserLocaleContext.Provider, {value: getExtendedLocale(locale)}, children)
 }
 
 export type {
