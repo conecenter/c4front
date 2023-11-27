@@ -8,6 +8,7 @@ import { ScrollInfoContext } from '../scroll-info-context';
 import { VKKey } from './vk-key';
 import { usePath } from '../../main/vdom-hooks';
 import { VkInfoContext } from '../ui-info-provider';
+import { VkInfoContext } from '../ui-info-provider';
 
 const SWITCHER_KEYS = ['Switcher1', 'Switcher2', 'Switcher3'];
 const BOTTOM_ROW_CLASS = "bottom-row";
@@ -21,6 +22,7 @@ interface VirtualKeyboard {
     hash: string,
     position: "left" | "right" | "bottom" | "static",
     setupType?: string,
+    setupMode?: boolean,
     switchedMode?: VkState
 }
 
@@ -44,13 +46,13 @@ interface Key {
     key: string,
     symbol?: string,
     row: number,
-    column: number, 
-    width: number, 
+    column: number,
+    width: number,
     height: number,
     color?: ColorDef
 }
 
-function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: VirtualKeyboard) {
+function VirtualKeyboard({ identity, hash, position, setupType, setupMode, switchedMode }: VirtualKeyboard) {
     const vkRef = useRef<HTMLDivElement | null>(null);
 
     // Exchange with server
@@ -85,12 +87,13 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
     const [vkType, setVkType] = useState<KeyboardType>();
     const currentPath = useContext(PathContext);
     useEffect(() => {
-        const inputType = setupType || getFocusedInputType(vkRef, currentPath);
-        if (keyboardTypes && inputType) {
+        const focusedInputType = getFocusedInputType(vkRef, currentPath);
+        if (keyboardTypes && (focusedInputType || setupMode)) {
+            const inputType = setupType || focusedInputType;
             const keyboardType = keyboardTypes.find(type => type.name === inputType)
                 || keyboardTypes.find(type => type.name === 'text');
             setVkType(keyboardType);
-        } 
+        }
         else setVkType(undefined);
     }, [currentPath, setupType, keyboardTypes]);
 
@@ -105,7 +108,7 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
     const scrollInfo = useContext(ScrollInfoContext);
 
     // Positioning logic
-    const [ rowsTotal, colsTotal ] = useMemo(() => (currentKeys 
+    const [ rowsTotal, colsTotal ] = useMemo(() => (currentKeys
         ? currentKeys.reduce(
             (dimensions, key) => {
                 const { row, column, width = 1, height = 1 } = key;
@@ -125,24 +128,31 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
         return () => setHaveVk?.(false);
     }, []);
 
+    // Providing info for VkInfoContext
+    const { setHaveVk } = useContext(VkInfoContext);
+    useEffect(() => {
+        setHaveVk?.(true);
+        return () => setHaveVk?.(false);
+    }, []);
+
     const keys = useMemo(() => currentKeys?.map((btn, ind) => {
         const { key, symbol, row, column, width = 1, height = 1, color } = btn;
         const btnStyle: CSSProperties = {
             position: 'absolute',
             left: `${(column - 1) * 100 / colsTotal!}%`,
-            top: `${VK_ROW_HEIGHT * (row - 1) + VK_OFFSET}em`,
+            top: `calc(var(--vk-row-height) * (${row} - 1) + ${VK_OFFSET}em)`,
             width: `${width * 100 / colsTotal!}%`,
-            height: `${VK_ROW_HEIGHT * height}em`
+            height: `calc(var(--vk-row-height) * ${height})`
         }
         const isSwitcher = isSwitcherKey(key);
-        const handleClick = setupType || isSwitcher
+        const handleClick = setupMode || isSwitcher
             ? () => {
                 setupType && sendFinalChange({ tp: 'keypress', key });
                 isSwitcher && sendFinalChange({ tp: 'modeChange', vkType: vkType!.name, mode: +key.slice(-1) });
             } : undefined;
-        return <VKKey key={`${key}-${ind}`} 
-                      style={btnStyle} 
-                      {...{ keyCode: key, symbol, color }} 
+        return <VKKey key={`${key}-${ind}`}
+                      style={btnStyle}
+                      {...{ keyCode: key, symbol, color }}
                       handleClick={handleClick} />
     }), [vkType, mode]);
 
@@ -152,11 +162,13 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
             onMouseDownCapture={(e) => e.preventDefault()}
             data-path={path}
             style={{
-                height: `${VK_ROW_HEIGHT * rowsTotal + 2 * VK_OFFSET}em`,
+                '--vk-height': `clamp(${1.6 * rowsTotal}em, ${VK_ROW_HEIGHT * rowsTotal + 2 * VK_OFFSET}em, 40vh)`,
+                '--vk-row-height': `calc((var(--vk-height) - ${2 * VK_OFFSET}em) / ${rowsTotal})`,
+                height: 'var(--vk-height)',
                 width: `${VK_COL_WIDTH * colsTotal}em`,
                 ...POSITIONING_STYLES[position],
                 ...isBottomPos && { bottom: scrollInfo.elementsStyles.get(path) }
-            }} >
+            } as CSSProperties} >
             {keys}
         </div>
     );
@@ -165,9 +177,8 @@ function VirtualKeyboard({ identity, hash, position, setupType, switchedMode }: 
  function getFocusedInputType(domRef: MutableRefObject<HTMLDivElement | null>, currentPath: string) {
     const cNode = domRef.current?.ownerDocument.querySelector(`[data-path='${currentPath}']`);
     const input = cNode?.querySelector<HTMLInputElement>('input:not([readonly]), textarea, .mddBox');
-    return input 
-        ? input.dataset?.type || 'text'
-        : null;
+    return !input || input.dataset.type === 'none' ? null
+        : input.dataset.type || 'text';
 }
 
 function getBiggerNum(a: number, b: number) {
