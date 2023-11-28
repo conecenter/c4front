@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect, useState } from 'react'
-import { useCached } from '../../../client/src/extra/components/cache-provider';
+import { useCached } from './cache-provider';
 
 const initViewBox = "0 0 0 0"
 
