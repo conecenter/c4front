@@ -1,7 +1,7 @@
 import {PivotField, PivotSettingsPartClass, PivotSettingsProps, PivotSettingsState} from "./pivot-settings";
 import {DATA_ID, PartNames} from "./pivot-const";
 import update, {extend} from "immutability-helper";
-import {XYCoord} from "react-dnd/dist/types/types/monitors";
+import type {XYCoord} from "react-dnd/dist/types/monitors";
 import {Patch, PatchHeaders} from "../exchange/patch-sync";
 import {isPivotFieldsGroup, PivotFieldsGroup} from "./pivot-settings";
 

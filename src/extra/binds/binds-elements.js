@@ -67,7 +67,7 @@ const BindingElement = (props) => {
 	const buttonText = isValid ? GetButtonCaption(keyData, buttonCaption) : [buttonCaption]
 
 	const checkedChildren = NVL(children, [])
-	const drawNormal = !isValid && checkedChildren === []
+	const drawNormal = !isValid && checkedChildren.length === 0
 	const noAction = !(onClick || onChange)
 	const className = clsx(props.className, focusClass, !drawNormal && 'shortButton', noAction && 'noAction')
 	return $('button', { ref: setElem, className, ...focusHtml, onClick: onClick || onChange }, [...buttonText, ...checkedChildren])
