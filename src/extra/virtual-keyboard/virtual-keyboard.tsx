@@ -8,7 +8,6 @@ import { ScrollInfoContext } from '../scroll-info-context';
 import { VKKey } from './vk-key';
 import { usePath } from '../../main/vdom-hooks';
 import { VkInfoContext } from '../ui-info-provider';
-import { VkInfoContext } from '../ui-info-provider';
 
 const SWITCHER_KEYS = ['Switcher1', 'Switcher2', 'Switcher3'];
 const BOTTOM_ROW_CLASS = "bottom-row";
@@ -120,13 +119,6 @@ function VirtualKeyboard({ identity, hash, position, setupType, setupMode, switc
             }, [0, 0])
         : [0, 0]
     ), [vkType, mode]);
-
-    // Providing info for VkInfoContext
-    const { setHaveVk } = useContext(VkInfoContext);
-    useEffect(() => {
-        setHaveVk?.(true);
-        return () => setHaveVk?.(false);
-    }, []);
 
     // Providing info for VkInfoContext
     const { setHaveVk } = useContext(VkInfoContext);
