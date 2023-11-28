@@ -15,6 +15,7 @@ import {
 } from '../../main/keyboard-keys';
 import { BindGroupElement } from '../binds/binds-elements';
 import { useBinds } from '../binds/key-binding';
+import { SVGElement } from '../../main/image';
 
 const ARROW_DOWN_URL = '/mod/main/ee/cone/core/ui/c4view/arrow-down.svg';
 const ARROW_DOWN_ICON = (
@@ -126,7 +127,7 @@ function MenuFolderItem(props: MenuFolderItem) {
 
             <BindGroupElement bindSrcId={bindSrcId} groupId={groupId} showBtn={true} >
 
-                {icon && <img src={icon} className='rowIconSize' />}
+                {icon && <SVGElement url={icon} className='rowIconSize' />}
                 <span className={clsx(shortName && 'longName')}>{name}</span>
                 {shortName &&
                     <span className='shortName'>{shortName}</span>}
