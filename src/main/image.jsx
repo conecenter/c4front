@@ -1,5 +1,4 @@
 import React, { useMemo, useEffect, useState } from 'react'
-import { globalRegistry } from '../utils'
 import { useCached } from '../../../client/src/extra/components/cache-provider';
 
 const initViewBox = "0 0 0 0"
@@ -51,7 +50,7 @@ const ImageElement = (props) => {
     const { src, forceSrcWithoutPrefix, title, className, rotate, color, draggable } = props
     const _className = (className || "") + (rotate ? " transitions" : "")
     const style = { ...rotate && { transform: `rotate(${rotate})` } }
-    const urlPrefix = globalRegistry.get().feedbackUrl
+    const urlPrefix = window.feedbackUrlPrefix || ''
     const _src = !forceSrcWithoutPrefix ? (urlPrefix || "") + src : src
     if (src === "")
         return (<svg className={_className} style={style} color={color}></svg>)
