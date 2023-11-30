@@ -1,6 +1,5 @@
 import React, { createElement as $, ReactNode, MutableRefObject } from 'react';
 import clsx from 'clsx';
-import { findFirstParent } from "../main/vdom-util";
 import { useFocusControl } from './focus-control';
 import { Patch } from './exchange/patch-sync';
 
@@ -35,7 +34,7 @@ const ButtonElement = (props: ButtonElement) => {
 	}, [changing])
 
     const onClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-        if (!disabled && (props.onClick || props.onChange)) {
+        if (!disabled && !noAction) {
             e.stopPropagation()
 			if (props.onClick) props.onClick(e)
 			else props.onChange?.({ target: { headers: { "x-r-action": "change" }, value: "1" } })
@@ -45,9 +44,6 @@ const ButtonElement = (props: ButtonElement) => {
             e.preventDefault()
             window.open(props.url)
         }
-        const focEl = findFirstParent((el: HTMLElement) => el.classList.contains("activeFocusWrapper") && el)(elem.current)
-        if (focEl) focEl.focus()
-        // problem was dropdown in popup: button-option disappear after click, and focus goes to nowhere, and popup closes
     }
 
 	React.useEffect(() => {
