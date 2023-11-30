@@ -262,7 +262,7 @@ class InputElementBase extends StatefulComponent {
         const errors = errorChildren?.length > 0 ? errorChildren : []
         const alignRight = !!this.props.alignRight
         return $("div", { style: inpContStyle, ref: (ref) => this.cont = ref, className: clsx("inputBox", focusClass), ...focusHtml },
-            this.props.shadowElement ? this.props.shadowElement() : null,
+            this.props.shadowElement?.(),
             alignRight && errors,
             $(InputsSizeContext.Consumer, null, size => this.props.drawFunc(
                 $(inputType, {
@@ -282,15 +282,13 @@ class InputElementBase extends StatefulComponent {
                     onChange: this.onChange, onKeyDown: this.onKeyDown,
                     onBlur: this.onBlur, onFocus: this.props.onFocus,
                     /*onMouseDown: this.onMouseDown, onTouchStart: this.onMouseDown*/
-                },
-                    content ? content : null)
-                )
+                }, content))
             ),
-            this.props.uploadedFileElement ? this.props.uploadedFileElement() : null,
-            this.props.deleteButtonElement ? this.props.deleteButtonElement() : null,
-            this.props.buttonElement ? this.props.buttonElement() : null,
+            this.props.uploadedFileElement?.(),
+            this.props.deleteButtonElement?.(),
+            this.props.buttonElement?.(),
             !alignRight && errors,
-            this.props.popupElement ? this.props.popupElement() : null
+            this.props.popupElement?.()
         );
     }
     getChildrenByClass(cl) {
