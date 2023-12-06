@@ -30,4 +30,14 @@ const useLatest = <T extends any>(current: T) => {
     return storedValue;
 }
 
-export { useAddEventListener, useLatest };
+function useInterval(callback: Function, delay: number | null) {
+    const savedCallback = useLatest(callback);
+    useEffect(() => {
+      if (delay !== null) {
+        let id = setInterval(() => savedCallback.current(), delay);
+        return () => clearInterval(id);
+      }
+    }, [delay]);
+  }
+
+export { useAddEventListener, useLatest, useInterval };

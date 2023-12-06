@@ -41,12 +41,12 @@ function UiInfoProvider({identity, uiType: state, children}: UiInfoProvider) {
     const {currentState: uiType, sendFinalChange} =
         usePatchSync(identity, 'receiver', state, false, (b) => b, changeToPatch, patchToChange, (prev, ch) => ch);
 
-    const isRootBranch = useContext(RootBranchContext);
+    const { isRoot } = useContext(RootBranchContext);
 
     const pointerMql = useRef(window.matchMedia("(any-hover: hover) and (any-pointer: fine)"));
 
     const updateUiType = () => {
-        if (!isRootBranch) return;
+        if (!isRoot) return;
         const currentUiType: UiType = pointerMql.current.matches ? 'pointer' : 'touch';
         if (uiType !== currentUiType) sendFinalChange(currentUiType);
     }

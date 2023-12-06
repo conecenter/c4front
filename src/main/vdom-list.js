@@ -242,10 +242,10 @@ const useGridKeyboardAction = identity => {
 }
 
 const useValueToServer = (identity, value) => {
-    const isRootBranch = useContext(RootBranchContext)
+    const {isRoot} = useContext(RootBranchContext)
     const [patches, enqueuePatch] = useSync(identity)
     useEffect(() => {
-        if (isRootBranch) enqueuePatch({ value, skipByPath: true, retry: true })
+        if (isRoot) enqueuePatch({ value, skipByPath: true, retry: true })
     }, [value, enqueuePatch])
 }
 
