@@ -9,6 +9,7 @@ import { MenuFolderItem } from './menu-folder-item';
 import { BindingElement } from '../binds/binds-elements';
 import { useBinds } from '../binds/key-binding';
 import { focusFirstMenuItem } from './main-menu-utils';
+import { SVGElement } from '../../main/image';
 
 
 interface MenuExecutableItem {
@@ -47,7 +48,7 @@ function MenuExecutableItem({identity, name, current, path, icon, bindSrcId}: Me
              onKeyDown={handleKeyDown} 
         >
             {isBindMode && <BindingElement bindSrcId={bindSrcId} onChange={onClick} />}
-            {icon && <img src={icon} className='rowIconSize'/>}
+            {icon && <SVGElement url={icon} className='rowIconSize'/>}
             <span>{name}</span>
         </div>
     );
