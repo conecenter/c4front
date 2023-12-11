@@ -48,7 +48,7 @@ function MenuExecutableItem({identity, name, current, path, icon, bindSrcId}: Me
              onKeyDown={handleKeyDown} 
         >
             {isBindMode && <BindingElement bindSrcId={bindSrcId} onChange={onClick} />}
-            {icon && <SVGElement url={icon} className='rowIconSize'/>}
+            {icon && <SVGElement url={icon} className='menuItemIcon'/>}
             <span>{name}</span>
         </div>
     );

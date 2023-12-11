@@ -127,7 +127,7 @@ function MenuFolderItem(props: MenuFolderItem) {
 
             <BindGroupElement bindSrcId={bindSrcId} groupId={groupId} showBtn={true} >
 
-                {icon && <SVGElement url={icon} className='rowIconSize' />}
+                {icon && <SVGElement url={icon} className='menuItemIcon' />}
                 <span className={clsx(shortName && 'longName')}>{name}</span>
                 {shortName &&
                     <span className='shortName'>{shortName}</span>}
