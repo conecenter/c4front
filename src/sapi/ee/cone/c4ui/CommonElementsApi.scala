@@ -48,4 +48,10 @@ import ee.cone.c4vdom.{ToChildPair, ToJson, c4el, c4tagSwitch, c4tags, c4val}
     children: ViewRes,
     align: Option[Align] = None,
   ): ToChildPair
+
+  @c4el("TreeNode") def treeNode(
+    key: String,
+    level: Int,
+    children: ViewRes,
+  ): ToChildPair
 }
