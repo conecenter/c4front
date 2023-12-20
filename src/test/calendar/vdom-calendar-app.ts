@@ -4,7 +4,7 @@ import { createSyncProviders } from "../../main/vdom-hooks";
 import { Calendar } from "../../extra/calendar";
 
 function App() {
-    const children = $('div', { style: { paddingLeft: '4em', height: '50em' } },
+    const children = $('div', { style: { paddingLeft: '4em', width: '1000px', maxWidth: '100%' } },
         $(Calendar, {
             //identity: { key: 'test' },
         })
