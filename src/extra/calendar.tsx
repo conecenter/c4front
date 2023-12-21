@@ -3,7 +3,18 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 
-function Calendar() {
+interface Calendar {
+    events: CalendarEvent[]
+}
+
+interface CalendarEvent {
+    title: string,
+    start: number,
+    end?: number,
+    allDay?: boolean
+}
+
+function Calendar({ events }: Calendar) {
     return (
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin]}
@@ -15,6 +26,7 @@ function Calendar() {
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
         }}
+        events={events}
       />
     );
 }

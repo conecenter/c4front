@@ -7,6 +7,18 @@ function App() {
     const children = $('div', { style: { paddingLeft: '4em', width: '1000px', maxWidth: '100%' } },
         $(Calendar, {
             //identity: { key: 'test' },
+            events: [
+                {
+                  title: 'Car arrival',
+                  start: new Date(2023, 11, 24, 10).getTime(),
+                  end: new Date(2023, 11, 24, 14).getTime()
+                },
+                {
+                    title: 'Train departure',
+                    start: new Date(2023, 11, 23).getTime(),
+                    allDay: true
+                }
+            ]
         })
     );
     const sender = {
