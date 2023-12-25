@@ -6,14 +6,34 @@ import { Calendar } from "../../extra/calendar";
 function App() {
     const children = $('div', { style: { paddingLeft: '4em', width: '1000px', maxWidth: '100%' } },
         $(Calendar, {
-            //identity: { key: 'test' },
+            identity: { key: 'test' },
             events: [
                 {
-                  title: 'Car arrival',
-                  start: new Date(2023, 11, 24, 10).getTime(),
-                  end: new Date(2023, 11, 24, 14).getTime()
+                    id: 'Meeting',
+                    title: 'Meeting',
+                    start: new Date(2023, 11, 24, 12).getTime(),
+                    end: new Date(2023, 11, 24, 14).getTime()
                 },
                 {
+                    id: 'Meeting-2',
+                    title: 'Meeting-2',
+                    start: new Date(2023, 11, 24, 14).getTime(),
+                    end: new Date(2023, 11, 24, 16).getTime()
+                },
+                {
+                    id: 'Meeting-3',
+                    title: 'Meeting-3',
+                    start: new Date(2023, 11, 24, 14).getTime(),
+                    end: new Date(2023, 11, 24, 16).getTime()
+                },
+                {
+                    id: 'Car arrival',
+                    title: 'Car arrival',
+                    start: new Date(2023, 11, 24, 10).getTime(),
+                    end: new Date(2023, 11, 24, 14).getTime()
+                },
+                {
+                    id: 'Train departure',
                     title: 'Train departure',
                     start: new Date(2023, 11, 23).getTime(),
                     allDay: true
