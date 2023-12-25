@@ -12,7 +12,8 @@ import type { EventImpl } from '@fullcalendar/core/internal';
 
 interface Calendar {
     identity: Object,
-    events: CalendarEvent[]
+    events: CalendarEvent[],
+    slotDuration?: number
 }
 
 interface CalendarEvent {
@@ -23,7 +24,7 @@ interface CalendarEvent {
     allDay?: boolean
 }
 
-function Calendar({ identity, events }: Calendar) {
+function Calendar({ identity, events, slotDuration }: Calendar) {
     const {currentState: eventsState, sendFinalChange} = 
         usePatchSync(identity, 'receiver', events, false, s => s, changeToPatch, patchToChange, applyChange);
 
@@ -39,7 +40,7 @@ function Calendar({ identity, events }: Calendar) {
         plugins={[dayGridPlugin, timeGridPlugin, luxon3Plugin, interactionPlugin]}
         initialView="dayGridMonth"
         firstDay={1}
-        slotDuration={'00:15'}
+        slotDuration={slotDuration || '00:15'}
         timeZone={locale.timezoneId}
         editable={true}
         headerToolbar={{
