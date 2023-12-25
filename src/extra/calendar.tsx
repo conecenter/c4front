@@ -13,7 +13,8 @@ import type { EventImpl } from '@fullcalendar/core/internal';
 interface Calendar {
     identity: Object,
     events: CalendarEvent[],
-    slotDuration?: number
+    slotDuration?: number,
+    businessHours?: BusinessHours
 }
 
 interface CalendarEvent {
@@ -21,12 +22,21 @@ interface CalendarEvent {
     title: string,
     start?: number,
     end?: number,
-    allDay?: boolean
+    allDay?: boolean,
+    eventConstraint?: 'businessHours'
 }
 
-function Calendar({ identity, events, slotDuration }: Calendar) {
-    const {currentState: eventsState, sendFinalChange} = 
+interface BusinessHours {
+    daysOfWeek: number[],   // 0 = Sunday
+    startTime: number,
+    endTime: number
+}
+
+function Calendar({ identity, events, slotDuration, businessHours }: Calendar) {
+    const {currentState, sendFinalChange} = 
         usePatchSync(identity, 'receiver', events, false, s => s, changeToPatch, patchToChange, applyChange);
+
+    const eventsState = constrainEvents(currentState);
 
     const locale = useUserLocale();
 
@@ -50,6 +60,7 @@ function Calendar({ identity, events, slotDuration }: Calendar) {
         }}
         events={(_, successCallback) => successCallback(eventsState)}
         eventChange={onEventChange}
+        businessHours={businessHours}
       />
     );
 }
@@ -62,6 +73,13 @@ function eventObjToCalendarEvent(eventObj: EventImpl) {
         end: end?.getTime(),
         ...allDay && { allDay }
     };
+}
+
+function constrainEvents(events: CalendarEvent[]): CalendarEvent[] {
+    return events.map(event => ({
+        ...event,
+        constraint: 'businessHours'
+    }));
 }
 
 // Server exchange

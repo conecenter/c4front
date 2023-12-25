@@ -7,6 +7,11 @@ function App() {
     const children = $('div', { style: { paddingLeft: '4em', width: '1000px', maxWidth: '100%' } },
         $(Calendar, {
             identity: { key: 'test' },
+            businessHours: {
+                daysOfWeek: [1, 2, 3, 4, 5],
+                startTime: 28800000,
+                endTime: 64800000
+            },
             events: [
                 {
                     id: 'Meeting',
