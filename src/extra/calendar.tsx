@@ -6,8 +6,9 @@ import luxon3Plugin from '@fullcalendar/luxon3';
 import interactionPlugin from '@fullcalendar/interaction';
 import { useUserLocale } from './locale';
 import { Patch, usePatchSync } from './exchange/patch-sync';
+import { ColorDef, ColorProps, colorToProps } from './view-builder/common-api';
 
-import type { EventChangeArg } from '@fullcalendar/core';
+import type { EventChangeArg, EventInput } from '@fullcalendar/core';
 import type { EventImpl } from '@fullcalendar/core/internal';
 
 interface Calendar {
@@ -18,13 +19,16 @@ interface Calendar {
     allDaySlot?: boolean
 }
 
-interface CalendarEvent {
+interface BaseEvent {
     id: string,
-    title: string,
     start?: number,
-    end?: number,
+    end?: number
+}
+
+interface CalendarEvent extends BaseEvent {
+    title: string,
     allDay?: boolean,
-    eventConstraint?: 'businessHours'
+    color?: ColorDef
 }
 
 interface BusinessHours {
@@ -34,15 +38,13 @@ interface BusinessHours {
 }
 
 function Calendar({ identity, events, slotDuration, businessHours, allDaySlot }: Calendar) {
-    const {currentState, sendFinalChange} = 
-        usePatchSync(identity, 'receiver', events, false, s => s, changeToPatch, patchToChange, applyChange);
-
-    const eventsState = constrainEvents(currentState);
+    const {currentState: eventsState, sendFinalChange} = 
+        usePatchSync(identity, 'receiver', events, false, serverStateToState, changeToPatch, patchToChange, applyChange);
 
     const locale = useUserLocale();
 
     const onEventChange = (changeInfo: EventChangeArg) => {
-        const changedEvent = eventObjToCalendarEvent(changeInfo.event);
+        const changedEvent = eventObjToBaseEvent(changeInfo.event);
         sendFinalChange({ tp: 'change', event: changedEvent});
     }
 
@@ -63,25 +65,19 @@ function Calendar({ identity, events, slotDuration, businessHours, allDaySlot }:
         eventChange={onEventChange}
         businessHours={businessHours}
         allDaySlot={allDaySlot}
+        eventDisplay='block'
+        eventConstraint='businessHours'
       />
     );
 }
 
-function eventObjToCalendarEvent(eventObj: EventImpl) {
-    const { id, title, start, end, allDay } = eventObj;
+function eventObjToBaseEvent(eventObj: EventImpl): BaseEvent {
+    const { id, start, end } = eventObj;
     return {
-        id, title,
+        id,
         start: start?.getTime(),
-        end: end?.getTime(),
-        ...allDay && { allDay }
+        end: end?.getTime()
     };
-}
-
-function constrainEvents(events: CalendarEvent[]): CalendarEvent[] {
-    return events.map(event => ({
-        ...event,
-        constraint: 'businessHours'
-    }));
 }
 
 // Server exchange
@@ -89,7 +85,21 @@ type EventChangeType = 'add' | 'change' | 'remove';
 
 interface EventChange {
     tp: EventChangeType,
-    event: CalendarEvent
+    event: EventInput
+}
+
+function serverStateToState(serverState: CalendarEvent[]): EventInput[] {
+    return serverState.map(({ color, ...event }) => {
+        const { style: colorStyle, className }: ColorProps = colorToProps(color);
+        return {
+            ...event,
+            ...className && { classNames: className },
+            ...colorStyle && {
+                backgroundColor: colorStyle.backgroundColor,
+                textColor: colorStyle.color
+            }
+        }
+    })
 }
 
 function changeToPatch(ch: EventChange): Patch {
@@ -106,12 +116,12 @@ function patchToChange(patch: Patch): EventChange {
     };
 }
 
-function applyChange(prevState: CalendarEvent[], ch: EventChange): CalendarEvent[] {
+function applyChange(prevState: EventInput[], ch: EventChange): EventInput[] {
     const changingState = [...prevState];
     switch (ch.tp) {
         case 'change':
             const eventIndex = prevState.findIndex(event => event.id === ch.event.id);
-            if (eventIndex >= 0) changingState.splice(eventIndex, 1, ch.event);
+            if (eventIndex >= 0) changingState[eventIndex] = { ...changingState[eventIndex], ...ch.event };
             return changingState;
         default:
             return prevState;

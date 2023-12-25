@@ -18,13 +18,15 @@ function App() {
                     id: 'Meeting',
                     title: 'Meeting',
                     start: new Date(2023, 11, 24, 12).getTime(),
-                    end: new Date(2023, 11, 24, 14).getTime()
+                    end: new Date(2023, 11, 24, 14).getTime(),
+                    color: { tp: 'p', cssClass: 'primaryColorCss' }
                 },
                 {
                     id: 'Meeting-2',
                     title: 'Meeting-2',
-                    start: new Date(2023, 11, 24, 14).getTime(),
-                    end: new Date(2023, 11, 24, 16).getTime()
+                    start: new Date(2023, 11, 22, 14).getTime(),
+                    end: new Date(2023, 11, 22, 16).getTime(),
+                    
                 },
                 {
                     id: 'Meeting-3',
@@ -36,7 +38,8 @@ function App() {
                     id: 'Car arrival',
                     title: 'Car arrival',
                     start: new Date(2023, 11, 24, 10).getTime(),
-                    end: new Date(2023, 11, 24, 14).getTime()
+                    end: new Date(2023, 11, 24, 14).getTime(),
+                    color: { tp: 'r', bgColor: 'grey', textColor: 'white' }
                 },
                 {
                     id: 'Train departure',
