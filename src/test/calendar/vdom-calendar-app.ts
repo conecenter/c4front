@@ -12,6 +12,7 @@ function App() {
                 startTime: 28800000,
                 endTime: 64800000
             },
+            allDaySlot: true,
             events: [
                 {
                     id: 'Meeting',

@@ -14,7 +14,8 @@ interface Calendar {
     identity: Object,
     events: CalendarEvent[],
     slotDuration?: number,
-    businessHours?: BusinessHours
+    businessHours?: BusinessHours,
+    allDaySlot?: boolean
 }
 
 interface CalendarEvent {
@@ -32,7 +33,7 @@ interface BusinessHours {
     endTime: number
 }
 
-function Calendar({ identity, events, slotDuration, businessHours }: Calendar) {
+function Calendar({ identity, events, slotDuration, businessHours, allDaySlot }: Calendar) {
     const {currentState, sendFinalChange} = 
         usePatchSync(identity, 'receiver', events, false, s => s, changeToPatch, patchToChange, applyChange);
 
@@ -61,6 +62,7 @@ function Calendar({ identity, events, slotDuration, businessHours }: Calendar) {
         events={(_, successCallback) => successCallback(eventsState)}
         eventChange={onEventChange}
         businessHours={businessHours}
+        allDaySlot={allDaySlot}
       />
     );
 }
