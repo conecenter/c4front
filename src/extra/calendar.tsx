@@ -38,8 +38,9 @@ interface BusinessHours {
 }
 
 function Calendar({ identity, events, slotDuration, businessHours, allDaySlot }: Calendar) {
-    const {currentState: eventsState, sendFinalChange} = 
-        usePatchSync(identity, 'receiver', events, false, serverStateToState, changeToPatch, patchToChange, applyChange);
+    const {currentState: eventsState, sendFinalChange} = usePatchSync(
+        identity, 'receiver', events, false, serverStateToState(transformColor), changeToPatch, patchToChange, applyChange
+    );
 
     const locale = useUserLocale();
 
@@ -80,15 +81,7 @@ function eventObjToBaseEvent(eventObj: EventImpl): BaseEvent {
     };
 }
 
-// Server exchange
-type EventChangeType = 'add' | 'change' | 'remove';
-
-interface EventChange {
-    tp: EventChangeType,
-    event: EventInput
-}
-
-function serverStateToState(serverState: CalendarEvent[]): EventInput[] {
+function transformColor(serverState: CalendarEvent[]): EventInput[] {
     return serverState.map(({ color, ...event }) => {
         const { style: colorStyle, className }: ColorProps = colorToProps(color);
         return {
@@ -99,7 +92,19 @@ function serverStateToState(serverState: CalendarEvent[]): EventInput[] {
                 textColor: colorStyle.color
             }
         }
-    })
+    });
+}
+
+// Server exchange
+type EventChangeType = 'add' | 'change' | 'remove';
+
+interface EventChange {
+    tp: EventChangeType,
+    event: EventInput
+}
+
+function serverStateToState(transform: (serverState: CalendarEvent[]) => EventInput[]) {
+    return (serverState: CalendarEvent[]) => transform(serverState);
 }
 
 function changeToPatch(ch: EventChange): Patch {
