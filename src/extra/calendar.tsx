@@ -70,6 +70,8 @@ function Calendar({ identity, events, slotDuration, businessHours, allDaySlot }:
         allDaySlot={allDaySlot}
         eventDisplay='block'
         eventConstraint='businessHours'
+        navLinks={true}
+        nowIndicator={true}
       />
     );
 }
