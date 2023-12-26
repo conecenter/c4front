@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -26,9 +26,10 @@ interface BaseEvent {
 }
 
 interface CalendarEvent extends BaseEvent {
-    title: string,
+    title?: string,
     allDay?: boolean,
-    color?: ColorDef
+    color?: ColorDef,
+    children?: ReactNode
 }
 
 interface BusinessHours {
@@ -63,6 +64,7 @@ function Calendar({ identity, events, slotDuration, businessHours, allDaySlot }:
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
         }}
         events={(_, successCallback) => successCallback(eventsState)}
+        eventContent={(eventInfo) => eventInfo.event.extendedProps.children ?? true}
         eventChange={onEventChange}
         businessHours={businessHours}
         allDaySlot={allDaySlot}

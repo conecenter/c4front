@@ -2,8 +2,14 @@ import ReactDOM from "react-dom";
 import { createElement as $ } from "react";
 import { createSyncProviders } from "../../main/vdom-hooks";
 import { Calendar } from "../../extra/calendar";
+import { ButtonElement } from "../../extra/button-element";
 
 function App() {
+    const eventChild = $(ButtonElement,
+        { value: '', className: 'yellowColorCss', onClick: () => console.log('clicked') },
+        'Full calendar'
+    );
+
     const children = $('div', { style: { paddingLeft: '4em', width: '1000px', maxWidth: '100%' } },
         $(Calendar, {
             identity: { key: 'test' },
@@ -12,14 +18,15 @@ function App() {
                 startTime: 28800000,
                 endTime: 64800000
             },
-            allDaySlot: true,
+            allDaySlot: false,
             events: [
                 {
                     id: 'Meeting',
                     title: 'Meeting',
                     start: new Date(2023, 11, 24, 12).getTime(),
                     end: new Date(2023, 11, 24, 14).getTime(),
-                    color: { tp: 'p', cssClass: 'primaryColorCss' }
+                    color: { tp: 'p', cssClass: 'primaryColorCss' },
+                    children: eventChild
                 },
                 {
                     id: 'Meeting-2',
