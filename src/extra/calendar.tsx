@@ -5,10 +5,10 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import luxon3Plugin from '@fullcalendar/luxon3';
 import interactionPlugin from '@fullcalendar/interaction';
 import { useUserLocale } from './locale';
-import { Patch, usePatchSync } from './exchange/patch-sync';
+import { Patch, PatchHeaders, usePatchSync } from './exchange/patch-sync';
 import { ColorDef, ColorProps, colorToProps } from './view-builder/common-api';
 
-import type { EventChangeArg, EventInput } from '@fullcalendar/core';
+import type { EventInput } from '@fullcalendar/core';
 import type { EventImpl } from '@fullcalendar/core/internal';
 
 interface Calendar {
@@ -19,13 +19,10 @@ interface Calendar {
     allDaySlot?: boolean
 }
 
-interface BaseEvent {
+interface CalendarEvent {
     id: string,
     start?: number,
     end?: number
-}
-
-interface CalendarEvent extends BaseEvent {
     title?: string,
     allDay?: boolean,
     color?: ColorDef,
@@ -42,13 +39,7 @@ function Calendar({ identity, events, slotDuration, businessHours, allDaySlot }:
     const {currentState: eventsState, sendFinalChange} = usePatchSync(
         identity, 'receiver', events, false, serverStateToState(transformColor), changeToPatch, patchToChange, applyChange
     );
-
     const locale = useUserLocale();
-
-    const onEventChange = (changeInfo: EventChangeArg) => {
-        const changedEvent = eventObjToBaseEvent(changeInfo.event);
-        sendFinalChange({ tp: 'change', event: changedEvent});
-    }
 
     return (
       <FullCalendar
@@ -64,8 +55,9 @@ function Calendar({ identity, events, slotDuration, businessHours, allDaySlot }:
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
         }}
         events={(_, successCallback) => successCallback(eventsState)}
-        eventContent={(eventInfo) => eventInfo.event.extendedProps.children ?? true}
-        eventChange={onEventChange}
+        eventContent={eventInfo => eventInfo.event.extendedProps.children ?? true}
+        eventClick={clickedEvent => sendFinalChange({ tp: 'click', event: clickedEvent.event })}
+        eventChange={changedEvent => sendFinalChange({ tp: 'change', event: changedEvent.event })}
         businessHours={businessHours}
         allDaySlot={allDaySlot}
         eventDisplay='block'
@@ -74,15 +66,6 @@ function Calendar({ identity, events, slotDuration, businessHours, allDaySlot }:
         nowIndicator={true}
       />
     );
-}
-
-function eventObjToBaseEvent(eventObj: EventImpl): BaseEvent {
-    const { id, start, end } = eventObj;
-    return {
-        id,
-        start: start?.getTime(),
-        end: end?.getTime()
-    };
 }
 
 function transformColor(serverState: CalendarEvent[]): EventInput[] {
@@ -100,12 +83,16 @@ function transformColor(serverState: CalendarEvent[]): EventInput[] {
 }
 
 // Server exchange
-type EventChangeType = 'add' | 'change' | 'remove';
+type EventChangeType = 'change' | 'click';
 
 interface EventChange {
     tp: EventChangeType,
-    event: EventInput
+    event: EventImpl
 }
+
+const HEADER_ID = 'x-r-event-id';
+const HEADER_EVENT_START = 'x-r-event-start';
+const HEADER_EVENT_END = 'x-r-event-end';
 
 function serverStateToState(transform: (serverState: CalendarEvent[]) => EventInput[]) {
     return (serverState: CalendarEvent[]) => transform(serverState);
@@ -113,15 +100,48 @@ function serverStateToState(transform: (serverState: CalendarEvent[]) => EventIn
 
 function changeToPatch(ch: EventChange): Patch {
     return {
-        value: JSON.stringify(ch.event),
-        headers: { 'x-r-tp': ch.tp }
+        value: ch.tp,
+        headers: getHeaders(ch)
+    }
+}
+
+function getHeaders(ch: EventChange): PatchHeaders {
+    const eventIdHeader = { [HEADER_ID]: ch.event.id! };
+    switch (ch.tp) {
+        case "click":
+            return eventIdHeader;
+        case "change":
+            const start = ch.event.start?.getTime();
+            const end = ch.event.end?.getTime();
+            return {
+                ...eventIdHeader,
+                ...start && {[HEADER_EVENT_START]: String(start)},
+                ...end && {[HEADER_EVENT_END]: String(end)}
+            }
+    }
+}
+
+function headersToEvent(patch: Patch) {
+    const { value: tp, headers } = patch as { value: EventChangeType, headers: PatchHeaders };
+    const id = headers[HEADER_ID]
+    switch (tp) {
+        case 'click':
+            return { id };
+        case 'change':
+            const start = +headers[HEADER_EVENT_START];
+            const end = +headers[HEADER_EVENT_END];
+            return {
+                id,
+                ...start && {start},
+                ...end && {end} 
+            };
     }
 }
 
 function patchToChange(patch: Patch): EventChange {
     return {
-        tp: patch.headers!['x-r-tp'] as EventChangeType,
-        event: JSON.parse(patch.value)
+        tp: patch.value as EventChangeType,
+        event: headersToEvent(patch) as unknown as EventImpl
     };
 }
 
