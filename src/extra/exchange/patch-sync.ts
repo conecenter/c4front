@@ -56,7 +56,7 @@ function usePatchSync<ServerState, State, StateChange>(
     patchToChange: (p: Patch) => StateChange,
     applyChange: (prevState: State, ch: StateChange) => State,
 ): SyncState<State, StateChange> {
-    const [patches, enqueuePatch] = <[SendPatch[], (patch: SendPatch) => void]>useSync(receiverId(receiverName)(identity))
+    const [patches, enqueuePatch] = useSync(receiverId(receiverName)(identity))
     const wasChanged = useRef(false);
     const convertedFromServer: State = useMemo(() => serverToState(serverState), [serverState])
     const patchedState: State = useMemo(
