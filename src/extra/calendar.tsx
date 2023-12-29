@@ -1,4 +1,5 @@
 import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -6,6 +7,7 @@ import luxon3Plugin from '@fullcalendar/luxon3';
 import interactionPlugin from '@fullcalendar/interaction';
 import { useUserLocale } from './locale';
 import { useEventClickAction, useEventsSync, useViewSync } from './calendar/calendar-exchange';
+import { OverlayWrapper } from './overlay-manager';
 import { ColorDef } from './view-builder/common-api';
 
 import type { DatesSetArg, EventSourceFuncArg, ViewApi } from '@fullcalendar/core';
@@ -54,8 +56,6 @@ function Calendar({ identity, events, currentView: serverView, slotDuration, bus
 
     const onEventClick = useEventClickAction(identity);
 
-    const [isLoading, setIsLoading] = useState(false);
-
     const getEvents = useCallback((fetchInfo: EventSourceFuncArg, successCallback: Function) => {
         const needNewEvents = !serverView
             || fetchInfo.start.getTime() < serverView.from 
@@ -83,35 +83,46 @@ function Calendar({ identity, events, currentView: serverView, slotDuration, bus
         }
     }, [viewType, from, to]);
 
+    const [isLoading, setIsLoading] = useState(false);
+    const viewRoot = useRef<HTMLElement | null>(null);
+    const isLoadingOverlay = isLoading && viewRoot.current && createPortal(
+        <OverlayWrapper textmsg='Loading, please wait...' />,
+        viewRoot.current
+    );
+
     console.log('rerender');
 
     return (
-      <FullCalendar
-        ref={calendarRef}
-        plugins={[dayGridPlugin, timeGridPlugin, luxon3Plugin, interactionPlugin]}
-        initialView="dayGridMonth"
-        firstDay={1}
-        slotDuration={slotDuration || '00:15'}
-        timeZone={locale.timezoneId}
-        editable={true}
-        headerToolbar={{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
-        }}
-        events={getEvents}
-        eventContent={eventInfo => eventInfo.event.extendedProps.children ?? true}
-        eventClick={onEventClick}
-        eventChange={changedEvent => sendEventsChange(changedEvent.event)}
-        datesSet={onDatesSet}
-        businessHours={businessHours}
-        allDaySlot={allDaySlot}
-        eventDisplay='block'
-        eventConstraint='businessHours'
-        navLinks={true}
-        nowIndicator={true}
-        loading={(isLoading) => { console.log('isLoading:', isLoading); setIsLoading(isLoading); }}
-      />
+        <>
+            <FullCalendar
+                ref={calendarRef}
+                plugins={[dayGridPlugin, timeGridPlugin, luxon3Plugin, interactionPlugin]}
+                initialView="dayGridMonth"
+                firstDay={1}
+                slotDuration={slotDuration || '00:15'}
+                timeZone={locale.timezoneId}
+                editable={true}
+                businessHours={businessHours}
+                allDaySlot={allDaySlot}
+                eventDisplay='block'
+                eventConstraint='businessHours'
+                navLinks={true}
+                nowIndicator={true}
+                headerToolbar={{
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                }}
+                events={getEvents}
+                eventContent={(eventInfo) => eventInfo.event.extendedProps.children ?? true}
+                eventClick={onEventClick}
+                eventChange={(changedEvent) => sendEventsChange(changedEvent.event)}
+                datesSet={onDatesSet}
+                viewDidMount={(viewMount) => viewRoot.current = viewMount.el}
+                loading={(isLoading) => setIsLoading(isLoading)}
+            />
+            {isLoadingOverlay}
+        </>
     );
 }
 

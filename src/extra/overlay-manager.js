@@ -65,4 +65,4 @@ const OverlayWrapper = (props) => {
 	return $('div',{ref:elem, style, className: "overlayMain"}, wrapperEl)
 }
 
-export { OverlayManager, OverlayMessage }
+export { OverlayManager, OverlayMessage, OverlayWrapper }
