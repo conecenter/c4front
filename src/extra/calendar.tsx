@@ -1,19 +1,19 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import luxon3Plugin from '@fullcalendar/luxon3';
 import interactionPlugin from '@fullcalendar/interaction';
 import { useUserLocale } from './locale';
-import { Patch, PatchHeaders, usePatchSync } from './exchange/patch-sync';
-import { ColorDef, ColorProps, colorToProps } from './view-builder/common-api';
+import { useEventClickAction, useEventsSync, useViewSync } from './calendar/calendar-exchange';
+import { ColorDef } from './view-builder/common-api';
 
-import type { EventInput } from '@fullcalendar/core';
-import type { EventImpl } from '@fullcalendar/core/internal';
+import type { DatesSetArg, EventSourceFuncArg, ViewApi } from '@fullcalendar/core';
 
 interface Calendar {
     identity: Object,
     events: CalendarEvent[],
+    currentView?: ViewInfo,
     slotDuration?: number,
     businessHours?: BusinessHours,
     allDaySlot?: boolean
@@ -29,20 +29,65 @@ interface CalendarEvent {
     children?: ReactNode
 }
 
+interface ViewInfo {
+    viewType: ViewType,
+    from: number,
+    to: number
+}
+
+type ViewType = 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay';
+
 interface BusinessHours {
     daysOfWeek: number[],   // 0 = Sunday
     startTime: number,
     endTime: number
 }
 
-function Calendar({ identity, events, slotDuration, businessHours, allDaySlot }: Calendar) {
-    const {currentState: eventsState, sendFinalChange} = usePatchSync(
-        identity, 'receiver', events, false, serverStateToState(transformColor), changeToPatch, patchToChange, applyChange
-    );
+function Calendar({ identity, events, currentView: serverView, slotDuration, businessHours, allDaySlot }: Calendar) {
+    const calendarRef = useRef<FullCalendar>(null);
     const locale = useUserLocale();
+
+    const { eventsState, sendEventsChange } = useEventsSync(identity, events);
+
+    const { currentView, sendViewChange } = useViewSync(identity, serverView);
+    const { viewType, from = 0, to = 0 } = currentView || {};
+
+    const onEventClick = useEventClickAction(identity);
+
+    const [isLoading, setIsLoading] = useState(false);
+
+    const getEvents = useCallback((fetchInfo: EventSourceFuncArg, successCallback: Function) => {
+        const needNewEvents = !serverView
+            || fetchInfo.start.getTime() < serverView.from 
+            || fetchInfo.end.getTime() > serverView.to;
+        console.log('get events, need new:', needNewEvents);
+        if (needNewEvents) return;
+        successCallback(eventsState);
+    }, [events]);
+
+    const onDatesSet = (viewInfo: DatesSetArg) => {
+        if (currentView && isViewCurrent(viewInfo.view, currentView)) return;
+        console.log('dates set');
+        sendViewChange({
+            viewType: viewInfo.view.type as ViewType,
+            from: viewInfo.start.getTime(),
+            to: viewInfo.end.getTime()
+        });
+    }
+
+    useEffect(function keepViewUpdated() {
+        const view = calendarRef.current!.getApi().view;
+        if (currentView && !isViewCurrent(view, currentView)) {
+            console.log('changeView to:', viewType);
+            view.calendar.changeView(viewType!, { start: from, end: to });
+        }
+    }, [viewType, from, to]);
+
+    console.log('rerender');
 
     return (
       <FullCalendar
+        ref={calendarRef}
         plugins={[dayGridPlugin, timeGridPlugin, luxon3Plugin, interactionPlugin]}
         initialView="dayGridMonth"
         firstDay={1}
@@ -54,107 +99,28 @@ function Calendar({ identity, events, slotDuration, businessHours, allDaySlot }:
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
         }}
-        events={(_, successCallback) => successCallback(eventsState)}
+        events={getEvents}
         eventContent={eventInfo => eventInfo.event.extendedProps.children ?? true}
-        eventClick={clickedEvent => sendFinalChange({ tp: 'click', event: clickedEvent.event })}
-        eventChange={changedEvent => sendFinalChange({ tp: 'change', event: changedEvent.event })}
+        eventClick={onEventClick}
+        eventChange={changedEvent => sendEventsChange(changedEvent.event)}
+        datesSet={onDatesSet}
         businessHours={businessHours}
         allDaySlot={allDaySlot}
         eventDisplay='block'
         eventConstraint='businessHours'
         navLinks={true}
         nowIndicator={true}
+        loading={(isLoading) => { console.log('isLoading:', isLoading); setIsLoading(isLoading); }}
       />
     );
 }
 
-function transformColor(serverState: CalendarEvent[]): EventInput[] {
-    return serverState.map(({ color, ...event }) => {
-        const { style: colorStyle, className }: ColorProps = colorToProps(color);
-        return {
-            ...event,
-            ...className && { classNames: className },
-            ...colorStyle && {
-                backgroundColor: colorStyle.backgroundColor,
-                textColor: colorStyle.color
-            }
-        }
-    });
+function isViewCurrent(view: ViewApi, currentView: ViewInfo) {
+    const { viewType, from, to } = currentView;
+    return view.type === viewType
+        && view.activeStart.getTime() === from
+        && view.activeEnd.getTime() === to;
 }
 
-// Server exchange
-type EventChangeType = 'change' | 'click';
-
-interface EventChange {
-    tp: EventChangeType,
-    event: EventImpl
-}
-
-const HEADER_ID = 'x-r-event-id';
-const HEADER_EVENT_START = 'x-r-event-start';
-const HEADER_EVENT_END = 'x-r-event-end';
-
-function serverStateToState(transform: (serverState: CalendarEvent[]) => EventInput[]) {
-    return (serverState: CalendarEvent[]) => transform(serverState);
-}
-
-function changeToPatch(ch: EventChange): Patch {
-    return {
-        value: ch.tp,
-        headers: getHeaders(ch)
-    }
-}
-
-function getHeaders(ch: EventChange): PatchHeaders {
-    const eventIdHeader = { [HEADER_ID]: ch.event.id! };
-    switch (ch.tp) {
-        case "click":
-            return eventIdHeader;
-        case "change":
-            const start = ch.event.start?.getTime();
-            const end = ch.event.end?.getTime();
-            return {
-                ...eventIdHeader,
-                ...start && {[HEADER_EVENT_START]: String(start)},
-                ...end && {[HEADER_EVENT_END]: String(end)}
-            }
-    }
-}
-
-function headersToEvent(patch: Patch) {
-    const { value: tp, headers } = patch as { value: EventChangeType, headers: PatchHeaders };
-    const id = headers[HEADER_ID]
-    switch (tp) {
-        case 'click':
-            return { id };
-        case 'change':
-            const start = +headers[HEADER_EVENT_START];
-            const end = +headers[HEADER_EVENT_END];
-            return {
-                id,
-                ...start && {start},
-                ...end && {end} 
-            };
-    }
-}
-
-function patchToChange(patch: Patch): EventChange {
-    return {
-        tp: patch.value as EventChangeType,
-        event: headersToEvent(patch) as unknown as EventImpl
-    };
-}
-
-function applyChange(prevState: EventInput[], ch: EventChange): EventInput[] {
-    const changingState = [...prevState];
-    switch (ch.tp) {
-        case 'change':
-            const eventIndex = prevState.findIndex(event => event.id === ch.event.id);
-            if (eventIndex >= 0) changingState[eventIndex] = { ...changingState[eventIndex], ...ch.event };
-            return changingState;
-        default:
-            return prevState;
-    }
-}
-
+export type { CalendarEvent, ViewInfo, ViewType }
 export { Calendar }
