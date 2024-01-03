@@ -9,7 +9,7 @@ import { PopupManager } from "../../extra/popup-elements/popup-manager";
 function App() {
     const eventChild = [
         $(ButtonElement, {key: '1', value: '', path: '/button', className: 'yellowColorCss', onClick: () => console.log('clicked')}, 'Full calendar'),
-        $(SyncedPopup, {key: '2', identity: { key: 'popup' }}, 'Hello world')
+        //$(SyncedPopup, {key: '2', identity: { key: 'popup' }}, 'Hello world')
     ];
 
     const calendar = $(Calendar, {
@@ -20,6 +20,11 @@ function App() {
             endTime: 64800000
         },
         allDaySlot: false,
+        currentView: {
+            viewType: 'dayGridMonth',
+            from: 1701043200000,
+            to: 1704672000000
+        },
         events: [
             {
                 id: 'Meeting',
@@ -58,7 +63,7 @@ function App() {
     });
 
     const children = $(PopupManager, null,
-        $('div', {style: { paddingLeft: '4em', width: '1000px', maxWidth: '100%' }}, calendar)
+        $('div', {style: { padding: '2em 0 2em 4em', width: '1000px', maxWidth: '100%' }}, calendar)
     );
 
     const sender = {

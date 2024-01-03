@@ -109,7 +109,7 @@ function Calendar({ identity, events, currentView: serverView, slotDuration, bus
                 navLinks={true}
                 nowIndicator={true}
                 headerToolbar={{
-                    left: 'prev,next today',
+                    left: 'prev today next',
                     center: 'title',
                     right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 }}

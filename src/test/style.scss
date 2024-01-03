@@ -132,6 +132,10 @@
     background: var(--color-light-headerColor);
     color: var(--textColor-light-headerColor);
 }
+.darkHeaderColorCss {
+  background-color: var(--color-dark-headerColor);
+  color: var(--textColor-dark-headerColor);
+}
 .focusOutlineColorCss{
     background: var(--color-focusOutlineColor);
     color: var(--textColor-focusOutlineColor);
@@ -1263,9 +1267,97 @@ div.grid {
   }
 }
 
+/**** ScrollBar ****/
+
+/* width */
+::-webkit-scrollbar {
+  width: 0.5em;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: var(--color-primaryColor);
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-dark-primaryColor);
+}
+
 /*********************** FullCalendar **************************/
-.fc .overlayMain {
-  position: absolute !important;
-  width: 100% !important;
-  height: 100% !important;
+.fc {
+  --fc-button-text-color: var(--textColor-light-headerColor);
+  --fc-button-bg-color: var(--color-light-headerColor);
+  --fc-button-active-bg-color: var(--color-dark-headerColor);
+  --fc-button-border-color: var(--color-dark-headerColor);
+  --fc-button-hover-bg-color: var(--color-light-headerColor);
+  --fc-page-bg-color: var(--color-body);
+  --fc-border-color: var(--color-dark-headerColor);
+  --fc-non-business-color: var(--color-headerColor);
+  --fc-event-bg-color: var(--color-light-primaryColor);
+  --fc-event-border-color: transparent;
+  --fc-event-text-color: var(--textColor-primaryColor);
+  --fc-now-indicator-color: var(--color-redColor);
+
+  .fc-button {
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0;
+    padding: 0.25em 0.55em;
+
+    &:hover {
+      opacity: 0.8;
+    }
+
+    &:disabled {
+      cursor: default;
+    }
+  }
+
+  .fc-today-button, .fc-prev-button, .fc-next-button  {
+    &, &:hover, &:active, &:disabled, :not(:disabled):active {
+      background-color: var(--color-body) !important;
+      color: var(--textColor-body) !important;
+    }
+  }
+
+  .fc-button-group {
+    @extend .darkHeaderColorCss;
+    padding: 0.15em;
+    border-radius: 0.28em;
+
+    .fc-button {
+      border-right: 1px solid var(--color-dark-headerColor) !important;
+      margin: 0 !important;
+
+      &:first-child {
+        border-top-left-radius: 0.28em;
+        border-bottom-left-radius: 0.28em;
+      }
+
+      &:last-child {
+          border-top-right-radius: 0.28em;
+          border-bottom-right-radius: 0.28em;
+      }
+    }
+  }
+
+  .fc-event:hover {
+    opacity: 0.8;
+  }
+
+  .fc-non-business {
+    opacity: 0.3;
+  }
+
+  .overlayMain {
+    position: absolute !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
 }
