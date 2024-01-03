@@ -5,6 +5,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import luxon3Plugin from '@fullcalendar/luxon3';
 import interactionPlugin from '@fullcalendar/interaction';
+import allLocales from '@fullcalendar/core/locales-all';
 import { useUserLocale } from './locale';
 import { useEventClickAction, useEventsSync, useViewSync } from './calendar/calendar-exchange';
 import { OverlayWrapper } from './overlay-manager';
@@ -58,7 +59,7 @@ function Calendar({ identity, events, currentView: serverView, slotDuration, bus
 
     const getEvents = useCallback((fetchInfo: EventSourceFuncArg, successCallback: Function) => {
         const needNewEvents = !serverView
-            || fetchInfo.start.getTime() < serverView.from 
+            || fetchInfo.start.getTime() < serverView.from
             || fetchInfo.end.getTime() > serverView.to;
         console.log('get events, need new:', needNewEvents);
         if (needNewEvents) return;
@@ -100,6 +101,7 @@ function Calendar({ identity, events, currentView: serverView, slotDuration, bus
                 initialView="dayGridMonth"
                 firstDay={1}
                 slotDuration={slotDuration || '00:15'}
+                slotLabelFormat={{ hour12: false, hour: 'numeric', minute: '2-digit' }}
                 timeZone={locale.timezoneId}
                 editable={true}
                 businessHours={businessHours}
@@ -108,6 +110,8 @@ function Calendar({ identity, events, currentView: serverView, slotDuration, bus
                 eventConstraint='businessHours'
                 navLinks={true}
                 nowIndicator={true}
+                locales={allLocales}
+                locale={locale.lang}
                 headerToolbar={{
                     left: 'prev today next',
                     center: 'title',

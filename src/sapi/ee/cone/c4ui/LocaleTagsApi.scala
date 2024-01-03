@@ -77,6 +77,7 @@ trait NumberInputProps extends ToChildPair
   @c4val def locale(
     timezoneId: String,
     shortName: String,
+    lang: String,
     weekDays: List[WeekDay],
     months: List[Month],
     dateTimeFormats: List[DateTimeFormat],

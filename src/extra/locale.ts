@@ -27,6 +27,7 @@ interface NumberFormat {
 interface Locale {
     timezoneId: string
     shortName: string
+    lang: string
     weekDays: WeekDay[]
     months: Month[]
     dateTimeFormats: DateTimeFormat[]
@@ -161,6 +162,7 @@ function getDateTimeFormat(formatId: number, locale: ExtendedLocale): ExtendedDa
 class DefaultLocale implements Locale {
     timezoneId: string = "UTC"
     shortName: string = "en"
+    lang: string = "en"
     months: Month[] = [
         {id: 0, shortName: "Jan", fullName: "January"},
         {id: 1, shortName: "Feb", fullName: "February"},
