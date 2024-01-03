@@ -110,6 +110,7 @@ function Calendar({ identity, events, currentView: serverView, slotDuration, bus
                 eventConstraint='businessHours'
                 navLinks={true}
                 nowIndicator={true}
+                longPressDelay={500}
                 locales={allLocales}
                 locale={locale.lang}
                 headerToolbar={{
