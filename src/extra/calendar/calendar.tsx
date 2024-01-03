@@ -6,10 +6,10 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import luxon3Plugin from '@fullcalendar/luxon3';
 import interactionPlugin from '@fullcalendar/interaction';
 import allLocales from '@fullcalendar/core/locales-all';
-import { useUserLocale } from './locale';
-import { useEventClickAction, useEventsSync, useViewSync } from './calendar/calendar-exchange';
-import { OverlayWrapper } from './overlay-manager';
-import { ColorDef } from './view-builder/common-api';
+import { useUserLocale } from '../locale';
+import { useEventClickAction, useEventsSync, useViewSync } from './calendar-exchange';
+import { OverlayWrapper } from '../overlay-manager';
+import { ColorDef } from '../view-builder/common-api';
 
 import type { DatesSetArg, EventSourceFuncArg, ViewApi } from '@fullcalendar/core';
 

@@ -4,7 +4,7 @@ import { useSync } from "../../main/vdom-hooks";
 import { identityAt } from "../../main/vdom-util";
 
 import type { Patch, PatchHeaders } from '../exchange/patch-sync';
-import type { CalendarEvent, ViewInfo, ViewType } from "../calendar";
+import type { CalendarEvent, ViewInfo, ViewType } from "./calendar";
 import type { EventClickArg, EventInput } from '@fullcalendar/core';
 import type { EventImpl } from '@fullcalendar/core/internal';
 

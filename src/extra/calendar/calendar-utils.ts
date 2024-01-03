@@ -1,6 +1,6 @@
 import { ColorProps, colorToProps } from "../view-builder/common-api";
 import { EventInput } from "@fullcalendar/core";
-import { CalendarEvent } from "../calendar";
+import { CalendarEvent } from "./calendar";
 
 function transformColor(serverEvents: CalendarEvent[]): EventInput[] {
     return serverEvents.map(({ color, ...event }) => {

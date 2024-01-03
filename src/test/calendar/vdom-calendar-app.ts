@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom";
 import { createElement as $ } from "react";
 import { createSyncProviders } from "../../main/vdom-hooks";
-import { Calendar } from "../../extra/calendar";
+import { Calendar } from "../../extra/calendar/calendar";
 import { ButtonElement } from "../../extra/button-element";
 import { SyncedPopup } from "../../extra/popup-elements/synced-popup";
 import { PopupManager } from "../../extra/popup-elements/popup-manager";
