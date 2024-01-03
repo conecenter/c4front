@@ -61,14 +61,11 @@ function Calendar({ identity, events, currentView: serverView, slotDuration, bus
         const needNewEvents = !serverView
             || fetchInfo.start.getTime() < serverView.from
             || fetchInfo.end.getTime() > serverView.to;
-        console.log('get events, need new:', needNewEvents);
-        if (needNewEvents) return;
-        successCallback(eventsState);
+        if (!needNewEvents) successCallback(eventsState);
     }, [events]);
 
     const onDatesSet = (viewInfo: DatesSetArg) => {
         if (currentView && isViewCurrent(viewInfo.view, currentView)) return;
-        console.log('dates set');
         sendViewChange({
             viewType: viewInfo.view.type as ViewType,
             from: viewInfo.start.getTime(),
@@ -79,7 +76,6 @@ function Calendar({ identity, events, currentView: serverView, slotDuration, bus
     useEffect(function keepViewUpdated() {
         const view = calendarRef.current!.getApi().view;
         if (currentView && !isViewCurrent(view, currentView)) {
-            console.log('changeView to:', viewType);
             view.calendar.changeView(viewType!, { start: from, end: to });
         }
     }, [viewType, from, to]);
@@ -90,8 +86,6 @@ function Calendar({ identity, events, currentView: serverView, slotDuration, bus
         <OverlayWrapper textmsg='Loading, please wait...' />,
         viewRoot.current
     );
-
-    console.log('rerender');
 
     return (
         <>
