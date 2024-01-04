@@ -123,16 +123,19 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
 
 ////
 
-export function FilterButtonExpander({identity,optButtons:rawOptButtons,children,openedChildren}){
-    const optButtons = rawOptButtons || []
-    const [isOpened,toggle] = usePopupState(identity)
-    return $("div", {className:'filterButtonExpander',onClick:ev=>toggle(!isOpened)},
+export function FilterButtonExpander({ identity, optButtons = [], children, openedChildren }) {
+    const [isOpened, toggle] = usePopupState(identity)
+    return $("div", { className: 'filterButtonExpander', onClick: () => toggle(!isOpened) },
         isOpened ? [
             openedChildren ?? children,
-            $(NewPopupElement,{identity},optButtons.map(btn=>{
-                return $("div",{key:btn.key,className:'gridPopupItem'}, 
-                    $(NoCaptionContext.Provider,{value:true},btn.props.children))
-            }))
+            $(NewPopupElement, { key: 'popup', identity },
+                $(NoCaptionContext.Provider, { value: true }, optButtons.map(btn =>
+                    $("div", {
+                        key: btn.key,
+                        className: 'gridPopupItem',
+                        onClickCapture: () => setTimeout(() => toggle(false), 200),
+                        children: btn.props.children
+                    }))))
         ] : children
     )
 }
