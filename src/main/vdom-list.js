@@ -199,8 +199,8 @@ const useScrollbarWidth = (outerWidth,fixedCellsSize) => {
     const scrollbarWidth = useRef(0)
     const calcScrollbarWidth = elem => {
         const {fontSize} = getComputedStyle(elem)
-        const {defaultView: win, body} = elem.ownerDocument
-        return (win.innerWidth - body.clientWidth) / parseFloat(fontSize)
+        const {defaultView: win, documentElement} = elem.ownerDocument
+        return (win.innerWidth - documentElement.clientWidth) / parseFloat(fontSize)
     }
     const ref = useCallback(gridElement=>{
         if (gridElement) scrollbarWidth.current = calcScrollbarWidth(gridElement)
