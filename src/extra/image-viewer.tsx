@@ -11,17 +11,27 @@ import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import "yet-another-react-lightbox/plugins/thumbnails/thumbnails.css";
 import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
 import { Patch, usePatchSync } from "./exchange/patch-sync";
+import { useSync } from "../main/vdom-hooks";
+import { identityAt } from "../main/vdom-util";
+
+const TRASH_ICON = (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15120 17000" width="24" height="24" fill="currentColor">
+        <path d="M14648 2447l-3537 0 0 -577c0,-1031 -839,-1870 -1870,-1870l-3362 0c-1031,0 -1870,839 -1870,1870l0 577 -3537 0c-262,0 -472,209 -472,471 0,263 210,472 472,472l853 0 0 11087c0,1391 1132,2523 2523,2523l7424 0c1391,0 2523,-1132 2523,-2523l0 -11087 853 0c262,0 472,-209 472,-472 0,-262 -210,-471 -472,-471zm-9695 -577c0,-510 415,-926 926,-926l3362 0c510,0 926,416 926,926l0 577 -5214 0 0 -577zm7898 12607c0,870 -709,1579 -1579,1579l-7424 0c-870,0 -1580,-709 -1580,-1579l0 -11087 10587 0 0 11087 -4 0zm-5291 -112c262,0 472,-210 472,-472l0 -8339c0,-262 -210,-472 -472,-472 -262,0 -472,210 -472,472l0 8335c0,263 210,476 472,476zm-3079 -521c262,0 472,-210 472,-472l0 -7301c0,-262 -210,-472 -472,-472 -262,0 -472,210 -472,472l0 7301c0,262 213,472 472,472zm6158 0c262,0 472,-210 472,-472l0 -7301c0,-262 -210,-472 -472,-472 -262,0 -472,210 -472,472l0 7301c0,262 210,472 472,472z"/>
+    </svg>
+);
 
 interface Slide {
     src: string,
-    title?: string
+    title?: string,
+    id?: string,
 }
 
 interface ImageViewer {
     identity: Object,
     index?: number,
     slides?: Slide[],
-    position?: 'fullscreen' | 'inline'
+    position?: 'fullscreen' | 'inline',
+    removable?: boolean
 }
 
 // Server exchange
@@ -29,8 +39,10 @@ const changeToPatch = (ch: string) => ({ value: ch });
 const patchToChange = (p: Patch) => p.value;
 const applyChange = (prev: number, ch: string) => ch ? +ch : prev;
 
+const deleteActionIdOf = identityAt('receiver');
 
-function ImageViewer({identity, index: state = 0, slides = [], position}: ImageViewer) {
+
+function ImageViewer({identity, index: state = 0, slides = [], position, removable }: ImageViewer) {
     const [bodyRef, setBodyRef] = useState<HTMLElement>();
 
     const {currentState: index, sendTempChange, sendFinalChange} =
@@ -59,6 +71,13 @@ function ImageViewer({identity, index: state = 0, slides = [], position}: ImageV
         controller.current?.close();
         sendFinalChange('');
     }
+    const closeButton = <IconButton key='ACTION_CLOSE' label='Close' icon={CloseIcon} onClick={handleClose} />;
+
+    const [_, enqueueDeleteActionPatch] = useSync(deleteActionIdOf(identity));
+    const onDelete = () => enqueueDeleteActionPatch({ value: slidesMemo[index].id });
+    const deleteButton = removable && (
+        <button key="deleteButton" type="button" className="yarl__button" onClick={onDelete}>{TRASH_ICON}</button>
+    );
 
     return (
         <div ref={elem => setBodyRef(elem?.ownerDocument.body)} className={clsx(inlinePos && 'inlineImageViewer')} >
@@ -84,9 +103,7 @@ function ImageViewer({identity, index: state = 0, slides = [], position}: ImageV
                         buttonNext: () => null
                     }
                 }}
-                toolbar={{ buttons: [
-                    <IconButton key='ACTION_CLOSE' label='Close' icon={CloseIcon} onClick={handleClose} />
-                ]}}
+                toolbar={{ buttons: [deleteButton, closeButton] }}
             />
         </div>
     );
