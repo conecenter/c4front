@@ -71,7 +71,7 @@ function ImageViewer({identity, index: state = 0, slides = [], position, removab
         controller.current?.close();
         sendFinalChange('');
     }
-    const closeButton = <IconButton key='ACTION_CLOSE' label='Close' icon={CloseIcon} onClick={handleClose} />;
+    const closeButton = !inlinePos && <IconButton key='ACTION_CLOSE' label='Close' icon={CloseIcon} onClick={handleClose} />;
 
     const [_, enqueueDeleteActionPatch] = useSync(deleteActionIdOf(identity));
     const onDelete = () => enqueueDeleteActionPatch({ value: slidesMemo[index].id });
