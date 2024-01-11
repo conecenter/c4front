@@ -8,6 +8,9 @@ import Counter from "yet-another-react-lightbox/plugins/counter";
 import "yet-another-react-lightbox/plugins/counter.css";
 import Inline from "yet-another-react-lightbox/plugins/inline";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import "yet-another-react-lightbox/plugins/thumbnails/thumbnails.css";
+import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
+import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
 import { Patch, usePatchSync } from "./exchange/patch-sync";
 
 interface Slide {
@@ -16,9 +19,8 @@ interface Slide {
 }
 
 interface ImageViewer {
-    key: string,
     identity: Object,
-    index: number,
+    index?: number,
     slides?: Slide[],
     position?: 'fullscreen' | 'inline'
 }
@@ -29,10 +31,10 @@ const patchToChange = (p: Patch) => p.value;
 const applyChange = (prev: number, ch: string) => ch ? +ch : prev;
 
 
-function ImageViewer({identity, index: state, slides = [], position}: ImageViewer) {
+function ImageViewer({identity, index: state = 0, slides = [], position }: ImageViewer) {
     const [bodyRef, setBodyRef] = useState<HTMLElement>();
 
-    const {currentState: index, sendTempChange, sendFinalChange} = 
+    const {currentState: index, sendTempChange, sendFinalChange} =
         usePatchSync(identity, 'slideChange', state, false, s => s, changeToPatch, patchToChange, applyChange);
 
     // Slides should have stable reference
@@ -58,6 +60,7 @@ function ImageViewer({identity, index: state, slides = [], position}: ImageViewe
         controller.current?.close();
         sendFinalChange('');
     }
+    const closeButton = !inlinePos && <IconButton key='ACTION_CLOSE' label='Close' icon={CloseIcon} onClick={handleClose} />;
 
     return (
         <div ref={elem => setBodyRef(elem?.ownerDocument.body)} className={clsx(inlinePos && 'inlineImageViewer')} >
@@ -67,7 +70,8 @@ function ImageViewer({identity, index: state, slides = [], position}: ImageViewe
                 index={startingIndexRef.current}
                 controller={{ ref: controller }}
                 portal={{ root: bodyRef }}
-                plugins={[Captions, Counter, Zoom, ...inlinePos ? [Inline] : []]}
+                plugins={[Captions, Counter, Fullscreen, Zoom, Thumbnails, ...inlinePos ? [Inline] : []]}
+                thumbnails={{ vignette: false }}
                 zoom={{
                     wheelZoomDistanceFactor: 500,
                     pinchZoomDistanceFactor: 200,
@@ -77,12 +81,13 @@ function ImageViewer({identity, index: state, slides = [], position}: ImageViewe
                     view: ({index: next}) => next !== index && sendTempChange(next.toString())
                 }}
                 render={{
-                    buttonPrev: slides.length <= 1 ? () => null : undefined,
-                    buttonNext: slides.length <= 1 ? () => null : undefined
+                    ...slides.length <= 1 && {
+                        buttonPrev: () => null,
+                        buttonNext: () => null
+                    }
                 }}
-                toolbar={{ buttons: [
-                    <IconButton key='ACTION_CLOSE' label='Close' icon={CloseIcon} onClick={handleClose} />
-                ]}}
+                toolbar={{ buttons: [closeButton] }}
+                fullscreen={{ auto: !inlinePos }}
             />
         </div>
     );
