@@ -10,6 +10,7 @@ import Inline from "yet-another-react-lightbox/plugins/inline";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import "yet-another-react-lightbox/plugins/thumbnails/thumbnails.css";
 import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
+import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
 import { Patch, usePatchSync } from "./exchange/patch-sync";
 
 interface Slide {
@@ -69,7 +70,7 @@ function ImageViewer({identity, index: state = 0, slides = [], position }: Image
                 index={startingIndexRef.current}
                 controller={{ ref: controller }}
                 portal={{ root: bodyRef }}
-                plugins={[Captions, Counter, Zoom, Thumbnails, ...inlinePos ? [Inline] : []]}
+                plugins={[Captions, Counter, Fullscreen, Zoom, Thumbnails, ...inlinePos ? [Inline] : []]}
                 thumbnails={{ vignette: false }}
                 zoom={{
                     wheelZoomDistanceFactor: 500,
@@ -86,6 +87,7 @@ function ImageViewer({identity, index: state = 0, slides = [], position }: Image
                     }
                 }}
                 toolbar={{ buttons: [closeButton] }}
+                fullscreen={{ auto: !inlinePos }}
             />
         </div>
     );
