@@ -1,14 +1,14 @@
 import React, { useMemo, useEffect, useState } from 'react'
+import clsx from 'clsx';
 import { useCached } from './cache-provider';
 
 const initViewBox = "0 0 0 0"
 
-const adaptiveTag = "#adaptive"
-
 const clear = (url) => url.replace(/#.*$/, "")
+const isDataUrl = (src) => src.startsWith("data:image/svg");
 
 const SVGElement = ({ url, ...props }) => {
-    const toDecode = url.startsWith("data:")
+    const toDecode = isDataUrl(url)
     const fetched = useCached(toDecode ? "" : url)
     const decodedContent = fetched || toDecode && atob(url.replace(/data:.+?,/, ""))
     const viewBox = decodedContent && getViewBox(decodedContent) || initViewBox
@@ -22,7 +22,7 @@ const SVGElement = ({ url, ...props }) => {
         fill={color}
         className={props.className}
         style={props.style}
-        {...!toDecode && { imagesource: url }}
+        alt={props.alt} // used for testing & ensure unified API with ImageElement
     />
 }
 
@@ -47,20 +47,18 @@ function replaceSvgTag(str) {
 }
 
 const ImageElement = (props) => {
-    const { src, forceSrcWithoutPrefix, title, className, rotate, color, draggable } = props
-    const _className = (className || "") + (rotate ? " transitions" : "")
+    const { src, forceSrcWithoutPrefix, title, className, rotate, color, draggable, description } = props
+    const _className = clsx(className, rotate && "transitions")
     const style = { ...rotate && { transform: `rotate(${rotate})` } }
-    const urlPrefix = window.feedbackUrlPrefix || ''
-    const _src = !forceSrcWithoutPrefix ? (urlPrefix || "") + src : src
+    const isDataUrlSvg = isDataUrl(src);
+    const alt = description || title || (!isDataUrlSvg && src) || undefined;
+    const _src = !forceSrcWithoutPrefix ? (window.feedbackUrlPrefix || "") + src : src
     if (src === "")
-        return (<svg className={_className} style={style} color={color}></svg>)
-    else if (color || src.startsWith("data:image/svg")) {
-        const __src = clear(_src)
-        return (<SVGElement url={__src} className={_className} style={style} color={color} />)
-    }
-    else {
-        return (<img src={_src} imagesource={src} title={title} className={_className} style={style} draggable={draggable} />)
-    }
+        return <svg className={_className} style={style} color={color}></svg>
+    else if (color || isDataUrlSvg)
+        return <SVGElement url={clear(_src)} className={_className} style={style} color={color} alt={alt} />
+    else
+        return <img src={_src} title={title} className={_className} style={style} draggable={draggable} alt={alt} />
 }
 
 const MJPEGStreamElement = (props) => {
@@ -121,4 +119,4 @@ const MJPEGStreamElement = (props) => {
     </div>)
 }
 
-export { ImageElement, SVGElement, MJPEGStreamElement, adaptiveTag }
+export { ImageElement, SVGElement, MJPEGStreamElement }
