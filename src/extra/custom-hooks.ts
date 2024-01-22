@@ -1,11 +1,11 @@
 import { useEffect, useRef } from "react";
 
-function useAddEventListener(
+function useAddEventListener<T extends Event>(
     element: EventTarget | null | undefined,
     eventName: string,
-    handler: Function,
+    handler: (event: T) => void,
     capture: boolean = false,
-    dependencies: any[] = []
+    dependencies: unknown[] = []
 ) {
     // Create a ref that stores handler
     const savedHandler = useRef(handler);
@@ -16,13 +16,13 @@ function useAddEventListener(
     }, [handler]);
 
     useEffect(() => {
-        const listener = (e: Event) => savedHandler.current(e);
+        const listener = (e: Event) => savedHandler.current(e as T);
         element?.addEventListener(eventName, listener, capture);
         return () => element?.removeEventListener(eventName, listener, capture);
     }, [eventName, element, ...dependencies]);
 }
 
-const useLatest = <T extends any>(current: T) => {
+const useLatest = <T>(current: T) => {
     const storedValue = useRef(current);
     useEffect(() => {
         storedValue.current = current;
@@ -30,11 +30,11 @@ const useLatest = <T extends any>(current: T) => {
     return storedValue;
 }
 
-function useInterval(callback: Function, delay: number | null) {
+function useInterval(callback: () => void, delay: number | null) {
     const savedCallback = useLatest(callback);
     useEffect(() => {
       if (delay !== null) {
-        let id = setInterval(() => savedCallback.current(), delay);
+        const id = setInterval(() => savedCallback.current(), delay);
         return () => clearInterval(id);
       }
     }, [delay]);

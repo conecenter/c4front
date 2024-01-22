@@ -15,7 +15,7 @@ function changeToPatch(ch: StateChange): Patch {
     const tpHeader = { 'x-r-change-tp': ch.tp };
     function makePatch(value: string, headers: PatchHeaders): Patch {
         return { value, headers: { ...tpHeader, ...headers } }
-    };
+    }
     switch (ch.tp) {
         case 'inputState':
             return makePatch(ch.inputValue, { 'x-r-temp-number': String(ch.tempNumber) });

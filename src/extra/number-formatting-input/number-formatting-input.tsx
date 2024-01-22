@@ -8,7 +8,7 @@ import { usePath } from "../../main/vdom-hooks";
 
 interface NumberFormattingInput {
     key?: string,
-    identity: Object,
+    identity: object,
     state: NumberFormattingInputState,
     showThousandSeparator: boolean,
     scale: number,    // round decimal part to this many numbers RoundingMode.HALF_UP

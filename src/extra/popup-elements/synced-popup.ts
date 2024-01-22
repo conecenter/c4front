@@ -6,7 +6,7 @@ import { usePopupState } from './popup-manager';
 
 interface SyncedPopup {
     key: string,
-    identity: Object,
+    identity: object,
     children?: ReactNode
 }
 

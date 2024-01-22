@@ -47,7 +47,7 @@ function stateToSendPatch(patch: Patch, changing: boolean, deferredSend: boolean
 }
 
 function usePatchSync<ServerState, State, StateChange>(
-    identity: Object,
+    identity: object,
     receiverName: string,
     serverState: ServerState,
     deferredSend: boolean,

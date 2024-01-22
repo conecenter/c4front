@@ -27,7 +27,7 @@ function PopupManager({children}: PopupManager) {
 
 type PopupState = [boolean, (on: boolean) => void, HTMLElement | undefined]
 
-const usePopupState = (identity: Object): PopupState => {
+const usePopupState = (identity: object): PopupState => {
     const path = usePath(identity);
     const [popup, setPopup, popupDrawer] = useContext(PopupContext);
     const isOpened = useCallback((p?: string)=> p === path, [path]);

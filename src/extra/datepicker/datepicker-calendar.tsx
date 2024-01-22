@@ -257,7 +257,7 @@ function createArray(start: number, end: number) {
 
 function getSpan(value: number | string, className?: string, dataset?: string) {
   return <span className={className || undefined} data-date={dataset} key={dataset || value} >{value}</span>;
-};
+}
 
 function getSpanList(
     array: number[], 

@@ -13,7 +13,7 @@ const keyboardActionIdOf = identityAt('keyboardAction');
 
 interface RouteElementProps {
     key: string,
-    identity: Object,
+    identity: object,
     keyboardAction?: boolean,
     compact?: boolean,
     routeParts: ReactElement[],  // ChipElements

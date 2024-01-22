@@ -19,7 +19,7 @@ interface Slide {
 }
 
 interface ImageViewer {
-    identity: Object,
+    identity: object,
     index?: number,
     slides?: Slide[],
     position?: 'fullscreen' | 'inline'

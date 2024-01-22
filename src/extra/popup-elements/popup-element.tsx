@@ -10,7 +10,7 @@ import { usePopupState } from './popup-manager';
 
 interface PopupElement {
     key?: string,
-    identity: Object,
+    identity: object,
     className?: string,
     children?: ReactNode
 }

@@ -6,7 +6,7 @@ import {isInstanceOfNode} from "./dom-utils";
 import {ENTER_KEY} from "../main/keyboard-keys";
 
 interface ColorPickerProps {
-	identity: Object,
+	identity: object,
 	value: string,
 	ro: boolean
 }

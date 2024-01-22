@@ -42,7 +42,7 @@ export type PivotSettingsPartClass = 'pivotFilters' | 'pivotBreaks' | 'pivotRows
 
 export interface PivotSettingsProps extends PivotSettingsState {
     // @ts-ignore
-    identity: Object
+    identity: object
 }
 
 export function PivotSettings(props: PivotSettingsProps) {
@@ -224,9 +224,9 @@ export function PivotFieldsGroup({ groupName, dropAction, fields }: PivotFieldsG
                 el('img', {src: '/mod/main/ee/cone/core/ui/c4view/arrow-down.svg', className: 'textLineSize', alt: 'arrow-down'}),
                 el('span', null, groupName),
             ),
-            el('div', null, fields.map(item => el
-                (PivotField, {key: item.id, type: item.fieldType || ItemTypes.FIELD, origin: PartNames.FIELDS, field: item, dropAction}))
-            )
+            el('div', null, fields.map(item => el(
+                PivotField, {key: item.id, type: item.fieldType || ItemTypes.FIELD, origin: PartNames.FIELDS, field: item, dropAction})
+            ))
         )
     )
 }

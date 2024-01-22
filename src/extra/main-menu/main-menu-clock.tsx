@@ -15,7 +15,7 @@ const INTL_LOCALES: IntlLocales = { bg, de, daDK: da, et, en: enGB, lt, pl, rmRO
 
 interface MainMenuClock {
   key: string,
-  identity: Object,
+  identity: object,
   serverTime: string,
   timestampFormatId: number,
   path: string

@@ -12,7 +12,7 @@ NoFocusContext.displayName = "NoFocusContext";
 
 interface LabeledElement {
     key: string,
-    identity: Object,
+    identity: object,
     path: string,
     label: string,
     sizes?: FlexibleSizes,
@@ -98,7 +98,7 @@ function hasSingleChildlessFocusable(elem: HTMLDivElement | null) {
     if (focusableDescendants.length === 1) return true;
 
     let count = 0;
-    for (let elem of focusableDescendants) {
+    for (const elem of focusableDescendants) {
         const focusableInside = elem.querySelector(SEL_FOCUSABLE_ATTR);
         if (!focusableInside) {
             count++;

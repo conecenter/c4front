@@ -31,7 +31,7 @@ const patchToChange = (patch: Patch) => patch.headers!["x-r-ui-type"] as UiType;
 
 interface UiInfoProvider {
     key: string,
-    identity: Object,
+    identity: object,
     uiType?: UiType,
     children: ReactNode
 }
