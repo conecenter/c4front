@@ -51,7 +51,7 @@ function formatDate(date: Date, dateSettings: DateSettings): [string, string] {
     const {formatTokens} = dateSettings.timestampFormat
 
     function pad(num: number, size: number): string {
-        let value = String(num).slice(-size)
+        const value = String(num).slice(-size)
         return "0".repeat(size - value.length) + value;
     }
 
@@ -186,7 +186,7 @@ function tryRegex(value: string, regexExtractor: RegExpExtractor): Option<Token>
     } else return None
 }
 
-function tokenizeString(value: String): Token[] {
+function tokenizeString(value: string): Token[] {
     let currentValue = value.toLowerCase()
     const tokens: Token[] = []
 
@@ -207,8 +207,6 @@ function getPrototypeDate() {
     now.setHours(0, 0, 0, 0)
     return now
 }
-
-type SetResult = "unchanged" | "changed" | "error"
 
 interface TimeValue {
     H?: number
@@ -264,12 +262,6 @@ function changeDate(date: Date, tokens: Token[], time: TimeValue, month: MonthVa
         return args
             .filter(num => num !== undefined)
             .shift() || 0
-    }
-
-    function reduceOpt(...args: (number | undefined)[]): number | undefined {
-        return args
-            .filter(num => num !== undefined)
-            .shift()
     }
 
     const dateTokens: number[] = tokens.reduce((acc: number[], token: Token) => acc.concat(token.type === 'number' ? [token.value] : []), [])

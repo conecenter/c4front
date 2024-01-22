@@ -17,7 +17,7 @@ const VK_OFFSET = 0.2;
 
 interface VirtualKeyboard {
     key: string,
-    identity: Object,
+    identity: object,
     hash: string,
     position: "left" | "right" | "bottom" | "static",
     setupType?: string,

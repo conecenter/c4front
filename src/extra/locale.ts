@@ -211,8 +211,8 @@ interface UserLocaleProviderProps {
 }
 
 function UserLocaleProvider({children, locale}: UserLocaleProviderProps) {
-    const extendedLocale = useMemo(()=>getExtendedLocale(locale),[locale])
-    return createElement(UserLocaleContext.Provider, {value: getExtendedLocale(locale)}, children)
+    const extendedLocale = useMemo(() => getExtendedLocale(locale), [locale])
+    return createElement(UserLocaleContext.Provider, {value: extendedLocale}, children)
 }
 
 export type {

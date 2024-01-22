@@ -56,7 +56,7 @@ interface PopupServerState {
 
 interface DatePickerProps {
 	key: string
-	identity: Object
+	identity: object
 	state: DatePickerServerState
 	timestampFormatId: number
 	userTimezoneId?: string
@@ -216,7 +216,7 @@ export function DatePickerInputElement({
 
 	const { haveVk } = useContext(VkInfoContext);
 
-  	return (
+	return (
 		<div ref={inputBoxRef}
 			 className={clsx("inputBox", focusClass)}
 			 onClick={(e) => e.stopPropagation()}
@@ -268,12 +268,13 @@ function getCurrentProps(
 	switch (currentState.tp) {
 		case "input-state":
 			return {date: None, dateFormat: None, inputValue: currentState.inputValue,}
-		case "timestamp-state":
+		case "timestamp-state": {
 			const date = getDate(currentState.timestamp, dateSettings)
 			const formatInfo = mapOption(date, date => formatDate(date, dateSettings))
 			const [formattedDate, dateFormat] = nonEmpty(formatInfo) ? formatInfo : ["", None]
 			memoInputValue.current = formattedDate;
-			return {date: date, dateFormat: dateFormat, inputValue: formattedDate,}
+			return {date: date, dateFormat: dateFormat, inputValue: formattedDate}
+		}
 	}
 }
 

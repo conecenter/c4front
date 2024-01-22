@@ -1,4 +1,4 @@
-import {createElement as el, MouseEvent, ReactNode, useEffect, useState} from "react";
+import {createElement as el, MouseEvent, ReactNode, useState} from "react";
 
 interface TableHeaderProps {
   title: string,
@@ -44,10 +44,9 @@ export function ExpandableTableHeader({title, hoverClassNames, shortTitle, child
   const [hovered, setHovered] = useState<boolean>(false)
 
 
-  function calculateStyle(): [Object | null, boolean, boolean, number | null] {
+  function calculateStyle(): [object | null, boolean, boolean, number | null] {
     if (elem !== null) {
-      // @ts-ignore
-      const parentRect = elem.parentElement.getBoundingClientRect()
+      const parentRect = elem.parentElement!.getBoundingClientRect()
       const childRect = elem.children[1].getBoundingClientRect()
       const needsHover = childRect.width > parentRect.width
       if (needsHover) {
