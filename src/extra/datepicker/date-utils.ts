@@ -173,6 +173,7 @@ function tryRegexes(value: string): Option<Token> {
     let i = 0
     while (i < dateExtractors.length) {
         const result = tryRegex(value, dateExtractors[i])
+        console.log({result})
         if (nonEmpty(result)) return result
         i++
     }
@@ -253,8 +254,12 @@ function getMonthValue(tokens: Token[], dateSettings: DateSettings): MonthValue 
 }
 
 function changeDate(date: Date, tokens: Token[], time: TimeValue, month: MonthValue, format: ExtendedDateTimeFormat): Date {
-    const yearsToThisEpoch = (year: number | undefined): number | undefined =>
-        year !== undefined ? year < 100 ? Math.floor(date.getFullYear() / 100) * 100 + year : year : undefined
+    const yearsToThisEpoch = (year: number | undefined): number | undefined => {
+        if (year === undefined) return undefined;
+        if (year < 100) return Math.floor(date.getFullYear() / 100) * 100 + year;
+        if (year > 9999) return 9999;
+        return year;
+    }
     const correctMonths = (month: number | undefined): number | undefined =>
         month !== undefined ? month - 1 : undefined
 
