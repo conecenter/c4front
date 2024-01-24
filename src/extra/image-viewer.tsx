@@ -68,6 +68,7 @@ function ImageViewer({identity, index: state = 0, slides = [], position }: Image
                 open={true}
                 slides={slidesMemo}
                 index={startingIndexRef.current}
+                carousel={{ finite: true }}
                 controller={{ ref: controller }}
                 portal={{ root: bodyRef }}
                 plugins={[Captions, Counter, Fullscreen, Zoom, Thumbnails, ...inlinePos ? [Inline] : []]}
