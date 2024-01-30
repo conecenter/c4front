@@ -51,7 +51,7 @@ trait NumberInputProps extends ToChildPair
     state: NumberInputServerState,
     showThousandSeparator: Boolean,
     scale: Int,
-    minFaction: Int,
+    minFraction: Int,
     receiver: Receiver[C],
   ): NumberInputProps
 
