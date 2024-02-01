@@ -11,14 +11,15 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
   @c4val("inline") def inline: Position
 
   @c4val def slide(
+    srcId: String,
     src: String,
     title: String = "",
   ): Slide
 
   @c4el("ImageViewer") def imageViewer(
     key: String,
-    index: Int,
-    slides: List[Slide] = Nil,
+    current: String,
+    slides: List[Slide],
     position: Position = fullscreen,
     slideChange: Receiver[C] = NoReceiver[C]
   ): ToChildPair
