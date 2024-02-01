@@ -14,13 +14,14 @@ import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
 import { Patch, usePatchSync } from "./exchange/patch-sync";
 
 interface Slide {
+    srcId: string,
     src: string,
     title?: string
 }
 
 interface ImageViewer {
     identity: Object,
-    index?: number,
+    current?: string,
     slides?: Slide[],
     position?: 'fullscreen' | 'inline'
 }
@@ -28,13 +29,12 @@ interface ImageViewer {
 // Server exchange
 const changeToPatch = (ch: string) => ({ value: ch });
 const patchToChange = (p: Patch) => p.value;
-const applyChange = (prev: number, ch: string) => ch ? +ch : prev;
+const applyChange = (prev: string, ch: string) => ch || prev;
 
-
-function ImageViewer({identity, index: state = 0, slides = [], position }: ImageViewer) {
+function ImageViewer({identity, current: state = '', slides = [], position }: ImageViewer) {
     const [bodyRef, setBodyRef] = useState<HTMLElement>();
 
-    const {currentState: index, sendTempChange, sendFinalChange} =
+    const {currentState: currentSrcId, sendTempChange, sendFinalChange} =
         usePatchSync(identity, 'slideChange', state, false, s => s, changeToPatch, patchToChange, applyChange);
 
     // Slides should have stable reference
@@ -42,19 +42,26 @@ function ImageViewer({identity, index: state = 0, slides = [], position }: Image
 
     const controller = useRef<ControllerRef>(null);
 
-    const startingIndexRef = useRef(index);
-
     const inlinePos = position === 'inline';
 
-    // Slide changes in spy
-    useEffect(() => {
-        const currentIndex = controller.current?.getLightboxState().currentIndex;
-        if (currentIndex !== undefined && currentIndex !== index) {
-            const changed = index - currentIndex;
-            const direction = changed > 0 ? 'next' : 'prev';
-            controller.current?.[direction]({count: Math.abs(changed)});
-        }
-    }, [index]);
+    const startingIndexRef = useRef(getCurrentSlideIndex());
+
+    useEffect(
+        function onSlideChange() {
+            const internalIndex = controller.current?.getLightboxState().currentIndex;
+            const currentIndex = getCurrentSlideIndex();
+            if (internalIndex !== undefined && internalIndex !== currentIndex) {
+                const changed = currentIndex - internalIndex;
+                const direction = changed > 0 ? 'next' : 'prev';
+                controller.current?.[direction]({count: Math.abs(changed)});
+            }
+        }, [currentSrcId]
+    );
+
+    function getCurrentSlideIndex() {
+        const index = slides.findIndex(slide => slide.srcId === currentSrcId);
+        return index < 0 ? 0 : index;
+    }
 
     const handleClose = () => {
         controller.current?.close();
@@ -79,7 +86,7 @@ function ImageViewer({identity, index: state = 0, slides = [], position }: Image
                     maxZoomPixelRatio: 3
                 }}
                 on={{
-                    view: ({index: next}) => next !== index && sendTempChange(next.toString())
+                    view: ({index}) => sendTempChange(slides[index].srcId)
                 }}
                 render={{
                     ...slides.length <= 1 && {
