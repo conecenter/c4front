@@ -69,6 +69,11 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
     }
     const closeButton = !inlinePos && <IconButton key='ACTION_CLOSE' label='Close' icon={CloseIcon} onClick={handleClose} />;
 
+    const onViewChange = ({ index }: { index: number }) => {
+        const activeSlide = slides[index];
+        if (activeSlide && activeSlide.srcId !== currentSrcId) sendTempChange(slides[index].srcId);
+    }
+
     return (
         <div ref={elem => setBodyRef(elem?.ownerDocument.body)} className={clsx(inlinePos && 'inlineImageViewer')} >
             <Lightbox
@@ -85,9 +90,7 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
                     pinchZoomDistanceFactor: 200,
                     maxZoomPixelRatio: 3
                 }}
-                on={{
-                    view: ({index}) => sendTempChange(slides[index].srcId)
-                }}
+                on={{ view: onViewChange }}
                 render={{
                     ...slides.length <= 1 && {
                         buttonPrev: () => null,
