@@ -14,13 +14,14 @@ import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
 import { Patch, usePatchSync } from "./exchange/patch-sync";
 
 interface Slide {
+    srcId: string,
     src: string,
     title?: string
 }
 
 interface ImageViewer {
     identity: object,
-    index?: number,
+    current?: string,
     slides?: Slide[],
     position?: 'fullscreen' | 'inline'
 }
@@ -28,13 +29,12 @@ interface ImageViewer {
 // Server exchange
 const changeToPatch = (ch: string) => ({ value: ch });
 const patchToChange = (p: Patch) => p.value;
-const applyChange = (prev: number, ch: string) => ch ? +ch : prev;
+const applyChange = (prev: string, ch: string) => ch || prev;
 
-
-function ImageViewer({identity, index: state = 0, slides = [], position }: ImageViewer) {
+function ImageViewer({identity, current: state = '', slides = [], position }: ImageViewer) {
     const [bodyRef, setBodyRef] = useState<HTMLElement>();
 
-    const {currentState: index, sendTempChange, sendFinalChange} =
+    const {currentState: currentSrcId, sendTempChange, sendFinalChange} =
         usePatchSync(identity, 'slideChange', state, false, s => s, changeToPatch, patchToChange, applyChange);
 
     // Slides should have stable reference
@@ -42,19 +42,26 @@ function ImageViewer({identity, index: state = 0, slides = [], position }: Image
 
     const controller = useRef<ControllerRef>(null);
 
-    const startingIndexRef = useRef(index);
-
     const inlinePos = position === 'inline';
 
-    // Slide changes in spy
-    useEffect(() => {
-        const currentIndex = controller.current?.getLightboxState().currentIndex;
-        if (currentIndex !== undefined && currentIndex !== index) {
-            const changed = index - currentIndex;
-            const direction = changed > 0 ? 'next' : 'prev';
-            controller.current?.[direction]({count: Math.abs(changed)});
-        }
-    }, [index]);
+    const startingIndexRef = useRef(getCurrentSlideIndex());
+
+    useEffect(
+        function onSlideChange() {
+            const internalIndex = controller.current?.getLightboxState().currentIndex;
+            const currentIndex = getCurrentSlideIndex();
+            if (internalIndex !== undefined && internalIndex !== currentIndex) {
+                const changed = currentIndex - internalIndex;
+                const direction = changed > 0 ? 'next' : 'prev';
+                controller.current?.[direction]({count: Math.abs(changed)});
+            }
+        }, [currentSrcId]
+    );
+
+    function getCurrentSlideIndex() {
+        const index = slides.findIndex(slide => slide.srcId === currentSrcId);
+        return index < 0 ? 0 : index;
+    }
 
     const handleClose = () => {
         controller.current?.close();
@@ -62,12 +69,18 @@ function ImageViewer({identity, index: state = 0, slides = [], position }: Image
     }
     const closeButton = !inlinePos && <IconButton key='ACTION_CLOSE' label='Close' icon={CloseIcon} onClick={handleClose} />;
 
+    const onViewChange = ({ index }: { index: number }) => {
+        const activeSlide = slides[index];
+        if (activeSlide && activeSlide.srcId !== currentSrcId) sendTempChange(slides[index].srcId);
+    }
+
     return (
         <div ref={elem => setBodyRef(elem?.ownerDocument.body)} className={clsx(inlinePos && 'inlineImageViewer')} >
             <Lightbox
                 open={true}
                 slides={slidesMemo}
                 index={startingIndexRef.current}
+                carousel={{ finite: true }}
                 controller={{ ref: controller }}
                 portal={{ root: bodyRef }}
                 plugins={[Captions, Counter, Fullscreen, Zoom, Thumbnails, ...inlinePos ? [Inline] : []]}
@@ -77,9 +90,7 @@ function ImageViewer({identity, index: state = 0, slides = [], position }: Image
                     pinchZoomDistanceFactor: 200,
                     maxZoomPixelRatio: 3
                 }}
-                on={{
-                    view: ({index: next}) => next !== index && sendTempChange(next.toString())
-                }}
+                on={{ view: onViewChange }}
                 render={{
                     ...slides.length <= 1 && {
                         buttonPrev: () => null,
