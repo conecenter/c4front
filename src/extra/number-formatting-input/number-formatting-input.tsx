@@ -19,18 +19,18 @@ type NumberFormattingInputState = InputState | NumberState;
 
 interface InputState {
     inputValue: string,
-    tempNumber: number | ''
+    tempNumber?: number
 }
 
 interface NumberState {
-    number: number | ''
+    number: number
 }
 
 function NumberFormattingInput({identity, state, showThousandSeparator, scale, minFraction}: NumberFormattingInput) {
     const { thousandSeparator, decimalSeparator } = useUserLocale().numberFormat;
     const path = usePath(identity);
 
-    const { currentState, sendTempChange, sendFinalChange } = usePatchSync(
+    const { currentState, sendTempChange, sendFinalChange, wasChanged } = usePatchSync(
         identity, 'receiver', state, false, s => s, changeToPatch, patchToChange, (_prev, ch) => ch
     );
 
@@ -41,7 +41,7 @@ function NumberFormattingInput({identity, state, showThousandSeparator, scale, m
     const onChange = (ch: { target: Patch }) => sendTempChange(createInputStateChange(ch.target.value, decimalSeparator));
 
     const onBlur = () => {
-        if (isInputState(currentState)) sendFinalChange({ tp: 'numberState', number: currentState.tempNumber });
+        if (wasChanged) sendFinalChange(createFinalChange(currentState as InputState));
         setIsFocused(false);
     }
 
@@ -94,11 +94,17 @@ function createInputStateChange(inputValue: string, decimalSeparator: string): I
     return { tp: 'inputState', inputValue, tempNumber: parseInputValue(inputValue, decimalSeparator) };
 }
 
-function parseInputValue(value: string, decimalSeparator: string): number | '' {
+function createFinalChange(state: InputState) {
+    const { inputValue, tempNumber } = state;
+    return tempNumber !== undefined
+        ? { tp: 'numberState' as const, number: tempNumber } : { tp: 'inputState' as const, inputValue };
+}
+
+function parseInputValue(value: string, decimalSeparator: string): number | undefined {
     const escapedSeparator = escapeRegex(decimalSeparator);
     const regex = new RegExp(`(^\\s*-)|\\d|(?<!(${escapedSeparator}.*))${escapedSeparator}`, 'g');
     const parsedString = value.match(regex)?.join('').replace(`${decimalSeparator}`, '.');
-    return parsedString !== undefined ? Number(parsedString) : '';
+    return parsedString ? Number(parsedString) : undefined;
 }
 
 function roundToScale(num: number, scale: number) {

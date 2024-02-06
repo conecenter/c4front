@@ -6,12 +6,12 @@ import { createSyncProviders } from "../../main/vdom-hooks";
 
 function App(props: PropsWithChildren<any>) {
   const sender = {enqueue: jest.fn(), ctxToPath: () => '/test'};
-  return createSyncProviders({sender, ack: null, isRoot: true, children: props.children});
+  return createSyncProviders({sender, ack: null, isRoot: true, children: props.children, branchKey: ''});
 }
 
 const DEFAULT_PROPS: NumberFormattingInput = {
   identity: { key: 'test' },
-  state: { number: '' },
+  state: { inputValue: '' },
   showThousandSeparator: false,
   scale: 2,
   minFraction: 0
@@ -33,10 +33,19 @@ describe('basic functionality', () => {
 
   it('correctly inputs data', async () => {
     const user = userEvent.setup();
-    renderWithProps({ ...DEFAULT_PROPS, state: { number: '' } });
+    renderWithProps({ ...DEFAULT_PROPS });
     const input = screen.getByRole('textbox');
     await act(() => user.type(input, '123'));
     expect(input).toHaveValue('123');
+  });
+
+  it('correctly handles empty input', async () => {
+    const user = userEvent.setup();
+    renderWithProps({ ...DEFAULT_PROPS, state: { number: 1 } });
+    const input = screen.getByRole('textbox');
+    await act(() => user.clear(input));
+    await user.click(document.body);
+    expect(input).toHaveValue('');
   });
 });
 
@@ -169,7 +178,7 @@ describe('input parsing logic', () => {
 
   it('correctly parses empty string', () => {
     const parsedValue = parseInputValue('', '.');
-    expect(parsedValue).toBe('');
+    expect(parsedValue).toBe(undefined);
   });
 
   it('correctly parses complex input', () => {
