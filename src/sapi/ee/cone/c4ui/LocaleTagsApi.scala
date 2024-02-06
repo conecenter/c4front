@@ -63,7 +63,7 @@ trait NumberInputProps extends ToChildPair
 
   @c4val("input-state") def inputNumberState(
     inputValue: String,
-    tempNumber: String,
+    tempNumber: String = "",
   ): InputNumberServerState
 }
 
