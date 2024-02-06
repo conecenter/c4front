@@ -1,4 +1,4 @@
-import { Patch, PatchHeaders } from "../exchange/patch-sync";
+import { Patch } from "../exchange/patch-sync";
 import type { InputState, NumberState } from "./number-formatting-input";
 
 type StateChange = InputStateChange | NumberStateChange;
@@ -12,27 +12,38 @@ interface NumberStateChange extends NumberState {
 }
 
 function changeToPatch(ch: StateChange): Patch {
-    const tpHeader = { 'x-r-change-tp': ch.tp };
-    function makePatch(value: string, headers: PatchHeaders): Patch {
-        return { value, headers: { ...tpHeader, ...headers } }
-    }
+    const getTpHeader = (tp: 'inputState' | 'numberState') => ({ 'x-r-change-tp': tp });
     switch (ch.tp) {
         case 'inputState':
-            return makePatch(ch.inputValue, { 'x-r-temp-number': String(ch.tempNumber) });
+            return {
+                value: ch.inputValue,
+                headers: {
+                    ...getTpHeader(ch.tp),
+                    ...ch.tempNumber !== undefined && { 'x-r-temp-number': String(ch.tempNumber) }
+                }
+            };
         case 'numberState':
-            return makePatch('', { 'x-r-number': String(ch.number) });
+            return {
+                value: '',
+                headers: {
+                    ...getTpHeader(ch.tp),
+                    'x-r-number': String(ch.number)
+                }
+            };
     }
 }
 
 function patchToChange({ value, headers }: Patch): StateChange {
     const tp = headers!['x-r-change-tp'] as 'inputState' | 'numberState';
     switch (tp) {
-        case 'inputState':
+        case 'inputState': {
+            const tempNumber = headers!['x-r-temp-number'];
             return {
                 tp,
                 inputValue: value,
-                tempNumber: +headers!['x-r-temp-number']
+                ...tempNumber !== undefined && { tempNumber: +tempNumber }
             }
+        }
         case 'numberState':
             return {
                 tp,
