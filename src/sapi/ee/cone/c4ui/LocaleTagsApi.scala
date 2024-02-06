@@ -53,6 +53,8 @@ trait NumberInputProps extends ToChildPair
     scale: Int,
     minFraction: Int,
     receiver: Receiver[C],
+    placeholder: Option[String] = None,
+    children: ViewRes = Nil
   ): NumberInputProps
 
   @c4val("number-state") def numberState(

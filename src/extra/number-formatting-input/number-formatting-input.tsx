@@ -1,4 +1,4 @@
-import React, { useRef, useState, useLayoutEffect } from "react";
+import React, { useRef, useState, useLayoutEffect, ReactNode } from "react";
 import { InputElement } from "../input-element";
 import { usePatchSync, Patch } from "../exchange/patch-sync";
 import { changeToPatch, patchToChange, InputStateChange } from "./number-formatting-input-exchange";
@@ -13,6 +13,8 @@ interface NumberFormattingInput {
     showThousandSeparator: boolean,
     scale: number,    // round decimal part to this many numbers RoundingMode.HALF_UP
     minFraction: number,    // min this many symbols after decimal separator
+    placeholder?: string,
+    children?: ReactNode
 }
 
 type NumberFormattingInputState = InputState | NumberState;
@@ -26,7 +28,9 @@ interface NumberState {
     number: number
 }
 
-function NumberFormattingInput({identity, state, showThousandSeparator, scale, minFraction}: NumberFormattingInput) {
+function NumberFormattingInput(
+    {identity, state, showThousandSeparator, scale, minFraction, placeholder, children}: NumberFormattingInput
+) {
     const { thousandSeparator, decimalSeparator } = useUserLocale().numberFormat;
     const path = usePath(identity);
 
@@ -82,7 +86,11 @@ function NumberFormattingInput({identity, state, showThousandSeparator, scale, m
             onChange={onChange}
             onFocus={onFocus}
             onBlur={onBlur}
-        />
+            placeholder={placeholder} >
+            {children && [
+                <div key="sideContent" className="sideContent">{children}</div>
+            ]}
+        </InputElement>
     );
 }
 

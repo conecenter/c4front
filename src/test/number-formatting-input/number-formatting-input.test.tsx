@@ -47,6 +47,19 @@ describe('basic functionality', () => {
     await user.click(document.body);
     expect(input).toHaveValue('');
   });
+
+  it('shows placeholder', () => {
+    const placeholderText = 'Input';
+    renderWithProps({ ...DEFAULT_PROPS, placeholder: placeholderText });
+    const input = screen.getByPlaceholderText(placeholderText);
+    expect(input).toBeInTheDocument();
+  });
+
+  it('renders sideContent', () => {
+    const sideContent = <span>Side content</span>;
+    renderWithProps({ ...DEFAULT_PROPS, children: sideContent });
+    expect(screen.getByText('Side content')).toBeInTheDocument();
+  });
 });
 
 describe('number formatting logic - thousands (initial render)', () => {
