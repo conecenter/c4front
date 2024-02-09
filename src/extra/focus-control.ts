@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import { NoFocusContext } from './labeled-element';
 
 const PathContext = React.createContext("path");
+PathContext.displayName = "PathContext";
 
 interface FocusControlObj {
     focusClass?: string,
