@@ -1,4 +1,4 @@
-import React, { useRef, ReactNode, useEffect, useState } from 'react';
+import React, { useRef, ReactNode, useEffect, useState, useLayoutEffect } from 'react';
 import { PathContext } from './focus-control';
 import { Patch } from './exchange/patch-sync';
 import { VISIBLE_CHILD_SEL } from './main-menu/main-menu-bar';
@@ -18,50 +18,53 @@ interface FocusChange {
 function FocusAnnouncerElement({ path, value, onChange, children }: FocusAnnouncerElement) {
     const [doc, setDoc] = useState<Document | undefined>(undefined);
 
+    const isMounted = useRef(true);
+    useLayoutEffect(() => {
+            isMounted.current = true;
+            return () => { isMounted.current = false; }
+    });
+
     const isFocusedView = useRef(false);
     useEffect(() => { isFocusedView.current = isRootBranch(doc) }, [doc]);
-
-    const findAutofocusCandidate = () => doc?.querySelector(`input`);
-
-    const sendChange = (path: string) => {
-        if (path !== value) onChange({ target: { headers: { "x-r-action": "change" }, value: path } });
-    }
 
     function onFocus(e: FocusEvent) {
         isFocusedView.current = true;
         const newPath = (e.target as Element).closest<HTMLElement>('[data-path]')?.dataset.path;
         if (newPath) sendChange(newPath);
     }
+    const sendChange = (path: string) => {
+        if (path !== value) onChange({ target: { headers: { "x-r-action": "change" }, value: path } });
+    }
     useAddEventListener(doc, 'focusin', onFocus, true);
 
-    function onBlur(event: FocusEvent) {
+    function onBlur(e: FocusEvent) {
         isFocusedView.current = false;
-        const e = event;
-        setTimeout( // without setTimeout e.target still exists in doc
-            function preventFocusLoss() {
-                const isFocusLost = e.relatedTarget === null && !doc?.contains(e.target as Node);
-                if (isFocusLost) findAutofocusCandidate()?.focus();
+        if (e.relatedTarget === null) preventFocusLoss(e.target as HTMLElement | null);
+    }
+    function preventFocusLoss(target: HTMLElement | null) {
+        const focusableAncestors = getFocusableAncestors(target);
+        setTimeout(() => {  // without queueMicrotask e.target still exists in doc
+            const isFocusLost = !doc?.contains(target);
+            if (isFocusLost && isMounted.current) {
+                const aliveFocusableAncestor = focusableAncestors.find((elem) => doc?.contains(elem) && elem.dataset.path !== path);
+                (aliveFocusableAncestor || findAutofocusCandidate(doc))?.focus();
             }
-        );
+        });
     }
     useAddEventListener(doc, 'focusout', onBlur);
 
     useEffect(
-        function correctFocusPosition() {
+        function alignFocusWithFocusFrame() {
             if (!isFocusedView.current) return;
-            if (!value) findAutofocusCandidate()?.focus();
-            else alignFocusWithFocusFrame();
+            if (!value) findAutofocusCandidate(doc)?.focus();
+            const activeElem = doc?.activeElement;
+            const activeElemPath = activeElem?.closest<HTMLElement>('[data-path]')?.dataset.path;
+            if (activeElemPath !== value) {
+                const focusFrameElem = doc?.querySelector<HTMLElement>(`*[data-path='${value}']${VISIBLE_CHILD_SEL}`);
+                (focusFrameElem || findAutofocusCandidate(doc))?.focus();
+            }
         }
     );
-
-    function alignFocusWithFocusFrame() {
-        const activeElem = doc?.activeElement;
-        const activeElemPath = activeElem?.closest<HTMLElement>('[data-path]')?.dataset.path;
-        if (activeElemPath !== value) {
-            const focusFrameElem = doc?.querySelector<HTMLElement>(`*[data-path='${value}']${VISIBLE_CHILD_SEL}`);
-            (focusFrameElem || findAutofocusCandidate())?.focus();
-        }
-    }
 
     return  (
         <div
@@ -79,6 +82,22 @@ function FocusAnnouncerElement({ path, value, onChange, children }: FocusAnnounc
 
 function isRootBranch(doc: Document | undefined) {
     return doc ? doc.defaultView === doc.defaultView?.parent : false;
+}
+
+function findAutofocusCandidate(doc: Document | undefined) {
+    return doc?.querySelector<HTMLElement>('input');
+}
+
+function getFocusableAncestors(elem: HTMLElement | null) {
+    let currentElem = elem;
+    const focusableAncestors = [];
+    while(currentElem) {
+        const closestFocusable = currentElem.closest<HTMLElement>('[data-path], [tabindex]');
+        if (!closestFocusable) break;
+        focusableAncestors.push(closestFocusable);
+        currentElem = closestFocusable.parentElement
+    }
+    return focusableAncestors;
 }
 
 export { FocusAnnouncerElement }

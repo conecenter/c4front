@@ -2,7 +2,7 @@ import React, { ReactNode, useCallback, useLayoutEffect, useRef, useState } from
 import clsx from 'clsx';
 import { createPortal } from 'react-dom';
 import { usePopupPos } from '../../main/popup';
-import { NoCaptionContext } from '../../main/vdom-hooks';
+import { NoCaptionContext, usePath } from '../../main/vdom-hooks';
 import { useAddEventListener } from '../custom-hooks';
 import { elementHasFocus, isInstanceOfNode } from '../dom-utils';
 import { NoFocusContext } from '../labeled-element';
@@ -19,6 +19,8 @@ const DEFAULT_IDENTITY = { key: 'popup-element' };
 
 function NewPopupElement({ identity = DEFAULT_IDENTITY, className, children }: PopupElement) {
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
+
+    const path = usePath(identity);
     
     const popupParent = useRef<HTMLElement | null>(null);
     const setPopupParent = useCallback((el: HTMLElement | null) => popupParent.current = el && el.parentElement, []);
@@ -31,18 +33,11 @@ function NewPopupElement({ identity = DEFAULT_IDENTITY, className, children }: P
     
     // Popup closing
     const handleBlur = (e: FocusEvent) => {
-		if (elementIsInsideElements(e.relatedTarget, [popupElement, popupParent.current])) return;
+		if (!e.relatedTarget || elementIsInsideElements(e.relatedTarget, [popupElement, popupParent.current])) return;
         toggle(false);
 	};
     const doc = popupElement?.ownerDocument;
     useAddEventListener(doc, 'focusout', handleBlur);
-
-    // Prevent focus loss after closing
-    useLayoutEffect(() => {
-        return () => {
-            if (isOpened && elementHasFocus(popupDrawer)) focusFocusableAncestor(popupParent.current);
-        }
-    }, [isOpened]);
 
     const popup = (
         <div ref={setPopupElement}
@@ -50,6 +45,7 @@ function NewPopupElement({ identity = DEFAULT_IDENTITY, className, children }: P
             style={popupStyle}
             onClick={(e) => e.stopPropagation()}
             tabIndex={-1}
+            data-path={path}
         >
             {children}
         </div>
@@ -70,11 +66,6 @@ function elementIsInsideElements(target: EventTarget | null, elems: (HTMLElement
     for (const elem of elems) {
         if (elem?.contains(target)) return true;
     }
-}
-
-function focusFocusableAncestor(elem?: HTMLElement | null) {
-    const focusableAncestor = elem?.closest<HTMLElement>('[data-path]');
-    focusableAncestor?.focus();
 }
 
 export { NewPopupElement }

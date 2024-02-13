@@ -10,7 +10,7 @@ import {ARROW_DOWN_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY, M_
 import {MenuCustomItem, MenuExecutableItem, MenuItemsGroup, MenuPopupElement, MenuUserItem} from './main-menu-items';
 import {MenuFolderItem} from "./menu-folder-item";
 import {BindGroupElement} from "../binds/binds-elements";
-import {NoCaptionContext} from "../../main/vdom-hooks";
+import {NoCaptionContext, usePath} from "../../main/vdom-hooks";
 import {isInstanceOfNode} from "../dom-utils";
 
 const MENU_BAR_PATH = 'main-menu-bar';
@@ -181,7 +181,7 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
                         }}
                         expandTo={[
             <Expander key='left-menu-compressed' area="lt" expandOrder={1} expandTo={leftMenuExpanded}>
-              <BurgerMenu opened={opened} setFinalState={setFinalState} domRef={domRef}>
+              <BurgerMenu identity={identity} opened={opened} setFinalState={setFinalState} domRef={domRef}>
                 {leftChildren}
               </BurgerMenu>
             </Expander>,
@@ -222,14 +222,16 @@ function getRightMenuCompressed(rightChildren: ReactElement<MenuItem>[]) {
 
 
 interface BurgerMenu {
+  identity: object,
   opened: boolean,
   domRef: React.RefObject<HTMLDivElement>,
   setFinalState: (s: MenuItemState) => void,
   children: ReactElement<MenuItem>[]
 }
 
-function BurgerMenu({opened, domRef, setFinalState, children}: BurgerMenu) {
-  const { focusClass, focusHtml } = useFocusControl('burgerMenu');
+function BurgerMenu({ identity, opened, domRef, setFinalState, children}: BurgerMenu) {
+  const path = usePath(identity);
+  const { focusClass, focusHtml } = useFocusControl(path);
 
   const currentPath = useContext(PathContext);
 
