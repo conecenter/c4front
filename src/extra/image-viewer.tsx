@@ -51,11 +51,13 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
     const startingIndex = useMemo(() => getCurrentSlideIndex(), [slidesMemo]);
 
     useEffect(
-        function onSlideChange() {
-            const internalIndex = controller.current?.getLightboxState().currentIndex;
+        function onServerSlideChange() {
+            const lightboxState = controller.current?.getLightboxState();
+            if (!lightboxState) return;
+            const { currentIndex: lightboxIndex, slides: lightboxSlides } = lightboxState;
             const currentIndex = getCurrentSlideIndex();
-            if (internalIndex !== undefined && internalIndex !== currentIndex) {
-                const changed = currentIndex - internalIndex;
+            if (lightboxIndex !== currentIndex && lightboxSlides.length === slides.length) {
+                const changed = currentIndex - lightboxIndex;
                 const direction = changed > 0 ? 'next' : 'prev';
                 controller.current?.[direction]({count: Math.abs(changed)});
             }
