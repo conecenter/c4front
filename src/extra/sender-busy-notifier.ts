@@ -14,7 +14,7 @@ function SenderBusyNotifier() {
 	const checkBusy = () => setIsBusy(busyFor(branchKey) > 3000);
 	useInterval(checkBusy, 500);
 
-	return isBusy && $(OverlayMessage, BUSY_OVERLAY);
+	return isBusy ? $(OverlayMessage, BUSY_OVERLAY) : null;
 }
 
 export { SenderBusyNotifier }
