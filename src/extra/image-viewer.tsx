@@ -47,14 +47,17 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
 
     const inlinePos = position === 'inline';
 
-    const startingIndexRef = useRef(getCurrentSlideIndex());
+    // The lightbox reads this property when it opens and when slides change
+    const startingIndex = useMemo(() => getCurrentSlideIndex(), [slidesMemo]);
 
     useEffect(
-        function onSlideChange() {
-            const internalIndex = controller.current?.getLightboxState().currentIndex;
+        function onServerSlideChange() {
+            const lightboxState = controller.current?.getLightboxState();
+            if (!lightboxState) return;
+            const { currentIndex: lightboxIndex, slides: lightboxSlides } = lightboxState;
             const currentIndex = getCurrentSlideIndex();
-            if (internalIndex !== undefined && internalIndex !== currentIndex) {
-                const changed = currentIndex - internalIndex;
+            if (lightboxIndex !== currentIndex && lightboxSlides.length === slides.length) {
+                const changed = currentIndex - lightboxIndex;
                 const direction = changed > 0 ? 'next' : 'prev';
                 controller.current?.[direction]({count: Math.abs(changed)});
             }
@@ -82,7 +85,7 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
             <Lightbox
                 open={true}
                 slides={slidesMemo}
-                index={startingIndexRef.current}
+                index={startingIndex}
                 carousel={{ finite: true, preload: PRELOAD }}
                 controller={{ ref: controller }}
                 portal={{ root: bodyRef }}
