@@ -140,6 +140,7 @@ case class NoReceiver[C]() extends Receiver[C] {
     children: ViewRes = Nil,
     openedChildren: ViewRes = Nil,
     optButtons: ElList[FilterButton] = Nil,
+    isFolder: Boolean = false,
   ): FilterButton
   @c4val("lt") def leftFilterButtonArea: FilterButtonArea
   @c4val("rt") def rightFilterButtonArea: FilterButtonArea
