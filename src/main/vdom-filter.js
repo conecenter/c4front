@@ -133,7 +133,7 @@ export function FilterButtonExpander({ identity, optButtons = [], children, open
                     $("div", {
                         key: btn.key,
                         className: 'gridPopupItem',
-                        onClickCapture: () => setTimeout(() => toggle(false), 200),
+                        onClickCapture: () => !btn.props.isFolder && setTimeout(() => toggle(false), 200),
                         children: btn.props.children
                     }))))
         ] : children
