@@ -2,9 +2,10 @@ import {createElement as $,cloneElement, useState} from "react"
 import clsx from 'clsx'
 import {em,sum,findLastIndex} from "./vdom-util.js"
 import {useWidths} from "../main/sizes.js"
-import {NoCaptionContext} from "./vdom-hooks.js"
+import {NoCaptionContext, usePath} from "./vdom-hooks.js"
 import {usePopupState} from "../extra/popup-elements/popup-manager"
 import {NewPopupElement} from "../extra/popup-elements/popup-element"
+import {useFocusControl} from '../extra/focus-control'
 
 //// non-shared
 
@@ -122,12 +123,14 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
 
 ////
 
-export function FilterButtonExpander({ identity, optButtons = [], children, openedChildren }) {
+export function FilterButtonExpander({ identity, optButtons = [], children }) {
+    const path = usePath(identity)
+    const { focusClass, focusHtml }  = useFocusControl(path)
     const [isOpened, toggle] = usePopupState(identity)
-    return $("div", { className: 'filterButtonExpander', onClick: () => toggle(!isOpened) },
-        isOpened ? [
-            openedChildren ?? children,
-            $(NewPopupElement, { key: 'popup', identity },
+    return $("div", { className: clsx('filterButtonExpander', focusClass), ...focusHtml, onClick: () => toggle(!isOpened) },
+        children,
+        isOpened &&
+            $(NewPopupElement, { identity },
                 $(NoCaptionContext.Provider, { value: true }, optButtons.map(btn =>
                     btn.props.isFolder
                         ? $(FolderButtonPlace, { key: btn.key, closeExpander: () => toggle(false), children: btn.props.children })
@@ -137,7 +140,6 @@ export function FilterButtonExpander({ identity, optButtons = [], children, open
                             onClickCapture: () => setTimeout(() => toggle(false), 300),
                             children: btn.props.children
                     }))))
-        ] : children
     )
 }
 
@@ -146,14 +148,13 @@ function FolderButtonPlace({ closeExpander, children }) {
     return $("div", {
         className: clsx('gridPopupItem', 'isFolder', opened && 'isOpened'),
         onClickCapture: (e) => {
-            console.log(e.target.closest('.popupEl, .gridPopupItem'))
             if (e.target.closest('.popupEl, .gridPopupItem')?.className.includes('popupEl')) {
                 setTimeout(() => closeExpander(), 300);
             }
             else setOpened(!opened);
         },
         onBlur: (e) => {
-            if (!e.currentTarget.contains(e.relatedTarget)) setOpened(false);            
+            if (!e.currentTarget.contains(e.relatedTarget)) setOpened(false);
         },
         children
     });

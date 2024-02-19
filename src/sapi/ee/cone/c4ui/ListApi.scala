@@ -139,7 +139,6 @@ case class NoReceiver[C]() extends Receiver[C] {
     key: String,
     area: FilterButtonArea,
     children: ViewRes = Nil,
-    openedChildren: ViewRes = Nil,
     optButtons: ElList[FilterButton] = Nil,
   ): FilterButton
   @c4val("lt") def leftFilterButtonArea: FilterButtonArea
