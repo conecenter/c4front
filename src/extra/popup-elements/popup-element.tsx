@@ -1,10 +1,10 @@
-import React, { ReactNode, useCallback, useLayoutEffect, useRef, useState } from 'react';
+import React, { ReactNode, useCallback, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { createPortal } from 'react-dom';
 import { usePopupPos } from '../../main/popup';
 import { NoCaptionContext, usePath } from '../../main/vdom-hooks';
 import { useAddEventListener } from '../custom-hooks';
-import { elementHasFocus, isInstanceOfNode } from '../dom-utils';
+import { isInstanceOfNode } from '../dom-utils';
 import { NoFocusContext } from '../labeled-element';
 import { usePopupState } from './popup-manager';
 
