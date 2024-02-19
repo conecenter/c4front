@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useRef, useState } from 'react';
+import React, { ReactNode, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { createPortal } from 'react-dom';
 import { usePopupPos } from '../../main/popup';
@@ -21,23 +21,27 @@ function NewPopupElement({ identity = DEFAULT_IDENTITY, className, children }: P
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
 
     const path = usePath(identity);
-    
+
     const popupParent = useRef<HTMLElement | null>(null);
     const setPopupParent = useCallback((el: HTMLElement | null) => popupParent.current = el && el.parentElement, []);
 
-    // Popup state
     const [isOpened, toggle, popupDrawer] = usePopupState(identity);
 
-    // Popup positioning
     const [popupStyle] = usePopupPos(popupElement, false, popupParent.current);
-    
-    // Popup closing
+
     const handleBlur = (e: FocusEvent) => {
 		if (!e.relatedTarget || elementIsInsideElements(e.relatedTarget, [popupElement, popupParent.current])) return;
         toggle(false);
 	};
     const doc = popupElement?.ownerDocument;
     useAddEventListener(doc, 'focusout', handleBlur);
+
+    useLayoutEffect(
+        function preventFocusLossOnClosing() {
+            return () => {
+                if (isOpened && elementHasFocus(popupDrawer)) focusFocusableAncestor(popupParent.current);
+            }
+    }, [isOpened]);
 
     const popup = (
         <div ref={setPopupElement}
@@ -66,6 +70,17 @@ function elementIsInsideElements(target: EventTarget | null, elems: (HTMLElement
     for (const elem of elems) {
         if (elem?.contains(target)) return true;
     }
+}
+
+function elementHasFocus(element?: HTMLElement | null) {
+	if (!element) return false;
+	const activeElement = element.ownerDocument.activeElement;
+	return element.contains(activeElement);
+}
+
+function focusFocusableAncestor(elem?: HTMLElement | null) {
+    const focusableAncestor = elem?.closest<HTMLElement>('[data-path]');
+    focusableAncestor?.focus();
 }
 
 export { NewPopupElement }
