@@ -146,10 +146,14 @@ function FolderButtonPlace({ closeExpander, children }) {
     return $("div", {
         className: clsx('gridPopupItem', 'isFolder', opened && 'isOpened'),
         onClickCapture: (e) => {
+            console.log(e.target.closest('.popupEl, .gridPopupItem'))
             if (e.target.closest('.popupEl, .gridPopupItem')?.className.includes('popupEl')) {
                 setTimeout(() => closeExpander(), 300);
             }
             else setOpened(!opened);
+        },
+        onBlur: (e) => {
+            if (!e.currentTarget.contains(e.relatedTarget)) setOpened(false);            
         },
         children
     });
