@@ -1,6 +1,5 @@
-
-import clsx from "clsx"
-import {createElement as $,cloneElement} from "react"
+import {createElement as $,cloneElement, useState} from "react"
+import clsx from 'clsx'
 import {em,sum,findLastIndex} from "./vdom-util.js"
 import {useWidths} from "../main/sizes.js"
 import {NoCaptionContext} from "./vdom-hooks.js"
@@ -130,14 +129,30 @@ export function FilterButtonExpander({ identity, optButtons = [], children, open
             openedChildren ?? children,
             $(NewPopupElement, { key: 'popup', identity },
                 $(NoCaptionContext.Provider, { value: true }, optButtons.map(btn =>
-                    $("div", {
-                        key: btn.key,
-                        className: 'gridPopupItem',
-                        onClickCapture: () => !btn.props.isFolder && setTimeout(() => toggle(false), 200),
-                        children: btn.props.children
+                    btn.props.isFolder
+                        ? $(FolderButtonPlace, { key: btn.key, closeExpander: () => toggle(false), children: btn.props.children })
+                        : $("div", {
+                            key: btn.key,
+                            className: 'gridPopupItem',
+                            onClickCapture: () => setTimeout(() => toggle(false), 300),
+                            children: btn.props.children
                     }))))
         ] : children
     )
+}
+
+function FolderButtonPlace({ closeExpander, children }) {
+    const [opened, setOpened] = useState(false);
+    return $("div", {
+        className: clsx('gridPopupItem', 'isFolder', opened && 'isOpened'),
+        onClickCapture: (e) => {
+            if (e.target.closest('.popupEl, .gridPopupItem')?.className.includes('popupEl')) {
+                setTimeout(() => closeExpander(), 300);
+            }
+            else setOpened(!opened);
+        },
+        children
+    });
 }
 
 export function FilterButtonPlace({className,children}){
