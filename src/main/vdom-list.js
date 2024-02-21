@@ -120,7 +120,7 @@ export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, spanRi
     const gridRow = argGridRow || getGridRow({ rowKey, rowKeyMod })
     const gridColumn = argGridColumn || getGridCol({ colKey }) + (spanRightTo ? " / "+spanRightTo : "")
     const align = argClassNames?.includes('gridGoRight') ? 'r' : 'l';
-    const {hoverStyle, hoverClass, ...hoverProps} = useHoverExpander(path, ref, align, needsHoverExpander);
+    const {hoverStyle, hoverClass, ...hoverProps} = useHoverExpander(ref, align, needsHoverExpander);
     const style = {...props.style, gridRow, gridColumn, ...hoverStyle}
     const expanderProps = expanding === "expander" && {
         'data-expander': expander,
