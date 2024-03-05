@@ -11,10 +11,10 @@ import { useEventClickAction, useEventsSync, useViewSync } from './calendar-exch
 import { OverlayWrapper } from '../overlay-manager';
 import { ColorDef } from '../view-builder/common-api';
 
-import type { DatesSetArg, EventSourceFuncArg, ViewApi } from '@fullcalendar/core';
+import type { DatesSetArg, EventInput, EventSourceFuncArg, ViewApi } from '@fullcalendar/core';
 
 interface Calendar {
-    identity: Object,
+    identity: object,
     events: CalendarEvent[],
     currentView?: ViewInfo,
     slotDuration?: number,
@@ -57,7 +57,7 @@ function Calendar({ identity, events, currentView: serverView, slotDuration, bus
 
     const onEventClick = useEventClickAction(identity);
 
-    const getEvents = useCallback((fetchInfo: EventSourceFuncArg, successCallback: Function) => {
+    const getEvents = useCallback((fetchInfo: EventSourceFuncArg, successCallback: (eventsState: EventInput[]) => void) => {
         const needNewEvents = !serverView
             || fetchInfo.start.getTime() < serverView.from
             || fetchInfo.end.getTime() > serverView.to;

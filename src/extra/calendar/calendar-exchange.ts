@@ -17,7 +17,7 @@ const HEADERS = {
     to: 'x-r-to'
 }
 
-const useEventsSync = (identity: Object, events: CalendarEvent[]) => {
+const useEventsSync = (identity: object, events: CalendarEvent[]) => {
     const { currentState, sendFinalChange } = usePatchSync(
         identity, 'changeEvent', events, false, serverStateToState(transformColor), changeToPatch, patchToChange, applyChange
     );
@@ -62,7 +62,7 @@ function applyChange(prevState: EventInput[], ch: EventImpl): EventInput[] {
 /////
 const clickActionIdOf = identityAt('clickAction');
 
-const useEventClickAction = (identity: Object) => {
+const useEventClickAction = (identity: object) => {
     const [_, enqueueClickActionPatch] = useSync(clickActionIdOf(identity))
     return (clickedEvent: EventClickArg) => enqueueClickActionPatch({
         value: 'clickAction',
@@ -71,7 +71,7 @@ const useEventClickAction = (identity: Object) => {
 }
 
 /////
-function useViewSync(identity: Object, serverView: ViewInfo | undefined) {
+function useViewSync(identity: object, serverView: ViewInfo | undefined) {
     const { currentState, sendTempChange } = usePatchSync(
         identity, 'changeView', serverView, false, s => s, viewChangeToPatch, viewPatchToChange, (prev, ch) => ch
     );
