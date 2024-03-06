@@ -7,10 +7,8 @@ import Inline from "yet-another-react-lightbox/plugins/inline";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
 import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
+import Download from "yet-another-react-lightbox/plugins/download";
 import { Patch, usePatchSync } from "./exchange/patch-sync";
-
-const PRELOAD = 2;
-const THUMBNAILS_AMOUNT = 2 * PRELOAD + 1;
 
 interface Slide {
     srcId: string,
@@ -82,10 +80,10 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
                 open={true}
                 slides={slidesMemo}
                 index={startingIndex}
-                carousel={{ finite: true, preload: PRELOAD }}
+                carousel={{ finite: true, preload: 3 }}
                 controller={{ ref: controller }}
                 portal={{ root: bodyRef }}
-                plugins={[Captions, Counter, Fullscreen, Zoom, Thumbnails, ...inlinePos ? [Inline] : []]}
+                plugins={[Captions, Counter, Download, Fullscreen, Zoom, Thumbnails, ...inlinePos ? [Inline] : []]}
                 thumbnails={{ vignette: false }}
                 zoom={{
                     wheelZoomDistanceFactor: 500,
@@ -101,8 +99,6 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
                 }}
                 toolbar={{ buttons: [closeButton] }}
                 fullscreen={{ auto: !inlinePos }}
-                // @ts-ignore
-                styles={{ thumbnailsTrack: { "--thumbnails-amount": THUMBNAILS_AMOUNT } }}
             />
         </div>
     );
