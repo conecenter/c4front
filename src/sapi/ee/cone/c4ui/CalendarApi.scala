@@ -18,7 +18,7 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
     key: String,
     events: List[CalendarEvent],
     currentView: Option[ViewInfo] = None,
-    slotDuration: Option[Long] = None,
+    slotDuration: Option[String] = None,
     businessHours: Option[BusinessHours] = None,
     allDaySlot: Option[Boolean] = None,
     changeView: Receiver[C] = NoReceiver[C],
@@ -28,8 +28,8 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
 
   @c4el("CalendarEvent") def calendarEvent(
     id: String,
-    start: Option[Long] = None,
-    end: Option[Long] = None,
+    start: Option[String] = None,
+    end: Option[String] = None,
     title: Option[String] = None,
     allDay: Option[Boolean] = None,
     color: Option[ColorDef] = None,
@@ -42,13 +42,13 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
 
   @c4val def viewInfo(
     viewType: ViewInfoType,
-    from: Long,
-    to: Long,
+    from: String,
+    to: String,
   ): ViewInfo
 
   @c4val def businessHours(
     daysOfWeek: List[Int], // 0 - sunday
-    startTime: Long,
-    endTime: Long,
+    startTime: String,
+    endTime: String,
   ): BusinessHours
 }
