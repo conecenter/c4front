@@ -119,6 +119,7 @@ function Calendar({ identity, events, currentView: serverView, slotDuration, bus
                 datesSet={onDatesSet}
                 viewDidMount={(viewMount) => viewRoot.current = viewMount.el}
                 loading={(isLoading) => setIsLoading(isLoading)}
+                height='auto'
             />
             {isLoadingOverlay}
         </>
