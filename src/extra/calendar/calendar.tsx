@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -10,43 +10,48 @@ import { useUserLocale } from '../locale';
 import { useEventClickAction, useEventsSync, useViewSync } from './calendar-exchange';
 import { OverlayWrapper } from '../overlay-manager';
 import { ColorDef } from '../view-builder/common-api';
+import { transformDateFormatProps } from './calendar-utils';
 
 import type { DatesSetArg, EventInput, EventSourceFuncArg, ViewApi } from '@fullcalendar/core';
 
-interface Calendar {
+interface Calendar<DateFormat = number> {
     identity: object,
-    events: CalendarEvent[],
-    currentView?: ViewInfo,
-    slotDuration?: number,
-    businessHours?: BusinessHours,
+    events: CalendarEvent<DateFormat>[],
+    currentView?: ViewInfo<DateFormat>,
+    slotDuration?: DateFormat,
+    businessHours?: BusinessHours<DateFormat>,
     allDaySlot?: boolean
 }
 
-interface CalendarEvent {
+interface CalendarEvent<DateFormat = number> {
     id: string,
-    start?: number,
-    end?: number
+    start?: DateFormat,
+    end?: DateFormat,
     title?: string,
     allDay?: boolean,
     color?: ColorDef,
     children?: ReactNode
 }
 
-interface ViewInfo {
+interface ViewInfo<DateFormat = number> {
     viewType: ViewType,
-    from: number,
-    to: number
+    from: DateFormat,
+    to: DateFormat
 }
 
 type ViewType = 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay';
 
-interface BusinessHours {
+interface BusinessHours<DateFormat = number> {
     daysOfWeek: number[],   // 0 = Sunday
-    startTime: number,
-    endTime: number
+    startTime: DateFormat,
+    endTime: DateFormat
 }
 
-function Calendar({ identity, events, currentView: serverView, slotDuration, businessHours, allDaySlot }: Calendar) {
+function Calendar(props: Calendar<string>) {
+    const { identity, events, currentView: serverView, slotDuration, businessHours, allDaySlot } = useMemo(
+        () => transformDateFormatProps(props), [props]
+    );
+
     const calendarRef = useRef<FullCalendar>(null);
     const locale = useUserLocale();
 

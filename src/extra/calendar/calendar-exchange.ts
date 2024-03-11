@@ -84,7 +84,7 @@ function viewChangeToPatch(ch: ViewInfo): Patch {
         headers: {
             [HEADERS.viewType]: ch.viewType,
             [HEADERS.from]: String(ch.from),
-            [HEADERS.to]: String(ch.to),
+            [HEADERS.to]: String(ch.to)
         }
     };
 }
