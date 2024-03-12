@@ -75,7 +75,7 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
         if (activeSlide && activeSlide.srcId !== currentSrcId) sendTempChange(slides[index].srcId);
     }
 
-    const zipButton = <ZipButton slides={slides} />;
+    const zipButton = <ZipButton key='zip-button' slides={slides} />;
 
     return (
         <div ref={elem => setBodyRef(elem?.ownerDocument.body)} className={clsx(inlinePos && 'inlineImageViewer')} >
