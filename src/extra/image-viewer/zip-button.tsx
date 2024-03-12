@@ -12,31 +12,38 @@ function ZipButton({ slides }: ZipButton) {
         if (slides.length === 0) return;
         try {
             const imageBlobs = await fetchImageBlobs(slides);
-            const fileNames = slides.map(slide => slide.src.split("/").pop() || slide.src);
-            const zipData = await generateZipFile(imageBlobs, fileNames);
+            const reserveFilenames = slides.map(slide => slide.src.split("/").pop() || slide.src);
+            const zipData = await generateZipFile(imageBlobs, reserveFilenames);
             downloadFile(window.URL.createObjectURL(zipData));
         }
         catch(err) { console.log(err) }
     }
     return (
-        <button key='ACTION_ZIP' type='button' style={{ order: -1 }} className="yarl__button" onClick={downloadZip}>
+        <button type='button' style={{ order: -1 }} className="yarl__button" onClick={downloadZip}>
             <img src={ZipIcon} className="yarl__icon" />
         </button>
     );
 }
 
-async function fetchImageBlobs(images: Slide[]) {
+interface ImageBlobData {
+    blob: Blob;
+    filename?: string;
+}
+
+async function fetchImageBlobs(images: Slide[]): Promise<ImageBlobData[]> {
     const fetchExtractBlob = (image: Slide) => fetch(image.src)
         .then(response => {
             if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-            return response.blob();
+            const contentDispositionHeader = response.headers.get('Content-Disposition');
+            const filename = contentDispositionHeader?.match(/filename="(.+)"/)?.[1];
+            return response.blob().then(blob => ({ blob, filename }));
         });
     return Promise.all(images.map(fetchExtractBlob));
 }
 
-async function generateZipFile(blobs: Blob[], fileNames: string[]) {
+async function generateZipFile(imageBlobs: ImageBlobData[], reserveFilenames: string[]) {
     const zip = new JSZip();
-    blobs.forEach((blob, i) => zip.file(fileNames[i], blob));
+    imageBlobs.forEach(({filename, blob}, i) => zip.file(filename || reserveFilenames[i], blob));
     return zip.generateAsync({
         type: "blob",
         streamFiles: true
