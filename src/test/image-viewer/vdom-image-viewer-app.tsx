@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom";
 import React, {createElement as $, useState} from "react";
 import {createSyncProviders} from "../../main/vdom-hooks";
-import {ImageViewer} from "../../extra/image-viewer";
+import {ImageViewer} from "../../extra/image-viewer/image-viewer";
 
 function App() {
     const [open, setOpen] = useState(false);

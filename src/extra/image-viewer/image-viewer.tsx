@@ -8,7 +8,8 @@ import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
 import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
 import Download from "yet-another-react-lightbox/plugins/download";
-import { Patch, usePatchSync } from "./exchange/patch-sync";
+import { Patch, usePatchSync } from "../exchange/patch-sync";
+import { ZipButton } from "./zip-button";
 
 interface Slide {
     srcId: string,
@@ -74,6 +75,8 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
         if (activeSlide && activeSlide.srcId !== currentSrcId) sendTempChange(slides[index].srcId);
     }
 
+    const zipButton = <ZipButton slides={slides} />;
+
     return (
         <div ref={elem => setBodyRef(elem?.ownerDocument.body)} className={clsx(inlinePos && 'inlineImageViewer')} >
             <Lightbox
@@ -83,7 +86,7 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
                 carousel={{ finite: true, preload: 3 }}
                 controller={{ ref: controller }}
                 portal={{ root: bodyRef }}
-                plugins={[Captions, Counter, Download, Fullscreen, Zoom, Thumbnails, ...inlinePos ? [Inline] : []]}
+                plugins={[Captions, Counter, Fullscreen, Zoom, Download, Thumbnails, ...inlinePos ? [Inline] : []]}
                 thumbnails={{ vignette: false }}
                 zoom={{
                     wheelZoomDistanceFactor: 500,
@@ -97,11 +100,12 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
                         buttonNext: () => null
                     }
                 }}
-                toolbar={{ buttons: [closeButton] }}
+                toolbar={{ buttons: [closeButton, zipButton] }}
                 fullscreen={{ auto: !inlinePos }}
             />
         </div>
     );
 }
 
-export {ImageViewer}
+export type { Slide }
+export { ImageViewer }
