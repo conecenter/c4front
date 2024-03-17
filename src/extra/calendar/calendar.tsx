@@ -12,7 +12,14 @@ import { OverlayWrapper } from '../overlay-manager';
 import { ColorDef } from '../view-builder/common-api';
 import { transformDateFormatProps } from './calendar-utils';
 
-import type { DatesSetArg, EventInput, EventSourceFuncArg, ViewApi } from '@fullcalendar/core';
+import type { DatesSetArg, EventInput, EventSourceFuncArg, FormatterInput, ViewApi } from '@fullcalendar/core';
+
+const TIME_FORMAT: FormatterInput = {
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+    meridiem: false
+}
 
 interface Calendar<DateFormat = number> {
     identity: object,
@@ -100,7 +107,7 @@ function Calendar(props: Calendar<string>) {
                 initialView="dayGridMonth"
                 firstDay={1}
                 slotDuration={slotDuration || '00:15'}
-                slotLabelFormat={{ hour12: false, hour: 'numeric', minute: '2-digit' }}
+                slotLabelFormat={TIME_FORMAT}
                 timeZone={locale.timezoneId}
                 editable={true}
                 businessHours={businessHours}
@@ -118,6 +125,7 @@ function Calendar(props: Calendar<string>) {
                     right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 }}
                 events={getEvents}
+                eventTimeFormat={TIME_FORMAT}
                 eventContent={(eventInfo) => eventInfo.event.extendedProps.children ?? true}
                 eventClick={onEventClick}
                 eventChange={(changedEvent) => sendEventsChange(changedEvent.event)}
