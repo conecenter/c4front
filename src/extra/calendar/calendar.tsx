@@ -12,7 +12,7 @@ import { OverlayWrapper } from '../overlay-manager';
 import { ColorDef } from '../view-builder/common-api';
 import { transformDateFormatProps } from './calendar-utils';
 
-import type { DatesSetArg, EventInput, EventSourceFuncArg, FormatterInput, ViewApi } from '@fullcalendar/core';
+import type { DatesSetArg, EventInput, EventSourceFuncArg, FormatterInput, SlotLabelContentArg, ViewApi } from '@fullcalendar/core';
 
 const TIME_FORMAT: FormatterInput = {
     hour12: false,
@@ -108,6 +108,7 @@ function Calendar(props: Calendar<string>) {
                 firstDay={1}
                 slotDuration={slotDuration || '00:15'}
                 slotLabelFormat={TIME_FORMAT}
+                slotLabelContent={fixMidnightPresentation}
                 timeZone={locale.timezoneId}
                 editable={true}
                 businessHours={businessHours}
@@ -144,6 +145,10 @@ function isViewCurrent(view: ViewApi, currentView: ViewInfo) {
     return view.type === viewType
         && view.activeStart.getTime() === from
         && view.activeEnd.getTime() === to;
+}
+
+function fixMidnightPresentation(info: SlotLabelContentArg) {
+    return info.text.replace(/^24/, '00');
 }
 
 export type { CalendarEvent, ViewInfo, ViewType }
