@@ -3,6 +3,8 @@ import NewWindow from 'react-new-window'
 import { RootBranchContext } from "../main/vdom-hooks";
 import { ButtonElement } from "./button-element";
 
+const SECOND_WINDOW_NAME = 'second_window';
+
 interface SecondWindowContext {
     secondWindow: boolean,
     toggleSecondWindow?: (on: boolean) => void
@@ -18,16 +20,10 @@ interface SecondWindowManager {
 
 function SecondWindowManager({ children }: SecondWindowManager) {
     const [secondWindow, setSecondWindow] = useState(false);
-    const { isRoot } = useContext(RootBranchContext);
 
-    const value = useMemo(() => ({
-        secondWindow,
-        ...isRoot && { toggleSecondWindow: setSecondWindow }
-    }), [secondWindow, isRoot]);
+    const value = useMemo(() => ({ secondWindow, toggleSecondWindow: setSecondWindow }), [secondWindow]);
 
-    return (
-        <SecondWindowContext.Provider value={value} children={children} />
-    );
+    return <SecondWindowContext.Provider value={value} children={children} />;
 }
 
 
@@ -39,16 +35,21 @@ function SecondWindowComponent({ children }: SecondWindowComponent) {
     const { secondWindow, toggleSecondWindow } = useContext(SecondWindowContext);
 
     return secondWindow
-        ? <NewWindow onUnload={() => toggleSecondWindow?.(false)}>{children}</NewWindow>
+        ? <NewWindow name={SECOND_WINDOW_NAME} onUnload={() => toggleSecondWindow?.(false)} children={children} />
         : <>{children}</>;
 }
 
 
 function SecondWindowButton(props: ButtonElement) {
-    const { toggleSecondWindow } = useContext(SecondWindowContext);
+    const { secondWindow, toggleSecondWindow } = useContext(SecondWindowContext);
+    const { isRoot } = useContext(RootBranchContext);
 
-    const switchSecondWindow = toggleSecondWindow && (() => toggleSecondWindow(true));
-    return <ButtonElement {...props} onClick={switchSecondWindow} />;
+    const switchToSecondWindow = () => {
+        secondWindow ? window.open('', SECOND_WINDOW_NAME) : toggleSecondWindow?.(true);
+    }
+    const onClick = isRoot ? switchToSecondWindow : undefined;
+
+    return <ButtonElement {...props} onClick={onClick} />;
 }
 
 export { SecondWindowManager, SecondWindowComponent, SecondWindowButton }
