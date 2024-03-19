@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -27,7 +27,8 @@ interface Calendar<DateFormat = number> {
     currentView?: ViewInfo<DateFormat>,
     slotDuration?: DateFormat,
     businessHours?: BusinessHours<DateFormat>,
-    allDaySlot?: boolean
+    allDaySlot?: boolean,
+    eventsChildren?: ReactElement[]
 }
 
 interface CalendarEvent<DateFormat = number> {
@@ -36,8 +37,7 @@ interface CalendarEvent<DateFormat = number> {
     end?: DateFormat,
     title?: string,
     allDay?: boolean,
-    color?: ColorDef,
-    children?: ReactNode
+    color?: ColorDef
 }
 
 interface ViewInfo<DateFormat = number> {
@@ -55,7 +55,7 @@ interface BusinessHours<DateFormat = number> {
 }
 
 function Calendar(props: Calendar<string>) {
-    const { identity, events, currentView: serverView, slotDuration, businessHours, allDaySlot } = useMemo(
+    const { identity, events, currentView: serverView, slotDuration, businessHours, allDaySlot, eventsChildren } = useMemo(
         () => transformDateFormatProps(props), [props]
     );
 
@@ -127,7 +127,7 @@ function Calendar(props: Calendar<string>) {
                 }}
                 events={getEvents}
                 eventTimeFormat={TIME_FORMAT}
-                eventContent={(eventInfo) => eventInfo.event.extendedProps.children ?? true}
+                eventContent={(eventInfo) => eventsChildren?.find(child => child.key === eventInfo.event.id)}
                 eventClick={onEventClick}
                 eventChange={(changedEvent) => sendEventsChange(changedEvent.event)}
                 datesSet={onDatesSet}
