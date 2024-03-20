@@ -12,7 +12,7 @@ import { OverlayWrapper } from '../overlay-manager';
 import { ColorDef } from '../view-builder/common-api';
 import { transformDateFormatProps } from './calendar-utils';
 
-import type { DatesSetArg, EventInput, EventSourceFuncArg, FormatterInput, SlotLabelContentArg, ViewApi } from '@fullcalendar/core';
+import type { DatesSetArg, EventContentArg, EventInput, EventSourceFuncArg, FormatterInput, SlotLabelContentArg, ViewApi } from '@fullcalendar/core';
 
 const TIME_FORMAT: FormatterInput = {
     hour12: false,
@@ -127,7 +127,7 @@ function Calendar(props: Calendar<string>) {
                 }}
                 events={getEvents}
                 eventTimeFormat={TIME_FORMAT}
-                eventContent={(eventInfo) => eventsChildren?.find(child => child.key === eventInfo.event.id)}
+                eventContent={(eventInfo) => eventsChildren?.find(child => child.key === eventInfo.event.id) ?? true}
                 eventClick={onEventClick}
                 eventChange={(changedEvent) => sendEventsChange(changedEvent.event)}
                 datesSet={onDatesSet}
