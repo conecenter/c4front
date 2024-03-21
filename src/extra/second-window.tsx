@@ -34,7 +34,11 @@ function SecondWindowComponent({ children }: SecondWindowComponent) {
     const { secondWindow, toggleSecondWindow } = useContext(SecondWindowContext);
 
     return secondWindow
-        ? <NewWindow name={SECOND_WINDOW_NAME} onUnload={() => toggleSecondWindow?.(false)} children={children} />
+        ? <NewWindow
+            name={SECOND_WINDOW_NAME}
+            title={document.title}
+            onUnload={() => toggleSecondWindow?.(false)}
+            children={children} />
         : <>{children}</>;
 }
 
