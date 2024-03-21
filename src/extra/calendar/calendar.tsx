@@ -37,7 +37,8 @@ interface CalendarEvent<DateFormat = number> {
     end?: DateFormat,
     title?: string,
     allDay?: boolean,
-    color?: ColorDef
+    color?: ColorDef,
+    editable?: boolean
 }
 
 interface ViewInfo<DateFormat = number> {
