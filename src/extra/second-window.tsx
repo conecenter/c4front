@@ -1,7 +1,6 @@
 import React, { ReactNode, createContext, useContext, useMemo, useState } from "react";
 import NewWindow from 'react-new-window'
 import { RootBranchContext } from "../main/vdom-hooks";
-import { ButtonElement } from "./button-element";
 
 const SECOND_WINDOW_NAME = 'second_window';
 
@@ -28,7 +27,7 @@ function SecondWindowManager({ children }: SecondWindowManager) {
 
 
 interface SecondWindowComponent {
-    children: ReactNode
+    children?: ReactNode
 }
 
 function SecondWindowComponent({ children }: SecondWindowComponent) {
@@ -40,7 +39,7 @@ function SecondWindowComponent({ children }: SecondWindowComponent) {
 }
 
 
-function SecondWindowButton(props: ButtonElement) {
+function SecondWindowOpener({ children }: SecondWindowComponent) {
     const { secondWindow, toggleSecondWindow } = useContext(SecondWindowContext);
     const { isRoot } = useContext(RootBranchContext);
 
@@ -49,7 +48,11 @@ function SecondWindowButton(props: ButtonElement) {
     }
     const onClick = isRoot ? switchToSecondWindow : undefined;
 
-    return <ButtonElement {...props} onClick={onClick} />;
+    return (
+        <div tabIndex={-1} onClickCapture={onClick} style={{ display: 'contents' }} >
+            {children}
+        </div>
+    );
 }
 
-export { SecondWindowManager, SecondWindowComponent, SecondWindowButton }
+export { SecondWindowManager, SecondWindowComponent, SecondWindowOpener }

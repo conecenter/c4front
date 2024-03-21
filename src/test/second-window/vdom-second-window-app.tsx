@@ -1,7 +1,9 @@
 import ReactDOM from "react-dom";
 import React, {createElement as $, useState} from "react";
 import {createSyncProviders} from "../../main/vdom-hooks";
-import {SecondWindowButton, SecondWindowComponent, SecondWindowManager} from "../../extra/second-window";
+import {SecondWindowOpener, SecondWindowComponent, SecondWindowManager} from "../../extra/second-window";
+import { ChipElement } from "../../extra/chip/chip";
+
 
 function App() {    
 	const [showContent, setShowContent] = useState(false);
@@ -14,11 +16,13 @@ function App() {
 			<img src='../images/denmark.svg' style={{ width: '5em' }} />
         </SecondWindowComponent>
 
-        <SecondWindowButton
-			value=''
-			path='/second-monitor-btn'
-			content='Open Second Window'
-			className='primaryColorCss' />
+        <SecondWindowOpener>
+			<ChipElement
+				identity={{ key: 'test' }}
+				text='Open Second Window'
+				color={{ tp: 'p', cssClass: 'primaryColorCss' }} />
+		</SecondWindowOpener>
+			
 
 		<button onClick={() => setShowContent(true)}>Show content</button>
         {showContent && <SecondWindowComponent>
@@ -29,7 +33,8 @@ function App() {
     );
 
     const sender = {
-        enqueue: (identity: object, patch: object) => console.log(patch)
+        enqueue: (identity: object, patch: object) => console.log(patch),
+		ctxToPath: () => '/test'
     }
     const ack: boolean | null = null;
     const branchKey = 'abc';
