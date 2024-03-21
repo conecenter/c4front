@@ -37,6 +37,7 @@ interface CalendarEvent<DateFormat = number> {
     title?: string,
     allDay?: boolean,
     color?: ColorDef,
+    editable?: boolean,
     children?: ReactNode
 }
 
