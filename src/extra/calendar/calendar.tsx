@@ -75,7 +75,7 @@ function Calendar(props: Calendar<string>) {
             || fetchInfo.start.getTime() < serverView.from
             || fetchInfo.end.getTime() > serverView.to;
         if (!needNewEvents) successCallback(eventsState);
-    }, [events]);
+    }, [eventsState]);
 
     const onDatesSet = (viewInfo: DatesSetArg) => {
         if (currentView && isViewCurrent(viewInfo.view, currentView)) return;
