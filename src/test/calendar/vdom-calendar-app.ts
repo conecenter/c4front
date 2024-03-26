@@ -8,58 +8,59 @@ import { PopupManager } from "../../extra/popup-elements/popup-manager";
 
 function App() {
     const eventChild = [
+        $('div', {key: 'Meeting'},
         $(ButtonElement, {key: '1', value: '', path: '/button', className: 'yellowColorCss', onClick: () => console.log('clicked')}, 'Full calendar'),
-        //$(SyncedPopup, {key: '2', identity: { key: 'popup' }}, 'Hello world')
+        $(SyncedPopup, {key: '2', identity: { key: 'popup' }}, 'Hello world'))
     ];
 
     const calendar = $(Calendar, {
         identity: { key: 'test' },
         businessHours: {
             daysOfWeek: [1, 2, 3, 4, 5],
-            startTime: 28800000,
-            endTime: 64800000
+            startTime: '28800000',
+            endTime: '64800000'
         },
         allDaySlot: false,
         currentView: {
             viewType: 'dayGridMonth',
-            from: 1701043200000,
-            to: 1704672000000
+            from: '1701043200000',
+            to: '1704672000000'
         },
         events: [
             {
                 id: 'Meeting',
                 title: 'Meeting',
-                start: new Date(2023, 11, 20, 12).getTime(),
-                end: new Date(2023, 11, 20, 14).getTime(),
-                color: { tp: 'p', cssClass: 'primaryColorCss' },
-                children: eventChild
+                start: new Date(2023, 11, 20, 12).getTime().toString(),
+                end: new Date(2023, 11, 20, 14).getTime().toString(),
+                color: { tp: 'p', cssClass: 'primaryColorCss' }
             },
             {
                 id: 'Meeting-2',
                 title: 'Meeting-2',
-                start: new Date(2023, 11, 21, 14).getTime(),
-                end: new Date(2023, 11, 21, 16).getTime()
+                start: new Date(2023, 11, 21, 14).getTime().toString(),
+                end: new Date(2023, 11, 21, 16).getTime().toString()
             },
             {
                 id: 'Meeting-3',
                 title: 'Meeting-3',
-                start: new Date(2023, 11, 21, 14).getTime(),
-                end: new Date(2023, 11, 21, 16).getTime()
+                start: new Date(2023, 11, 21, 14).getTime().toString(),
+                end: new Date(2023, 11, 21, 16).getTime().toString()
             },
             {
                 id: 'Car arrival',
                 title: 'Car arrival',
-                start: new Date(2023, 11, 21, 10).getTime(),
-                end: new Date(2023, 11, 21, 14).getTime(),
+                start: new Date(2023, 11, 21, 10).getTime().toString(),
+                end: new Date(2023, 11, 21, 14).getTime().toString(),
                 color: { tp: 'r', bgColor: 'grey', textColor: 'white' }
             },
             {
                 id: 'Train departure',
                 title: 'Train departure',
-                start: new Date(2023, 11, 23).getTime(),
+                start: new Date(2023, 11, 23).getTime().toString(),
                 allDay: true
             }
-        ]
+        ],
+        eventsChildren: eventChild
     });
 
     const children = $(PopupManager, null,

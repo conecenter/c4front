@@ -11,6 +11,7 @@ import { useEventClickAction, useEventsSync, useViewSync } from './calendar-exch
 import { OverlayWrapper } from '../overlay-manager';
 import { ColorDef } from '../view-builder/common-api';
 import { transformDateFormatProps } from './calendar-utils';
+import { EventContent } from './event-content';
 
 import type { DatesSetArg, EventContentArg, EventInput, EventSourceFuncArg, FormatterInput, SlotLabelContentArg, ViewApi } from '@fullcalendar/core';
 
@@ -100,6 +101,11 @@ function Calendar(props: Calendar<string>) {
         viewRoot.current
     );
 
+    const renderEventContent = useCallback((eventInfo: EventContentArg) => {
+        const customContent = eventsChildren?.find(child => child.key === eventInfo.event.id);
+        return <EventContent eventInfo={eventInfo} customContent={customContent} />;
+    }, [eventsChildren]);
+
     return (
         <>
             <FullCalendar
@@ -128,7 +134,7 @@ function Calendar(props: Calendar<string>) {
                 }}
                 events={getEvents}
                 eventTimeFormat={TIME_FORMAT}
-                eventContent={(eventInfo) => eventsChildren?.find(child => child.key === eventInfo.event.id) ?? true}
+                eventContent={renderEventContent}
                 eventClick={onEventClick}
                 eventChange={(changedEvent) => sendEventsChange(changedEvent.event)}
                 datesSet={onDatesSet}
