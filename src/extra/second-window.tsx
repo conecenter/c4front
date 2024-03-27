@@ -53,7 +53,7 @@ function SecondWindowOpener({ children }: SecondWindowComponent) {
     const onClick = isRoot ? switchToSecondWindow : undefined;
 
     return (
-        <div tabIndex={-1} onClickCapture={onClick} style={{ display: 'contents' }} >
+        <div tabIndex={-1} onClickCapture={onClick} className='secondWindowOpener' >
             {children}
         </div>
     );
