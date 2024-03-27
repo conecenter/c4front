@@ -21,6 +21,7 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
     slotDuration: Option[String] = None,
     businessHours: Option[BusinessHours] = None,
     allDaySlot: Option[Boolean] = None,
+    eventsChildren: ViewRes,
     changeView: Receiver[C] = NoReceiver[C],
     changeEvent: Receiver[C] = NoReceiver[C],
     clickAction: Receiver[C] = NoReceiver[C],
@@ -33,7 +34,7 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
     title: Option[String] = None,
     allDay: Option[Boolean] = None,
     color: Option[ColorDef] = None,
-    children: ViewRes = Nil,
+    editable: Option[Boolean] = None,
   ): CalendarEvent
 
   @c4val("dayGridMonth") def dayGridMonth: ViewInfoType

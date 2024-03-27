@@ -4,7 +4,7 @@ import { EventInput } from "@fullcalendar/core";
 
 // Server sends timestamps as strings due to Scala Long type may give error in transition to JS number in big numbers
 function transformDateFormatProps(props: Calendar<string>): Calendar<number> {
-    const { identity, allDaySlot } = props;
+    const { identity, allDaySlot, eventsChildren } = props;
     const events = props.events.map(event => ({
         ...event,
         start: event.start ? +event.start : undefined,
@@ -21,7 +21,7 @@ function transformDateFormatProps(props: Calendar<string>): Calendar<number> {
         endTime: +props.businessHours!.endTime
     };
     return {
-        identity, allDaySlot,
+        identity, allDaySlot, eventsChildren,
         events, currentView, businessHours,
         ...props.slotDuration && { slotDuration: +props.slotDuration }
     }

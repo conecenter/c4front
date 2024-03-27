@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -11,8 +11,9 @@ import { useEventClickAction, useEventsSync, useViewSync } from './calendar-exch
 import { OverlayWrapper } from '../overlay-manager';
 import { ColorDef } from '../view-builder/common-api';
 import { transformDateFormatProps } from './calendar-utils';
+import { EventContent } from './event-content';
 
-import type { DatesSetArg, EventInput, EventSourceFuncArg, FormatterInput, SlotLabelContentArg, ViewApi } from '@fullcalendar/core';
+import type { DatesSetArg, EventContentArg, FormatterInput, SlotLabelContentArg, ViewApi } from '@fullcalendar/core';
 
 const TIME_FORMAT: FormatterInput = {
     hour12: false,
@@ -27,7 +28,8 @@ interface Calendar<DateFormat = number> {
     currentView?: ViewInfo<DateFormat>,
     slotDuration?: DateFormat,
     businessHours?: BusinessHours<DateFormat>,
-    allDaySlot?: boolean
+    allDaySlot?: boolean,
+    eventsChildren?: ReactElement[]
 }
 
 interface CalendarEvent<DateFormat = number> {
@@ -37,8 +39,7 @@ interface CalendarEvent<DateFormat = number> {
     title?: string,
     allDay?: boolean,
     color?: ColorDef,
-    editable?: boolean,
-    children?: ReactNode
+    editable?: boolean
 }
 
 interface ViewInfo<DateFormat = number> {
@@ -56,7 +57,7 @@ interface BusinessHours<DateFormat = number> {
 }
 
 function Calendar(props: Calendar<string>) {
-    const { identity, events, currentView: serverView, slotDuration, businessHours, allDaySlot } = useMemo(
+    const { identity, events, currentView: serverView, slotDuration, businessHours, allDaySlot, eventsChildren } = useMemo(
         () => transformDateFormatProps(props), [props]
     );
 
@@ -69,13 +70,6 @@ function Calendar(props: Calendar<string>) {
     const { viewType, from = 0, to = 0 } = currentView || {};
 
     const onEventClick = useEventClickAction(identity);
-
-    const getEvents = useCallback((fetchInfo: EventSourceFuncArg, successCallback: (eventsState: EventInput[]) => void) => {
-        const needNewEvents = !serverView
-            || fetchInfo.start.getTime() < serverView.from
-            || fetchInfo.end.getTime() > serverView.to;
-        if (!needNewEvents) successCallback(eventsState);
-    }, [events]);
 
     const onDatesSet = (viewInfo: DatesSetArg) => {
         if (currentView && isViewCurrent(viewInfo.view, currentView)) return;
@@ -99,6 +93,17 @@ function Calendar(props: Calendar<string>) {
         <OverlayWrapper textmsg='Loading, please wait...' />,
         viewRoot.current
     );
+    useEffect(function switchIsLoading() {
+        const needNewEvents = !serverView || !currentView
+            || currentView.from < serverView.from || currentView.to > serverView.to;
+        if (needNewEvents && !isLoading) setIsLoading(true);
+        else if (!needNewEvents && isLoading) setIsLoading(false);
+    });
+
+    const renderEventContent = useCallback((eventInfo: EventContentArg) => {
+        const customContent = eventsChildren?.find(child => child.key === eventInfo.event.id);
+        return <EventContent eventInfo={eventInfo} customContent={customContent} />;
+    }, [eventsChildren]);
 
     return (
         <>
@@ -126,14 +131,13 @@ function Calendar(props: Calendar<string>) {
                     center: 'title',
                     right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 }}
-                events={getEvents}
+                events={eventsState}
                 eventTimeFormat={TIME_FORMAT}
-                eventContent={(eventInfo) => eventInfo.event.extendedProps.children ?? true}
+                eventContent={renderEventContent}
                 eventClick={onEventClick}
                 eventChange={(changedEvent) => sendEventsChange(changedEvent.event)}
                 datesSet={onDatesSet}
                 viewDidMount={(viewMount) => viewRoot.current = viewMount.el}
-                loading={(isLoading) => setIsLoading(isLoading)}
                 height='auto'
             />
             {isLoadingOverlay}
