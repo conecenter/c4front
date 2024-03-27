@@ -13,7 +13,7 @@ import { ColorDef } from '../view-builder/common-api';
 import { transformDateFormatProps } from './calendar-utils';
 import { EventContent } from './event-content';
 
-import type { DatesSetArg, EventContentArg, EventInput, EventSourceFuncArg, FormatterInput, SlotLabelContentArg, ViewApi } from '@fullcalendar/core';
+import type { DatesSetArg, EventContentArg, FormatterInput, SlotLabelContentArg, ViewApi } from '@fullcalendar/core';
 
 const TIME_FORMAT: FormatterInput = {
     hour12: false,
@@ -71,13 +71,6 @@ function Calendar(props: Calendar<string>) {
 
     const onEventClick = useEventClickAction(identity);
 
-    const getEvents = useCallback((fetchInfo: EventSourceFuncArg, successCallback: (eventsState: EventInput[]) => void) => {
-        const needNewEvents = !serverView
-            || fetchInfo.start.getTime() < serverView.from
-            || fetchInfo.end.getTime() > serverView.to;
-        if (!needNewEvents) successCallback(eventsState);
-    }, [eventsState]);
-
     const onDatesSet = (viewInfo: DatesSetArg) => {
         if (currentView && isViewCurrent(viewInfo.view, currentView)) return;
         sendViewChange({
@@ -100,6 +93,12 @@ function Calendar(props: Calendar<string>) {
         <OverlayWrapper textmsg='Loading, please wait...' />,
         viewRoot.current
     );
+    useEffect(function switchIsLoading() {
+        const needNewEvents = !serverView || !currentView
+            || currentView.from < serverView.from || currentView.to > serverView.to;
+        if (needNewEvents && !isLoading) setIsLoading(true);
+        else if (!needNewEvents && isLoading) setIsLoading(false);
+    });
 
     const renderEventContent = useCallback((eventInfo: EventContentArg) => {
         const customContent = eventsChildren?.find(child => child.key === eventInfo.event.id);
@@ -132,14 +131,13 @@ function Calendar(props: Calendar<string>) {
                     center: 'title',
                     right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 }}
-                events={getEvents}
+                events={eventsState}
                 eventTimeFormat={TIME_FORMAT}
                 eventContent={renderEventContent}
                 eventClick={onEventClick}
                 eventChange={(changedEvent) => sendEventsChange(changedEvent.event)}
                 datesSet={onDatesSet}
                 viewDidMount={(viewMount) => viewRoot.current = viewMount.el}
-                loading={(isLoading) => setIsLoading(isLoading)}
                 height='auto'
             />
             {isLoadingOverlay}
