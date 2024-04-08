@@ -29,6 +29,7 @@ interface Calendar<DateFormat = number> {
     slotDuration?: DateFormat,
     businessHours?: BusinessHours<DateFormat>,
     allDaySlot?: boolean,
+    timeSlotsRange?: TimeRange<DateFormat>,
     eventsChildren?: ReactElement[]
 }
 
@@ -42,10 +43,13 @@ interface CalendarEvent<DateFormat = number> {
     editable?: boolean
 }
 
-interface ViewInfo<DateFormat = number> {
-    viewType: ViewType,
+interface TimeRange<DateFormat = number> {
     from: DateFormat,
     to: DateFormat
+} 
+
+interface ViewInfo<DateFormat = number> extends TimeRange<DateFormat> {
+    viewType: ViewType
 }
 
 type ViewType = 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay';
@@ -57,9 +61,8 @@ interface BusinessHours<DateFormat = number> {
 }
 
 function Calendar(props: Calendar<string>) {
-    const { identity, events, currentView: serverView, slotDuration, businessHours, allDaySlot, eventsChildren } = useMemo(
-        () => transformDateFormatProps(props), [props]
-    );
+    const { identity, events, currentView: serverView, slotDuration, businessHours, allDaySlot, timeSlotsRange, eventsChildren } =
+        useMemo(() => transformDateFormatProps(props), [props]);
 
     const calendarRef = useRef<FullCalendar>(null);
     const locale = useUserLocale();
@@ -140,6 +143,10 @@ function Calendar(props: Calendar<string>) {
                 viewDidMount={(viewMount) => viewRoot.current = viewMount.el}
                 height='auto'
                 weekNumbers={true}
+                {...timeSlotsRange && {
+                    slotMinTime: timeSlotsRange.from,
+                    slotMaxTime: timeSlotsRange.to
+                }}
             />
             {isLoadingOverlay}
         </>

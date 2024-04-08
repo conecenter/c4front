@@ -12,6 +12,8 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
 
 @c4tagSwitch("FrontApp") trait BusinessHours extends ToJson
 
+@c4tagSwitch("FrontApp") trait TimeRange extends ToJson
+
 @c4tagSwitch("FrontApp") trait ViewInfoType extends ToJson
 @c4tags("FrontApp") trait CalendarTags[C] {
   @c4el("Calendar") def calendar(
@@ -21,6 +23,7 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
     slotDuration: Option[String] = None,
     businessHours: Option[BusinessHours] = None,
     allDaySlot: Option[Boolean] = None,
+    timeSlotsRange: Option[TimeRange] = None,
     eventsChildren: ViewRes,
     changeView: Receiver[C] = NoReceiver[C],
     changeEvent: Receiver[C] = NoReceiver[C],
@@ -52,4 +55,9 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
     startTime: String,
     endTime: String,
   ): BusinessHours
+
+  @c4val def timeRange(
+    from: String,
+    to: String,
+  ): TimeRange
 }

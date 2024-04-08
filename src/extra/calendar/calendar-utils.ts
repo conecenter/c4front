@@ -17,12 +17,16 @@ function transformDateFormatProps(props: Calendar<string>): Calendar<number> {
     };
     const businessHours = props.businessHours && {
         ...props.businessHours,
-        startTime: +props.businessHours!.startTime,
-        endTime: +props.businessHours!.endTime
+        startTime: +props.businessHours.startTime,
+        endTime: +props.businessHours.endTime
+    };
+    const timeSlotsRange = props.timeSlotsRange && {
+        from: +props.timeSlotsRange.from,
+        to: +props.timeSlotsRange.to
     };
     return {
         identity, allDaySlot, eventsChildren,
-        events, currentView, businessHours,
+        events, currentView, businessHours, timeSlotsRange,
         ...props.slotDuration && { slotDuration: +props.slotDuration }
     }
 }
