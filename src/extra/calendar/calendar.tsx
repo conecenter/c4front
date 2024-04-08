@@ -118,7 +118,7 @@ function Calendar(props: Calendar<string>) {
                 timeZone={locale.timezoneId}
                 editable={true}
                 businessHours={businessHours}
-                allDaySlot={allDaySlot}
+                allDaySlot={!!allDaySlot}
                 eventDisplay='block'
                 eventConstraint='businessHours'
                 navLinks={true}
