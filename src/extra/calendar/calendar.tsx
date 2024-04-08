@@ -139,6 +139,7 @@ function Calendar(props: Calendar<string>) {
                 datesSet={onDatesSet}
                 viewDidMount={(viewMount) => viewRoot.current = viewMount.el}
                 height='auto'
+                weekNumbers={true}
             />
             {isLoadingOverlay}
         </>
