@@ -5,8 +5,8 @@ import { NewPopupElement } from './popup-element';
 import { usePopupState } from './popup-manager';
 
 interface SyncedPopup {
-    key: string,
     identity: object,
+    overlay?: boolean,
     children?: ReactNode
 }
 
@@ -16,7 +16,7 @@ const closePopupPatch = {
     headers: {"x-r-action": "close"}    
 };
 
-function SyncedPopup({ identity, children }: SyncedPopup) {
+function SyncedPopup({ identity, overlay, children }: SyncedPopup) {
     // Popup opening
     const [isOpened, toggle] = usePopupState(identity);
     useLayoutEffect(() => { toggle(true) }, []);
@@ -27,7 +27,7 @@ function SyncedPopup({ identity, children }: SyncedPopup) {
         return () => { isOpened && sendClosePopupPatch(closePopupPatch); }
     }, [isOpened]);
 
-    return $(NewPopupElement, {identity}, children);
+    return $(NewPopupElement, { identity, overlay }, children);
 }
 
 export { SyncedPopup }

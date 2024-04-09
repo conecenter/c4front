@@ -7,17 +7,18 @@ import { useAddEventListener } from '../custom-hooks';
 import { isInstanceOfNode } from '../dom-utils';
 import { NoFocusContext } from '../labeled-element';
 import { usePopupState } from './popup-manager';
-
-interface PopupElement {
-    key?: string,
-    identity: object,
-    className?: string,
-    children?: ReactNode
-}
+import { PopupOverlay } from './popup-overlay';
 
 const DEFAULT_IDENTITY = { key: 'popup-element' };
 
-function NewPopupElement({ identity = DEFAULT_IDENTITY, className, children }: PopupElement) {
+interface PopupElement {
+    identity: object,
+    className?: string,
+    overlay?: boolean,
+    children?: ReactNode
+}
+
+function NewPopupElement({ identity = DEFAULT_IDENTITY, className, overlay: overlayProp, children }: PopupElement) {
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
 
     const path = usePath(identity);
@@ -41,18 +42,20 @@ function NewPopupElement({ identity = DEFAULT_IDENTITY, className, children }: P
             return () => {
                 if (isOpened && elementHasFocus(popupDrawer)) focusFocusableAncestor(popupParent.current);
             }
-    }, [isOpened]);
+        }, [isOpened]
+    );
 
     const popup = (
-        <div ref={setPopupElement}
-            className={clsx('popupEl', className)}
-            style={popupStyle}
-            onClick={(e) => e.stopPropagation()}
-            tabIndex={-1}
-            data-path={path}
-        >
-            {children}
-        </div>
+        <>
+            <div ref={setPopupElement}
+                className={clsx('popupEl', className)}
+                style={popupStyle}
+                onClick={(e) => e.stopPropagation()}
+                tabIndex={-1}
+                data-path={path}
+                children={children} />
+            <PopupOverlay popupElement={popupElement} overlayProp={!!overlayProp} />
+        </>
     );
 
     return (

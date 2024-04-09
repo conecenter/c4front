@@ -9,5 +9,6 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, c4elPath, c4tags}
     key: String,
     children: ViewRes,
     receiver: Receiver[C] = NoReceiver[C],
+    overlay: Boolean = false,
   ): ToChildPair
 }
