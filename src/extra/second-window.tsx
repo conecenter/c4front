@@ -1,13 +1,14 @@
 import React, { ReactNode, createContext, useContext, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import NewWindow from 'react-new-window'
 import { RootBranchContext } from "../main/vdom-hooks";
-import { ButtonElement } from "./button-element";
 
 const SECOND_WINDOW_NAME = 'second_window';
 
 interface SecondWindowContext {
     secondWindow: boolean,
-    toggleSecondWindow?: (on: boolean) => void
+    toggleSecondWindow?: (on: boolean) => void,
+    secondWindowRef?: HTMLDivElement | null
 }
 
 const SecondWindowContext = createContext<SecondWindowContext>({ secondWindow: false });
@@ -20,27 +21,37 @@ interface SecondWindowManager {
 
 function SecondWindowManager({ children }: SecondWindowManager) {
     const [secondWindow, setSecondWindow] = useState(false);
+    const [secondWindowRef, setSecondWindowRef] = useState<HTMLDivElement | null>(null);
 
-    const value = useMemo(() => ({ secondWindow, toggleSecondWindow: setSecondWindow }), [secondWindow]);
+    const value = useMemo(() => ({
+        secondWindow,
+        toggleSecondWindow: setSecondWindow,
+        secondWindowRef
+    }), [secondWindow, secondWindowRef]);
 
-    return <SecondWindowContext.Provider value={value} children={children} />;
+    return (
+        <SecondWindowContext.Provider value={value}>
+            {children}
+            {secondWindow &&
+                <NewWindow name={SECOND_WINDOW_NAME} title={document.title} onUnload={() => setSecondWindow(false)} >
+                    <div ref={setSecondWindowRef} className='secondWindowBox' />
+                </NewWindow>}
+        </SecondWindowContext.Provider>
+    );
 }
 
 
 interface SecondWindowComponent {
-    children: ReactNode
+    children?: ReactNode
 }
 
 function SecondWindowComponent({ children }: SecondWindowComponent) {
-    const { secondWindow, toggleSecondWindow } = useContext(SecondWindowContext);
-
-    return secondWindow
-        ? <NewWindow name={SECOND_WINDOW_NAME} onUnload={() => toggleSecondWindow?.(false)} children={children} />
-        : <>{children}</>;
+    const { secondWindowRef } = useContext(SecondWindowContext);
+    return secondWindowRef ? createPortal(children, secondWindowRef) : <>{children}</>;
 }
 
 
-function SecondWindowButton(props: ButtonElement) {
+function SecondWindowOpener({ children }: SecondWindowComponent) {
     const { secondWindow, toggleSecondWindow } = useContext(SecondWindowContext);
     const { isRoot } = useContext(RootBranchContext);
 
@@ -49,7 +60,11 @@ function SecondWindowButton(props: ButtonElement) {
     }
     const onClick = isRoot ? switchToSecondWindow : undefined;
 
-    return <ButtonElement {...props} onClick={onClick} />;
+    return (
+        <div tabIndex={-1} onClickCapture={onClick} className='secondWindowOpener' >
+            {children}
+        </div>
+    );
 }
 
-export { SecondWindowManager, SecondWindowComponent, SecondWindowButton }
+export { SecondWindowManager, SecondWindowComponent, SecondWindowOpener }
