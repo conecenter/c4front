@@ -7,6 +7,7 @@ import {Patch} from '../exchange/input-sync';
 import {useUserLocale} from '../locale';
 import {bg, de, da, et, enGB, lt, pl, ro, ru, uk, it} from 'date-fns/locale';
 import {useFocusControl} from '../focus-control';
+import type { Locale } from 'date-fns'
 
 interface IntlLocales {
   [name: string]: Locale

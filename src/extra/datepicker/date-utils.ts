@@ -1,5 +1,5 @@
 import {mapOption, None, nonEmpty, Option} from "../../main/option";
-import {utcToZonedTime, zonedTimeToUtc} from "date-fns-tz";
+import {toZonedTime, fromZonedTime} from "date-fns-tz";
 import {
     addDays,
     addHours,
@@ -36,12 +36,12 @@ interface DateSettings {
 }
 
 function getDate(timestamp: number, dateSettings: DateSettings): Option<Date> {
-    const date: Date = utcToZonedTime(new Date(timestamp), dateSettings.timezoneId);
+    const date: Date = toZonedTime(new Date(timestamp), dateSettings.timezoneId);
     return isValid(date) ? date : None
 }
 
 function getTimestamp(date: Date, dateSettings: DateSettings): number {
-    return getTime(zonedTimeToUtc(date, dateSettings.timezoneId))
+    return getTime(fromZonedTime(date, dateSettings.timezoneId))
 }
 
 function formatDate(date: Date, dateSettings: DateSettings): [string, string] {
@@ -303,7 +303,7 @@ function parseStringToDate(value: string, dateSettings: DateSettings): Option<nu
         if (month === undefined) return None
         const prototypeDate = getPrototypeDate()
         const newDate = changeDate(prototypeDate, tokens, time, month, dateSettings.timestampFormat)
-        return zonedTimeToUtc(newDate, dateSettings.timezoneId).getTime()
+        return fromZonedTime(newDate, dateSettings.timezoneId).getTime()
     } else return None
 }
 
