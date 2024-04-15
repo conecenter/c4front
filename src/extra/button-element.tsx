@@ -66,7 +66,7 @@ const ButtonElement = (props: ButtonElement) => {
 			key: "btn", ref: elem,
             onClick, title: props.hint, ...focusHtml,
             className: clsx(props.className, focusClass, noAction && 'noAction', markerClass),
-			style: disabled ? { opacity: "0.4" } : undefined,
+			style: disabled ? { opacity: "0.4", cursor: 'default' } : undefined,
 			onKeyDown: (e) => e.preventDefault()
 		},
 		textContent,
