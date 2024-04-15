@@ -35,7 +35,7 @@ const ButtonElement = (props: ButtonElement) => {
 	}, [changing])
 
     const onClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-        if (!disabled && (props.onClick || props.onChange)) {
+        if (!disabled && !noAction) {
             e.stopPropagation()
 			if (props.onClick) props.onClick(e)
 			else props.onChange?.({ target: { headers: { "x-r-action": "change" }, value: "1" } })
@@ -70,7 +70,7 @@ const ButtonElement = (props: ButtonElement) => {
 			key: "btn", ref: elem,
             onClick, title: props.hint, ...focusHtml,
             className: clsx(props.className, focusClass, noAction && 'noAction', markerClass),
-			style: disabled ? { opacity: "0.4" } : undefined,
+			style: disabled ? { opacity: "0.4", cursor: 'default' } : undefined,
 			onKeyDown: (e) => e.preventDefault()
 		},
 		textContent,
