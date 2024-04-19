@@ -27,12 +27,7 @@ const validateInput = (inputStr, regexStr, skipInvalidSymbols, upperCase) => {
 }
 
 class InputElementBase extends StatefulComponent {
-    setChanged(value) {
-        this.changed = value
-    }
-    getChanged() {
-        return this.changed
-    }
+    // getInitialState() { return { visibility: "" } }
     setFocus(focus) {
         if(!focus) return
         this.inp.focus()
@@ -127,7 +122,6 @@ class InputElementBase extends StatefulComponent {
     }
     onClear(){
         this.inp.value = ""
-        this.setChanged(true)
         if (this.props.onChange) this.props.onChange({ target: { headers: { "x-r-action": "change" }, value: this.inp.value }, inp: this.inp })
         if (this.inp != activeElement(this.inp)) this.props.onBlur?.()
     }
@@ -240,15 +234,10 @@ class InputElementBase extends StatefulComponent {
         let value = e.target.value
         if (this.props.uctext) value = value.toUpperCase();
         this.props.onChange({ target: { headers: { "x-r-action": "change" }, value }, inp: e.inp });
-        this.setChanged(true);
     }
     onBlur() {
-        if (this.props.onBlur && this.getChanged()) {
-            this.props.onChange?.({ target: { headers: { "x-r-action": "change" }, value: this.inp.value } });
-            this.props.onBlur?.();
-        }
+        this.props.onBlur?.();
         this.prevval = this.inp.value
-        this.setChanged(undefined)
     }
     /*onMouseDown(e) {
         if (!this.props.div) return
