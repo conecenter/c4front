@@ -5,6 +5,8 @@ import { Focusable } from './focus-control';
 import { InputsSizeContext } from "./dom-utils";
 import { VkInfoContext } from './ui-info-provider';
 
+const HEADERS_CHANGE = { headers: { "x-r-action": "change" } };
+
 class StatefulComponent extends React.Component {
 	constructor(props) {
 	  super(props)
@@ -233,10 +235,13 @@ class InputElementBase extends StatefulComponent {
         if (this.s !== null && this.s !== undefined) { this.k = this.s; this.s = null }
         let value = e.target.value
         if (this.props.uctext) value = value.toUpperCase();
-        this.props.onChange({ target: { headers: { "x-r-action": "change" }, value }, inp: e.inp });
+        this.props.onChange({ target: { ...HEADERS_CHANGE, value }, inp: e.inp });
     }
     onBlur() {
-        this.props.onBlur?.();
+        this.props.onBlur?.({
+            target: { ...HEADERS_CHANGE, value: this.inp.value },
+            replaceLastPatch: true
+        });
         this.prevval = this.inp.value
     }
     /*onMouseDown(e) {
