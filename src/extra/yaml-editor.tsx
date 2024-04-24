@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
-import { yaml } from '@codemirror/lang-yaml'
+import { yaml } from '@codemirror/lang-yaml';
 import { yamlSchema } from "codemirror-json-schema/yaml";
 import { usePatchSync, Patch } from './exchange/patch-sync';
 import { JSONSchema7 } from "json-schema";
-import { linter, lintGutter, Diagnostic } from "@codemirror/lint"
+import { linter, lintGutter, Diagnostic } from "@codemirror/lint";
 import { load, YAMLException } from 'js-yaml';
 
 const changeToPatch = (ch: string): Patch => ({ value: ch });
@@ -35,8 +35,6 @@ function YamlEditor({ identity, value, jsonSchema }: YamlEditor) {
         }
         return diagnostics;
     }
-
-    console.log('rerender YamlEditor', { value, currentState });
 
     return <CodeMirror
         value={currentState}
