@@ -4,7 +4,7 @@ import { yaml } from '@codemirror/lang-yaml'
 import { yamlSchema } from "codemirror-json-schema/yaml";
 import { usePatchSync, Patch } from './exchange/patch-sync';
 import { JSONSchema7 } from "json-schema";
-import { linter, Diagnostic } from "@codemirror/lint"
+import { linter, lintGutter, Diagnostic } from "@codemirror/lint"
 import { load, YAMLException } from 'js-yaml';
 
 const changeToPatch = (ch: string): Patch => ({ value: ch });
@@ -40,7 +40,7 @@ function YamlEditor({ identity, value, jsonSchema }: YamlEditor) {
 
     return <CodeMirror
         value={currentState}
-        extensions={[yamlSupport, schemaExtension, linter(lintErrors)]}
+        extensions={[yamlSupport, schemaExtension, linter(lintErrors), lintGutter()]}
         onBlur={() => wasChanged && sendFinalChange(currentState)}
         onChange={(value) => sendTempChange(value)} />
 }
