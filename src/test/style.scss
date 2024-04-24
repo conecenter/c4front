@@ -1366,3 +1366,98 @@ div.grid {
     height: 100% !important;
   }
 }
+
+/************** Image Viewer **************/
+@import "yet-another-react-lightbox/styles.css";
+@import "yet-another-react-lightbox/plugins/captions.css";
+@import "yet-another-react-lightbox/plugins/counter.css";
+@import "yet-another-react-lightbox/plugins/thumbnails.css";
+
+.yarl__root {
+    --yarl__portal_zindex: 50000;
+    --yarl__counter_top: auto;
+    --yarl__counter_bottom: 0;
+    --yarl__counter_filter: none;
+    --yarl__counter_padding: 0;
+    --yarl__container_background_color: var(--color-body);
+    --yarl__thumbnails_container_background_color: var(--color-body);
+    --yarl__thumbnails_thumbnail_background: var(--color-body);
+    --yarl__thumbnails_thumbnail_padding: 0;
+    --yarl__thumbnails_thumbnail_border_color: var(--color-dark-headerColor);
+    --yarl__thumbnails_thumbnail_active_border_color: var(--color-primaryColor);
+    --yarl__color_button: var(--textColor-body);
+    --yarl__color_button_disabled: var(--textColor-body);
+    --yarl__color_button_active: var(--textColor-body);
+    --yarl__slide_captions_container_background: var( --color-headerColor);
+    --yarl__slide_title_color: var(--textColor-body);
+    --yarl__button_filter: none;
+    --yarl__thumbnails_thumbnail_border_radius: 0;
+
+    .yarl__button:disabled {
+        display: none;
+    }
+
+    .yarl__thumbnails_thumbnail_active {
+        border-width: 0.15em;
+    }
+
+    .thumbnailImage {
+        max-width: min(1280px, 100%);
+        max-height: min(720px, 100%);
+    }
+
+    .thumbnailTitle {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        text-overflow: ellipsis;
+        background: inherit;
+        overflow: hidden;
+        width: 100%;
+        font-size: 0.9em;
+        direction: rtl;
+        box-sizing: border-box;
+        padding: 0.1em 0.1em 0 0;
+    }
+}
+
+.inlineImageViewer {
+    --yarl__button_padding: 4px;
+    --yarl__navigation_button_padding: 4px;
+    --yarl__slide_captions_container_padding: 10px;
+    --yarl__slide_title_font_size: 1em;
+    --yarl__toolbar_padding: 0 0.2em;
+    --yarl__thumbnails_thumbnail_gap: 0.5em;
+    --yarl__thumbnails_container_padding: 0.4em 0 0;
+
+    width: 100%;
+    max-height: 80vh;
+    aspect-ratio: 3 / 2;
+    margin: 0.2em 0;
+    flex-grow: 1;
+
+    @media (orientation: portrait) {
+        aspect-ratio: 2 / 3;
+    }
+
+    .yarl__container {
+        border: 1px solid var(--color-dark-headerColor);
+    }
+
+    .yarl__slide {
+        padding: 2.5em 0 0;
+    }
+
+    button {
+        margin: 0;
+    }
+
+    .yarl__navigation_next, .yarl__navigation_prev {
+        background: rgb(0 0 0 / 0.2);
+        color: white !important;
+    }
+
+    &:is(.groupBox > *) {
+        width: min(90vw, 750px);
+    }
+}

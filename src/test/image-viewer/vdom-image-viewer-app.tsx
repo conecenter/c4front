@@ -4,31 +4,35 @@ import {createSyncProviders} from "../../main/vdom-hooks";
 import {ImageViewer} from "../../extra/image-viewer/image-viewer";
 
 function App() {
-    const [open, setOpen] = useState(false);
+    const [mainSet, setMainSet] = useState(true);
 
-    const slides = [
-      { src: "./left.jpg", title: 'Left Side' },
-      { src: "./back.jpg", title: 'Back' },
-      { src: "./photo.jpg", title: 'Front' }
-    ];
+    const slides = mainSet
+      ? [
+        { src: "./left.jpg", title: 'L', srcId: '1' },
+        { src: "./back.jpg", title: 'B', srcId: '2' }
+      ]
+      : [
+        { src: "./left-2.jpg", title: 'C', srcId: '3' },
+        { src: "./back-2.jpg", title: 'B', srcId: '4' }
+      ];
     
     const children = (
       <>
-        <button type="button" onClick={() => setOpen(true)}>
-          Open Lightbox
-        </button>
-        
-        {/*<ImageViewer key="test" identity={{parent: "test"}} index={1} slides={slides} />*/}
+        <div style={{ width: '600px' }}>
+          <ImageViewer identity={{parent: "test"}} slides={slides} position="inline" />
+        </div>
+        <button onClick={() => setMainSet(!mainSet)}>Switch</button>
       </>
     );
 
     const sender = {
-        enqueue: (identity: any, patch: any) => console.log(patch)
+        enqueue: (identity: object, patch: any) => console.log(patch)
     }
     const ack: boolean | null = null;
+    const branchKey = 'abc';
     const isRoot = true;
     
-    return createSyncProviders({sender, ack, isRoot, children});
+    return createSyncProviders({sender, ack, branchKey, isRoot, children});
 }
 
 const containerElement = document.createElement("div");

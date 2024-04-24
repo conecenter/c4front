@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
-import Lightbox, { ControllerRef, CloseIcon, IconButton, SlideImage } from "yet-another-react-lightbox";
+import Lightbox, { ControllerRef, CloseIcon, IconButton, ImageSlide, RenderThumbnailProps } from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
 import Counter from "yet-another-react-lightbox/plugins/counter";
 import Inline from "yet-another-react-lightbox/plugins/inline";
@@ -99,7 +99,7 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
                         buttonPrev: () => null,
                         buttonNext: () => null
                     },
-                    thumbnail: ({ slide }) => <Thumbnail slide={slide} />
+                    thumbnail: (props) => <Thumbnail {...props} />
                 }}
                 toolbar={{ buttons: [closeButton, zipButton] }}
                 fullscreen={{ auto: !inlinePos }}
@@ -108,11 +108,11 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
     );
 }
 
-function Thumbnail({ slide }: { slide: SlideImage }) {
-    const { src, title } = slide;
+function Thumbnail(props: RenderThumbnailProps) {
+    const { src, title } = props.slide;
     return (
         <>
-            <img className="yarl__slide_image thumbnailImage" src={src} />
+            <ImageSlide key={src} {...props} />
             <span className="thumbnailTitle">{title || src}</span>
         </>
     );
