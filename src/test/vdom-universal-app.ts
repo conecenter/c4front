@@ -1,24 +1,24 @@
 import ReactDOM from "react-dom";
 import { createElement as $ } from "react";
 import { createSyncProviders } from "../main/vdom-hooks";
-import { FlagElement } from "../extra/flag-element";
+import { ScalingElement } from "../extra/scaling-element";
 
 function App() {
-    const child = $('div', {style: { maxWidth: '300px', margin: '2em', fontSize: '2.5em' }},
-        $(FlagElement, {
-            identity: { key: 'test' },
-            imageSrc: './images/denmark.svg',
-            name: 'DK'
-        })
+    const child = $('div', { style: { display: 'flex', flexDirection: 'column' }},
+        $(ScalingElement, { scale: 3 },
+            $('span', null, 'Hello, world!'),
+            $('span', null, 'Hello, world!')
+        )
     );
     const sender = {
-        enqueue: (identity: any, patch: any) => console.log(patch),
+        enqueue: (identity: object, patch: any) => console.log(patch),
         ctxToPath: () => '/test'
     };
     const ack: boolean | null = null;
+    const branchKey = 'abc';
     const isRoot = true;
 
-    return createSyncProviders({sender, ack, isRoot, children: child});
+    return createSyncProviders({sender, ack, branchKey, isRoot, children: child});
 }
 
 const containerElement = document.createElement("div");
