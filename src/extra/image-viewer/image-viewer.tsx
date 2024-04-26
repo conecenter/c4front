@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import clsx from "clsx";
-import Lightbox, { ControllerRef, CloseIcon, IconButton, ImageSlide, RenderThumbnailProps } from "yet-another-react-lightbox";
+import Lightbox, { ControllerRef, CloseIcon, IconButton } from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
 import Counter from "yet-another-react-lightbox/plugins/counter";
 import Inline from "yet-another-react-lightbox/plugins/inline";
@@ -9,6 +9,7 @@ import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
 import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
 import Download from "yet-another-react-lightbox/plugins/download";
 import { Patch, usePatchSync } from "../exchange/patch-sync";
+import { Thumbnail, thumbnailsProps, useThumbnailsNumber } from "./image-viewer-thumbnails";
 import { ZipButton } from "./zip-button";
 
 interface Slide {
@@ -30,8 +31,6 @@ const patchToChange = (p: Patch) => p.value;
 const applyChange = (prev: string, ch: string) => ch || prev;
 
 function ImageViewer({identity, current: state = '', slides = [], position }: ImageViewer) {
-    const [bodyRef, setBodyRef] = useState<HTMLElement>();
-
     const {currentState: currentSrcId, sendTempChange, sendFinalChange} =
         usePatchSync(identity, 'slideChange', state, false, s => s, changeToPatch, patchToChange, applyChange);
 
@@ -44,6 +43,8 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
 
     // The lightbox reads this property when it opens and when slides change
     const startingIndex = useMemo(() => getCurrentSlideIndex(), [slidesMemo]);
+
+    const { thumbnailsNumber, getThumbsContainer } = useThumbnailsNumber();
 
     useEffect(
         function onServerSlideChange() {
@@ -78,16 +79,15 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
     const zipButton = <ZipButton key='zip-button' slides={slides} />;
 
     return (
-        <div ref={elem => setBodyRef(elem?.ownerDocument.body)} className={clsx(inlinePos && 'inlineImageViewer')} >
+        <div ref={getThumbsContainer} className={clsx(inlinePos && 'inlineImageViewer')} >
             <Lightbox
                 open={true}
                 slides={slidesMemo}
                 index={startingIndex}
-                carousel={{ finite: true, preload: 3 }}
+                carousel={{ finite: true, preload: thumbnailsNumber }}
                 controller={{ ref: controller }}
-                portal={{ root: bodyRef }}
                 plugins={[Captions, Counter, Fullscreen, Zoom, Download, Thumbnails, ...inlinePos ? [Inline] : []]}
-                thumbnails={{ vignette: false }}
+                thumbnails={thumbnailsProps}
                 zoom={{
                     wheelZoomDistanceFactor: 500,
                     pinchZoomDistanceFactor: 200,
@@ -105,16 +105,6 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
                 fullscreen={{ auto: !inlinePos }}
             />
         </div>
-    );
-}
-
-function Thumbnail(props: RenderThumbnailProps) {
-    const { src, title } = props.slide;
-    return (
-        <>
-            <ImageSlide key={src} {...props} />
-            <span className="thumbnailTitle">{title || src}</span>
-        </>
     );
 }
 
