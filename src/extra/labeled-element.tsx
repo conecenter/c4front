@@ -57,8 +57,7 @@ function LabeledElement({ identity, path, label, sizes, accented, clickable, lab
     const style: CSSProperties = {
         flexGrow: sizes?.max ? 1 : undefined,
         ...sizes && {
-            minWidth: 'min-content',
-            flexBasis: `${sizes.min}em`,
+            minWidth: `${sizes.min}em`,
             maxWidth: sizes.max ? `${sizes.max}em` : undefined
         },
         ...clickable && { cursor: 'pointer' },
