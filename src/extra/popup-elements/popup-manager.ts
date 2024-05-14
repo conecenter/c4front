@@ -1,4 +1,4 @@
-import { createElement as $, createContext, useMemo, useRef, useState, useContext, useCallback } from "react";
+import { createElement as $, createContext, useMemo, useState, useContext, useCallback } from "react";
 import type { ReactNode, Dispatch, SetStateAction } from "react";
 import { SyncedPopup } from "./synced-popup";
 import { NewPopupElement } from "./popup-element";
@@ -15,11 +15,14 @@ interface PopupManager {
 
 function PopupManager({children}: PopupManager) {
     const [popup, setPopup] = useState<string>('');   // TODO: sync
+    const [popupDrawerRef, setPopupDrawerRef] = useState<HTMLElement>();
 
-    const popupDrawerRef = useRef<HTMLElement | undefined>();
-    const popupDrawer = $('div', {ref: popupDrawerRef});
+    const popupDrawer = $('div', {ref: setPopupDrawerRef});
 
-    const value: PopupContext = useMemo(() => [popup, setPopup, popupDrawerRef.current], [popup]);
+    const value: PopupContext = useMemo(
+        () => [popup, setPopup, popupDrawerRef],
+        [popup, popupDrawerRef]
+    );
 
     return $(PopupContext.Provider, { value }, children, popupDrawer);
 }
@@ -37,4 +40,4 @@ const usePopupState = (identity: object): PopupState => {
 
 
 export const popupComponents = { PopupManager, NewPopupElement, SyncedPopup };
-export { PopupManager, usePopupState }
+export { PopupManager, usePopupState, PopupContext }
