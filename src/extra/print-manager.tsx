@@ -7,7 +7,7 @@ PrintContext.displayName = 'PrintContext';
 
 interface PrintManager {
     key: string,
-    identity: Object,
+    identity: object,
     children: ReactNode,
     printChildren: ReactNode,
     printMode: boolean
@@ -45,7 +45,9 @@ function PrintManager({ identity, children, printMode: state, printChildren }: P
             <div ref={setElem} className='mainContent'>{children}</div>
             {isPrinting && (
                 <div className='printContent'>
-                    <PrintContext.Provider value={true} children={printMode ? printChildren : children} />
+                    <PrintContext.Provider value={true}>
+                        printMode ? printChildren : children
+                    </PrintContext.Provider>
                 </div>
             )}
         </>

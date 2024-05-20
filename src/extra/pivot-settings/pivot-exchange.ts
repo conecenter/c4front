@@ -1,7 +1,7 @@
 import {PivotField, PivotSettingsPartClass, PivotSettingsProps, PivotSettingsState} from "./pivot-settings";
 import {DATA_ID, PartNames} from "./pivot-const";
 import update, {extend} from "immutability-helper";
-import {XYCoord} from "react-dnd/dist/types/types/monitors";
+import type {XYCoord} from "react-dnd/dist/types/monitors";
 import {Patch, PatchHeaders} from "../exchange/patch-sync";
 import {isPivotFieldsGroup, PivotFieldsGroup} from "./pivot-settings";
 
@@ -178,7 +178,7 @@ const applyPivotChange: (prev: PivotSettingsState, ch: PivotChange) => PivotSett
         [ch.from]: {$filterOut: ch.draggedItemId},
         [ch.to]: {$push: find(ch.draggedItemId, prev[ch.from as PivotSettingsPartClass])}
       })
-    case "reorder":
+    case "reorder": {
       const item = find(ch.draggedItemId, prev[ch.in as PivotSettingsPartClass])
       // @ts-ignore
       const draggedList = update(prev[ch.in as PivotSettingsPartClass], {$filterOut: ch.draggedItemId})
@@ -186,8 +186,8 @@ const applyPivotChange: (prev: PivotSettingsState, ch: PivotChange) => PivotSett
       const indexOffset = ch.dropLeft ? 0 : 1
       draggedList.splice(targetInd + indexOffset, 0, ...item)
       return update(prev, {[ch.in]: {$set: draggedList}})
+    }
     case "select":
-
       return update(prev, {[ch.location]: {$select: ch.itemId}})
     default:
       return prev

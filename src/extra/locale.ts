@@ -1,6 +1,5 @@
 import {Context, createContext, createElement, ReactNode, useContext, useMemo} from "react";
 import {getOrElse, None, Option, toOption} from "../main/option";
-// @ts-ignore
 import TrieSearch from "trie-search";
 
 interface WeekDay {
@@ -20,15 +19,22 @@ interface DateTimeFormat {
     pattern: string
 }
 
+interface NumberFormat {
+    thousandSeparator: string
+    decimalSeparator: string
+}
+
 interface Locale {
     timezoneId: string
     shortName: string
+    lang: string
     weekDays: WeekDay[]
     months: Month[]
     dateTimeFormats: DateTimeFormat[]
     defaultDateTimeFormatId: number
     btnNowText: string,
-    btnCloseText: string
+    btnCloseText: string,
+    numberFormat: NumberFormat
 }
 
 interface TextFormatToken {
@@ -156,6 +162,7 @@ function getDateTimeFormat(formatId: number, locale: ExtendedLocale): ExtendedDa
 class DefaultLocale implements Locale {
     timezoneId: string = "UTC"
     shortName: string = "en"
+    lang: string = "en"
     months: Month[] = [
         {id: 0, shortName: "Jan", fullName: "January"},
         {id: 1, shortName: "Feb", fullName: "February"},
@@ -190,6 +197,10 @@ class DefaultLocale implements Locale {
     defaultDateTimeFormatId: number = 0
     btnNowText = 'Now'
     btnCloseText = 'Close'
+    numberFormat: NumberFormat = {
+        thousandSeparator: ',',
+        decimalSeparator: '.'
+    }
 }
 
 const UserLocaleContext: Context<ExtendedLocale> = createContext<ExtendedLocale>(getExtendedLocale(new DefaultLocale()))
@@ -201,9 +212,9 @@ interface UserLocaleProviderProps {
     children: ReactNode[]
 }
 
-function UserLocaleProvider({key, children, locale}: UserLocaleProviderProps) {
-    const extendedLocale = useMemo(()=>getExtendedLocale(locale),[locale])
-    return createElement(UserLocaleContext.Provider, {key: key, value: getExtendedLocale(locale)}, children)
+function UserLocaleProvider({children, locale}: UserLocaleProviderProps) {
+    const extendedLocale = useMemo(() => getExtendedLocale(locale), [locale])
+    return createElement(UserLocaleContext.Provider, {value: extendedLocale}, children)
 }
 
 export type {

@@ -20,7 +20,7 @@ interface ColorProps {
     style?: CSSProperties
 }
 
-export function colorToProps<T>(color?: ColorDef): ColorProps {
+export function colorToProps(color?: ColorDef): ColorProps {
     switch (color?.tp) {
         case "p":
             return {

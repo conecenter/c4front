@@ -6,7 +6,7 @@ import {CLICKED_CLASSNAME, INLINE_BUTTON_CLASSNAME, INLINE_CHIP_CLASSNAME} from 
 
 interface InlineButton {
   key: string,
-  identity: Object
+  identity: object
   receiver: boolean
   color: ColorDef
   children: ReactNode[]
@@ -25,7 +25,7 @@ function InlineButton({key, identity, receiver, color, children}: InlineButton) 
 
 interface InlineChip {
   key: string
-  identity: Object
+  identity: object
   receiver: boolean
   color: ColorDef
   children: ReactNode[]

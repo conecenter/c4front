@@ -120,7 +120,7 @@ export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, spanRi
     const gridRow = argGridRow || getGridRow({ rowKey, rowKeyMod })
     const gridColumn = argGridColumn || getGridCol({ colKey }) + (spanRightTo ? " / "+spanRightTo : "")
     const align = argClassNames?.includes('gridGoRight') ? 'r' : 'l';
-    const {hoverStyle, hoverClass, ...hoverProps} = useHoverExpander(path, ref, align, needsHoverExpander);
+    const {hoverStyle, hoverClass, ...hoverProps} = useHoverExpander(ref, align, needsHoverExpander);
     const style = {...props.style, gridRow, gridColumn, ...hoverStyle}
     const expanderProps = expanding === "expander" && {
         'data-expander': expander,
@@ -136,11 +136,10 @@ const colKeysOf = children => children.map(c => c.colKey)
 const getGidTemplateRows = rows => rows.map(o => `[${getGridRow(o)}] auto`).join(" ")
 const getGridTemplateColumns = (columns,fixedCellsSize) => {
     const lastVisibleCol = columns.length - countServiceCols(columns) === 1
-    return columns.map(col => {
+    return columns.map((col, i) => {
         const key = getGridCol(col)
-        const getMaxStr = (width) =>
-            width.tp === "bound" ? `${width.max}em` :
-            width.tp === "unbound" ? "auto" : never()
+        const getMaxStr = (width) => width.tp === "unbound" || i === columns.length - 1 ? "auto"
+            : width.tp === "bound" ? `${width.max}em` : never()
         const width = (fixedCellsSize && !lastVisibleCol) || isServiceCol(col.colKey)
             ? `minmax(${col.width.min}em,${getMaxStr(col.width)})` : 'auto'
         return `[${key}] ${width}`
@@ -200,8 +199,8 @@ const useScrollbarWidth = (outerWidth,fixedCellsSize) => {
     const scrollbarWidth = useRef(0)
     const calcScrollbarWidth = elem => {
         const {fontSize} = getComputedStyle(elem)
-        const {defaultView: win, body} = elem.ownerDocument
-        return (win.innerWidth - body.clientWidth) / parseFloat(fontSize)
+        const {defaultView: win, documentElement} = elem.ownerDocument
+        return (win.innerWidth - documentElement.clientWidth) / parseFloat(fontSize)
     }
     const ref = useCallback(gridElement=>{
         if (gridElement) scrollbarWidth.current = calcScrollbarWidth(gridElement)
@@ -243,10 +242,10 @@ const useGridKeyboardAction = identity => {
 }
 
 const useValueToServer = (identity, value) => {
-    const isRootBranch = useContext(RootBranchContext)
+    const {isRoot} = useContext(RootBranchContext)
     const [patches, enqueuePatch] = useSync(identity)
     useEffect(() => {
-        if (isRootBranch) enqueuePatch({ value, skipByPath: true, retry: true })
+        if (isRoot) enqueuePatch({ value, skipByPath: true, retry: true })
     }, [value, enqueuePatch])
 }
 

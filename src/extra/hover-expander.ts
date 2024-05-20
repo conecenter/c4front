@@ -1,32 +1,31 @@
-import { MutableRefObject, useContext, useEffect, useMemo, useState } from "react";
+import { MutableRefObject, useMemo, useRef, useState } from "react";
 import { useAddEventListener } from "./custom-hooks";
-import { PathContext } from "./focus-control";
 import { FlexibleAlign } from "./view-builder/flexible-api";
 
 export const useHoverExpander = (
-    path: string,
     ref: MutableRefObject<HTMLDivElement | null>,
     align: FlexibleAlign,
     needsHoverExpander: boolean
 ) => {
     const [hovered, setHovered] = useState<HTMLElement | null>(null);
+
+    const focusInside = useRef(false);
+    const onFocus = () => {
+        focusInside.current = true;
+        setHovered(ref.current);
+    }
+    const onBlur = () => {
+        focusInside.current = false;
+        setHovered(null);
+    }
+
     let needAction = false;
-
-    // Hover when focus inside the cell
-    const currentPath = useContext(PathContext);
-    const focusInside = currentPath.includes(path);
-    useEffect(() => {
-        if (focusInside && !hovered) setHovered(ref.current);
-        else if (!focusInside && hovered) setHovered(null);
-    }, [focusInside]);
-
     const onMouseEnter = () => {
         needAction = true;
         setTimeout(() => needAction && setHovered(ref.current), 50);
     }
-
     const onMouseLeave = () => {
-        if (focusInside) return;
+        if (focusInside.current) return;
         needAction = false;
         setHovered(null);
     }
@@ -35,7 +34,7 @@ export const useHoverExpander = (
     const doc = ref.current?.ownerDocument;
     const onTouchStart = (e: TouchEvent) => {
         if (ref.current?.contains(e.target as Node) && !hovered) setHovered(ref.current);
-        else if (!ref.current?.contains(e.target as Node) && hovered && !focusInside) setHovered(null);
+        else if (!ref.current?.contains(e.target as Node) && hovered && !focusInside.current) setHovered(null);
     }
     useAddEventListener(doc, 'touchstart', onTouchStart);
 
@@ -56,13 +55,13 @@ export const useHoverExpander = (
         }
         return { translate: offset };
     }
-    
+
     const hoverStyle = useMemo(() => getOffset(), [hovered]);
 
     return needsHoverExpander ? {
         hoverStyle,
         hoverClass: hoverStyle && 'hoverExpander',
-        onMouseEnter,
-        onMouseLeave
+        onMouseEnter, onMouseLeave,
+        onFocus, onBlur
     } : {};
 }

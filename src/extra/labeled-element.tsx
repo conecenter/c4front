@@ -12,7 +12,7 @@ NoFocusContext.displayName = "NoFocusContext";
 
 interface LabeledElement {
     key: string,
-    identity: Object,
+    identity: object,
     path: string,
     label: string,
     sizes?: FlexibleSizes,
@@ -57,8 +57,7 @@ function LabeledElement({ identity, path, label, sizes, accented, clickable, lab
     const style: CSSProperties = {
         flexGrow: sizes?.max ? 1 : undefined,
         ...sizes && {
-            minWidth: 'min-content',
-            flexBasis: `${sizes.min}em`,
+            minWidth: `${sizes.min}em`,
             maxWidth: sizes.max ? `${sizes.max}em` : undefined
         },
         ...clickable && { cursor: 'pointer' },
@@ -98,7 +97,7 @@ function hasSingleChildlessFocusable(elem: HTMLDivElement | null) {
     if (focusableDescendants.length === 1) return true;
 
     let count = 0;
-    for (let elem of focusableDescendants) {
+    for (const elem of focusableDescendants) {
         const focusableInside = elem.querySelector(SEL_FOCUSABLE_ATTR);
         if (!focusableInside) {
             count++;

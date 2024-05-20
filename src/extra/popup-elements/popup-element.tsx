@@ -1,20 +1,28 @@
 import React, { ReactNode, createContext, useCallback, useContext, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { usePopupPos } from '../../main/popup';
+import { usePath } from '../../main/vdom-hooks';
 import { SEL_FOCUSABLE_ATTR } from '../focus-module-interface';
 import { PopupContext } from './popup-context';
 import { usePopupState } from './popup-manager';
 import { useAddEventListener } from '../custom-hooks';
 import { isInstanceOfNode } from '../dom-utils';
+import { NoFocusContext } from '../labeled-element';
+import { PopupOverlay } from './popup-overlay';
+
+const DEFAULT_IDENTITY = { key: 'popup-element' };
 
 interface PopupElement {
-    key?: string,
+    identity: object,
     popupKey: string,
+    overlay?: boolean,
     children?: ReactNode
 }
 
-function PopupElement({ popupKey, children }: PopupElement) {
+function PopupElement({ identity = DEFAULT_IDENTITY, popupKey, overlay: overlayProp, children }: PopupElement) {
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
+    const path = usePath(identity);
+
     const { isOpened, toggle } = usePopupState(popupKey);
 
     const popupAncestorKey = useContext(PopupAncestorKeyContext);
@@ -58,11 +66,13 @@ function PopupElement({ popupKey, children }: PopupElement) {
                     style={popupStyle}
                     onClick={(e)=>e.stopPropagation()}
                     tabIndex={-1}
+                    data-path={path}
                     children={children}
                 />,
                 popupDrawer
             )}
             <span ref={setPopupParent} style={{display: 'none'}}></span>
+            <PopupOverlay popupElement={popupElement} overlayProp={!!overlayProp} />
         </PopupAncestorKeyContext.Provider>
     );
 }

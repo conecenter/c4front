@@ -7,6 +7,7 @@ import {Patch} from '../exchange/input-sync';
 import {useUserLocale} from '../locale';
 import {bg, de, da, et, enGB, lt, pl, ro, ru, uk, it} from 'date-fns/locale';
 import {useFocusControl} from '../focus-control';
+import type { Locale } from 'date-fns'
 
 interface IntlLocales {
   [name: string]: Locale
@@ -15,7 +16,7 @@ const INTL_LOCALES: IntlLocales = { bg, de, daDK: da, et, en: enGB, lt, pl, rmRO
 
 interface MainMenuClock {
   key: string,
-  identity: Object,
+  identity: object,
   serverTime: string,
   timestampFormatId: number,
   path: string

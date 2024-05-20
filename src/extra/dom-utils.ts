@@ -96,15 +96,9 @@ function formatTo3Digits(obj: LineSegmentCoords) {
     return obj;
 }
 
-function elementHasFocus(element?: HTMLElement | null) {
-	if (!element) return false;
-	const activeElement = element.ownerDocument.activeElement;
-	return element.contains(activeElement);
-}
-
 const isInstanceOfNode = (elem: EventTarget | null): elem is Node => !!elem && 'nodeType' in elem;
 
 const InputsSizeContext = createContext(20);
 InputsSizeContext.displayName = 'InputsSizeContext';
 
-export { findClosestNode, InputsSizeContext, elementHasFocus, isInstanceOfNode };
+export { findClosestNode, InputsSizeContext, isInstanceOfNode };

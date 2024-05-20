@@ -55,17 +55,19 @@ function getOnKeyDown(
     ): (event: KeyboardEvent<HTMLInputElement>) => void {
     return (e: React.KeyboardEvent<HTMLInputElement>) => {
         switch (e.key) {
-            case ENTER_KEY:
+            case ENTER_KEY: {
                 e.stopPropagation();
                 // Async "cTab" event dispatch to fix edit icon blinking
                 const currTarget = e.currentTarget;
                 setTimeout(() => currTarget.dispatchEvent(new CustomEvent("cTab", { bubbles: true })));
                 break;
+            }
             case ARROW_DOWN_KEY:
                 if (e.altKey) {
                     getOnPopupToggle(currentDateOpt, currentState, dateSettings, sendTempChange)();
                     break;
                 }
+                // fall through
             case ARROW_UP_KEY:
                 if (nonEmpty(currentDateOpt) && nonEmpty(dateFormat)) {
                     const cycleThroughout = !e.ctrlKey;
@@ -85,7 +87,7 @@ function getOnKeyDown(
                     e.stopPropagation();
                 }
                 break;
-            case ESCAPE_KEY:
+            case ESCAPE_KEY: {
                 const inputVal = memoInputValue.current;
                 sendTempChange(
                     getOrElse(
@@ -98,6 +100,7 @@ function getOnKeyDown(
                 );
                 const closestWrapper = inputBoxRef.current?.parentElement?.closest('.focusWrapper') as HTMLElement | null;
                 setTimeout(() => closestWrapper?.focus());
+            }
         }
     }
 }

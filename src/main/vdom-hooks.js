@@ -7,13 +7,13 @@ const NoContext = createContext()
 const AckContext = createContext()
 AckContext.displayName = "AckContext"
 
-/** @typedef {{ enqueue: Function, ctxToPath: (ctx?: Object) => string }} Sender */
+/** @typedef {{ enqueue: Function, ctxToPath: (ctx?: Object) => string, busyFor: (qKey: string) => number }} Sender */
 /** @type {React.Context<Sender>} */
 const SenderContext = createContext()
 SenderContext.displayName = "SenderContext"
 
-/** @type {React.Context<boolean>} */
-export const RootBranchContext = createContext(true)
+/** @type {React.Context<{isRoot: boolean, branchKey: string}>} */
+export const RootBranchContext = createContext({isRoot: true, branchKey: ''})
 RootBranchContext.displayName = 'RootBranchContext'
 
 const nonMerged = ack => aPatch => !(aPatch && ack && aPatch.sentIndex <= ack.index)
@@ -40,10 +40,11 @@ export const useSync = identity => {
     return [patches,enqueuePatch]
 }
 
-export function createSyncProviders({sender,ack,isRoot,children}){
+export function createSyncProviders({sender,ack,isRoot,branchKey,children}){
+    const rootContextValue = useMemo(() => ({isRoot, branchKey}),[isRoot, branchKey])
     return createElement(SenderContext.Provider, {value:sender},
         createElement(AckContext.Provider, {value:ack}, 
-            createElement(RootBranchContext.Provider, {value: isRoot}, children))
+            createElement(RootBranchContext.Provider, {value:rootContextValue}, children))
     )
 }
 

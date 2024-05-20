@@ -15,8 +15,8 @@ import {
 } from '../../main/keyboard-keys';
 import { BindGroupElement } from '../binds/binds-elements';
 import { useBinds } from '../binds/key-binding';
+import { SVGElement } from '../../main/image';
 
-const ARROW_DOWN_URL = '/mod/main/ee/cone/core/ui/c4view/arrow-down.svg';
 const ARROW_DOWN_ICON = (
     <svg xmlns="http://www.w3.org/2000/svg" className='menuFolderIcon' fill="currentColor" viewBox="0 0 18000 18000" width="18000" height="18000">
         <g><path d="M1646 6819c-546,-544 -549,-1428 -5,-1974 543,-547 1427,-549 1974,-6l5385 5362 5385 -5362c547,-543 1431,-541 1974,6 544,546 541,1430 -5,1974l-6370 6342c-544,541 -1423,542 -1968,0l-6370 -6342z"/></g>
@@ -25,7 +25,7 @@ const ARROW_DOWN_ICON = (
 
 interface MenuFolderItem {
     key: string,
-	identity: Object,
+	identity: object,
     name: string,
     shortName?: string,
     current: boolean,
@@ -74,6 +74,7 @@ function MenuFolderItem(props: MenuFolderItem) {
                     if (onArrowLeftRight && menuFolder) onArrowLeftRight(path, menuFolder, e.key, opened);
                     break;
                 }
+                // fall through
             case ENTER_KEY:
                 if (!opened && menuFolder) {
                     keyboardOperation.current = true;
@@ -87,6 +88,7 @@ function MenuFolderItem(props: MenuFolderItem) {
                     if (onArrowLeftRight && menuFolder) onArrowLeftRight(path, menuFolder, e.key, opened);
                     break;
                 }
+                // fall through
             case ESCAPE_KEY:
                 if (opened) {
                     keyboardOperation.current = true;
@@ -126,7 +128,7 @@ function MenuFolderItem(props: MenuFolderItem) {
 
             <BindGroupElement bindSrcId={bindSrcId} groupId={groupId} showBtn={true} >
 
-                {icon && <img src={icon} className='rowIconSize' />}
+                {icon && <SVGElement url={icon} className='menuItemIcon' />}
                 <span className={clsx(shortName && 'longName')}>{name}</span>
                 {shortName &&
                     <span className='shortName'>{shortName}</span>}

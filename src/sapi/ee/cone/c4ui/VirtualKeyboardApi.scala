@@ -23,6 +23,7 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
   @c4el("VirtualKeyboard") def virtualKeyboard(
     key: String, // VDomKey
     hash: String, // hash of a published json file with the rest of the keyboard
+    setupMode: Boolean = false,
     setupType: String = "", // Name of the keyboard type to set-up (only setup mode)
     position: KeyboardPosition,
     receiver: Receiver[C] = NoReceiver[C],

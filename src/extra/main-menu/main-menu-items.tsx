@@ -9,11 +9,12 @@ import { MenuFolderItem } from './menu-folder-item';
 import { BindingElement } from '../binds/binds-elements';
 import { useBinds } from '../binds/key-binding';
 import { focusFirstMenuItem } from './main-menu-utils';
+import { SVGElement } from '../../main/image';
 
 
 interface MenuExecutableItem {
     key: string,
-	identity: Object,
+	identity: object,
     name: string,
     current: boolean,
     path?: string,
@@ -47,7 +48,7 @@ function MenuExecutableItem({identity, name, current, path, icon, bindSrcId}: Me
              onKeyDown={handleKeyDown} 
         >
             {isBindMode && <BindingElement bindSrcId={bindSrcId} onChange={onClick} />}
-            {icon && <img src={icon} className='rowIconSize'/>}
+            {icon && <SVGElement url={icon} className='menuItemIcon'/>}
             <span>{name}</span>
         </div>
     );
@@ -56,7 +57,7 @@ function MenuExecutableItem({identity, name, current, path, icon, bindSrcId}: Me
 
 interface MenuCustomItem {
     key: string,
-	identity: Object,
+	identity: object,
     path?: string,
     children?: ReactNode
 }
@@ -114,7 +115,7 @@ function hasIconProp(child: JSX.Element): string | undefined {
 
 interface MenuItemsGroup {
     key: string,
-	identity?: Object,
+	identity?: object,
     children: ReactElement<MenuItem>[]
 }
 
@@ -129,7 +130,7 @@ function MenuItemsGroup({children}: MenuItemsGroup) {
 
 interface MenuUserItem {
     key: string,
-	identity: Object,
+	identity: object,
     shortName: string,
     longName: string,
     current: boolean,

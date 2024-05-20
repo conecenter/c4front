@@ -95,12 +95,13 @@ function patchToChange(patch: Patch): VkChange {
 
 function applyChange(prevState: VkState, ch: VkChange): VkState {
     switch (ch.tp) {
-        case "modeChange":
+        case "modeChange": {
             const prevModeInd = prevState?.findIndex(switchedMode => switchedMode.vkType === ch.vkType);
             const newChangedMode = { vkType: ch.vkType, mode: ch.mode };
             return prevModeInd && prevModeInd > -1
                 ? [...prevState!].splice(prevModeInd, 1, newChangedMode)
                 : [...prevState!, newChangedMode]
+        }
         default:
             return prevState;
     }

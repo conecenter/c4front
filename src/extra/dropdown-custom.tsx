@@ -19,7 +19,7 @@ import {
 
 interface DropdownProps {
 	key: string,
-	identity: Object,
+	identity: object,
 	state: DropdownState,
 	content: Content[],
 	popupChildren: ReactNode[],
@@ -122,17 +122,18 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 					sendFinalChange({ popupOpen: true });
 					break;
 				}
+				// fall through
 			case ENTER_KEY:
 				if (!popupOpen) {
 					e.stopPropagation();
 					e.currentTarget.dispatchEvent(new CustomEvent(TAB_EVENT, { bubbles: true }));
 					break;
 				}
+				// fall through
 			case ARROW_UP_KEY:
 				if (popupOpen) {
 					e.stopPropagation();
 					e.preventDefault();
-					//@ts-ignore
 					enqueueKeyboardActionPatch({value: e.key});
 				}
 				break;
@@ -164,7 +165,7 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 		);
 	}
 
-  	return (
+	return (
 		<div
 			className='customDropdownBox'
 			tabIndex={1}

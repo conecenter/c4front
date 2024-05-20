@@ -7,7 +7,7 @@ interface InputSyncState<State> {
 }
 
 function useInputSync<ServerState, State>(
-  identity: Object,
+  identity: object,
   receiverName: string,
   serverState: ServerState,
   deferredSend: boolean,

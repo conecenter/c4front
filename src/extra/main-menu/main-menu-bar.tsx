@@ -10,7 +10,7 @@ import {ARROW_DOWN_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY, M_
 import {MenuCustomItem, MenuExecutableItem, MenuItemsGroup, MenuPopupElement, MenuUserItem} from './main-menu-items';
 import {MenuFolderItem} from "./menu-folder-item";
 import {BindGroupElement} from "../binds/binds-elements";
-import {NoCaptionContext} from "../../main/vdom-hooks";
+import {NoCaptionContext, usePath} from "../../main/vdom-hooks";
 import {isInstanceOfNode} from "../dom-utils";
 
 const MENU_BAR_PATH = 'main-menu-bar';
@@ -22,7 +22,7 @@ type OnArrowLeftRight = (path: string, elem: HTMLElement, key: 'ArrowLeft' | 'Ar
 interface MenuControlsContext { 
   onArrowLeftRight?: OnArrowLeftRight, 
   setReadyArrowLeftRight?: () => boolean
-};
+}
 
 const MenuControlsContext = createContext<MenuControlsContext>({});
 
@@ -32,7 +32,7 @@ const isMenuOpenCombo = (e: KeyboardEvent) => (e.ctrlKey || e.altKey) && e.key =
 
 interface MainMenuBar {
   key: string,
-  identity: Object,
+  identity: object,
   state: MenuItemState,
   icon?: string
   leftChildren: ReactElement<MenuItem>[],
@@ -181,7 +181,9 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
                         }}
                         expandTo={[
             <Expander key='left-menu-compressed' area="lt" expandOrder={1} expandTo={leftMenuExpanded}>
-              <BurgerMenu opened={opened} setFinalState={setFinalState} children={leftChildren} domRef={domRef}/>
+              <BurgerMenu identity={identity} opened={opened} setFinalState={setFinalState} domRef={domRef}>
+                {leftChildren}
+              </BurgerMenu>
             </Expander>,
 
             <Expander key='right-menu-compressed'
@@ -196,7 +198,7 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
       </NoCaptionContext.Provider>
     </BindGroupElement>
   );
-};
+}
 
 function getRightMenuCompressed(rightChildren: ReactElement<MenuItem>[]) {
   const menuUserItem = rightChildren.find(child => child.type === MenuUserItem) as ReactElement<MenuUserItem> | undefined;
@@ -220,14 +222,16 @@ function getRightMenuCompressed(rightChildren: ReactElement<MenuItem>[]) {
 
 
 interface BurgerMenu {
+  identity: object,
   opened: boolean,
   domRef: React.RefObject<HTMLDivElement>,
   setFinalState: (s: MenuItemState) => void,
   children: ReactElement<MenuItem>[]
 }
 
-function BurgerMenu({opened, domRef, setFinalState, children}: BurgerMenu) {
-  const { focusClass, focusHtml } = useFocusControl('burgerMenu');
+function BurgerMenu({ identity, opened, domRef, setFinalState, children}: BurgerMenu) {
+  const path = usePath(identity);
+  const { focusClass, focusHtml } = useFocusControl(path);
 
   const currentPath = useContext(PathContext);
 
@@ -290,10 +294,10 @@ function BurgerMenu({opened, domRef, setFinalState, children}: BurgerMenu) {
       </button>
 
       {opened &&
-          <MenuPopupElement popupLrMode={false} keyboardOperation={keyboardOperation} children={children}/>}
+          <MenuPopupElement popupLrMode={false} keyboardOperation={keyboardOperation}>{children}</MenuPopupElement>}
     </div>
   )
-};
+}
 
 export const mainMenuComponents = { 
   MainMenuBar,

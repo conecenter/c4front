@@ -1,34 +1,39 @@
 import ReactDOM from "react-dom";
 import React, {createElement as $, useState} from "react";
 import {createSyncProviders} from "../../main/vdom-hooks";
-import {ImageViewer} from "../../extra/image-viewer";
+import {ImageViewer} from "../../extra/image-viewer/image-viewer";
 
 function App() {
-    const [open, setOpen] = useState(false);
-
+    const [boxSize, setBoxSize] = useState('600px')
     const slides = [
-      { src: "./left.jpg", title: 'Left Side' },
-      { src: "./back.jpg", title: 'Back' },
-      { src: "./photo.jpg", title: 'Front' }
-    ];
+        { src: "./left.jpg", title: 'L', srcId: '1' },
+        { src: "./back.jpg", title: 'B', srcId: '2' },
+        { src: "./left-2.jpg", title: 'C', srcId: '3' },
+        { src: "./back-2.jpg", title: 'B', srcId: '4' },
+        { src: "./photo.jpg", title: 'photo', srcId: '5' },
+        { src: "./photo.jpg", title: 'photo', srcId: '6' },
+        { src: "./photo.jpg", title: 'photo', srcId: '7' },
+        { src: "./photo.jpg", title: 'photo', srcId: '8' },
+        { src: "./photo.jpg", title: 'photo', srcId: '9' },
+      ];
     
     const children = (
       <>
-        <button type="button" onClick={() => setOpen(true)}>
-          Open Lightbox
-        </button>
-        
-        {/*<ImageViewer key="test" identity={{parent: "test"}} index={1} slides={slides} />*/}
+        <div style={{ maxWidth: boxSize }}>
+          <ImageViewer identity={{parent: "test"}} slides={slides} position="inline" />
+        </div>
+        <button onClick={() => setBoxSize('800px')} >Change Size</button>
       </>
     );
 
     const sender = {
-        enqueue: (identity: any, patch: any) => console.log(patch)
+        enqueue: (identity: object, patch: any) => console.log(patch)
     }
     const ack: boolean | null = null;
+    const branchKey = 'abc';
     const isRoot = true;
     
-    return createSyncProviders({sender, ack, isRoot, children});
+    return createSyncProviders({sender, ack, branchKey, isRoot, children});
 }
 
 const containerElement = document.createElement("div");

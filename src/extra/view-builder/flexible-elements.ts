@@ -19,7 +19,7 @@ interface FlexibleColumnRoot {
   children: ReactNode[]
 }
 
-function FlexibleColumnRoot({key, children}: FlexibleColumnRoot) {
+function FlexibleColumnRoot({children}: FlexibleColumnRoot) {
   return el("div", {
     className: FLEXIBLE_ROOT_CLASSNAME,
     style: {
@@ -36,9 +36,8 @@ interface FlexibleColumn {
   children: ReactNode[]
 }
 
-function FlexibleColumn({key, sizes, className, align, children}: FlexibleColumn) {
+function FlexibleColumn({sizes, className, align, children}: FlexibleColumn) {
   return el("div", {
-    key,
     className: clsx(FLEXIBLE_COLUMN_CLASSNAME, className),
     style: {
       ...align && !sizes?.max && { flexGrow: 0 },
@@ -77,7 +76,7 @@ function createLabel(label: string | undefined, children: ReactNode[]) {
     children
 }
 
-function FlexibleGroupbox({key, label, displayMode, sizes, children}: FlexibleGroupbox) {
+function FlexibleGroupbox({label, displayMode, sizes, children}: FlexibleGroupbox) {
   return el("div", {
     className: clsx(FLEXIBLE_GROUPBOX_CLASSNAME, displayMode === 'accent' && FLEXIBLE_ACCENTED_GROUPBOX_CLASSNAME),
     style: {
@@ -135,10 +134,10 @@ function separateChildren(children: (ReactNode & FlexibleChildAlign)): React.Rea
 }
 
 function wrapInRow(key: string, props: HTMLAttributes<HTMLDivElement>, children: ReactNode[]) {
-  return el("div", {key, ...props}, children)
+  return el("div", {key, ...props}, ...children)
 }
 
-function FlexibleRow({key, sizes, className, align, children}: FlexibleRow) {
+function FlexibleRow({sizes, className, align, children}: FlexibleRow) {
   const props: HTMLAttributes<HTMLDivElement> = {
     className: clsx(FLEXIBLE_ROW_CLASSNAME, className),
     style: {
@@ -149,7 +148,7 @@ function FlexibleRow({key, sizes, className, align, children}: FlexibleRow) {
       }
     }
   }
-  const separated = separateChildren(children).map((list, ind) => wrapInRow(`${key}-${ind}`, props, list)) 
+  const separated = separateChildren(children).map((list, ind) => wrapInRow(`row-${ind}`, props, list)) 
   return el(React.Fragment, null, separated)
 }
 
@@ -169,9 +168,8 @@ interface FlexibleCell {
   children: ReactNode[]
 }
 
-function FlexibleCell({key, align, sizes, className, children}: FlexibleCell) {
+function FlexibleCell({align, sizes, className, children}: FlexibleCell) {
   return el("div", {
-    key,
     className: clsx(FLEXIBLE_CELL_CLASSNAME, className),
     style: {
       ...align && !sizes?.max && { flexGrow: 0 },

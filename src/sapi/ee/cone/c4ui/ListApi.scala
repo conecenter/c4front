@@ -133,12 +133,12 @@ case class NoReceiver[C]() extends Receiver[C] {
     area: FilterButtonArea,
     className: CSSClassName = NoCSSClassName,
     children: ViewRes = Nil,
+    isFolder: Boolean = false,
   ): FilterButton
   @c4el("FilterButtonExpander") def filterButtonExpander(
     key: String,
     area: FilterButtonArea,
     children: ViewRes = Nil,
-    openedChildren: ViewRes = Nil,
     optButtons: ElList[FilterButton] = Nil,
   ): FilterButton
   @c4val("lt") def leftFilterButtonArea: FilterButtonArea

@@ -54,7 +54,7 @@ function Observed({observer,...props}){
     const ref = useObservedRef(observer)
     return createElement("div",{...props,ref})
 }
-
+// eslint-disable-next-line react/display-name
 const useAddObserved = extractedUse((observer,keyAttrName) => (key,attr) => createElement(Observed,{
     [keyAttrName]: key, observer, ...attr
 }), useMemo)

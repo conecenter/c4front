@@ -1,5 +1,5 @@
 import {mapOption, None, nonEmpty, Option} from "../../main/option";
-import {utcToZonedTime, zonedTimeToUtc} from "date-fns-tz";
+import {toZonedTime, fromZonedTime} from "date-fns-tz";
 import {
     addDays,
     addHours,
@@ -36,12 +36,12 @@ interface DateSettings {
 }
 
 function getDate(timestamp: number, dateSettings: DateSettings): Option<Date> {
-    const date: Date = utcToZonedTime(new Date(timestamp), dateSettings.timezoneId);
+    const date: Date = toZonedTime(new Date(timestamp), dateSettings.timezoneId);
     return isValid(date) ? date : None
 }
 
 function getTimestamp(date: Date, dateSettings: DateSettings): number {
-    return getTime(zonedTimeToUtc(date, dateSettings.timezoneId))
+    return getTime(fromZonedTime(date, dateSettings.timezoneId))
 }
 
 function formatDate(date: Date, dateSettings: DateSettings): [string, string] {
@@ -51,7 +51,7 @@ function formatDate(date: Date, dateSettings: DateSettings): [string, string] {
     const {formatTokens} = dateSettings.timestampFormat
 
     function pad(num: number, size: number): string {
-        let value = String(num).slice(-size)
+        const value = String(num).slice(-size)
         return "0".repeat(size - value.length) + value;
     }
 
@@ -173,6 +173,7 @@ function tryRegexes(value: string): Option<Token> {
     let i = 0
     while (i < dateExtractors.length) {
         const result = tryRegex(value, dateExtractors[i])
+        console.log({result})
         if (nonEmpty(result)) return result
         i++
     }
@@ -186,7 +187,7 @@ function tryRegex(value: string, regexExtractor: RegExpExtractor): Option<Token>
     } else return None
 }
 
-function tokenizeString(value: String): Token[] {
+function tokenizeString(value: string): Token[] {
     let currentValue = value.toLowerCase()
     const tokens: Token[] = []
 
@@ -207,8 +208,6 @@ function getPrototypeDate() {
     now.setHours(0, 0, 0, 0)
     return now
 }
-
-type SetResult = "unchanged" | "changed" | "error"
 
 interface TimeValue {
     H?: number
@@ -255,8 +254,12 @@ function getMonthValue(tokens: Token[], dateSettings: DateSettings): MonthValue 
 }
 
 function changeDate(date: Date, tokens: Token[], time: TimeValue, month: MonthValue, format: ExtendedDateTimeFormat): Date {
-    const yearsToThisEpoch = (year: number | undefined): number | undefined =>
-        year !== undefined ? year < 100 ? Math.floor(date.getFullYear() / 100) * 100 + year : year : undefined
+    const yearsToThisEpoch = (year: number | undefined): number | undefined => {
+        if (year === undefined) return undefined;
+        if (year < 100) return Math.floor(date.getFullYear() / 100) * 100 + year;
+        if (year > 9999) return 9999;
+        return year;
+    }
     const correctMonths = (month: number | undefined): number | undefined =>
         month !== undefined ? month - 1 : undefined
 
@@ -264,12 +267,6 @@ function changeDate(date: Date, tokens: Token[], time: TimeValue, month: MonthVa
         return args
             .filter(num => num !== undefined)
             .shift() || 0
-    }
-
-    function reduceOpt(...args: (number | undefined)[]): number | undefined {
-        return args
-            .filter(num => num !== undefined)
-            .shift()
     }
 
     const dateTokens: number[] = tokens.reduce((acc: number[], token: Token) => acc.concat(token.type === 'number' ? [token.value] : []), [])
@@ -306,7 +303,7 @@ function parseStringToDate(value: string, dateSettings: DateSettings): Option<nu
         if (month === undefined) return None
         const prototypeDate = getPrototypeDate()
         const newDate = changeDate(prototypeDate, tokens, time, month, dateSettings.timestampFormat)
-        return zonedTimeToUtc(newDate, dateSettings.timezoneId).getTime()
+        return fromZonedTime(newDate, dateSettings.timezoneId).getTime()
     } else return None
 }
 

@@ -1,11 +1,11 @@
-
-import clsx from "clsx"
-import {createElement as $,cloneElement} from "react"
+import {createElement as $,cloneElement, useState} from "react"
+import clsx from 'clsx'
 import {em,sum,findLastIndex} from "./vdom-util.js"
 import {useWidths} from "../main/sizes.js"
 import {NoCaptionContext, usePath} from "./vdom-hooks.js"
 import {usePopupState} from "../extra/popup-elements/popup-manager"
 import {PopupElement} from "../extra/popup-elements/popup-element"
+import {useFocusControl} from '../extra/focus-control'
 
 //// non-shared
 
@@ -123,21 +123,41 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
 
 ////
 
-export function FilterButtonExpander({identity,optButtons:rawOptButtons,children,openedChildren}){
-    const optButtons = rawOptButtons || []
-
-    const popupKey = usePath(identity)
-    const {isOpened,toggle} = usePopupState(popupKey)
-
-    return $("div", {className:'filterButtonExpander',onClick:()=>toggle(!isOpened)},
-        isOpened ? [
-            openedChildren ?? children,
-            $(PopupElement,{popupKey},optButtons.map(btn=>{
-                return $("div",{key:btn.key,className:'gridPopupItem'}, 
-                    $(NoCaptionContext.Provider,{value:true},btn.props.children))
-            }))
-        ] : children
+export function FilterButtonExpander({ identity, optButtons = [], children }) {
+    const path = usePath(identity)
+    const { focusClass, focusHtml }  = useFocusControl(path)
+    const {isOpened,toggle} = usePopupState(path)
+    return $("div", { className: clsx('filterButtonExpander', focusClass), ...focusHtml, onClick: () => toggle(!isOpened) },
+        children,
+        isOpened &&
+        $(PopupElement,{popupKey: path},
+                $(NoCaptionContext.Provider, { value: true }, optButtons.map(btn =>
+                    btn.props.isFolder
+                        ? $(FolderButtonPlace, { key: btn.key, closeExpander: () => toggle(false), children: btn.props.children })
+                        : $("div", {
+                            key: btn.key,
+                            className: 'gridPopupItem',
+                            onClickCapture: () => setTimeout(() => toggle(false), 300),
+                            children: btn.props.children
+                    }))))
     )
+}
+
+function FolderButtonPlace({ closeExpander, children }) {
+    const [opened, setOpened] = useState(false);
+    return $("div", {
+        className: clsx('gridPopupItem', 'isFolder', opened && 'isOpened'),
+        onClickCapture: (e) => {
+            if (e.target.closest('.popupEl, .gridPopupItem')?.className.includes('popupEl')) {
+                setTimeout(() => closeExpander(), 300);
+            }
+            else setOpened(!opened);
+        },
+        onBlur: (e) => {
+            if (!e.currentTarget.contains(e.relatedTarget)) setOpened(false);
+        },
+        children
+    });
 }
 
 export function FilterButtonPlace({className,children}){
