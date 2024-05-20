@@ -10,7 +10,7 @@ const applyChange = (_prevState: PopupStack, ch: PopupStack) => ch;
 
 
 interface PopupManager {
-    identity: Object,
+    identity: object,
     openedPopups: PopupStack,
     children: ReactNode
 }

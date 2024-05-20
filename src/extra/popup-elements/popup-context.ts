@@ -6,7 +6,7 @@ interface PopupContext {
     openedPopups: PopupStack,
     sendFinalChange: (change: PopupStack) => void,
     popupDrawer?: HTMLElement
-};
+}
 
 const defaultPopupContext: PopupContext = {
     openedPopups: [],

@@ -7,13 +7,12 @@ import { PopupContext } from './popup-context';
 import { usePopupState } from './popup-manager';
 import { useAddEventListener } from '../custom-hooks';
 import { isInstanceOfNode } from '../dom-utils';
-import { NoFocusContext } from '../labeled-element';
 import { PopupOverlay } from './popup-overlay';
 
 const DEFAULT_IDENTITY = { key: 'popup-element' };
 
 interface PopupElement {
-    identity: object,
+    identity?: object,
     popupKey: string,
     overlay?: boolean,
     children?: ReactNode
@@ -36,7 +35,7 @@ function PopupElement({ identity = DEFAULT_IDENTITY, popupKey, overlay: overlayP
     function closeOnBlur(e: FocusEvent) {
         if (elementsContainTarget([popupElement, parent.current], e.relatedTarget)) return;
         toggle(false);
-	};
+	}
     useAddEventListener(popupElement?.ownerDocument, 'focusout', closeOnBlur);
 
     useLayoutEffect(
