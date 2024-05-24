@@ -53,11 +53,12 @@ function PopupElement({ identity = DEFAULT_IDENTITY, popupKey, overlay: overlayP
     );
 
     useLayoutEffect(
-        function preventFocusLossAfterClosing() {
+        function preventFocusLossOnClosing() {
             return () => {
-                if (popupElement?.contains(popupElement?.ownerDocument.activeElement)) parent.current?.focus();
+                if (isOpened && elementHasFocus(popupElement)) focusFocusableAncestor(parent.current);
             }
-    }, []);
+        }, [isOpened]
+    );
 
     const popup = (
         <>
@@ -89,6 +90,17 @@ function elementsContainTarget(elems: (HTMLElement | null)[], target: EventTarge
     for (const elem of elems) {
         if (elem?.contains(target)) return true;
     }
+}
+
+function elementHasFocus(element?: HTMLElement | null) {
+	if (!element) return false;
+	const activeElement = element.ownerDocument.activeElement;
+	return element.contains(activeElement);
+}
+
+function focusFocusableAncestor(elem?: HTMLElement | null) {
+    const focusableAncestor = elem?.closest<HTMLElement>('[data-path]');
+    focusableAncestor?.focus();
 }
 
 const PopupAncestorKeyContext = createContext('');
