@@ -1,7 +1,7 @@
 import React, { ReactNode, createContext, useCallback, useContext, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { usePopupPos } from '../../main/popup';
-import { NoCaptionContext, usePath } from '../../main/vdom-hooks';
+import { NoCaptionContext } from '../../main/vdom-hooks';
 import { SEL_FOCUSABLE_ATTR } from '../focus-module-interface';
 import { PopupContext } from './popup-context';
 import { usePopupState } from './popup-manager';
@@ -13,19 +13,14 @@ import { NoFocusContext } from '../labeled-element';
 const PopupAncestorKeyContext = createContext('');
 PopupAncestorKeyContext.displayName = 'PopupAncestorKeyContext';
 
-const DEFAULT_IDENTITY = { key: 'popup-element' };
-
 interface PopupElement {
-    identity?: object,
     popupKey: string,
     overlay?: boolean,
     children?: ReactNode
 }
 
-function PopupElement({ identity = DEFAULT_IDENTITY, popupKey, overlay: overlayProp, children }: PopupElement) {
+function PopupElement({ popupKey, overlay: overlayProp, children }: PopupElement) {
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
-
-    const path = usePath(identity);
 
     const { isOpened, toggle } = usePopupState(popupKey);
 
@@ -70,7 +65,7 @@ function PopupElement({ identity = DEFAULT_IDENTITY, popupKey, overlay: overlayP
                 style={popupStyle}
                 onClick={(e) => e.stopPropagation()}
                 tabIndex={-1}
-                data-path={path}
+                data-path={`/popup-${popupKey}`}    // needed for FocusAnnouncer's focus loss prevention
                 children={children} />
             <PopupOverlay popupElement={popupElement} overlayProp={!!overlayProp} />
         </>
