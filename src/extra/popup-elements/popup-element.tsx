@@ -10,6 +10,9 @@ import { isInstanceOfNode } from '../dom-utils';
 import { PopupOverlay } from './popup-overlay';
 import { NoFocusContext } from '../labeled-element';
 
+const PopupAncestorKeyContext = createContext('');
+PopupAncestorKeyContext.displayName = 'PopupAncestorKeyContext';
+
 const DEFAULT_IDENTITY = { key: 'popup-element' };
 
 interface PopupElement {
@@ -31,7 +34,7 @@ function PopupElement({ identity = DEFAULT_IDENTITY, popupKey, overlay: overlayP
 
     const parent = useRef<HTMLElement | null>(null);
     const setPopupParent = useCallback((elem: HTMLElement | null) => {
-        parent.current = elem && elem.closest<HTMLElement>(SEL_FOCUSABLE_ATTR);
+        parent.current = findFocusableAncestor(elem);
     }, []);
 
     const [popupStyle] = usePopupPos(popupElement, false, parent.current);
@@ -55,7 +58,7 @@ function PopupElement({ identity = DEFAULT_IDENTITY, popupKey, overlay: overlayP
     useLayoutEffect(
         function preventFocusLossOnClosing() {
             return () => {
-                if (isOpened && elementHasFocus(popupElement)) focusFocusableAncestor(parent.current);
+                if (isOpened && elementHasFocus(popupElement)) findFocusableAncestor(parent.current)?.focus();
             }
         }, [isOpened]
     );
@@ -98,12 +101,8 @@ function elementHasFocus(element?: HTMLElement | null) {
 	return element.contains(activeElement);
 }
 
-function focusFocusableAncestor(elem?: HTMLElement | null) {
-    const focusableAncestor = elem?.closest<HTMLElement>('[data-path]');
-    focusableAncestor?.focus();
+function findFocusableAncestor(elem?: HTMLElement | null) {
+    return elem?.closest<HTMLElement>(SEL_FOCUSABLE_ATTR) || null;
 }
-
-const PopupAncestorKeyContext = createContext('');
-PopupAncestorKeyContext.displayName = 'PopupAncestorKeyContext';
 
 export { PopupElement }
