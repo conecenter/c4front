@@ -1,13 +1,14 @@
 import React, { ReactNode, createContext, useCallback, useContext, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { usePopupPos } from '../../main/popup';
-import { usePath } from '../../main/vdom-hooks';
+import { NoCaptionContext, usePath } from '../../main/vdom-hooks';
 import { SEL_FOCUSABLE_ATTR } from '../focus-module-interface';
 import { PopupContext } from './popup-context';
 import { usePopupState } from './popup-manager';
 import { useAddEventListener } from '../custom-hooks';
 import { isInstanceOfNode } from '../dom-utils';
 import { PopupOverlay } from './popup-overlay';
+import { NoFocusContext } from '../labeled-element';
 
 const DEFAULT_IDENTITY = { key: 'popup-element' };
 
@@ -20,6 +21,7 @@ interface PopupElement {
 
 function PopupElement({ identity = DEFAULT_IDENTITY, popupKey, overlay: overlayProp, children }: PopupElement) {
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
+
     const path = usePath(identity);
 
     const { isOpened, toggle } = usePopupState(popupKey);
@@ -31,6 +33,8 @@ function PopupElement({ identity = DEFAULT_IDENTITY, popupKey, overlay: overlayP
     const setPopupParent = useCallback((elem: HTMLElement | null) => {
         parent.current = elem && elem.closest<HTMLElement>(SEL_FOCUSABLE_ATTR);
     }, []);
+
+    const [popupStyle] = usePopupPos(popupElement, false, parent.current);
 
     function closeOnBlur(e: FocusEvent) {
         if (elementsContainTarget([popupElement, parent.current], e.relatedTarget)) return;
@@ -48,30 +52,34 @@ function PopupElement({ identity = DEFAULT_IDENTITY, popupKey, overlay: overlayP
         [isOpened]
     );
 
-    useLayoutEffect(function preventFocusLossAfterClosing() {
-        return () => {
-            if (popupElement?.contains(popupElement?.ownerDocument.activeElement)) parent.current?.focus();
-        }
+    useLayoutEffect(
+        function preventFocusLossAfterClosing() {
+            return () => {
+                if (popupElement?.contains(popupElement?.ownerDocument.activeElement)) parent.current?.focus();
+            }
     }, []);
 
-    const [popupStyle] = usePopupPos(popupElement, false, parent.current);
+    const popup = (
+        <>
+            <div ref={setPopupElement}
+                className='popupEl'
+                style={popupStyle}
+                onClick={(e) => e.stopPropagation()}
+                tabIndex={-1}
+                data-path={path}
+                children={children} />
+            <PopupOverlay popupElement={popupElement} overlayProp={!!overlayProp} />
+        </>
+    );
 
     return (
         <PopupAncestorKeyContext.Provider value={popupKey} >
-            {isOpened && popupDrawer && createPortal(
-                <div
-                    ref={setPopupElement}
-                    className='popupEl'
-                    style={popupStyle}
-                    onClick={(e)=>e.stopPropagation()}
-                    tabIndex={-1}
-                    data-path={path}
-                    children={children}
-                />,
-                popupDrawer
-            )}
-            <span ref={setPopupParent} style={{display: 'none'}}></span>
-            <PopupOverlay popupElement={popupElement} overlayProp={!!overlayProp} />
+            <NoCaptionContext.Provider value={false} >
+                <NoFocusContext.Provider value={false} >
+                    {isOpened && popupDrawer && createPortal(popup, popupDrawer)}
+                    <span ref={setPopupParent} style={{display: 'none'}}></span>
+                </NoFocusContext.Provider>
+            </NoCaptionContext.Provider>
         </PopupAncestorKeyContext.Provider>
     );
 }
