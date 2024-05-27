@@ -29,7 +29,7 @@ function PopupElement({ popupKey, overlay: overlayProp, children }: PopupElement
 
     const parent = useRef<HTMLElement | null>(null);
     const setPopupParent = useCallback((elem: HTMLElement | null) => {
-        parent.current = findFocusableAncestor(elem);
+        parent.current = elem && elem.parentElement;
     }, []);
 
     const [popupStyle] = usePopupPos(popupElement, false, parent.current);
