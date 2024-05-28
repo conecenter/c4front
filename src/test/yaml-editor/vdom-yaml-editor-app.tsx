@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom";
 import {createElement as $} from "react";
 import {createSyncProviders} from "../../main/vdom-hooks";
-import {YamlEditor} from "../../extra/yaml-editor";
+import YamlEditor from "../../extra/yaml-editor/yaml-editor";
 import packageJsonSchema from "./package.schema.json";
 import { JSONSchema7 } from "json-schema";
 

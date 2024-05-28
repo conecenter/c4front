@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { yaml } from '@codemirror/lang-yaml';
 import { yamlSchema } from "codemirror-json-schema/yaml";
-import { usePatchSync, Patch } from './exchange/patch-sync';
+import { usePatchSync, Patch } from '../exchange/patch-sync';
 import { JSONSchema7 } from "json-schema";
 import { linter, lintGutter, Diagnostic } from "@codemirror/lint";
 import { load, YAMLException } from 'js-yaml';
@@ -10,13 +10,13 @@ import { load, YAMLException } from 'js-yaml';
 const changeToPatch = (ch: string): Patch => ({ value: ch });
 const patchToChange = (patch: Patch): string => patch.value;
 
-interface YamlEditor {
+interface YamlEditorProps {
     identity: object,
     value: string,
     jsonSchema?: JSONSchema7
 }
 
-function YamlEditor({ identity, value, jsonSchema }: YamlEditor) {
+function YamlEditor({ identity, value, jsonSchema }: YamlEditorProps) {
     const yamlSupport = useMemo(() => yaml(), []);
 
     const schemaExtension = jsonSchema ? yamlSchema(jsonSchema) : [];
@@ -43,4 +43,5 @@ function YamlEditor({ identity, value, jsonSchema }: YamlEditor) {
         onChange={(value) => sendTempChange(value)} />
 }
 
-export { YamlEditor }
+export type { YamlEditorProps }
+export default YamlEditor
