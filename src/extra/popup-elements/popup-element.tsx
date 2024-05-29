@@ -15,11 +15,11 @@ PopupAncestorKeyContext.displayName = 'PopupAncestorKeyContext';
 
 interface PopupElement {
     popupKey: string,
-    overlay?: boolean,
+    forceOverlay?: boolean,
     children?: ReactNode
 }
 
-function PopupElement({ popupKey, overlay: overlayProp, children }: PopupElement) {
+function PopupElement({ popupKey, forceOverlay, children }: PopupElement) {
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
 
     const { isOpened, toggle } = usePopupState(popupKey);
@@ -67,7 +67,7 @@ function PopupElement({ popupKey, overlay: overlayProp, children }: PopupElement
                 tabIndex={-1}
                 data-path={`/popup-${popupKey}`}    // needed for FocusAnnouncer's focus loss prevention
                 children={children} />
-            <PopupOverlay popupElement={popupElement} overlayProp={!!overlayProp} />
+            <PopupOverlay popupElement={popupElement} forceOverlay={!!forceOverlay} />
         </>
     );
 
