@@ -1,46 +1,59 @@
-import React, { ReactNode, useCallback, useLayoutEffect, useRef, useState } from 'react';
-import clsx from 'clsx';
+import React, { ReactNode, createContext, useCallback, useContext, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { usePopupPos } from '../../main/popup';
-import { NoCaptionContext, usePath } from '../../main/vdom-hooks';
+import { NoCaptionContext } from '../../main/vdom-hooks';
+import { SEL_FOCUSABLE_ATTR } from '../focus-module-interface';
+import { PopupContext } from './popup-context';
+import { usePopupState } from './popup-manager';
 import { useAddEventListener } from '../custom-hooks';
 import { isInstanceOfNode } from '../dom-utils';
-import { NoFocusContext } from '../labeled-element';
-import { usePopupState } from './popup-manager';
 import { PopupOverlay } from './popup-overlay';
+import { NoFocusContext } from '../labeled-element';
 
-const DEFAULT_IDENTITY = { key: 'popup-element' };
+const PopupAncestorKeyContext = createContext('');
+PopupAncestorKeyContext.displayName = 'PopupAncestorKeyContext';
 
 interface PopupElement {
-    identity: object,
-    className?: string,
-    overlay?: boolean,
+    popupKey: string,
+    forceOverlay?: boolean,
     children?: ReactNode
 }
 
-function NewPopupElement({ identity = DEFAULT_IDENTITY, className, overlay: overlayProp, children }: PopupElement) {
+function PopupElement({ popupKey, forceOverlay, children }: PopupElement) {
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
 
-    const path = usePath(identity);
+    const { isOpened, toggle } = usePopupState(popupKey);
 
-    const popupParent = useRef<HTMLElement | null>(null);
-    const setPopupParent = useCallback((el: HTMLElement | null) => popupParent.current = el && el.parentElement, []);
+    const popupAncestorKey = useContext(PopupAncestorKeyContext);
+    const { openedPopups, sendFinalChange, popupDrawer } = useContext(PopupContext);
 
-    const [isOpened, toggle, popupDrawer] = usePopupState(identity);
+    const parent = useRef<HTMLElement | null>(null);
+    const setPopupParent = useCallback((elem: HTMLElement | null) => {
+        parent.current = elem && elem.parentElement;
+    }, []);
 
-    const [popupStyle] = usePopupPos(popupElement, false, popupParent.current);
+    const [popupStyle] = usePopupPos(popupElement, false, parent.current);
 
-    const handleBlur = (e: FocusEvent) => {
-		if (!e.relatedTarget || elementIsInsideElements(e.relatedTarget, [popupElement, popupParent.current])) return;
+    function closeOnBlur(e: FocusEvent) {
+        if (elementsContainTarget([popupElement, parent.current], e.relatedTarget)) return;
         toggle(false);
-	};
-    const doc = popupElement?.ownerDocument;
-    useAddEventListener(doc, 'focusout', handleBlur);
+	}
+    useAddEventListener(popupElement?.ownerDocument, 'focusout', closeOnBlur);
+
+    useLayoutEffect(
+        function closeRivalPopupsAfterOpening() {
+            if (isOpened && openedPopups.length > 1) {
+                const popupAncestorIndex = openedPopups.indexOf(popupAncestorKey);
+                sendFinalChange([...openedPopups.slice(0, popupAncestorIndex + 1), popupKey]);
+            }
+        },
+        [isOpened]
+    );
 
     useLayoutEffect(
         function preventFocusLossOnClosing() {
             return () => {
-                if (isOpened && elementHasFocus(popupDrawer)) focusFocusableAncestor(popupParent.current);
+                if (isOpened && elementHasFocus(popupElement)) findFocusableAncestor(parent.current)?.focus();
             }
         }, [isOpened]
     );
@@ -48,27 +61,29 @@ function NewPopupElement({ identity = DEFAULT_IDENTITY, className, overlay: over
     const popup = (
         <>
             <div ref={setPopupElement}
-                className={clsx('popupEl', className)}
+                className='popupEl'
                 style={popupStyle}
                 onClick={(e) => e.stopPropagation()}
                 tabIndex={-1}
-                data-path={path}
+                data-path={`/popup-${popupKey}`}    // needed for FocusAnnouncer's focus loss prevention
                 children={children} />
-            <PopupOverlay popupElement={popupElement} overlayProp={!!overlayProp} />
+            <PopupOverlay popupElement={popupElement} forceOverlay={!!forceOverlay} />
         </>
     );
 
     return (
-        <NoCaptionContext.Provider value={false} >
-            <NoFocusContext.Provider value={false} >
-                {isOpened && popupDrawer ? createPortal(popup, popupDrawer) : null}
-                <span ref={setPopupParent} style={{display: 'none'}}></span>
-            </NoFocusContext.Provider>
-        </NoCaptionContext.Provider>
+        <PopupAncestorKeyContext.Provider value={popupKey} >
+            <NoCaptionContext.Provider value={false} >
+                <NoFocusContext.Provider value={false} >
+                    {isOpened && popupDrawer && createPortal(popup, popupDrawer)}
+                    <span ref={setPopupParent} style={{display: 'none'}}></span>
+                </NoFocusContext.Provider>
+            </NoCaptionContext.Provider>
+        </PopupAncestorKeyContext.Provider>
     );
 }
 
-function elementIsInsideElements(target: EventTarget | null, elems: (HTMLElement | null)[]) {
+function elementsContainTarget(elems: (HTMLElement | null)[], target: EventTarget | null) {
     if (!isInstanceOfNode(target)) return;
     for (const elem of elems) {
         if (elem?.contains(target)) return true;
@@ -81,9 +96,8 @@ function elementHasFocus(element?: HTMLElement | null) {
 	return element.contains(activeElement);
 }
 
-function focusFocusableAncestor(elem?: HTMLElement | null) {
-    const focusableAncestor = elem?.closest<HTMLElement>('[data-path]');
-    focusableAncestor?.focus();
+function findFocusableAncestor(elem?: HTMLElement | null) {
+    return elem?.closest<HTMLElement>(SEL_FOCUSABLE_ATTR) || null;
 }
 
-export { NewPopupElement }
+export { PopupElement }

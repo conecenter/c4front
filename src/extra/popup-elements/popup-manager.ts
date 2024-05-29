@@ -1,43 +1,43 @@
-import { createElement as $, createContext, useMemo, useState, useContext, useCallback } from "react";
-import type { ReactNode, Dispatch, SetStateAction } from "react";
-import { SyncedPopup } from "./synced-popup";
-import { NewPopupElement } from "./popup-element";
-import { usePath } from "../../main/vdom-hooks";
+import { createElement as $, useMemo, useContext, ReactNode, useState } from "react";
+import { PopupElement } from "./popup-element";
+import { Patch, usePatchSync } from "../exchange/patch-sync";
+import { PopupContext, PopupStack } from "./popup-context";
 
-type PopupContext = [string, Dispatch<SetStateAction<string>>, HTMLElement | undefined] | [];
+// Server sync functions
+const changeToPatch = (ch: PopupStack): Patch => ({ value: ch.join('|') });
+const patchToChange = (p: Patch): PopupStack => p.value.split('|');
+const applyChange = (_prevState: PopupStack, ch: PopupStack) => ch;
 
-const PopupContext = createContext<PopupContext>([]);
-PopupContext.displayName = "PopupContext";
 
 interface PopupManager {
+    identity: object,
+    openedPopups: PopupStack,
     children: ReactNode
 }
 
-function PopupManager({children}: PopupManager) {
-    const [popup, setPopup] = useState<string>('');   // TODO: sync
-    const [popupDrawerRef, setPopupDrawerRef] = useState<HTMLElement>();
+function PopupManager({identity, openedPopups=[], children}: PopupManager) {
+    const { currentState, sendFinalChange } =
+        usePatchSync(identity, 'receiver', openedPopups, false, s => s, changeToPatch, patchToChange, applyChange);
 
-    const popupDrawer = $('div', {ref: setPopupDrawerRef});
+    const [popupDrawer, setPopupDrawer] = useState<HTMLElement | undefined>();
 
-    const value: PopupContext = useMemo(
-        () => [popup, setPopup, popupDrawerRef],
-        [popup, popupDrawerRef]
-    );
+    const value = useMemo<PopupContext>(() => (
+        { openedPopups: currentState, sendFinalChange, popupDrawer }
+    ), [JSON.stringify(currentState), popupDrawer]);
 
-    return $(PopupContext.Provider, { value }, children, popupDrawer);
+    return $(PopupContext.Provider, { value }, children, $('div', {ref: setPopupDrawer}));
 }
 
 
-type PopupState = [boolean, (on: boolean) => void, HTMLElement | undefined]
-
-const usePopupState = (identity: object): PopupState => {
-    const path = usePath(identity);
-    const [popup, setPopup, popupDrawer] = useContext(PopupContext);
-    const isOpened = useCallback((p?: string)=> p === path, [path]);
-    const setOpened = useCallback((on: boolean) => setPopup?.(on ? path : ''), [path]);
-    return [isOpened(popup), setOpened, popupDrawer];
+const usePopupState = (popupKey: string) => {
+    const { openedPopups, sendFinalChange } = useContext(PopupContext);
+    const isOpened = openedPopups.includes(popupKey);
+    const toggle = (on: boolean) => {
+        if (on && !isOpened) sendFinalChange([...openedPopups, popupKey]);
+        else if (!on && isOpened) sendFinalChange(openedPopups.slice(0, openedPopups.indexOf(popupKey)));
+    };
+    return { isOpened, toggle };
 }
 
-
-export const popupComponents = { PopupManager, NewPopupElement, SyncedPopup };
-export { PopupManager, usePopupState, PopupContext }
+export { PopupManager, usePopupState }
+export const popupComponents = { PopupManager, PopupElement };

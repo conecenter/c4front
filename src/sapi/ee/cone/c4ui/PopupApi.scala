@@ -5,10 +5,10 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, c4elPath, c4tags}
 
 
 @c4tags("FrontApp") trait PopupTags[C] {
-  @c4elPath("SyncedPopup") def syncedPopup(
+  @c4elPath("PopupElement") def popupElement(
     key: String,
+    popupKey: String,
     children: ViewRes,
-    receiver: Receiver[C] = NoReceiver[C],
-    overlay: Boolean = false,
+    forceOverlay: Boolean = false,
   ): ToChildPair
 }

@@ -4,7 +4,7 @@ import {em,sum,findLastIndex} from "./vdom-util.js"
 import {useWidths} from "../main/sizes.js"
 import {NoCaptionContext, usePath} from "./vdom-hooks.js"
 import {usePopupState} from "../extra/popup-elements/popup-manager"
-import {NewPopupElement} from "../extra/popup-elements/popup-element"
+import {PopupElement} from "../extra/popup-elements/popup-element"
 import {useFocusControl} from '../extra/focus-control'
 
 //// non-shared
@@ -126,11 +126,11 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
 export function FilterButtonExpander({ identity, optButtons = [], children }) {
     const path = usePath(identity)
     const { focusClass, focusHtml }  = useFocusControl(path)
-    const [isOpened, toggle] = usePopupState(identity)
+    const {isOpened,toggle} = usePopupState(path)
     return $("div", { className: clsx('filterButtonExpander', focusClass), ...focusHtml, onClick: () => toggle(!isOpened) },
         children,
         isOpened &&
-            $(NewPopupElement, { identity },
+        $(PopupElement,{popupKey: path},
                 $(NoCaptionContext.Provider, { value: true }, optButtons.map(btn =>
                     btn.props.isFolder
                         ? $(FolderButtonPlace, { key: btn.key, closeExpander: () => toggle(false), children: btn.props.children })
