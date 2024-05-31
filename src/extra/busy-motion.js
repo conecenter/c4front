@@ -15,7 +15,7 @@ const busySvg = (fill) =>
 	</svg>`
 
 const startCircularMotion = (props) => () =>{	 		
-    const els = props.getEls()
+    const els = props.getEls?.()
     Array.isArray(els) && els.forEach(el=>{
         const mountNode = props.mountNode
         el.style.display = mountNode&&props.getComputedStyle(mountNode).display=="none"?"none":""
@@ -42,7 +42,6 @@ const BusyMotionElement = (props) =>{
 			const params = {
 				...props,
 				elem:elem.current,
-				getEls:()=>props.getEls&&props.getEls(),
 				getComputedStyle: ()=>elem.curent.ownerDocument.defaultView.getComputedStyle
 			}
 			timeout = elem.current.ownerDocument.defaultView.setInterval(startCircularMotion(params), 100)

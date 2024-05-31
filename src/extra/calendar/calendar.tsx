@@ -8,7 +8,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import allLocales from '@fullcalendar/core/locales-all';
 import { useUserLocale } from '../locale';
 import { useEventClickAction, useEventsSync, useViewSync } from './calendar-exchange';
-import { OverlayWrapper } from '../overlay-manager';
+import { LoadingIndicator } from '../loading-indicator';
 import { ColorDef } from '../view-builder/common-api';
 import { transformDateFormatProps } from './calendar-utils';
 import { EventContent } from './event-content';
@@ -93,7 +93,7 @@ function Calendar(props: Calendar<string>) {
     const [isLoading, setIsLoading] = useState(false);
     const viewRoot = useRef<HTMLElement | null>(null);
     const isLoadingOverlay = isLoading && viewRoot.current && createPortal(
-        <OverlayWrapper textmsg='Loading, please wait...' />,
+        <LoadingIndicator overlayed={true} />,
         viewRoot.current
     );
     useEffect(function switchIsLoading() {
