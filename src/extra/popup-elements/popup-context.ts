@@ -2,19 +2,25 @@ import { createContext } from "react";
 
 type PopupStack = string[];
 
-interface PopupContext {
+interface PopupStateContext {
     openedPopups: PopupStack,
-    sendFinalChange: (change: PopupStack) => void,
-    popupDrawer?: HTMLElement
+    sendFinalChange: (change: PopupStack) => void
 }
 
-const defaultPopupContext: PopupContext = {
+const defaultPopupContext: PopupStateContext = {
     openedPopups: [],
     sendFinalChange: () => undefined
 };
 
-const PopupContext = createContext(defaultPopupContext);
-PopupContext.displayName = 'PopupContext';
+const PopupStateContext = createContext(defaultPopupContext);
+PopupStateContext.displayName = 'PopupStateContext';
+
+// PopupDrawerContext - to extract popup from its stacking context
+const PopupDrawerContext = createContext<HTMLElement | null>(null);
+PopupDrawerContext.displayName = 'PopupDrawerContext';
+
+const PopupWrapperKeyContext = createContext('');
+PopupWrapperKeyContext.displayName = 'PopupWrapperKeyContext';
 
 export type { PopupStack };
-export { PopupContext }
+export { PopupStateContext, PopupDrawerContext, PopupWrapperKeyContext }
