@@ -1,6 +1,6 @@
 import React, { ReactNode, useCallback, useContext, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { PopupStateContext, PopupDrawerContext, PopupWrapperKeyContext } from './popup-context';
+import { PopupStateContext, PopupDrawerContext, PopupWrapperKeyContext } from './popup-contexts';
 import { usePopupPos } from '../../main/popup';
 import { NoCaptionContext } from '../../main/vdom-hooks';
 import { SEL_FOCUSABLE_ATTR } from '../focus-module-interface';

@@ -1,7 +1,7 @@
 import { createElement as $, useMemo, useContext, ReactNode, useState } from "react";
 import { PopupElement } from "./popup-element";
 import { Patch, usePatchSync } from "../exchange/patch-sync";
-import { PopupStateContext, PopupDrawerContext, PopupStack } from "./popup-context";
+import { PopupStateContext, PopupDrawerContext, PopupStack } from "./popup-contexts";
 
 // Server sync functions
 const changeToPatch = (ch: PopupStack): Patch => ({ value: ch.join('|') });
