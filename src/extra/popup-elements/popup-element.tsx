@@ -33,7 +33,7 @@ function PopupElement({ popupKey, forceOverlay, children }: PopupElement) {
     const [popupStyle] = usePopupPos(popupElement, false, parent.current);
 
     function closeOnBlur(e: FocusEvent) {
-        if (elementsContainTarget([popupElement, parent.current], e.relatedTarget)) return;
+        if (!e.relatedTarget || elementsContainTarget([popupElement, parent.current], e.relatedTarget)) return;
         toggle(false);
 	}
     useAddEventListener(popupElement?.ownerDocument, 'focusout', closeOnBlur);
