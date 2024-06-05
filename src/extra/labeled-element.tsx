@@ -77,7 +77,7 @@ function LabeledElement({ identity, path, label, sizes, accented, clickable, lab
                 {showCaption ? (
                     <NoCaptionContext.Provider value={true}>
                         <div className='labelBox' style={clicked ? { opacity: 0.8 } : undefined}>
-                            {label && <label title={label}>{label}</label>}
+                            {label && <label>{label}</label>}
                             {labelChildren}
                         </div>
                         <div className='contentBox'>
@@ -107,4 +107,4 @@ function hasSingleChildlessFocusable(elem: HTMLDivElement | null) {
     return count === 1;
 }
 
-export { LabeledElement, NoFocusContext }
+export { LabeledElement, NoFocusContext };
