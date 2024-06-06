@@ -3,9 +3,9 @@ import clsx from 'clsx';
 import { HorizontalCaptionContext, NoCaptionContext } from '../main/vdom-hooks';
 import { useClickSyncOpt } from './exchange/click-sync';
 import { useFocusControl } from './focus-control';
-import { SEL_FOCUSABLE_ATTR } from './focus-module-interface';
 import { getUserManualUtils, useUserManual } from './user-manual';
 import { FlexibleSizes } from './view-builder/flexible-api';
+import { SEL_FOCUSABLE_ATTR } from './css-selectors';
 
 const NoFocusContext = React.createContext(false);
 NoFocusContext.displayName = "NoFocusContext";

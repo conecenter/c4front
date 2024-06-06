@@ -12,10 +12,10 @@ import {MenuFolderItem} from "./menu-folder-item";
 import {BindGroupElement} from "../binds/binds-elements";
 import {NoCaptionContext, usePath} from "../../main/vdom-hooks";
 import {isInstanceOfNode} from "../dom-utils";
+import {VISIBLE_CHILD_SELECTOR} from "../css-selectors";
 
 const MENU_BAR_PATH = 'main-menu-bar';
 const KEY_MODIFICATOR = { ArrowLeft: -1, ArrowRight: 1 };
-const VISIBLE_CHILD_SEL = ':not([style*="visibility: hidden"] *)';
 
 type OnArrowLeftRight = (path: string, elem: HTMLElement, key: 'ArrowLeft' | 'ArrowRight', isOpened: boolean) => void;
 
@@ -105,14 +105,14 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
     const onKeyDown = (e: KeyboardEvent) => {
       if (isMenuOpenCombo(e)) {
         prevFocusedPath.current = currentPath;
-        const isBurgerMenu = domRef.current?.matches(VISIBLE_CHILD_SEL);
+        const isBurgerMenu = domRef.current?.matches(VISIBLE_CHILD_SELECTOR);
         if (isBurgerMenu) setFinalState({ opened: true });
         window!.scrollTo({top: 0});
         const firstFocusablePath = leftChildren[0].props.path;
         const pathSelector = `[data-path='${firstFocusablePath}']`;
         const firstFocusableItem: HTMLElement | null = isBurgerMenu 
             ? domRef.current!.querySelector(pathSelector)
-            : doc!.querySelector(`${pathSelector}${VISIBLE_CHILD_SEL}`);
+            : doc!.querySelector(`${pathSelector}${VISIBLE_CHILD_SELECTOR}`);
         setTimeout(() => {
           firstFocusableItem?.focus();
           if (!isBurgerMenu) firstFocusableItem?.click();
@@ -158,7 +158,7 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
       return;
     }
     const nextFocusablePath = menuItems[nextMenuItemIndex].props.path;
-    const selector = `[data-path='${nextFocusablePath}']${VISIBLE_CHILD_SEL}`;
+    const selector = `[data-path='${nextFocusablePath}']${VISIBLE_CHILD_SELECTOR}`;
     const nextFocusableItem: HTMLElement | null = doc.querySelector(selector);
     nextFocusableItem?.focus();
     if (isOpened && isMenuFolderType(menuItems[nextMenuItemIndex])) nextFocusableItem?.click();
@@ -309,5 +309,5 @@ export const mainMenuComponents = {
   MainMenuClock
 };
 
-export { MenuControlsContext, VISIBLE_CHILD_SEL };
+export { MenuControlsContext };
 export type { MenuItemState, MenuItem };

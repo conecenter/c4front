@@ -1,8 +1,8 @@
 import React, { useRef, ReactNode, useEffect, useState, useLayoutEffect } from 'react';
 import { PathContext } from './focus-control';
 import { Patch } from './exchange/patch-sync';
-import { VISIBLE_CHILD_SEL } from './main-menu/main-menu-bar';
 import { useAddEventListener } from './custom-hooks';
+import { VISIBLE_CHILD_SELECTOR } from './css-selectors';
 
 interface FocusAnnouncerElement {
     path: string,
@@ -60,7 +60,7 @@ function FocusAnnouncerElement({ path, value, onChange, children }: FocusAnnounc
             const activeElem = doc?.activeElement;
             const activeElemPath = activeElem?.closest<HTMLElement>('[data-path]')?.dataset.path;
             if (activeElemPath !== value) {
-                const focusFrameElem = doc?.querySelector<HTMLElement>(`*[data-path='${value}']${VISIBLE_CHILD_SEL}`);
+                const focusFrameElem = doc?.querySelector<HTMLElement>(`*[data-path='${value}']${VISIBLE_CHILD_SELECTOR}`);
                 (focusFrameElem || findAutofocusCandidate(doc))?.focus();
             }
         }

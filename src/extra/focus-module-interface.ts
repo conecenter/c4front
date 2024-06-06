@@ -1,8 +1,5 @@
 import { useEffect, useRef } from 'react';
 
-const SEL_FOCUSABLE = '.focusWrapper';
-const SEL_FOCUSABLE_ATTR = '[data-path]';
-
 const ENTER_EVENT = 'enter';
 const DELETE_EVENT = 'delete';
 const BACKSPACE_EVENT = 'backspace';
@@ -61,9 +58,7 @@ export {
 	PASTE_EVENT, 
 	COPY_EVENT, 
 	CUT_EVENT, 
-	TAB_EVENT,
-	SEL_FOCUSABLE,
-	SEL_FOCUSABLE_ATTR
+	TAB_EVENT
 };
 
 export type { KeyboardEventNames };

@@ -4,10 +4,10 @@ import clsx from 'clsx'
 import { useBinds, BindKeyData, useProvideBinds, OnPageBindContext } from './key-binding'
 import { KeyBinder } from './key-binder'
 import { firstChild } from './binds-utils'
-import { VISIBLE_CHILD_SEL } from '../main-menu/main-menu-bar'
 import { useFocusControl } from '../focus-control'
 import { TAB_EVENT } from '../focus-module-interface'
 import { useAddEventListener } from '../custom-hooks'
+import { VISIBLE_CHILD_SELECTOR } from '../css-selectors'
 
 
 const GetButtonCaption = (keyData, buttonCaption) => {
@@ -108,7 +108,7 @@ const BindGroupElement = (props) => {
 				true)
 
 			const el = firstChild(elem,
-				el => el.classList && el.classList.contains("focusWrapper") && el.matches(VISIBLE_CHILD_SEL),
+				el => el.classList && el.classList.contains("focusWrapper") && el.matches(VISIBLE_CHILD_SELECTOR),
 				el => el.classList && el.classList.contains("withBindProvider"),
 				true)
 
@@ -158,7 +158,7 @@ const BindGroupElement = (props) => {
 		e.preventDefault();
 		e.stopPropagation();
 		const currFocusedElement = e.target?.closest('.focusWrapper');
-		const groupFocusables = Array.from(elem.querySelectorAll(`.focusWrapper${VISIBLE_CHILD_SEL}`));
+		const groupFocusables = Array.from(elem.querySelectorAll(`.focusWrapper${VISIBLE_CHILD_SELECTOR}`));
 		const currFocusedIndex = groupFocusables.findIndex(elem => elem === currFocusedElement);
 		const nextFocusableIndex = (currFocusedIndex + 1 + groupFocusables.length) % groupFocusables.length;
 		groupFocusables[nextFocusableIndex]?.focus();
