@@ -133,7 +133,7 @@ export function FilterButtonExpander({ identity, optButtons = [], children }) {
         $(PopupElement,{popupKey: path},
                 $(NoCaptionContext.Provider, { value: true }, optButtons.map(btn =>
                     btn.props.isFolder
-                        ? $(FolderButtonPlace, { key: btn.key, closeExpander: () => toggle(false), children: btn.props.children })
+                        ? $(FolderButtonPlace, { key: btn.key, children: btn.props.children })
                         : $("div", {
                             key: btn.key,
                             className: 'gridPopupItem',
@@ -143,15 +143,12 @@ export function FilterButtonExpander({ identity, optButtons = [], children }) {
     )
 }
 
-function FolderButtonPlace({ closeExpander, children }) {
+function FolderButtonPlace({ children }) {
     const [opened, setOpened] = useState(false);
     return $("div", {
         className: clsx('gridPopupItem', 'isFolder', opened && 'isOpened'),
         onClickCapture: (e) => {
-            if (e.target.closest('.popupEl, .gridPopupItem')?.className.includes('popupEl')) {
-                setTimeout(() => closeExpander(), 300);
-            }
-            else setOpened(!opened);
+            if (e.currentTarget.contains(e.target)) setOpened(!opened);
         },
         onBlur: (e) => {
             if (!e.currentTarget.contains(e.relatedTarget)) setOpened(false);
