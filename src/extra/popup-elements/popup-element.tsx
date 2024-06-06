@@ -1,14 +1,14 @@
-import React, { ReactNode, useCallback, useContext, useLayoutEffect, useRef, useState } from 'react';
+import React, { ReactNode, useCallback, useContext, useLayoutEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { PopupStateContext, PopupDrawerContext, PopupWrapperKeyContext } from './popup-contexts';
 import { usePopupPos } from '../../main/popup';
 import { NoCaptionContext } from '../../main/vdom-hooks';
-import { SEL_FOCUSABLE_ATTR } from '../focus-module-interface';
 import { usePopupState } from './popup-manager';
 import { useAddEventListener } from '../custom-hooks';
 import { isInstanceOfNode } from '../dom-utils';
 import { PopupOverlay } from './popup-overlay';
 import { NoFocusContext } from '../labeled-element';
+import { SEL_FOCUSABLE_ATTR, VISIBLE_CHILD_SELECTOR } from '../css-selectors';
 
 interface PopupElement {
     popupKey: string,
@@ -25,32 +25,33 @@ function PopupElement({ popupKey, forceOverlay, children }: PopupElement) {
 
     const { isOpened, toggle } = usePopupState(popupKey);
 
-    const parent = useRef<HTMLElement | null>(null);
-    const setPopupParent = useCallback((elem: HTMLElement | null) => {
-        parent.current = elem && elem.parentElement;
-    }, []);
+    const [parent, setParent] = useState<HTMLElement | null>(null);
+    const setPopupParent = useCallback((elem: HTMLElement | null) => setParent(elem && elem.parentElement), []);
 
-    const [popupStyle] = usePopupPos(popupElement, false, parent.current);
+    // menu & filters have multiple copies - hidden & visible - of some elements
+    const isVisible = parent?.matches(VISIBLE_CHILD_SELECTOR);
+
+    const [popupStyle] = usePopupPos(popupElement, false, parent);
 
     function closeOnBlur(e: FocusEvent) {
-        if (!e.relatedTarget || elementsContainTarget([popupElement, parent.current], e.relatedTarget)) return;
+        if (!e.relatedTarget || elementsContainTarget([popupElement, parent], e.relatedTarget)) return;
         toggle(false);
 	}
     useAddEventListener(popupElement?.ownerDocument, 'focusout', closeOnBlur);
 
     useLayoutEffect(
         function closeRivalPopupsAfterOpening() {
-            if (isOpened && openedPopups.length > 1) {
+            if (popupElement && openedPopups.length > 1) {
                 const popupAncestorIndex = openedPopups.indexOf(popupAncestorKey);
                 sendFinalChange([...openedPopups.slice(0, popupAncestorIndex + 1), popupKey]);
             }
-        }, [isOpened]
+        }, [popupElement]
     );
 
     useLayoutEffect(
         function preventFocusLossOnClosing() {
             return () => {
-                if (isOpened && elementHasFocus(popupElement)) findFocusableAncestor(parent.current)?.focus();
+                if (isOpened && elementHasFocus(popupElement)) findFocusableAncestor(parent)?.focus();
             }
         }, [isOpened]
     );
@@ -73,7 +74,7 @@ function PopupElement({ popupKey, forceOverlay, children }: PopupElement) {
             <PopupDrawerContext.Provider value={popupElement} >
                 <NoCaptionContext.Provider value={false} >
                     <NoFocusContext.Provider value={false} >
-                        {isOpened && popupDrawer && createPortal(popup, popupDrawer)}
+                        {isOpened && isVisible && popupDrawer && createPortal(popup, popupDrawer)}
                         <span ref={setPopupParent} style={{display: 'none'}}></span>
                     </NoFocusContext.Provider>
                 </NoCaptionContext.Provider>
