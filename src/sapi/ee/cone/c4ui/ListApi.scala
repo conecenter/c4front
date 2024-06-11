@@ -134,6 +134,7 @@ case class NoReceiver[C]() extends Receiver[C] {
     className: CSSClassName = NoCSSClassName,
     children: ViewRes = Nil,
     isFolder: Boolean = false,
+    folderOpened: Boolean = false,
   ): FilterButton
   @c4el("FilterButtonExpander") def filterButtonExpander(
     key: String,
