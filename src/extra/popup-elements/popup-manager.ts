@@ -28,7 +28,7 @@ function PopupManager({identity, openedPopups=[], children}: PopupManager) {
     return $(PopupStateContext.Provider, { value: popupStateContextValue },
         $(PopupDrawerContext.Provider, { value: popupDrawer },
             children,
-            $('div', {ref: setPopupDrawer})
+            $('div', { ref: setPopupDrawer, className: 'popupDrawer' }) // className used by testers
         )
     );
 }
