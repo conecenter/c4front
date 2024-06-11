@@ -1,4 +1,4 @@
-import {createElement as $,cloneElement, useState} from "react"
+import {createElement as $,cloneElement, createContext, useCallback, useContext} from "react"
 import clsx from 'clsx'
 import {em,sum,findLastIndex} from "./vdom-util.js"
 import {useWidths} from "../main/sizes.js"
@@ -122,34 +122,33 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
 }
 
 ////
+const FilterButtonExpanderContext = createContext(() => undefined);
 
 export function FilterButtonExpander({ identity, optButtons = [], children }) {
     const path = usePath(identity)
     const { focusClass, focusHtml }  = useFocusControl(path)
     const { isOpened, toggle } = usePopupState(path)
+    const closeExpander = useCallback(() => setTimeout(() => toggle(false), 300));
     return $("div", { className: clsx('filterButtonExpander', focusClass), ...focusHtml, onClick: () => toggle(!isOpened) },
         children,
         isOpened && $(PopupElement, { popupKey: path },
-            $(NoCaptionContext.Provider, { value: true }, optButtons.map(btn => {
-                const { isFolder, folderOpened, children } = btn.props;
-                return isFolder
-                    ? $(FolderButtonPlace, { key: btn.key, folderOpened, children })
-                    : $("div", {
-                        key: btn.key,
-                        className: 'gridPopupItem',
-                        onClickCapture: () => setTimeout(() => toggle(false), 300),
-                        children
+            $(NoCaptionContext.Provider, { value: true },
+                $(FilterButtonExpanderContext.Provider, { value: closeExpander }, optButtons.map(btn => {
+                    const { isFolder, folderOpened, children } = btn.props;
+                    return isFolder
+                        ? $(FolderButtonPlace, { key: btn.key, folderOpened, children })
+                        : $(FilterButtonPlace, { key: btn.key, className: btn.props.className, children })
                     })
-                })
-            )))
+            ))))
 }
 
 function FolderButtonPlace({ folderOpened, children }) {
-    return $("div", { className: clsx('gridPopupItem', 'isFolder', folderOpened && 'isOpened') }, children)
+    return $("div", { className: clsx('filterButtonPlace', 'isFolder', folderOpened && 'isOpened') }, children);
 }
 
-export function FilterButtonPlace({className,children}){
-    return $("div",{className:clsx('filterButtonPlace',className)},children)
+export function FilterButtonPlace({className,children}) {
+    const closeExpander = useContext(FilterButtonExpanderContext);
+    return $("div", { className: clsx('filterButtonPlace', className), onClickCapture: closeExpander }, children);
 }
 
 export function FilterItem({className,children}){
