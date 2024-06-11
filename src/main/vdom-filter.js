@@ -126,35 +126,26 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
 export function FilterButtonExpander({ identity, optButtons = [], children }) {
     const path = usePath(identity)
     const { focusClass, focusHtml }  = useFocusControl(path)
-    const {isOpened,toggle} = usePopupState(path)
+    const { isOpened, toggle } = usePopupState(path)
     return $("div", { className: clsx('filterButtonExpander', focusClass), ...focusHtml, onClick: () => toggle(!isOpened) },
         children,
-        isOpened &&
-        $(PopupElement,{popupKey: path},
-                $(NoCaptionContext.Provider, { value: true }, optButtons.map(btn =>
-                    btn.props.isFolder
-                        ? $(FolderButtonPlace, { key: btn.key, children: btn.props.children })
-                        : $("div", {
-                            key: btn.key,
-                            className: 'gridPopupItem',
-                            onClickCapture: () => setTimeout(() => toggle(false), 300),
-                            children: btn.props.children
-                    }))))
-    )
+        isOpened && $(PopupElement, { popupKey: path },
+            $(NoCaptionContext.Provider, { value: true }, optButtons.map(btn => {
+                const { isFolder, folderOpened, children } = btn.props;
+                return isFolder
+                    ? $(FolderButtonPlace, { key: btn.key, folderOpened, children })
+                    : $("div", {
+                        key: btn.key,
+                        className: 'gridPopupItem',
+                        onClickCapture: () => setTimeout(() => toggle(false), 300),
+                        children
+                    })
+                })
+            )))
 }
 
-function FolderButtonPlace({ children }) {
-    const [opened, setOpened] = useState(false);
-    return $("div", {
-        className: clsx('gridPopupItem', 'isFolder', opened && 'isOpened'),
-        onClickCapture: (e) => {
-            if (e.currentTarget.contains(e.target)) setOpened(!opened);
-        },
-        onBlur: (e) => {
-            if (!e.currentTarget.contains(e.relatedTarget)) setOpened(false);
-        },
-        children
-    });
+function FolderButtonPlace({ folderOpened, children }) {
+    return $("div", { className: clsx('gridPopupItem', 'isFolder', folderOpened && 'isOpened') }, children)
 }
 
 export function FilterButtonPlace({className,children}){
