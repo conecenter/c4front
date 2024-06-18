@@ -15,7 +15,8 @@ import { ZipButton } from "./zip-button";
 interface Slide {
     srcId: string,
     src: string,
-    title?: string
+    title?: string,
+    thumbnail?: string
 }
 
 interface ImageViewer {
