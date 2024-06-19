@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from "react";
 import useResizeObserver from '@react-hook/resize-observer';
 import { ImageSlide, RenderThumbnailProps } from "yet-another-react-lightbox";
+import { Slide } from "./image-viewer";
 
 const THUMBNAILS_GAP = 8;
 const THUMBNAILS_WIDTH = 120;
@@ -32,10 +33,10 @@ function useThumbnailsNumber() {
 }
 
 function Thumbnail(props: RenderThumbnailProps) {
-    const { src, title } = props.slide;
+    const { src, title, thumbnail } = props.slide as Slide;
     return (
         <>
-            <ImageSlide key={src} {...props} />
+            <ImageSlide key={src} {...props} slide={{ ...props.slide, src: thumbnail || src }} />
             <span className="thumbnailTitle">{title || src}</span>
         </>
     );
