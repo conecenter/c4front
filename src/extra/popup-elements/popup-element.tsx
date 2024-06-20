@@ -51,9 +51,12 @@ function PopupElement({ popupKey, forceOverlay, children }: PopupElement) {
     useLayoutEffect(
         function preventFocusLossOnClosing() {
             return () => {
-                if (isOpened && elementHasFocus(popupElement)) findFocusableAncestor(parent)?.focus();
+                if (popupElement && elementHasFocus(popupElement)) {
+                    // run focus() after React operations finished to avoid triggering events/effects with stale state
+                    setTimeout(() => findFocusableAncestor(parent)?.focus());
+                }
             }
-        }, [isOpened]
+        }, [popupElement]
     );
 
     const popup = (

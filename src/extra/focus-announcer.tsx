@@ -43,8 +43,9 @@ function FocusAnnouncerElement({ path, value, onChange, children }: FocusAnnounc
     }
     function preventFocusLoss(target: HTMLElement | null) {
         const focusableAncestors = getFocusableAncestors(target);
-        setTimeout(() => {  // without queueMicrotask e.target still exists in doc
-            const isFocusLost = !doc?.contains(target);
+        setTimeout(() => {  // without setTimeout target still exists in doc
+            // hasNoFocusedElement gives other routines (e.g. popup) chance to do its own focus loss prevention
+            const isFocusLost = doc && !doc.contains(target) && hasNoFocusedElement(doc);
             if (isFocusLost && isMounted.current) {
                 const aliveFocusableAncestor = focusableAncestors.find((elem) => doc?.contains(elem) && elem.dataset.path !== path);
                 (aliveFocusableAncestor || findAutofocusCandidate(doc))?.focus();
@@ -61,12 +62,12 @@ function FocusAnnouncerElement({ path, value, onChange, children }: FocusAnnounc
             const activeElemPath = activeElem?.closest<HTMLElement>('[data-path]')?.dataset.path;
             if (activeElemPath !== value) {
                 const focusFrameElem = doc?.querySelector<HTMLElement>(`*[data-path='${value}']${VISIBLE_CHILD_SELECTOR}`);
-                (focusFrameElem || findAutofocusCandidate(doc))?.focus();
+                focusFrameElem?.focus();
             }
         }
     );
 
-    return  (
+    return (
         <div
             ref={elem => setDoc(elem?.ownerDocument)}
             style={{ minHeight: "100vh" }}
@@ -86,6 +87,10 @@ function isRootBranch(doc: Document | undefined) {
 
 function findAutofocusCandidate(doc: Document | undefined) {
     return doc?.querySelector<HTMLElement>('input');
+}
+
+function hasNoFocusedElement(doc: Document) {
+    return !doc.activeElement || doc.activeElement.tagName === 'BODY';
 }
 
 function getFocusableAncestors(elem: HTMLElement | null) {
