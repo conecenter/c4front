@@ -14,6 +14,10 @@ function inRange(num: number, range: number[], inclusive = false) {
         : num > range[0] && num < range[1];
 }
 
+function clamp(num: number, min: number, max: number) {
+    return Math.min(Math.max(num, min), max);
+}
+
 /* eslint-disable */
 function throttleWithTrailing(callback: Function, limit: number) {
     let waiting = false;
@@ -47,4 +51,4 @@ function escapeRegex(string: string) {
     return string.replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&');
 }
 
-export { copyToClipboard, inRange, throttleWithTrailing, escapeRegex }
+export { copyToClipboard, inRange, clamp, throttleWithTrailing, escapeRegex }

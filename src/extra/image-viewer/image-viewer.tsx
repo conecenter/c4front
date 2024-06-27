@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 import Lightbox, { ControllerRef, CloseIcon, IconButton } from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
@@ -9,8 +9,9 @@ import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
 import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
 import Download from "yet-another-react-lightbox/plugins/download";
 import { Patch, usePatchSync } from "../exchange/patch-sync";
-import { Thumbnail, thumbnailsProps, useThumbnailsNumber } from "./image-viewer-thumbnails";
+import { Thumbnail, thumbnailsProps } from "./image-viewer-thumbnails";
 import { ZipButton } from "./zip-button";
+import { LazyImageSlide } from "./lazy-image-slide";
 
 interface Slide {
     srcId: string,
@@ -45,8 +46,6 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
     // The lightbox reads this property when it opens and when slides change
     const startingIndex = useMemo(() => getCurrentSlideIndex(), [slidesMemo]);
 
-    const { thumbnailsNumber, getThumbsContainer } = useThumbnailsNumber();
-
     useEffect(
         function onServerSlideChange() {
             const lightboxState = controller.current?.getLightboxState();
@@ -79,13 +78,17 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
 
     const zipButton = <ZipButton key='zip-button' slides={slides} />;
 
+    const [loadedSrc, setLoadedSrc] = useState<string[]>([]);
+    const isLoaded = (src: string) => loadedSrc.includes(src);
+    const onLoad = (src: string) => !isLoaded(src) && setLoadedSrc((prev) => [...prev, src]);
+
     return (
-        <div ref={getThumbsContainer} className={clsx(inlinePos && 'inlineImageViewer')} >
+        <div className={clsx(inlinePos && 'inlineImageViewer')} >
             <Lightbox
                 open={true}
                 slides={slidesMemo}
                 index={startingIndex}
-                carousel={{ finite: true, preload: thumbnailsNumber }}
+                carousel={{ finite: true, preload: 10 }}
                 controller={{ ref: controller }}
                 plugins={[Captions, Counter, Fullscreen, Zoom, Download, Thumbnails, ...inlinePos ? [Inline] : []]}
                 thumbnails={thumbnailsProps}
@@ -100,6 +103,7 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
                         buttonPrev: () => null,
                         buttonNext: () => null
                     },
+                    slide: (props) => <LazyImageSlide {...props} isLoaded={isLoaded} onLoad={onLoad} />,
                     thumbnail: (props) => <Thumbnail {...props} />
                 }}
                 toolbar={{ buttons: [closeButton, zipButton] }}
