@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { RenderSlideProps, ImageSlide, SlideImage, useLightboxState, LoadingIcon, ErrorIcon } from "yet-another-react-lightbox";
+import React from "react";
+import { RenderSlideProps, ImageSlide, SlideImage, useLightboxState, LoadingIcon } from "yet-another-react-lightbox";
 import { clamp } from "../utils";
 
 interface LazyImageSlide extends RenderSlideProps<SlideImage> {
@@ -16,19 +16,11 @@ function LazyImageSlide({ slide, offset, isLoaded, onLoad, ...rest }: LazyImageS
         return prioritySlideIndexes.every(index => isLoaded(getSlide(index).src));
     }
 
-    const [error, setError] = useState(false);
-    const onError = () => {
-        setError(true);
-        onLoad(slide.src);
-    }
+    const markImageLoaded = () => onLoad(slide.src);
 
-    if (error) return <ErrorIcon className="yarl__icon yarl__slide_error" />;
-
-    if (isLoaded(slide.src) || offset === 0 || (Math.abs(offset) <= 2 && arePrioritySlidesLoaded())) {
-        // @ts-ignore
-        return <ImageSlide slide={slide} offset={offset} {...rest} imageProps={{ onError }} onLoad={() => onLoad(slide.src)} />;
-    }
-    return <LoadingIcon className='yarl__icon yarl__slide_loading' />
+    return isLoaded(slide.src) || offset === 0 || (Math.abs(offset) <= 2 && arePrioritySlidesLoaded())
+        ? <ImageSlide slide={slide} offset={offset} {...rest} onError={markImageLoaded} onLoad={markImageLoaded} />
+        : <LoadingIcon className='yarl__icon yarl__slide_loading' />
 }
 
 export { LazyImageSlide }
