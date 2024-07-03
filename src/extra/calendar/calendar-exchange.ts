@@ -24,8 +24,8 @@ const useEventsSync = (identity: object, events: CalendarEvent[]) => {
     return { eventsState: currentState, sendEventsChange: sendFinalChange };
 }
 
-function serverStateToState(transform: (serverState: CalendarEvent[]) => EventInput[]) {
-    return (serverState: CalendarEvent[]) => transform(serverState);
+function serverStateToState(transform: (serverEvent: CalendarEvent) => EventInput) {
+    return (serverState: CalendarEvent[]) => serverState.map(transform);
 }
 
 function changeToPatch(ch: EventImpl): Patch {

@@ -10,10 +10,10 @@ import { useUserLocale } from '../locale';
 import { useEventClickAction, useEventsSync, useViewSync } from './calendar-exchange';
 import { LoadingIndicator } from '../loading-indicator';
 import { ColorDef } from '../view-builder/common-api';
-import { transformDateFormatProps } from './calendar-utils';
+import { transformColor, transformDateFormatProps } from './calendar-utils';
 import { EventContent } from './event-content';
 
-import type { DatesSetArg, EventContentArg, FormatterInput, SlotLabelContentArg, ViewApi } from '@fullcalendar/core';
+import type { DatesSetArg, EventContentArg, EventInput, FormatterInput, SlotLabelContentArg, ViewApi } from '@fullcalendar/core';
 
 const TIME_FORMAT: FormatterInput = {
     hour12: false,
@@ -22,31 +22,51 @@ const TIME_FORMAT: FormatterInput = {
     meridiem: false
 }
 
+const ALLOW_DROP_GROUP_ID = 'allowDrop';
+
 interface Calendar<DateFormat = number> {
     identity: object,
     events: CalendarEvent<DateFormat>[],
+    periodsOfTime?: PeriodOfTime<DateFormat>[],
     currentView?: ViewInfo<DateFormat>,
     slotDuration?: DateFormat,
-    businessHours?: BusinessHours<DateFormat>,
     allDaySlot?: boolean,
     timeSlotsRange?: TimeRange<DateFormat>,
     eventsChildren?: ReactElement[]
 }
 
-interface CalendarEvent<DateFormat = number> {
+type BaseEvent<DateFormat = number> = EventDuration<DateFormat> & {
     id: string,
-    start?: DateFormat,
-    end?: DateFormat,
+    color?: ColorDef
+}
+
+type CalendarEvent<DateFormat = number> = BaseEvent<DateFormat> & {
     title?: string,
     allDay?: boolean,
-    color?: ColorDef,
     editable?: boolean
+}
+
+type PeriodOfTime<DateFormat> = BaseEvent<DateFormat> & {
+    allowDrop: boolean
+}
+
+type EventDuration<DateFormat> = SingleDuration<DateFormat> | RecurringDuration<DateFormat>
+
+interface SingleDuration<DateFormat> {
+    start: DateFormat,
+    end?: DateFormat
+}
+
+interface RecurringDuration<DateFormat> {
+    daysOfWeek: number[],   // 0 = Sunday
+    startTime?: DateFormat,  // if omitted - allDay
+    endTime?: DateFormat
 }
 
 interface TimeRange<DateFormat = number> {
     from: DateFormat,
     to: DateFormat
-} 
+}
 
 interface ViewInfo<DateFormat = number> extends TimeRange<DateFormat> {
     viewType: ViewType
@@ -54,20 +74,17 @@ interface ViewInfo<DateFormat = number> extends TimeRange<DateFormat> {
 
 type ViewType = 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay';
 
-interface BusinessHours<DateFormat = number> {
-    daysOfWeek: number[],   // 0 = Sunday
-    startTime: DateFormat,
-    endTime: DateFormat
-}
 
 function Calendar(props: Calendar<string>) {
-    const { identity, events, currentView: serverView, slotDuration, businessHours, allDaySlot, timeSlotsRange, eventsChildren } =
+    const { identity, events, periodsOfTime = [], currentView: serverView, slotDuration, allDaySlot, timeSlotsRange, eventsChildren } =
         useMemo(() => transformDateFormatProps(props), [props]);
 
     const calendarRef = useRef<FullCalendar>(null);
     const locale = useUserLocale();
 
     const { eventsState, sendEventsChange } = useEventsSync(identity, events);
+
+    const backgroundEvents = periodsOfTime.map(periodOfTimeToBgEvent);
 
     const { currentView, sendViewChange } = useViewSync(identity, serverView);
     const { viewType, from = 0, to = 0 } = currentView || {};
@@ -120,10 +137,9 @@ function Calendar(props: Calendar<string>) {
                 slotLabelContent={fixMidnightPresentation}
                 timeZone={locale.timezoneId}
                 editable={true}
-                businessHours={businessHours}
                 allDaySlot={!!allDaySlot}
                 eventDisplay='block'
-                eventConstraint='businessHours'
+                eventConstraint={ALLOW_DROP_GROUP_ID}
                 navLinks={true}
                 nowIndicator={true}
                 longPressDelay={500}
@@ -134,7 +150,7 @@ function Calendar(props: Calendar<string>) {
                     center: 'title',
                     right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 }}
-                events={eventsState}
+                events={[...eventsState, ...backgroundEvents]}
                 eventTimeFormat={TIME_FORMAT}
                 eventContent={renderEventContent}
                 eventClick={onEventClick}
@@ -164,5 +180,13 @@ function fixMidnightPresentation(info: SlotLabelContentArg) {
     return info.text.replace(/^24/, '00');
 }
 
-export type { CalendarEvent, ViewInfo, ViewType }
+function periodOfTimeToBgEvent({ allowDrop, ...periodOfTime }: PeriodOfTime<number>): EventInput {
+    return {
+        ...transformColor(periodOfTime),
+        ...allowDrop && { groupId: ALLOW_DROP_GROUP_ID },
+        display: 'background'
+    };
+}
+
+export type { CalendarEvent, EventDuration, ViewInfo, ViewType, TimeRange }
 export { Calendar }

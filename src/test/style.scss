@@ -1352,12 +1352,22 @@ div.grid {
     }
   }
 
-  .fc-event:hover {
+  .fc-event:not(.fc-bg-event):hover {
     opacity: 0.8;
   }
 
   .fc-non-business {
     opacity: 0.3;
+  }
+
+  .fc-event {
+    &:not(.fc-event-draggable) {
+        cursor: default;
+    }
+
+    &:is(.fc-not-allowed *) {
+        cursor: not-allowed;
+    }
   }
 
   .overlayMain {
