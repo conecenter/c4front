@@ -7,7 +7,7 @@ import luxon3Plugin from '@fullcalendar/luxon3';
 import interactionPlugin from '@fullcalendar/interaction';
 import allLocales from '@fullcalendar/core/locales-all';
 import { useUserLocale } from '../locale';
-import { useEventClickAction, useEventsSync, useViewSync } from './calendar-exchange';
+import { useEventClickAction, useEventDragAction, useEventsSync, useViewSync } from './calendar-exchange';
 import { LoadingIndicator } from '../loading-indicator';
 import { ColorDef } from '../view-builder/common-api';
 import { transformColor, transformDateFormatProps } from './calendar-utils';
@@ -91,6 +91,8 @@ function Calendar(props: Calendar<string>) {
 
     const onEventClick = useEventClickAction(identity);
 
+    const onEventDrag = useEventDragAction(identity);
+
     const onDatesSet = (viewInfo: DatesSetArg) => {
         if (currentView && isViewCurrent(viewInfo.view, currentView)) return;
         sendViewChange({
@@ -163,6 +165,8 @@ function Calendar(props: Calendar<string>) {
                     slotMinTime: timeSlotsRange.from,
                     slotMaxTime: timeSlotsRange.to
                 }}
+                eventDragStart={(ev) => onEventDrag(ev, true)}
+                eventDragStop={(ev) => onEventDrag(ev, false)}
             />
             {isLoadingOverlay}
         </>

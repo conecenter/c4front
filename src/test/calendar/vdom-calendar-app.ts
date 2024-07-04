@@ -45,26 +45,28 @@ function App() {
         }
     ];
 
+    const periodsOfTime = [
+        {
+            id: 'period_0',
+            allowDrop: true,
+            daysOfWeek: [1, 2, 3, 4, 5],
+            // startTime: '28800000',
+            // endTime: '64800000',
+            color: { tp: 'r' as const, bgColor: 'green', textColor: 'white' }
+        },
+        {
+            id: 'period_1',
+            allowDrop: false,
+            daysOfWeek: [0],
+            startTime: '28800000',
+            endTime: '64800000',
+            color: { tp: 'r' as const, bgColor: 'blue', textColor: 'white' }
+        }
+    ];
+
     const calendar = $(Calendar, {
         identity: { key: 'test' },
-        periodsOfTime: [
-            {
-                id: 'period_0',
-                allowDrop: true,
-                daysOfWeek: [1, 2, 3, 4, 5],
-                // startTime: '28800000',
-                // endTime: '64800000',
-                color: { tp: 'r', bgColor: 'green', textColor: 'white' }
-            },
-            {
-                id: 'period_1',
-                allowDrop: false,
-                daysOfWeek: [0],
-                startTime: '28800000',
-                endTime: '64800000',
-                color: { tp: 'r', bgColor: 'blue', textColor: 'white' }
-            }
-        ],
+        periodsOfTime,
         allDaySlot: false,
         currentView: {
             viewType: 'dayGridMonth',
