@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
-import Lightbox, { ControllerRef, CloseIcon, IconButton } from "yet-another-react-lightbox";
+import Lightbox, { ControllerRef, CloseIcon, IconButton, SlideImage } from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
 import Counter from "yet-another-react-lightbox/plugins/counter";
 import Inline from "yet-another-react-lightbox/plugins/inline";
@@ -20,6 +20,19 @@ interface Slide {
     thumbnail?: string
 }
 
+interface LoadedSlidesInfo {
+    [src: string]: {
+        width?: number,
+        height?: number
+    } | undefined
+}
+
+interface CustomSlide extends SlideImage {
+    srcId: string,
+    title?: string,
+    isLoaded?: boolean
+}
+
 interface ImageViewer {
     identity: object,
     current?: string,
@@ -36,22 +49,33 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
     const {currentState: currentSrcId, sendTempChange, sendFinalChange} =
         usePatchSync(identity, 'slideChange', state, false, s => s, changeToPatch, patchToChange, applyChange);
 
-    // Slides should have stable reference
-    const slidesMemo = useMemo(() => slides, [JSON.stringify(slides)]);
-
     const controller = useRef<ControllerRef>(null);
 
     const inlinePos = position === 'inline';
 
     // The lightbox reads this property when it opens and when slides change
-    const startingIndex = useMemo(() => getCurrentSlideIndex(), [slidesMemo]);
+    const currentIndex = getCurrentSlideIndex();
+    function getCurrentSlideIndex() {
+        const index = slides.findIndex(slide => slide.srcId === currentSrcId);
+        return index < 0 ? 0 : index;
+    }
+
+    const [loadedSlides, setLoadedSlides] = useState<LoadedSlidesInfo>({});
+    const isLoaded = (src: string) => !!loadedSlides[src];
+    const registerLoadedImage = (src: string) => (img?: HTMLImageElement) => {
+        const loadedImage = { [src]: { width: img?.naturalWidth, height: img?.naturalHeight } }
+        !isLoaded(src) && setLoadedSlides((prev) => ({ ...prev, ...loadedImage }));
+    }
+
+    const customSlides: CustomSlide[] = useMemo(() => slides.map(slide => isLoaded(slide.src)
+        ? { ...slide, ...loadedSlides[slide.src], isLoaded: true } : slide
+    ), [slides, loadedSlides]);
 
     useEffect(
         function onServerSlideChange() {
             const lightboxState = controller.current?.getLightboxState();
             if (!lightboxState) return;
             const { currentIndex: lightboxIndex, slides: lightboxSlides } = lightboxState;
-            const currentIndex = getCurrentSlideIndex();
             if (lightboxIndex !== currentIndex && lightboxSlides.length === slides.length) {
                 const changed = currentIndex - lightboxIndex;
                 const direction = changed > 0 ? 'next' : 'prev';
@@ -59,11 +83,6 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
             }
         }, [currentSrcId]
     );
-
-    function getCurrentSlideIndex() {
-        const index = slides.findIndex(slide => slide.srcId === currentSrcId);
-        return index < 0 ? 0 : index;
-    }
 
     const handleClose = () => {
         controller.current?.close();
@@ -78,16 +97,12 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
 
     const zipButton = <ZipButton key='zip-button' slides={slides} />;
 
-    const [loadedSrc, setLoadedSrc] = useState<string[]>([]);
-    const isLoaded = (src: string) => loadedSrc.includes(src);
-    const onLoad = (src: string) => !isLoaded(src) && setLoadedSrc((prev) => [...prev, src]);
-
     return (
         <div className={clsx(inlinePos && 'inlineImageViewer')} >
             <Lightbox
                 open={true}
-                slides={slidesMemo}
-                index={startingIndex}
+                slides={customSlides}
+                index={currentIndex}
                 carousel={{ finite: true, preload: 10 }}
                 controller={{ ref: controller }}
                 plugins={[Captions, Counter, Fullscreen, Zoom, Download, Thumbnails, ...inlinePos ? [Inline] : []]}
@@ -103,7 +118,7 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
                         buttonPrev: () => null,
                         buttonNext: () => null
                     },
-                    slide: (props) => <LazyImageSlide {...props} isLoaded={isLoaded} onLoad={onLoad} />,
+                    slide: (props) => <LazyImageSlide {...props} registerLoadedImage={registerLoadedImage} />,
                     thumbnail: (props) => <Thumbnail {...props} />
                 }}
                 toolbar={{ buttons: [closeButton, zipButton] }}
@@ -113,5 +128,5 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
     );
 }
 
-export type { Slide }
+export type { Slide, CustomSlide }
 export { ImageViewer }
