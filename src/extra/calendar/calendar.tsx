@@ -86,7 +86,8 @@ function Calendar(props: Calendar<string>) {
     useEffect(function keepViewUpdated() {
         const view = calendarRef.current!.getApi().view;
         if (currentView && !isViewCurrent(view, currentView)) {
-            view.calendar.changeView(viewType!, { start: from, end: to });
+            const currentViewMiddlePoint = from + ((to - from) / 2);
+            view.calendar.changeView(viewType!, currentViewMiddlePoint);
         }
     }, [viewType, from, to]);
 
