@@ -12,6 +12,7 @@ import {useHoverExpander} from "../extra/hover-expander"
 import {InputsSizeContext} from "../extra/dom-utils"
 import {PrintContext} from "../extra/print-manager"
 import {UiInfoContext} from "../extra/ui-info-provider"
+import useResizeObserver from "@react-hook/resize-observer"
 
 const dragRowIdOf = identityAt('dragRow')
 const dragColIdOf = identityAt('dragCol')
@@ -112,6 +113,8 @@ const hideExpander = hasHiddenCols => hasHiddenCols ? (l => l) : (l => l.filter(
 const getGridRow = ({ rowKey, rowKeyMod }) => CSS.escape(rowKey + (rowKeyMod || ''))
 const getGridCol = ({ colKey }) => colKey === GRIDCELL_COLSPAN_ALL ? spanAll : CSS.escape(colKey)
 
+const hasOverflow = (elem) => elem && (elem.scrollWidth - elem.clientWidth) > 4 || false;
+
 const spanAll = "1 / -1"
 
 export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, spanRight, spanRightTo, expanding, expander, dragHandle, noDefCellClass, classNames: argClassNames, gridRow: argGridRow, gridColumn: argGridColumn, needsHoverExpander=true, ...props }) {
@@ -121,13 +124,22 @@ export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, spanRi
     const gridColumn = argGridColumn || getGridCol({ colKey }) + (spanRightTo ? " / "+spanRightTo : "")
     const align = argClassNames?.includes('gridGoRight') ? 'r' : 'l';
     const {hoverStyle, hoverClass, ...hoverProps} = useHoverExpander(ref, align, needsHoverExpander);
+
+    const [overflow, setOverflow] = useState(false);
+    useResizeObserver(ref, (entry) => setOverflow(hasOverflow(entry.target)));
+
     const style = {...props.style, gridRow, gridColumn, ...hoverStyle}
     const expanderProps = expanding === "expander" && {
         'data-expander': expander,
         ...expander === 'passive' && {onClickCapture: (e) => e.stopPropagation()}
     }
     const {focusClass, focusHtml} = useFocusControl(path);
-    const className = clsx(argClassNames, !noDefCellClass && GRID_CLASS_NAMES.CELL, focusClass, dragHandle && 'gridDragCell', hoverClass);
+    const className = clsx(
+        argClassNames, focusClass, hoverClass,
+        !noDefCellClass && GRID_CLASS_NAMES.CELL,
+        dragHandle && 'gridDragCell',
+        overflow && 'overflownCell'
+    );
     return $("div", {ref, ...props, ...expanderProps, 'data-col-key': colKey, 'data-row-key': rowKey, "data-drag-handle": dragHandle, ...focusHtml, style, className, ...hoverProps}, children)
 }
 
