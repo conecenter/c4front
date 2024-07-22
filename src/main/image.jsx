@@ -1,20 +1,25 @@
 import React, { useMemo, useEffect, useState } from 'react'
 import clsx from 'clsx';
-import { useCached } from './cache-provider';
+import useSWR from 'swr';
 
 const initViewBox = "0 0 0 0"
 
 const clear = (url) => url.replace(/#.*$/, "")
 const isDataUrl = (src) => src.startsWith("data:image/svg");
 
-const SVGElement = ({ url, ...props }) => {
+const fetcher = async (url) => {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Network response was not OK');
+    return res.text();
+}
+
+const SVGElement = ({ url, color, ...props }) => {
     const toDecode = isDataUrl(url)
-    const fetched = useCached(toDecode ? "" : url)
+    const { data: fetched } = useSWR(toDecode ? null : url, fetcher)
     const decodedContent = fetched || toDecode && atob(url.replace(/data:.+?,/, ""))
     const viewBox = decodedContent && getViewBox(decodedContent) || initViewBox
     const content = decodedContent && replaceSvgTag(decodedContent) || ""
-    const color = !props.color || props.color == "adaptive" ? "currentColor" : props.color
-
+    const fillColor = !color || color == "adaptive" ? "currentColor" : color
     const htmlObject = useMemo(() => ({ __html: content }), [content])
     return <svg
         dangerouslySetInnerHTML={htmlObject}
