@@ -21,14 +21,16 @@ const SVGElement = ({ url, color, ...props }) => {
     const content = decodedContent && replaceSvgTag(decodedContent) || ""
     const fillColor = !color || color == "adaptive" ? "currentColor" : color
     const htmlObject = useMemo(() => ({ __html: content }), [content])
-    return <svg
-        dangerouslySetInnerHTML={htmlObject}
-        viewBox={viewBox}
-        fill={color}
-        className={props.className}
-        style={props.style}
-        alt={props.alt} // used for testing & ensure unified API with ImageElement
-    />
+    return content
+        ? <svg
+            dangerouslySetInnerHTML={htmlObject}
+            viewBox={viewBox}
+            fill={fillColor}
+            className={props.className}
+            style={props.style}
+            alt={props.alt} // used for testing & ensure unified API with ImageElement
+        />
+        : null
 }
 
 function getViewBox(str) {
