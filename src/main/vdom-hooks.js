@@ -41,6 +41,7 @@ export const useSync = identity => {
 }
 
 export function createSyncProviders({sender,ack,isRoot,branchKey,children}){
+    console.log("providers render")
     const rootContextValue = useMemo(() => ({isRoot, branchKey}),[isRoot, branchKey])
     return createElement(SenderContext.Provider, {value:sender},
         createElement(AckContext.Provider, {value:ack}, 
