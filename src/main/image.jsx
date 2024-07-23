@@ -13,13 +13,13 @@ const fetcher = async (url) => {
     return res.text();
 }
 
-const SVGElement = ({ url, color, ...props }) => {
+const SVGElement = ({ url, color = "adaptive", ...props }) => {
     const toDecode = isDataUrl(url)
     const { data: fetched } = useSWR(toDecode ? null : url, fetcher)
     const decodedContent = fetched || toDecode && atob(url.replace(/data:.+?,/, ""))
     const viewBox = decodedContent && getViewBox(decodedContent) || initViewBox
     const content = decodedContent && replaceSvgTag(decodedContent) || ""
-    const fillColor = !color || color == "adaptive" ? "currentColor" : color
+    const fillColor = color == "adaptive" ? "currentColor" : color
     const htmlObject = useMemo(() => ({ __html: content }), [content])
     return content
         ? <svg
