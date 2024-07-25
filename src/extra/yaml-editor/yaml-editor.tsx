@@ -13,13 +13,13 @@ const patchToChange = (patch: Patch): string => patch.value;
 interface YamlEditorProps {
     identity: object,
     value: string,
-    jsonSchema?: JSONSchema7
+    jsonSchema?: string
 }
 
 function YamlEditor({ identity, value, jsonSchema }: YamlEditorProps) {
     const yamlSupport = useMemo(() => yaml(), []);
 
-    const schemaExtension = jsonSchema ? yamlSchema(jsonSchema) : [];
+    const schemaExtension = jsonSchema ? yamlSchema(parseJsonSchema(jsonSchema)) : [];
 
     const { currentState, sendTempChange, sendFinalChange, wasChanged } =
         usePatchSync(identity, 'receiver', value, true, s => s, changeToPatch, patchToChange, (prev, ch) => ch);
@@ -41,6 +41,14 @@ function YamlEditor({ identity, value, jsonSchema }: YamlEditorProps) {
         extensions={[yamlSupport, schemaExtension, linter(lintErrors), lintGutter()]}
         onBlur={() => wasChanged && sendFinalChange(currentState)}
         onChange={(value) => sendTempChange(value)} />
+}
+
+function parseJsonSchema(jsonSchema: string) {
+    try {
+        return JSON.parse(jsonSchema) as JSONSchema7;
+    } catch (err) {
+        console.log('Parsing jsonSchema error: ', err);
+    }
 }
 
 export type { YamlEditorProps }
