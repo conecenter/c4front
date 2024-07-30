@@ -3,12 +3,13 @@ import { EventContentArg } from '@fullcalendar/core';
 
 interface EventContent {
     eventInfo: EventContentArg,
-    customContent?: ReactElement
+    customContent?: ReactElement,
+    onEventClick: (clickedEventId: string) => void
 }
 
-function EventContent({ eventInfo, customContent }: EventContent) {
+function EventContent({ eventInfo, customContent, onEventClick }: EventContent) {
     return (
-        <div tabIndex={-1} className="fc-event-main-frame">
+        <div onClick={() => onEventClick(eventInfo.event.id)} tabIndex={-1} className="fc-event-main-frame">
             <div className="fc-event-time">{eventInfo.timeText}</div>
             <div className="fc-event-title-container">
                 <div className="fc-event-title fc-sticky">{eventInfo.event.title}</div>

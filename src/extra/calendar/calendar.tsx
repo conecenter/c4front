@@ -47,7 +47,7 @@ interface CalendarEvent<DateFormat = number> {
 interface TimeRange<DateFormat = number> {
     from: DateFormat,
     to: DateFormat
-} 
+}
 
 interface ViewInfo<DateFormat = number> extends TimeRange<DateFormat> {
     viewType: ViewType
@@ -109,7 +109,7 @@ function Calendar(props: Calendar<string>) {
         // TODO: refactor, key can have ":" added in the beginning of string, keys API can change
         const regExp = new RegExp(`^:?${escapeRegex(eventInfo.event.id)}$`);
         const customContent = eventsChildren?.find(child => regExp.test(child.key as string));
-        return <EventContent eventInfo={eventInfo} customContent={customContent} />;
+        return <EventContent eventInfo={eventInfo} customContent={customContent} onEventClick={onEventClick} />;
     }, [eventsChildren]);
 
     return (
@@ -141,7 +141,6 @@ function Calendar(props: Calendar<string>) {
                 events={eventsState}
                 eventTimeFormat={TIME_FORMAT}
                 eventContent={renderEventContent}
-                eventClick={onEventClick}
                 eventChange={(changedEvent) => sendEventsChange(changedEvent.event)}
                 datesSet={onDatesSet}
                 viewDidMount={(viewMount) => viewRoot.current = viewMount.el}

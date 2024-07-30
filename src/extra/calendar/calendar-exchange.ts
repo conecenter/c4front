@@ -5,7 +5,7 @@ import { identityAt } from "../../main/vdom-util";
 
 import type { Patch, PatchHeaders } from '../exchange/patch-sync';
 import type { CalendarEvent, ViewInfo, ViewType } from "./calendar";
-import type { EventClickArg, EventInput } from '@fullcalendar/core';
+import type { EventInput } from '@fullcalendar/core';
 import type { EventImpl } from '@fullcalendar/core/internal';
 
 const HEADERS = {
@@ -64,9 +64,9 @@ const clickActionIdOf = identityAt('clickAction');
 
 const useEventClickAction = (identity: object) => {
     const [_, enqueueClickActionPatch] = useSync(clickActionIdOf(identity))
-    return (clickedEvent: EventClickArg) => enqueueClickActionPatch({
+    return (clickedEventId: string) => enqueueClickActionPatch({
         value: 'clickAction',
-        headers: { [HEADERS.id]: clickedEvent.event.id }
+        headers: { [HEADERS.id]: clickedEventId }
     });
 }
 
