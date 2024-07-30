@@ -12,6 +12,7 @@ import { LoadingIndicator } from '../loading-indicator';
 import { ColorDef } from '../view-builder/common-api';
 import { transformDateFormatProps } from './calendar-utils';
 import { EventContent } from './event-content';
+import { escapeRegex } from '../utils';
 
 import type { DatesSetArg, EventContentArg, FormatterInput, SlotLabelContentArg, ViewApi } from '@fullcalendar/core';
 
@@ -105,7 +106,9 @@ function Calendar(props: Calendar<string>) {
     });
 
     const renderEventContent = useCallback((eventInfo: EventContentArg) => {
-        const customContent = eventsChildren?.find(child => child.key === eventInfo.event.id);
+        // TODO: refactor, key can have ":" added in the beginning of string, keys API can change
+        const regExp = new RegExp(`^:?${escapeRegex(eventInfo.event.id)}$`);
+        const customContent = eventsChildren?.find(child => regExp.test(child.key as string));
         return <EventContent eventInfo={eventInfo} customContent={customContent} />;
     }, [eventsChildren]);
 
