@@ -238,19 +238,21 @@ button {
   height: 100vh;
 }
 
+.textLineSize {
+  height: 1em;
+}
+
 //HEADER
 .filterArea {
-  background-color: var(--color-darkPrimaryColor);
-  color: var(--textColor-body);
+  @extend .primaryColorCss;
+  width: 100%;
+  box-shadow: 0 0 0 1px var(--color-primaryColor);
 
-  > button {
+  button {
     border: medium none;
-    cursor: pointer;
     font-size: 1em;
     align-self: center;
     font-family: inherit;
-    outline: currentcolor none medium;
-    outline-offset: -0.1em;
     line-height: 1;
   }
 }
@@ -1459,4 +1461,43 @@ div.grid {
     &:is(.groupBox > *) {
         width: min(90vw, 750px);
     }
+}
+
+/**********************Button*************************/
+button {
+  min-height: 1.6em;
+  min-width: 1.6em;
+  color: var(--textColor-body);
+  background-color: transparent;
+  cursor: pointer;
+  margin: 0.2em;
+  border: medium none;
+  font-size: 1em;
+  font-family: inherit;
+  line-height: 1;
+  align-self: center;
+  padding: 0 0.2em;
+  white-space: nowrap;
+  outline: currentcolor none medium;
+  outline-offset: -0.1em;
+
+  &.noAction {
+      color: var(--color-dark-grayColor);
+      background: var(--color-grayColor);
+      cursor: initial;
+  }
+
+  &:not(.noAction):hover {
+      opacity: 0.8;
+  }
+
+  > .text {
+      padding: 0 1em;
+  }
+
+  > svg, img {
+      + .text {
+          vertical-align: text-top;
+      }
+  }
 }
