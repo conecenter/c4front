@@ -1,7 +1,8 @@
-import React, { createElement as $, ReactNode, MutableRefObject } from 'react';
+import React, { createElement as $, useEffect, ReactNode, MutableRefObject } from 'react';
 import clsx from 'clsx';
 import { useFocusControl } from './focus-control';
 import { Patch } from './exchange/patch-sync';
+import { ColorDef, ColorProps, colorToProps } from './view-builder/common-api';
 
 interface ButtonElement {
     value: boolean | '1' | '',
@@ -15,6 +16,7 @@ interface ButtonElement {
     url?: string,
     hint?: string,
 	className?: string,
+	color?: ColorDef,
     forwardRef?: MutableRefObject<HTMLButtonElement | null>
 }
 
@@ -27,9 +29,11 @@ const ButtonElement = (props: ButtonElement) => {
 
 	const { focusClass, focusHtml } = useFocusControl(props.path)
 
+	const { style: colorStyle, className: colorClass }: ColorProps = colorToProps(props.color);
+
 	const markerClass = props.marker && `marker-${props.marker}`
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (props.forwardRef) props.forwardRef.current = elem.current
 	}, [changing])
 
@@ -46,7 +50,7 @@ const ButtonElement = (props: ButtonElement) => {
         }
     }
 
-	React.useEffect(() => {
+	useEffect(() => {
 		const onEnter = (e: CustomEvent) => {
 			e.stopPropagation()
 			elem.current?.click()
@@ -63,11 +67,13 @@ const ButtonElement = (props: ButtonElement) => {
 	const children = props.children !== props.content && props.children
 
 	return $("button", {
-			key: "btn", ref: elem,
-            onClick, title: props.hint, ...focusHtml,
-            className: clsx(props.className, focusClass, noAction && 'noAction', markerClass),
-			style: disabled ? { opacity: "0.4", cursor: 'default' } : undefined,
-			onKeyDown: (e) => e.preventDefault()
+			ref: elem, onClick, title: props.hint, ...focusHtml,
+            className: clsx(props.className, focusClass, colorClass, noAction && 'noAction', markerClass),
+			onKeyDown: (e) => e.preventDefault(),
+			style: {
+				...disabled && { opacity: "0.4", cursor: 'default' },
+				...colorStyle
+			}
 		},
 		textContent,
 		children
