@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import { HorizontalCaptionContext, NoCaptionContext } from '../main/vdom-hooks';
 import { useClickSyncOpt } from './exchange/click-sync';
 import { useFocusControl } from './focus-control';
-import { getUserManualUtils, useUserManual } from './user-manual';
+import { useUserManual } from './user-manual';
 import { FlexibleSizes } from './view-builder/flexible-api';
 import { SEL_FOCUSABLE_ATTR } from './css-selectors';
 
@@ -40,9 +40,7 @@ function LabeledElement({ identity, path, label, sizes, accented, clickable, lab
     }, [isEmptyLabel, labelChildren, children]);
 
     // User manual functionality
-    const userManual = useUserManual();
-    const umUrl = isFocused && userManual.has(umid) ? userManual.getUrl(umid) : null;
-    const {button: umButton, onKeyDown} = getUserManualUtils(umUrl);
+    const { button: umButton, onKeyDown } = useUserManual(isFocused, umid);
 
     const { clicked, onClick } = useClickSyncOpt(identity, 'receiver', clickable);
     
@@ -62,7 +60,7 @@ function LabeledElement({ identity, path, label, sizes, accented, clickable, lab
             maxWidth: sizes.max ? `${sizes.max}em` : undefined
         },
         ...clickable && { cursor: 'pointer' },
-        ...umUrl && { position: 'relative' }
+        ...umButton && { position: 'relative' }
     };
 
     return (

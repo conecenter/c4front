@@ -4,7 +4,7 @@ import { useClickSync } from "./exchange/click-sync";
 import { ButtonElement } from "./button-element";
 import { usePath } from "../main/vdom-hooks";
 import { useFocusControl } from "./focus-control";
-import { getUserManualUtils, useUserManual } from "./user-manual";
+import { useUserManual } from "./user-manual";
 
 interface FlagElement {
     identity: Object,
@@ -20,9 +20,7 @@ function FlagElement ({ identity, imageSrc, name, umid }: FlagElement) {
     const { focusClass, focusHtml, isFocused } = useFocusControl(path);
 
     // User manual logic
-    const userManual = useUserManual();
-    const umUrl = isFocused && userManual.has(umid) ? userManual.getUrl(umid) : null;
-    const {button: umButton, onKeyDown} = getUserManualUtils(umUrl);
+    const {button: umButton, onKeyDown} = useUserManual(isFocused, umid);
 
     return (
         <div className={clsx('flagElement', focusClass)} {...focusHtml} onKeyDown={onKeyDown} >

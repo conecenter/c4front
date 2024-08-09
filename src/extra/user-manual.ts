@@ -14,7 +14,11 @@ const defaultUserManual: UserManual = {
 const UserManualContext = createContext<UserManual>(defaultUserManual)
 UserManualContext.displayName = "UserManualContext"
 
-const useUserManual: () => UserManual = () => useContext(UserManualContext)
+const useUserManual = (isFocused: boolean | undefined, umid?: string) => {
+    const userManual = useContext(UserManualContext);
+    const umUrl = isFocused ? userManual.getUrl(umid) : null;
+    return getUserManualUtils(umUrl);
+}
 
 interface UserManualProviderProps {
     url: string,
@@ -60,6 +64,7 @@ function getUserManualUtils(url: string | null): { button?: ReactNode, onKeyDown
 
 function UserManualButton(action: (e: SyntheticEvent) => void) {
     return $("div", {
+            className: 'umButton',
             onClick: action,
             style: {
                 cursor: "pointer",
