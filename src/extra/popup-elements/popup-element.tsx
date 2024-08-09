@@ -15,10 +15,11 @@ interface PopupElement {
     popupKey: string,
     className?: string,
     forceOverlay?: boolean,
+    lrMode?: boolean,
     children?: ReactNode
 }
 
-function PopupElement({ popupKey, className, forceOverlay, children }: PopupElement) {
+function PopupElement({ popupKey, className, forceOverlay, lrMode, children }: PopupElement) {
     const { openedPopups, sendFinalChange } = useContext(PopupStateContext);
     const popupAncestorKey = useContext(PopupWrapperKeyContext);
     const popupDrawer = useContext(PopupDrawerContext);
@@ -33,7 +34,7 @@ function PopupElement({ popupKey, className, forceOverlay, children }: PopupElem
     // menu & filters have multiple copies - hidden & visible - of some elements
     const isVisible = parent?.matches(VISIBLE_CHILD_SELECTOR);
 
-    const [popupStyle] = usePopupPos(popupElement, false, parent);
+    const [popupStyle] = usePopupPos(popupElement, lrMode, parent);
 
     function closeOnBlur(e: FocusEvent) {
         if (!e.relatedTarget || elementsContainTarget([popupElement, parent], e.relatedTarget)) return;

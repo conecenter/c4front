@@ -34,10 +34,11 @@ function PopupManager({identity, openedPopups=[], children}: PopupManager) {
 }
 
 
-const usePopupState = (popupKey: string) => {
+const usePopupState = (popupKey: string | null) => {
     const { openedPopups, sendFinalChange } = useContext(PopupStateContext);
-    const isOpened = openedPopups.includes(popupKey);
+    const isOpened = !!popupKey && openedPopups.includes(popupKey);
     const toggle = (on: boolean) => {
+        if (!popupKey) return;
         if (on && !isOpened) sendFinalChange([...openedPopups, popupKey]);
         else if (!on && isOpened) sendFinalChange(openedPopups.slice(0, openedPopups.indexOf(popupKey)));
     };
