@@ -1518,6 +1518,39 @@ button {
   }
 }
 
+/************LabeledElement****************/
+.labeledElement {
+  &:not(:is(.labeledElement *)) {
+      margin: 0.2em;
+  }
+  &.accented {
+      background: var(--color-light-primaryColor);
+      box-shadow: 0 0 0 0.3em var(--color-light-primaryColor);
+  }
+  .labelBox, .contentBox, &.contentBox {
+      display: flex;
+      align-items: center;
+      gap: 0.2em;
+
+      > button {
+          margin: 0;
+      }
+  }
+  .labelBox {
+      min-height: 1em;
+
+      label {
+          font-size: 0.8em;
+          white-space: nowrap;
+          cursor: inherit;
+      }
+  }
+  &.contentBox > .labelBox > label {
+      font-size: 1em;
+  }
+}
+
+/************** FilterButtonExpander & MassOps **************/
 .filterButtonExpander, .massOp {
   height: 2em;
   display: inline-flex;
@@ -1529,50 +1562,73 @@ button {
   > .nameFolded {
     display: none;
   }
+
+  + .umButton {
+    top: -0.5em !important;
+  }
 }
 
-.popupEl > .massOp {
-  @extend .menuItem;
-  @extend .transparentColorCss;
-  position: relative;
-  opacity: 1;
-  padding: 0 1.5em 0 0.5em;
+.filteringInput {
+  width: auto;
+  margin: 0.3em;
+  align-items: center;
+  height: 2em;
+
+  .searchIcon {
+      height: 100%;
+      box-sizing: border-box;
+      padding: 0.2em 0.1em 0.2em 0.2em;
+      order: -1;
+      color: var(--color-dark-grayColor);
+  }
+}
+
+.popupEl > .labeledElement {
   margin: 0;
-  width: 100%;
-  height: 100%;
-  text-align: left;
 
-  &.activeFocusWrapper {
-      outline: none;
-  }
+  > .massOp {
+    @extend .menuItem;
+    @extend .transparentColorCss;
+    position: relative;
+    opacity: 1;
+    padding: 0 1.5em 0 0.5em;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    text-align: left;
 
-  &.isFolder {
-      &::after {
-          content: "";
-          height: 1em;
-          width: 1em;
-          position: absolute;
-          right: 0.1em;
-          background: no-repeat center url(./filter-massops/arrow-down.svg);
-          background-size: 100% 100%;
-          transform: rotate(-90deg);
-          transition: all 0.15s ease;
-          pointer-events: none;
-      }
-      &.isOpened::after {
-          transform: rotate(-270deg);
-      }
-  }
+    &.activeFocusWrapper {
+        outline: none;
+    }
 
-  > span {
-    padding: 0;
-  }
+    &.isFolder {
+        &::after {
+            content: "";
+            height: 1em;
+            width: 1em;
+            position: absolute;
+            right: 0.1em;
+            background: no-repeat center url(./filter-massops/arrow-down.svg);
+            background-size: 100% 100%;
+            transform: rotate(-90deg);
+            transition: all 0.15s ease;
+            pointer-events: none;
+        }
+        &.isOpened::after {
+            transform: rotate(-270deg);
+        }
+    }
 
-  > .nameFolded {
-    display: block;
-  }
+    > span {
+      padding: 0;
+    }
 
-  > .nameFull {
-    display: none;
+    > .nameFolded {
+      display: block;
+    }
+
+    > .nameFull {
+      display: none;
+    }
   }
 }

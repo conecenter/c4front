@@ -6,7 +6,7 @@ import SearchSvg from './search.svg';
 
 interface FilteringInput {
     identity: object,
-    filterValue: string,
+    filterValue?: string,
     path: string
 }
 

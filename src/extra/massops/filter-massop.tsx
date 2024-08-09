@@ -1,13 +1,14 @@
 import React, { createContext, FunctionComponentElement, ReactNode, useContext } from "react";
 import clsx from "clsx";
 import { ButtonElement } from "../button-element";
-import { usePath } from "../../main/vdom-hooks";
+import { NoCaptionContext, usePath } from "../../main/vdom-hooks";
 import { ImageElement } from "../../main/image";
 import { ColorDef } from "../view-builder/common-api";
 import { usePopupState } from "../popup-elements/popup-manager";
 import { PopupElement } from "../popup-elements/popup-element";
 import { useClickSync } from "../exchange/click-sync";
 import { FilteringInput } from "./filtering-input";
+import { LabeledElement } from "../labeled-element";
 
 const FilterButtonExpanderContext = createContext(false);
 FilterButtonExpanderContext.displayName = 'FilterButtonExpanderContext';
@@ -18,7 +19,7 @@ interface FilterButtonExpander {
     name?: string,
     color?: ColorDef,
     optButtons: FunctionComponentElement<MassOp>[]
-    filterValue: string,
+    filterValue?: string,
 }
 
 function FilterButtonExpander({ identity, name, color, optButtons = [], filterValue }: FilterButtonExpander) {
@@ -32,8 +33,10 @@ function FilterButtonExpander({ identity, name, color, optButtons = [], filterVa
             {isOpened &&
                 <PopupElement popupKey={path}>
                     <FilterButtonExpanderContext.Provider value={true}>
-                        <FilteringInput identity={identity} filterValue={filterValue} path={path} />
-                        {optButtons}
+                        <NoCaptionContext.Provider value={true}>
+                            <FilteringInput identity={identity} filterValue={filterValue} path={path} />
+                            {optButtons}
+                        </NoCaptionContext.Provider>
                     </FilterButtonExpanderContext.Provider>
                 </PopupElement>}
         </ButtonElement>
@@ -49,10 +52,11 @@ interface MassOp {
     hint?: string,
     isFolder?: boolean,
     icon?: string,
+    umid?: string,
     children?: ReactNode
 }
 
-function MassOp({ identity, name, nameFolded, color, hint, isFolder, icon, children }: MassOp) {
+function MassOp({ identity, name, nameFolded, color, hint, isFolder, icon, umid, children }: MassOp) {
     const path = usePath(identity);
     const { isOpened, toggle } = usePopupState(isFolder ? path : null);
     const { clicked, onClick: sendClick } = useClickSync(identity, 'receiver');
@@ -68,20 +72,24 @@ function MassOp({ identity, name, nameFolded, color, hint, isFolder, icon, child
     const isFolderOpened = isOpened && children;
 
     return (
-        <ButtonElement
-            value={clicked} path={path} color={color} hint={hint} onClick={onClick}
-            className={clsx('massOp', isFolder && 'isFolder', isFolderOpened && 'isOpened')}
-        >
-            {icon &&
-                <ImageElement src={icon} className='textLineSize' color='adaptive' />}
-            {nameFolded &&
-                <span className='nameFolded'>{nameFolded}</span>}
-            {name &&
-                <span className={clsx(nameFolded && 'nameFull')}>{name}</span>}
+        <NoCaptionContext.Provider value={true}>
+            <LabeledElement umid={umid} >
+                <ButtonElement
+                    value={clicked} path={path} color={color} hint={hint} onClick={onClick}
+                    className={clsx('massOp', isFolder && 'isFolder', isFolderOpened && 'isOpened')}
+                >
+                    {icon &&
+                        <ImageElement src={icon} className='textLineSize' color='adaptive' />}
+                    {nameFolded &&
+                        <span className='nameFolded'>{nameFolded}</span>}
+                    {name &&
+                        <span className={clsx(nameFolded && 'nameFull')}>{name}</span>}
 
-            {isFolderOpened &&
-                <PopupElement popupKey={path} lrMode={isInsideExpander}>{children}</PopupElement>}
-        </ButtonElement>
+                    {isFolderOpened &&
+                        <PopupElement popupKey={path} lrMode={isInsideExpander} children={children} />}
+                </ButtonElement>
+            </LabeledElement>
+        </NoCaptionContext.Provider>
     );
 }
 

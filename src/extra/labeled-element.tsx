@@ -10,14 +10,14 @@ const NoFocusContext = React.createContext(false);
 NoFocusContext.displayName = "NoFocusContext";
 
 interface LabeledElement {
-    key: string,
+    key?: string,
     identity?: object,
-    path: string,
-    label: string,
+    path?: string,
+    label?: string,
     sizes?: FlexibleSizes,
     accented?: boolean,
     clickable?: boolean,
-    labelChildren: ReactNode,
+    labelChildren?: ReactNode,
     umid?: string,
     children: ReactNode
 }
