@@ -1,7 +1,6 @@
 import React, { useContext, ReactNode, useEffect, useRef, useState, CSSProperties } from 'react';
 import clsx from 'clsx';
 import { HorizontalCaptionContext, NoCaptionContext } from '../main/vdom-hooks';
-import { useClickSyncOpt } from './exchange/click-sync';
 import { useFocusControl } from './focus-control';
 import { useUserManual } from './user-manual';
 import { FlexibleSizes } from './view-builder/flexible-api';
@@ -12,7 +11,7 @@ NoFocusContext.displayName = "NoFocusContext";
 
 interface LabeledElement {
     key: string,
-    identity: object,
+    identity?: object,
     path: string,
     label: string,
     sizes?: FlexibleSizes,
@@ -23,7 +22,7 @@ interface LabeledElement {
     children: ReactNode
 }
 
-function LabeledElement({ identity, path, label, sizes, accented, clickable, labelChildren, umid, children }: LabeledElement) {
+function LabeledElement({ path, label, sizes, accented, clickable, labelChildren, umid, children }: LabeledElement) {
     const showCaption = !useContext(NoCaptionContext);
     const isHorizontalCaption = useContext(HorizontalCaptionContext);
 
@@ -42,8 +41,8 @@ function LabeledElement({ identity, path, label, sizes, accented, clickable, lab
     // User manual functionality
     const { button: umButton, onKeyDown } = useUserManual(isFocused, umid);
 
-    const { clicked, onClick } = useClickSyncOpt(identity, 'receiver', clickable);
-    
+    // const { clicked, onClick } = useClickSyncOpt(identity, 'receiver', clickable);
+
     const className = clsx(
         'labeledElement',
         focusClass,
@@ -65,17 +64,16 @@ function LabeledElement({ identity, path, label, sizes, accented, clickable, lab
 
     return (
         <NoFocusContext.Provider value={disableChildFocus} >
-            <div ref={refLE} 
-                className={className} 
-                {...focusHtml} 
-                style={style} 
-                onClick={onClick} 
-                onKeyDown={onKeyDown} 
+            <div ref={refLE}
+                className={className}
+                {...focusHtml}
+                style={style}
+                onKeyDown={onKeyDown}
                 data-umid={umid}
             >
                 {showCaption ? (
                     <NoCaptionContext.Provider value={true}>
-                        <div className='labelBox' style={clicked ? { opacity: 0.8 } : undefined}>
+                        <div className='labelBox' /*style={clicked ? { opacity: 0.8 } : undefined}*/>
                             {label && <label>{label}</label>}
                             {labelChildren}
                         </div>
