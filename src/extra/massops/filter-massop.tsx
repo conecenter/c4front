@@ -1,12 +1,13 @@
 import React, { createContext, FunctionComponentElement, ReactNode, useContext } from "react";
 import clsx from "clsx";
-import { ButtonElement } from "./button-element";
-import { usePath } from "../main/vdom-hooks";
-import { ImageElement } from "../main/image";
-import { ColorDef } from "./view-builder/common-api";
-import { usePopupState } from "./popup-elements/popup-manager";
-import { PopupElement } from "./popup-elements/popup-element";
-import { useClickSync } from "./exchange/click-sync";
+import { ButtonElement } from "../button-element";
+import { usePath } from "../../main/vdom-hooks";
+import { ImageElement } from "../../main/image";
+import { ColorDef } from "../view-builder/common-api";
+import { usePopupState } from "../popup-elements/popup-manager";
+import { PopupElement } from "../popup-elements/popup-element";
+import { useClickSync } from "../exchange/click-sync";
+import { FilteringInput } from "./filtering-input";
 
 const FilterButtonExpanderContext = createContext(false);
 FilterButtonExpanderContext.displayName = 'FilterButtonExpanderContext';
@@ -17,10 +18,10 @@ interface FilterButtonExpander {
     name?: string,
     color?: ColorDef,
     optButtons: FunctionComponentElement<MassOp>[]
-    // inputValue: string,
+    filterValue: string,
 }
 
-function FilterButtonExpander({ identity, name, color, optButtons = [] }: FilterButtonExpander) {
+function FilterButtonExpander({ identity, name, color, optButtons = [], filterValue }: FilterButtonExpander) {
     const path = usePath(identity);
     const { isOpened, toggle } = usePopupState(path);
     return (
@@ -31,6 +32,7 @@ function FilterButtonExpander({ identity, name, color, optButtons = [] }: Filter
             {isOpened &&
                 <PopupElement popupKey={path}>
                     <FilterButtonExpanderContext.Provider value={true}>
+                        <FilteringInput identity={identity} filterValue={filterValue} path={path} />
                         {optButtons}
                     </FilterButtonExpanderContext.Provider>
                 </PopupElement>}
