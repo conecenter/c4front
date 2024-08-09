@@ -244,29 +244,18 @@ class InputElementBase extends StatefulComponent {
         });
         this.prevval = this.inp.value
     }
-    /*onMouseDown(e) {
-        if (!this.props.div) return
-        if (!this.props.onReorder) return
-        this.dragBinding = dragDropModule.dragStartDD(e, this.inp, this.onMouseUpCall)
-        if (this.dragBinding) this.setState({ visibility: "hidden" })
-    }
-    onMouseUpCall(newPos) {
-        if (!this.props.div) return
-        if (!this.props.onReorder) return
-        this.setState({ visibility: "" })
-        this.props.onReorder("reorder", newPos.toString())
-    }*/
     render() {
         const readOnly = !this.props.onChange && !this.props.onBlur
         const inpContStyle = readOnly ? {borderColor: "transparent"} : undefined;
         const {focusClass, focusHtml} = this.props.focusProps || {};
+        const className = clsx("inputBox", this.props.className, focusClass);
         const inputType = !this.props.inputType ? "input" : this.props.inputType
         const name = this.props.typeKey || null
         const content = this.props.content
         const errorChildren = this.getChildrenByClass("sideContent")
         const errors = errorChildren?.length > 0 ? errorChildren : []
         const alignRight = !!this.props.alignRight
-        return $("div", { style: inpContStyle, ref: (ref) => this.cont = ref, className: clsx("inputBox", focusClass), ...focusHtml },
+        return $("div", { style: inpContStyle, ref: (ref) => this.cont = ref, className, ...focusHtml },
             this.props.shadowElement?.(),
             alignRight && errors,
             $(InputsSizeContext.Consumer, null, size => this.props.drawFunc(
@@ -285,8 +274,7 @@ class InputElementBase extends StatefulComponent {
                     "data-type": this.props.dataType,
                     "data-changing": this.props.changing,
                     onChange: this.onChange, onKeyDown: this.onKeyDown,
-                    onBlur: this.onBlur, onFocus: this.props.onFocus,
-                    /*onMouseDown: this.onMouseDown, onTouchStart: this.onMouseDown*/
+                    onBlur: this.onBlur, onFocus: this.props.onFocus
                 }, content))
             ),
             this.props.uploadedFileElement?.(),
