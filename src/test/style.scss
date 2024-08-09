@@ -144,6 +144,10 @@
     background: var(--color-light-focusOutlineColor);
     color: var(--textColor-light-focusOutlineColor);
 }
+.transparentColorCss{
+  background-color: transparent;
+  color: inherit;
+}
 
 /*****************IdeaColors********************/
 .darkIdeaBackGroundCssClass{
@@ -192,37 +196,6 @@ body {
   }
 }
 
-button {
-  min-height: 1.6em;
-  min-width: 1.6em;
-  color: var(--textColor-body);
-  background-color: transparent;
-  cursor: pointer;
-  margin: 0.2em;
-  border: medium none;
-  font-size: 1em;
-  font-family: inherit;
-  line-height: 1;
-  align-self: center;
-  padding: 0 0.2em;
-  white-space: nowrap;
-  outline: currentcolor none medium;
-  outline-offset: -0.1em;
-
-  // &:hover {
-  //   opacity: 0.8;
-  // }
-
-  > .text {
-    padding: 0 1em;
-  }
-  // ????????????????????????????????????????????????
-  &.buttonEl {
-    margin: 0;
-    padding: 0.2em;
-  }
-}
-
 /********************************************************/
 .top-row, .topRow {
   position: fixed;
@@ -247,14 +220,6 @@ button {
   @extend .primaryColorCss;
   width: 100%;
   box-shadow: 0 0 0 1px var(--color-primaryColor);
-
-  button {
-    border: medium none;
-    font-size: 1em;
-    align-self: center;
-    font-family: inherit;
-    line-height: 1;
-  }
 }
 
 //POPUP
@@ -926,193 +891,244 @@ div.grid {
 }
 
 /***********************Menu**************************/
-.mainMenuBar {
-  position: fixed !important;
-  height: 2.7em !important;
-  width: 100%;
-  top: 0;
-  left: 0;
-  z-index: 100000;
-  border-bottom: 0.15em solid var(--color-dark-primaryColor);
-  background-color: var(--color-primaryColor);
-  color: var(--textColor-primaryColor);
+.menuItem {
+  display: flex;
+  align-items: center;
+  min-height: 2.4em;
+  white-space: nowrap;
+  outline: none !important;
+  cursor: pointer;
 
-  > div {
-    display: flex;
-    height: 100%;
+  &.isCurrent {
+      @extend .primaryColorCss;
   }
 
-  .menuItem {
-    display: flex;
-    align-items: center;
-    min-height: 2.4em;
-    white-space: nowrap;
-    cursor: pointer;
+  &:hover, &:focus-within {
+      @extend .primaryLighterColorCss;
+  }
 
-    &.isCurrent {
-      color: var(--textColor-primaryColor);
-      background-color: var(--color-primaryColor);
-    }
-
-    &:hover {
-      background-color: var(--color-light-primaryColor);
-      color: var(--textColor-light-primaryColor);
-    }
-
-    &.executeAnim {
+  &.executeAnim {
       animation: executeAnimation 0.4s ease-out infinite alternate;
 
       @keyframes executeAnimation {
           0% { opacity: 1 }
           100% { opacity: 0.5 }
       }
-    }
+  }
 
-    .menuFolderIcon {
+  .menuItemIcon {
+      width: 2em;
+      height: 2em;
+  }
+
+  .menuFolderIcon {
       transition: transform 0.15s ease 0s;
       height: 1em;
       margin-right: 0.5em;
-    }
+  }
 
-    > span {
-      padding: 0 0.5em;
-      // padding: 0 1.8em 0 1em;  // 2020
+  %menu-item-name {
       flex-grow: 1;
       text-overflow: ellipsis;
       overflow: hidden;
-    }
-
-    > img.rowIconSize {
-        margin-left: 0.5em;
-    }
   }
 
-  .menuCustomItem {
-    display: flex;
-    align-items: center;
-    margin: 0 0.5em;
-    cursor: default;
-
-    > .shoppingBasket > button {
-      padding: 0;
-      background-color: inherit;
-      line-height: normal;
-      color: inherit;
-      height: 1.6em;
-    }
+  > span {
+      @extend %menu-item-name;
+      padding: 0 0.5em;
   }
 
-  .menuLogo > img {
-    max-width: 18em;
-    max-height: 100%;
+  > .withBindProvider > span {
+      @extend %menu-item-name;
+      padding: 0 0.5em 0 0;
   }
 
-  .menuPopupBox {
-    min-width: 13.5em !important;
-    color: var(--textColor-body);
-
-    &.hasIcons > .menuItem > span:first-child {
-      margin-left: 2.5em;
-   }
-
-    .menuFolderIcon {
-      transform: rotate(-90deg);
-      margin-right: 0.1em;
-    }
-
-    .menuFolderOpened > .menuFolderIcon {
-      transform: rotate(-270deg);
-    }
-
-    .menuItem:first-child > .menuPopupBox {
-      margin-top: -1px;
-    }
-
-    hr {
-      background-color: var(--color-dark-primaryColor);
-      height: 0.06em;
-      margin: 0 0.3em;
-      border: none;
-    }
-
-    hr + hr,
-    hr:first-child,
-    hr:last-child {
-      display: none;
-    }
+  > .menuItemIcon,
+  > .withBindProvider > .menuItemIcon {
+      margin-left: 0.5em;
   }
 
-  // top level menu items
-  .leftMenuBox, .rightMenuBox  {
-    > .menuItem {
-      &.menuFolderOpened > .menuFolderIcon {
-        transform: rotate(-180deg);
-      }
-
-      .menuPopupBox {
-        margin-top: 0.07em;
-      }
-    }
-
-    > .menuItem,
-    > .menuPopupBox >.menuItem {
-      max-width: 20em;
-      color: var(--textColor-primaryColor);
-
-      &.isCurrent:not(:hover) {
-        background-color: var(--color-dark-primaryColor);
-        color: var(--textColor-dark-primaryColor);
-      }
-    }
-
-    &.hiddenIcons > .menuItem > img.rowIconSize:first-child {
-      display: none;
-    }
+  > .shortButton {
+      margin-right: -0.2em;
   }
 
-  .rightMenuBox {
-    .dateTimeClock > .dateDisplay {
-      padding-right: 0.3em;
-    }
-
-    &:not(.rightMenuCompressed) .shortName {
-      display: none;
-    }
-
-    &.rightMenuCompressed {
-      .longName,
-      .dateTimeClock > .dateDisplay {
-        display: none;
-      }
-    }
-  }
-
-  .menuBurgerBox  {
-    display: flex;
-
-    > .menuPopupBox {
-      background: var(--color-primaryColor);
-      border: none!important;
-      box-shadow: none!important;
-      margin-top: 0.15em;
-    }
-  }
-
-  .btnBurger {
-    margin: 0 0 0 0.5em;
-
-    > svg {
-      width: 1.5em;
-      stroke: var(--textColor-primaryColor);
-
-      > line {
-        transition: transform 100ms;
-        transform-origin: center;
-      }
-    }
+  .withBindProvider {
+      min-height: inherit;
+      height: 100%;
+      width: 100%;
   }
 }
 
+.mainMenuBar {
+  @extend .primaryColorCss;
+  box-sizing: border-box;
+  position: fixed !important;
+  height: 2.7em !important;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 20000;
+  border-bottom: 0.15em solid var(--color-dark-primaryColor);
+
+  > div {
+      display: flex;
+      height: 100%;
+  }
+
+  .menuCustomItem  {
+      display: flex;
+      align-items: center;
+      min-height: 2.4em;
+      margin-right: 0.5em;
+      cursor: default;
+      white-space: nowrap;
+
+      &.activeFocusWrapper {
+          outline-offset: 0;
+      }
+
+      .btnManualUpd {
+          color: var(--color-redColor);
+      }
+
+      > .shoppingBasket > button {
+          padding: 0;
+          background-color: inherit;
+          line-height: normal;
+          color: inherit;
+          height: 1.6em;
+      }
+  }
+
+  .menuLogo > img {
+      max-width: 18em;
+      max-height: 100%;
+      min-height: 2em;
+  }
+
+  .menuPopupBox {
+      @extend .bodyColorCss;
+      min-width: 13.5em !important;
+
+      &.hasIcons {
+          > .menuItem > span:first-child,
+          > .menuItem > .shortButton + span,
+          > .menuItem > .withBindProvider > .shortButton + span,
+          > .menuCustomItem {
+              margin-left: 2.5em;
+          }
+      }
+
+      .menuFolderIcon {
+          transform: rotate(-90deg);
+          margin-right: 0.1em;
+      }
+
+      .menuFolderOpened {
+          > .withBindProvider > .menuFolderIcon,
+          > .menuFolderIcon {
+              transform: rotate(-270deg);
+          }
+      }
+
+      .menuItem:first-child > .menuPopupBox {
+          margin-top: -1px;
+      }
+
+      .menuCustomItem {
+          padding: 0 0.5em;
+      }
+
+      hr {
+          background-color: var(--color-dark-primaryColor);
+          height: 0.06em;
+          margin: 0 0.3em;
+          border: none;
+      }
+
+      hr + hr,
+      hr:first-child,
+      hr:last-child {
+          display: none;
+      }
+  }
+
+  // top level menu items
+  .leftMenuBox,
+  .rightMenuBox {
+      > .menuItem {
+          &.menuFolderOpened > .menuFolderIcon {
+              transform: rotate(-180deg);
+          }
+
+          .menuPopupBox {
+              margin-top: 0.07em;
+          }
+      }
+
+      > .menuItem,
+      > .menuPopupBox > .menuItem {
+          max-width: 20em;
+
+          &.isCurrent:not(:hover):not(:focus-within) {
+              @extend .darkPrimaryColorCss;
+          }
+      }
+
+      &.hiddenIcons > .menuItem > .menuItemIcon:first-child {
+          display: none;
+      }
+  }
+
+  .rightMenuBox {
+      .chipItem {
+          min-width: 1.9em;
+      }
+
+      .dateTimeClock > .dateDisplay {
+          padding-right: 0.3em;
+      }
+
+      &:not(.rightMenuCompressed) .shortName {
+          display: none;
+      }
+
+      &.rightMenuCompressed {
+          .longName,
+          .dateTimeClock > .dateDisplay {
+              display: none;
+          }
+      }
+  }
+
+  .menuBurgerBox {
+      display: flex;
+
+      &:focus-within {
+          @extend .primaryLighterColorCss;
+          outline: none;
+      }
+
+      > .menuPopupBox {
+          @extend .primaryColorCss;
+          border: none !important;
+          box-shadow: none !important;
+          margin-top: 0.1em;
+      }
+  }
+
+  .btnBurger {
+      > svg {
+          width: 1.5em;
+          stroke: var(--textColor-primaryColor);
+
+          > line {
+              transition: transform 100ms;
+              transform-origin: center;
+          }
+      }
+  }
+}
 
 /***********************Virtual Keyboard**************************/
 .vkKeyboard {
@@ -1499,5 +1515,64 @@ button {
       + .text {
           vertical-align: text-top;
       }
+  }
+}
+
+.filterButtonExpander, .massOp {
+  height: 2em;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 1em;
+  gap: 0.5em;
+  vertical-align: middle;
+
+  > .nameFolded {
+    display: none;
+  }
+}
+
+.popupEl > .massOp {
+  @extend .menuItem;
+  @extend .transparentColorCss;
+  position: relative;
+  opacity: 1;
+  padding: 0 1.5em 0 0.5em;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  text-align: left;
+
+  &.activeFocusWrapper {
+      outline: none;
+  }
+
+  &.isFolder {
+      &::after {
+          content: "";
+          height: 1em;
+          width: 1em;
+          position: absolute;
+          right: 0.1em;
+          background: no-repeat center url(./filter-massops/arrow-down.svg);
+          background-size: 100% 100%;
+          transform: rotate(-90deg);
+          transition: all 0.15s ease;
+          pointer-events: none;
+      }
+      &.isOpened::after {
+          transform: rotate(-270deg);
+      }
+  }
+
+  > span {
+    padding: 0;
+  }
+
+  > .nameFolded {
+    display: block;
+  }
+
+  > .nameFull {
+    display: none;
   }
 }

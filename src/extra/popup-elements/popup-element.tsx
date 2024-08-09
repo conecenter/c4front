@@ -13,10 +13,11 @@ import { SEL_FOCUSABLE_ATTR, VISIBLE_CHILD_SELECTOR } from '../css-selectors';
 interface PopupElement {
     popupKey: string,
     forceOverlay?: boolean,
+    lrMode?: boolean,
     children?: ReactNode
 }
 
-function PopupElement({ popupKey, forceOverlay, children }: PopupElement) {
+function PopupElement({ popupKey, forceOverlay, lrMode, children }: PopupElement) {
     const { openedPopups, sendFinalChange } = useContext(PopupStateContext);
     const popupAncestorKey = useContext(PopupWrapperKeyContext);
     const popupDrawer = useContext(PopupDrawerContext);
@@ -31,7 +32,7 @@ function PopupElement({ popupKey, forceOverlay, children }: PopupElement) {
     // menu & filters have multiple copies - hidden & visible - of some elements
     const isVisible = parent?.matches(VISIBLE_CHILD_SELECTOR);
 
-    const [popupStyle] = usePopupPos(popupElement, false, parent);
+    const [popupStyle] = usePopupPos(popupElement, lrMode, parent);
 
     function closeOnBlur(e: FocusEvent) {
         if (!e.relatedTarget || elementsContainTarget([popupElement, parent], e.relatedTarget)) return;
