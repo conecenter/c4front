@@ -1,7 +1,8 @@
 import ReactDOM from "react-dom";
 import { createElement as $ } from "react";
 import { createSyncProviders } from "../../main/vdom-hooks";
-import { FilterButtonExpander, MassOp } from "../../extra/massops/filter-massop";
+import { FilterButtonExpander } from "../../extra/massops/filter-button-expander";
+import { MassOp } from "../../extra/massops/filter-massop";
 import { PopupManager } from "../../extra/popup-elements/popup-manager";
 
 const IDENTITY_EXPANDER = { key: "expander" };
