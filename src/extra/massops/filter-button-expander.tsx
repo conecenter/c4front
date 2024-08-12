@@ -1,4 +1,4 @@
-import React, { createContext, FunctionComponentElement } from "react";
+import React, { createContext, FunctionComponentElement, MutableRefObject } from "react";
 import { ButtonElement } from "../button-element";
 import { NoCaptionContext, usePath } from "../../main/vdom-hooks";
 import { ImageElement } from "../../main/image";
@@ -7,8 +7,9 @@ import { usePopupState } from "../popup-elements/popup-manager";
 import { PopupElement } from "../popup-elements/popup-element";
 import { FilteringInput } from "./filtering-input";
 import { MassOp } from "./filter-massop";
+import { useLatest } from "../custom-hooks";
 
-const FilterButtonExpanderContext = createContext(false);
+const FilterButtonExpanderContext = createContext<MutableRefObject<() => void> | null>(null);
 FilterButtonExpanderContext.displayName = 'FilterButtonExpanderContext';
 
 interface FilterButtonExpander {
@@ -23,6 +24,7 @@ interface FilterButtonExpander {
 function FilterButtonExpander({ identity, name, color, optButtons = [], filterValue }: FilterButtonExpander) {
     const path = usePath(identity);
     const { isOpened, toggle } = usePopupState(path);
+    const closeExpanderRef = useLatest(() => toggle(false));
     return (
         <ButtonElement value='' path={path} className='filterButtonExpander' color={color} onClick={() => toggle(!isOpened)} >
             {/*TODO: change image src*/}
@@ -30,7 +32,7 @@ function FilterButtonExpander({ identity, name, color, optButtons = [], filterVa
             {name}
             {isOpened &&
                 <PopupElement popupKey={path}>
-                    <FilterButtonExpanderContext.Provider value={true}>
+                    <FilterButtonExpanderContext.Provider value={closeExpanderRef}>
                         <NoCaptionContext.Provider value={true}>
                             <FilteringInput identity={identity} filterValue={filterValue} path={path} />
                             {optButtons}

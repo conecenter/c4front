@@ -1,4 +1,4 @@
-import React, { ReactNode, useContext } from "react";
+import React, { ReactNode, useContext, useEffect } from "react";
 import clsx from "clsx";
 import { ButtonElement } from "../button-element";
 import { NoCaptionContext, usePath } from "../../main/vdom-hooks";
@@ -28,14 +28,19 @@ function MassOp({ identity, name, nameFolded, color, hint, isFolder, icon, umid,
     const { isOpened, toggle } = usePopupState(isFolder ? path : null);
     const { clicked, onClick: sendClick } = useClickSync(identity, 'receiver');
 
-    // ignores case when another list inside folder's popup
-    const isInsideExpander = useContext(FilterButtonExpanderContext);
-
     function onClick() {
         sendClick();
         isFolder && toggle(!isOpened);
     }
+    
+    const closeExpanderRef = useContext(FilterButtonExpanderContext);
+    useEffect(function closeExpanderAfterAction() {
+        return () => {
+            if (!isFolder && clicked) closeExpanderRef?.current();
+        }
+    }, [clicked]);
 
+    const isInsideExpander = !!closeExpanderRef;
     const isFolderOpened = isOpened && children;
 
     return (

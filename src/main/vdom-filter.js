@@ -1,12 +1,9 @@
-import {createElement as $,cloneElement, createContext, useContext} from "react"
-import clsx from 'clsx'
+import {createElement as $,cloneElement} from "react"
 import {em,sum,findLastIndex} from "./vdom-util.js"
 import {useWidths} from "../main/sizes.js"
-import {NoCaptionContext, usePath} from "./vdom-hooks.js"
-import {usePopupState} from "../extra/popup-elements/popup-manager"
-import {PopupElement} from "../extra/popup-elements/popup-element"
-import {useFocusControl} from '../extra/focus-control'
-import {useLatest} from '../extra/custom-hooks'
+import {NoCaptionContext} from "./vdom-hooks.js"
+import {FilterButtonExpander, FilterButtonExpanderContext} from '../extra/massops/filter-button-expander'
+import {MassOp} from '../extra/massops/filter-massop'
 
 //// non-shared
 
@@ -119,37 +116,8 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
     /* maxWidth: maxFilterAreaWidth ? em(maxFilterAreaWidth) : "100vw"*/
     const height = yRowToEm(groupedFilters.length)
     return $(NoCaptionContext.Provider, {value: true},
-        $("div",{className},addContainer(height,children)))
-}
-
-////
-const FilterButtonExpanderContext = createContext({ current: () => undefined });
-
-export function FilterButtonExpander({ identity, optButtons = [], children }) {
-    const path = usePath(identity)
-    const { focusClass, focusHtml }  = useFocusControl(path)
-    const { isOpened, toggle } = usePopupState(path)
-    const closeExpanderRef = useLatest(() => setTimeout(() => toggle(false), 300));
-    return $("div", { className: clsx('filterButtonExpander', focusClass), ...focusHtml, onClick: () => toggle(!isOpened) },
-        children,
-        isOpened && $(PopupElement, { popupKey: path },
-            $(NoCaptionContext.Provider, { value: true },
-                $(FilterButtonExpanderContext.Provider, { value: closeExpanderRef }, optButtons.map(btn => {
-                    const { isFolder, folderOpened, children } = btn.props;
-                    return isFolder
-                        ? $(FolderButtonPlace, { key: btn.key, folderOpened, children })
-                        : $(FilterButtonPlace, { key: btn.key, className: btn.props.className, children })
-                    })
-            ))))
-}
-
-function FolderButtonPlace({ folderOpened, children }) {
-    return $("div", { className: clsx('filterButtonPlace', 'isFolder', folderOpened && 'isOpened') }, children);
-}
-
-export function FilterButtonPlace({className,children}) {
-    const { current: closeExpander } = useContext(FilterButtonExpanderContext);
-    return $("div", { className: clsx('filterButtonPlace', className), onClickCapture: closeExpander }, children);
+        $(FilterButtonExpanderContext.Provider, {value: null}),
+            $("div",{className},addContainer(height,children)))
 }
 
 export function FilterItem({className,children}){
@@ -157,4 +125,4 @@ export function FilterItem({className,children}){
         $("div",{className},children))
 }
 
-export const components = {FilterArea,FilterButtonExpander,FilterButtonPlace,FilterItem}
+export const components = {FilterArea,FilterItem,FilterButtonExpander,MassOp}
