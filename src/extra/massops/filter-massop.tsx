@@ -40,7 +40,7 @@ function MassOp({ identity, name, nameFolded, color, hint, isFolder, icon, umid,
 
     return (
         <NoCaptionContext.Provider value={true}>
-            <LabeledElement umid={umid} >
+            <LabeledElement className='massOpBox' umid={umid} >
                 <ButtonElement
                     value={clicked} path={path} color={color} hint={hint} onClick={onClick}
                     className={clsx('massOp', isFolder && 'isFolder', isFolderOpened && 'isOpened')}
