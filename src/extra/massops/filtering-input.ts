@@ -1,4 +1,4 @@
-import { createElement as $ } from 'react';
+import { createElement as $, ReactElement, useEffect, useRef } from 'react';
 import { InputElement } from '../input-element';
 import { Patch, usePatchSync } from '../exchange/patch-sync';
 import { SVGElement } from '../../main/image';
@@ -29,9 +29,15 @@ function FilteringInput({ identity, filterValue: sFilterValue = '', path }: Filt
     );
     const onChange = (e: InputChangeEvent) => sendTempChange(e.target.value);
 
+    const inputRef = useRef<(ReactElement & { inp: HTMLInputElement }) | null>(null);
+    useEffect(function focusInputOnRender() {
+        setTimeout(() => inputRef.current?.inp?.focus());
+    }, []);
+
     const searchIcon = () => $(SVGElement, { url: SearchSvg, className: 'searchIcon' });
 
     return $(InputElement, {
+        _ref: inputRef,
         value: filterValue,
         path: `${path}/:${FILTER_INPUT_RECEIVER}`,
         className: 'filteringInput',
