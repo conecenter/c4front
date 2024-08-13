@@ -1,14 +1,7 @@
 import { createElement as $, ReactElement, useEffect, useRef } from 'react';
 import { InputElement } from '../input-element';
-import { Patch, usePatchSync } from '../exchange/patch-sync';
 import { SVGElement } from '../../main/image';
 import SearchSvg from './search.svg';
-
-interface FilteringInput {
-    identity: object,
-    filterValue?: string,
-    path: string
-}
 
 interface InputChangeEvent {
     target: {
@@ -17,17 +10,14 @@ interface InputChangeEvent {
     }
 }
 
-const FILTER_INPUT_RECEIVER = 'filterInput';
+interface FilteringInput {
+    filterValue: string,
+    path: string,
+    sendChange: (change: string) => void
+}
 
-const changeToPatch = (ch: string): Patch => ({ value: ch });
-const patchToChange = (p: Patch) => p.value;
-const applyChange = (prev: string, ch: string) => ch;
-
-function FilteringInput({ identity, filterValue: sFilterValue = '', path }: FilteringInput) {
-    const { currentState: filterValue, sendTempChange } = usePatchSync(
-        identity, FILTER_INPUT_RECEIVER, sFilterValue, false, s => s, changeToPatch, patchToChange, applyChange
-    );
-    const onChange = (e: InputChangeEvent) => sendTempChange(e.target.value);
+function FilteringInput({ filterValue, path, sendChange }: FilteringInput) {
+    const onChange = (e: InputChangeEvent) => sendChange(e.target.value);
 
     const inputRef = useRef<(ReactElement & { inp: HTMLInputElement }) | null>(null);
     useEffect(function focusInputOnRender() {
@@ -39,11 +29,12 @@ function FilteringInput({ identity, filterValue: sFilterValue = '', path }: Filt
     return $(InputElement, {
         _ref: inputRef,
         value: filterValue,
-        path: `${path}/:${FILTER_INPUT_RECEIVER}`,
+        path: `${path}/:filter`,
         className: 'filteringInput',
         onChange,
         buttonElement: searchIcon
     });
 }
 
+export type { InputChangeEvent }
 export { FilteringInput }

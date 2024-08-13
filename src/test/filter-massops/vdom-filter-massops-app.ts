@@ -24,14 +24,15 @@ function App() {
 
     const optButtons = [
         $(MassOp, { key: 0, identity: getMassopIdentity(0), area: 'lt', nameFolded: 'Copy', name: 'Copy document', color: { tp: 'p', cssClass: 'secondaryColorCss' }, hint: 'Copy', isFolder: true },
-            $(MassOp, { key: 2, identity: getMassopIdentity(2), area: 'lt', name: 'Copy gate order', color: { tp: 'p', cssClass: 'yellowColorCss' } }),
-            $(MassOp, { key: 3, identity: getMassopIdentity(3), area: 'lt', name: 'Copy document', color: { tp: 'p', cssClass: 'yellowColorCss' }, isFolder: true },
-                $(MassOp, { key: 4, identity: getMassopIdentity(4), area: 'lt', name: 'Copy gate order 1', color: { tp: 'p', cssClass: 'yellowColorCss' } }),
-                $(MassOp, { key: 5, identity: getMassopIdentity(5), area: 'lt', name: 'Copy gate order 2', color: { tp: 'p', cssClass: 'yellowColorCss' } }),
-                $(MassOp, { key: 6, identity: getMassopIdentity(6), area: 'lt', name: 'Copy gate order 3', color: { tp: 'p', cssClass: 'yellowColorCss' } }),
-                $(MassOp, { key: 7, identity: getMassopIdentity(7), area: 'lt', name: 'Copy gate order 4', color: { tp: 'p', cssClass: 'yellowColorCss' } }),
+            $(MassOp, { key: 2, identity: getMassopIdentity(2), area: 'lt', name: 'Gate order', color: { tp: 'p', cssClass: 'yellowColorCss' } }),
+            $(MassOp, { key: 3, identity: getMassopIdentity(3), area: 'lt', name: 'Document', color: { tp: 'p', cssClass: 'yellowColorCss' }, isFolder: true },
+                $(MassOp, { key: 4, identity: getMassopIdentity(4), area: 'lt', name: 'Number 1', color: { tp: 'p', cssClass: 'yellowColorCss' } }),
+                $(MassOp, { key: 5, identity: getMassopIdentity(5), area: 'lt', name: 'Number 2', color: { tp: 'p', cssClass: 'yellowColorCss' } }),
+                $(MassOp, { key: 6, identity: getMassopIdentity(6), area: 'lt', name: 'Number 3', color: { tp: 'p', cssClass: 'yellowColorCss' } }),
+                $(MassOp, { key: 7, identity: getMassopIdentity(7), area: 'lt', name: 'Number 4', color: { tp: 'p', cssClass: 'yellowColorCss' } })
             )
         ),
+        $(MassOp, { key: 8, identity: getMassopIdentity(8), area: 'lt', nameFolded: 'Linked copy', name: 'Copy document', color: { tp: 'p', cssClass: 'secondaryColorCss' } }),
         $(MassOp, {
             key: 1,
             identity: getMassopIdentity(1),

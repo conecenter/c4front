@@ -1630,5 +1630,13 @@ button {
     > .nameFull {
       display: none;
     }
+
+    .folderPath {
+      color: var(--color-dark-headerColor);
+      font-size: 0.9em;
+      margin-left: auto;
+      margin-right: -0.5em;
+      flex-grow: 0;
+    }
   }
 }

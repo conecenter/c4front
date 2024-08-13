@@ -1,4 +1,4 @@
-import React, { ReactNode, useContext, useEffect } from "react";
+import React, { ReactElement, useContext, useEffect } from "react";
 import clsx from "clsx";
 import { ButtonElement } from "../button-element";
 import { NoCaptionContext, usePath } from "../../main/vdom-hooks";
@@ -20,10 +20,11 @@ interface MassOp {
     isFolder?: boolean,
     icon?: string,
     umid?: string,
-    children?: ReactNode
+    folderPath?: string,  // front only
+    children?: ReactElement[]
 }
 
-function MassOp({ identity, name, nameFolded, color, hint, isFolder, icon, umid, children }: MassOp) {
+function MassOp({ identity, name, nameFolded, color, hint, isFolder, icon, umid, folderPath, children }: MassOp) {
     const path = usePath(identity);
     const { isOpened, toggle } = usePopupState(isFolder ? path : null);
     const { clicked, onClick: sendClick } = useClickSync(identity, 'receiver');
@@ -56,6 +57,9 @@ function MassOp({ identity, name, nameFolded, color, hint, isFolder, icon, umid,
                         <span className='nameFolded'>{nameFolded}</span>}
                     {name &&
                         <span className={clsx(nameFolded && 'nameFull')}>{name}</span>}
+                    
+                    {folderPath &&
+                        <span className='folderPath'>{folderPath}</span>}
 
                     {isFolderOpened &&
                         <PopupElement popupKey={path} lrMode={isInsideExpander} children={children} />}
