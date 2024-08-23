@@ -2,6 +2,7 @@ import React, { createElement as $, ReactNode, MutableRefObject } from 'react';
 import clsx from 'clsx';
 import { useFocusControl } from './focus-control';
 import { Patch } from './exchange/patch-sync';
+import { ImageElement } from '../main/image';
 
 interface ButtonElement {
     value: boolean | '1' | '',
@@ -65,7 +66,9 @@ const ButtonElement = (props: ButtonElement) => {
 	return $("button", {
 			key: "btn", ref: elem,
             onClick, title: props.hint, ...focusHtml,
-            className: clsx(props.className, focusClass, noAction && 'noAction', markerClass),
+            className: clsx(props.className, focusClass, noAction && 'noAction', markerClass,
+				!props.content && (props.children as React.ReactElement[])[0]?.type === ImageElement && 'iconButton'
+			),
 			style: disabled ? { opacity: "0.4", cursor: 'default' } : undefined,
 			onKeyDown: (e) => e.preventDefault()
 		},
