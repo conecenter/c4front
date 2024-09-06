@@ -16,7 +16,7 @@ const fetcher = async (url) => {
 const SVGElement = ({ url, color = "adaptive", ...props }) => {
     const toDecode = isDataUrl(url)
     const { data: fetched } = useSWR(toDecode ? null : url, fetcher)
-    const decodedContent = fetched || toDecode && atob(url.replace(/data:.+?,/, ""))
+    const decodedContent = fetched || toDecode && decodeBase64String(url.replace(/data:.+?,/, ""));
     const viewBox = decodedContent && getViewBox(decodedContent) || initViewBox
     const content = decodedContent && replaceSvgTag(decodedContent) || ""
     const fillColor = color == "adaptive" ? "currentColor" : color
@@ -31,6 +31,17 @@ const SVGElement = ({ url, color = "adaptive", ...props }) => {
             alt={props.alt} // used for testing & ensure unified API with ImageElement
         />
         : null
+}
+
+function decodeBase64String(base64) {
+    const binString = atob(base64);
+    const bytes = Uint8Array.from(binString, (m) => m.codePointAt(0));
+    try {
+        return new TextDecoder().decode(bytes);
+    } catch(e) {
+        console.log(e);
+        return '';
+    }
 }
 
 function getViewBox(str) {
