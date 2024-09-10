@@ -1,5 +1,6 @@
 import React, { ReactNode, useCallback, useContext, useLayoutEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import clsx from 'clsx';
 import { PopupStateContext, PopupDrawerContext, PopupWrapperKeyContext } from './popup-contexts';
 import { usePopupPos } from '../../main/popup';
 import { NoCaptionContext } from '../../main/vdom-hooks';
@@ -12,11 +13,12 @@ import { SEL_FOCUSABLE_ATTR, VISIBLE_CHILD_SELECTOR } from '../css-selectors';
 
 interface PopupElement {
     popupKey: string,
+    className?: string,
     forceOverlay?: boolean,
     children?: ReactNode
 }
 
-function PopupElement({ popupKey, forceOverlay, children }: PopupElement) {
+function PopupElement({ popupKey, className, forceOverlay, children }: PopupElement) {
     const { openedPopups, sendFinalChange } = useContext(PopupStateContext);
     const popupAncestorKey = useContext(PopupWrapperKeyContext);
     const popupDrawer = useContext(PopupDrawerContext);
@@ -62,7 +64,7 @@ function PopupElement({ popupKey, forceOverlay, children }: PopupElement) {
     const popup = (
         <>
             <div ref={setPopupElement}
-                className='popupEl'
+                className={clsx('popupEl', className)}
                 style={popupStyle}
                 onClick={(e) => e.stopPropagation()}
                 tabIndex={-1}

@@ -1,13 +1,15 @@
-import React, {ReactNode, useContext, useMemo, useRef} from "react";
+import React, {ReactNode, useContext, useEffect, useMemo, useRef} from "react";
 import clsx from 'clsx';
 import {getDateTimeFormat, useUserLocale} from "../locale";
-import {DateSettings, formatDate, getDate, parseStringToDate} from "./date-utils";
+import {DateSettings, formatDate, getDate, getPopupDate, parseStringToDate} from "./date-utils";
 import {getOrElse, mapOption, None, nonEmpty, Option} from "../../main/option";
 import {useSelectionEditableInput} from "./selection-control";
 import {DatepickerCalendar} from "./datepicker-calendar";
 import {usePatchSync} from '../exchange/patch-sync';
 import {useFocusControl} from '../focus-control';
 import {VkInfoContext} from "../ui-info-provider";
+import { usePopupState } from "../popup-elements/popup-manager";
+import { PopupElement } from "../popup-elements/popup-element";
 import {
 	BACKSPACE_EVENT,
 	COPY_EVENT,
@@ -21,6 +23,7 @@ import {
 	applyChange,
 	changeToPatch,
 	createInputChange,
+	createPopupChange,
 	createTimestampChange,
 	DatepickerChange,
 	DatePickerState,
@@ -32,7 +35,6 @@ import {
 	getOnChange,
 	getOnKeyDown,
 	onTimestampChangeAction,
-	getOnPopupToggle,
 	getOnInputBoxBlur
 } from "./datepicker-actions";
 
@@ -61,7 +63,7 @@ interface DatePickerProps {
 	timestampFormatId: number
 	userTimezoneId?: string
 	deferredSend?: boolean,
-	path?: string,
+	path: string,
 	children?: ReactNode[]
 }
 
@@ -111,6 +113,15 @@ export function DatePickerInputElement({
 
 	const inputRef = useRef<HTMLInputElement>(null)
 	const inputBoxRef = useRef<HTMLDivElement>(null)
+
+	const { isOpened, toggle } = usePopupState(path);
+	const togglePopup = () => toggle(!isOpened);
+
+	useEffect(function calcInitCalendarState() {
+		const dateToShow = isOpened ? getOrElse(currentDateOpt, getDate(Date.now(), dateSettings)) : None;
+		const popupDate = getOrElse(mapOption(dateToShow, getPopupDate), null);
+		sendTempChange(createPopupChange(popupDate));
+	}, [isOpened]);
 
 	// Interaction with FocusModule & VK
 	const keyboardEventHandlers = {
@@ -197,9 +208,8 @@ export function DatePickerInputElement({
 	const setSelection: (from: number, to: number) => void = useSelectionEditableInput(inputRef)
 	const onTimestampChange: (timestamp: number) => void = onTimestampChangeAction(currentState, dateSettings, sendTempChange)
 	const onInputBlur = getOnBlur(currentState, memoInputValue, sendTempChange, inputBoxRef, dateSettings)
-	const onInputBoxBlur = getOnInputBoxBlur(currentState, memoInputValue, sendTempChange, sendFinalChange)
+	const onInputBoxBlur = getOnInputBoxBlur(currentState, memoInputValue, sendFinalChange)
 	const onChange = getOnChange(dateSettings, sendTempChange)
-	const onPopupToggle = getOnPopupToggle(currentDateOpt, currentState, dateSettings, sendTempChange)
 	const onKeyDown = getOnKeyDown(
 		currentDateOpt,
 		dateFormat,
@@ -209,7 +219,7 @@ export function DatePickerInputElement({
 		setSelection,
 		sendTempChange,
 		inputBoxRef,
-		currentState
+		togglePopup
 	)
 
 	const { focusClass, focusHtml } = useFocusControl(path);
@@ -234,21 +244,23 @@ export function DatePickerInputElement({
 			<button
 				type='button'
 				className={clsx('btnCalendar', currentState.popupDate && 'rotate180deg')}
-				onClick={onPopupToggle} />
+				onClick={togglePopup} />
 
 			<div className='sideContent'>
 				{children}
 			</div>
 
-			{currentState.popupDate &&
-				<DatepickerCalendar {...{
+			{isOpened && <PopupElement popupKey={path}>
+				{currentState.popupDate && <DatepickerCalendar {...{
 					currentState,
 					currentDateOpt,
 					dateSettings,
 					sendFinalChange,
 					sendTempChange,
-					inputRef
+					inputRef,
+					closePopup: () => toggle(false)
 				}} />}
+			</PopupElement>}
 		</div>
 
 	);
