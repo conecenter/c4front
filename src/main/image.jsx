@@ -2,10 +2,9 @@ import React, { useMemo, useEffect, useState } from 'react'
 import clsx from 'clsx';
 import useSWR from 'swr';
 
-const initViewBox = "0 0 0 0"
-
 const clear = (url) => url.replace(/#.*$/, "")
 const isDataUrl = (src) => src.startsWith("data:image/svg");
+const replaceSvgTag = (str) => str.replace(/<\/svg>|<svg>|<svg\s[^>]*>/g, "")
 
 const fetcher = async (url) => {
     const res = await fetch(url);
@@ -17,7 +16,8 @@ const SVGElement = ({ url, color = "adaptive", ...props }) => {
     const toDecode = isDataUrl(url)
     const { data: fetched } = useSWR(toDecode ? null : url, fetcher)
     const decodedContent = fetched || toDecode && decodeBase64String(url.replace(/data:.+?,/, ""));
-    const viewBox = decodedContent && getViewBox(decodedContent) || initViewBox
+    const sizes = decodedContent && extractSizes(decodedContent)
+    const viewBox = decodedContent && (getViewBox(decodedContent, sizes))
     const content = decodedContent && replaceSvgTag(decodedContent) || ""
     const fillColor = color == "adaptive" ? "currentColor" : color
     const htmlObject = useMemo(() => ({ __html: content }), [content])
@@ -29,7 +29,7 @@ const SVGElement = ({ url, color = "adaptive", ...props }) => {
             className={props.className}
             style={props.style}
             alt={props.alt} // used for testing & ensure unified API with ImageElement
-        />
+            {...sizes} />
         : null
 }
 
@@ -44,11 +44,11 @@ function decodeBase64String(base64) {
     }
 }
 
-function getViewBox(str) {
+function getViewBox(str, fallbackSizes) {
     const reg = /\bviewBox=(?:"([^"]+)"|'([^']+)')/
     const res = str.match(reg)
     if (res) return res[1] || res[2];
-    const { width = 0, height = 0 } = extractSizes(str);
+    const { width = 0, height = 0 } = fallbackSizes;
     return `0 0 ${width} ${height}`;
 }
 
@@ -58,10 +58,6 @@ function extractSizes(str) {
         width: str.match(getSizeReg('width'))?.[1],
         height: str.match(getSizeReg('height'))?.[1]
     }
-}
-
-function replaceSvgTag(str) {
-    return str.replace(/<\/svg>|<svg>|<svg\s[^>]*>/g, "")
 }
 
 const ImageElement = (props) => {
