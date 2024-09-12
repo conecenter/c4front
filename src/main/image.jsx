@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import clsx from 'clsx';
 import useSWR from 'swr';
 
@@ -12,25 +12,25 @@ const fetcher = async (url) => {
     return res.text();
 }
 
-const SVGElement = ({ url, color = "adaptive", ...props }) => {
+const SVGElement = ({ url, color, ...props }) => {
     const toDecode = isDataUrl(url)
     const { data: fetched } = useSWR(toDecode ? null : url, fetcher)
     const decodedContent = fetched || toDecode && decodeBase64String(url.replace(/data:.+?,/, ""));
-    const sizes = decodedContent && extractSizes(decodedContent)
-    const viewBox = decodedContent && (getViewBox(decodedContent, sizes))
-    const content = decodedContent && replaceSvgTag(decodedContent) || ""
-    const fillColor = color == "adaptive" ? "currentColor" : color
-    const htmlObject = useMemo(() => ({ __html: content }), [content])
-    return content
-        ? <svg
-            dangerouslySetInnerHTML={htmlObject}
+    if (!decodedContent) return null;
+    const sizes = extractSizes(decodedContent)
+    const viewBox = getViewBox(decodedContent, sizes)
+    const content = replaceSvgTag(decodedContent)
+    const fillColor = !color || color == "adaptive" ? "currentColor" : color
+    return (
+        <svg
+            dangerouslySetInnerHTML={{ __html: content }}
             viewBox={viewBox}
             fill={fillColor}
             className={props.className}
             style={props.style}
             alt={props.alt} // used for testing & ensure unified API with ImageElement
             {...sizes} />
-        : null
+    );
 }
 
 function decodeBase64String(base64) {
