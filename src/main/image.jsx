@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import clsx from 'clsx';
 import useSWR from 'swr';
 
+const ADAPTIVE_COLOR = "adaptive";
+
 const clear = (url) => url.replace(/#.*$/, "")
 const isDataUrl = (src) => src.startsWith("data:image/svg");
 const replaceSvgTag = (str) => str.replace(/<\/svg>|<svg>|<svg\s[^>]*>/g, "")
@@ -12,7 +14,7 @@ const fetcher = async (url) => {
     return res.text();
 }
 
-const SVGElement = ({ url, color, ...props }) => {
+const SVGElement = ({ url, color = ADAPTIVE_COLOR, ...props }) => {
     const toDecode = isDataUrl(url)
     const { data: fetched } = useSWR(toDecode ? null : url, fetcher)
     const decodedContent = fetched || toDecode && decodeBase64String(url.replace(/data:.+?,/, ""));
@@ -20,7 +22,7 @@ const SVGElement = ({ url, color, ...props }) => {
     const sizes = extractSizes(decodedContent)
     const viewBox = getViewBox(decodedContent, sizes)
     const content = replaceSvgTag(decodedContent)
-    const fillColor = !color || color == "adaptive" ? "currentColor" : color
+    const fillColor = color == ADAPTIVE_COLOR ? "currentColor" : color
     return (
         <svg
             dangerouslySetInnerHTML={{ __html: content }}
