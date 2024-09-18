@@ -24,12 +24,13 @@ interface FilterButtonExpander {
     identity: object,
     area: string,
     name?: string,
+    icon?: string,
     color?: ColorDef,
     filterValue?: string,
     optButtons: ReactElement[]
 }
 
-function FilterButtonExpander({ identity, name, color, optButtons = [], filterValue: sFilterValue = '' }: FilterButtonExpander) {
+function FilterButtonExpander({ identity, name, icon, color, optButtons = [], filterValue: sFilterValue = '' }: FilterButtonExpander) {
     const path = usePath(identity);
 
     const { isOpened, toggle } = usePopupState(path);

@@ -139,7 +139,8 @@ case class NoReceiver[C]() extends Receiver[C] {
   @c4el("FilterButtonExpander") def filterButtonExpander(
     key: String,
     area: FilterButtonArea,
-    children: ViewRes = Nil,
+    name: String = "",
+    icon: String = "",
     optButtons: ElList[FilterButton] = Nil,
   ): FilterButton
   @c4val("lt") def leftFilterButtonArea: FilterButtonArea
