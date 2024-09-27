@@ -6,34 +6,35 @@ import { ImageElement } from "../../main/image";
 import { ColorDef } from "../view-builder/common-api";
 import { usePopupState } from "../popup-elements/popup-manager";
 import { PopupElement } from "../popup-elements/popup-element";
-import { useClickSync } from "../exchange/click-sync";
+import { useClickSyncOpt } from "../exchange/click-sync";
 import { LabeledElement } from "../labeled-element";
 import { FilterButtonExpanderContext } from "./filter-button-expander";
 
 interface MassOp {
     identity: object,
     area: string,
-    name: string,
+    name?: string,
     nameFolded?: string,
     color?: ColorDef,
-    hint?: string,
-    isFolder?: boolean,
     icon?: string,
     umid?: string,
+    receiver: boolean,
     folderPath?: string,  // front only
     children?: ReactElement[]
 }
 
-function MassOp({ identity, name, nameFolded, color, hint, isFolder, icon, umid, folderPath, children }: MassOp) {
+function MassOp({ identity, name, nameFolded, color, icon, umid, receiver, folderPath, children }: MassOp) {
     const path = usePath(identity);
+
+    const isFolder = !!children
     const { isOpened, toggle } = usePopupState(isFolder ? path : null);
-    const { clicked, onClick: sendClick } = useClickSync(identity, 'receiver');
+    const { clicked, onClick: sendClick } = useClickSyncOpt(identity, 'receiver', receiver);
 
     function onClick() {
-        sendClick();
+        sendClick?.();
         isFolder && toggle(!isOpened);
     }
-    
+
     const closeExpanderRef = useContext(FilterButtonExpanderContext);
     useEffect(function closeExpanderAfterAction() {
         return () => {
@@ -42,26 +43,23 @@ function MassOp({ identity, name, nameFolded, color, hint, isFolder, icon, umid,
     }, [clicked]);
 
     const isInsideExpander = !!closeExpanderRef;
-    const isFolderOpened = isOpened && children;
 
     return (
         <NoCaptionContext.Provider value={true}>
             <LabeledElement className='massOpBox' umid={umid} >
                 <ButtonElement
-                    value={clicked} path={path} color={color} hint={hint} onClick={onClick}
-                    className={clsx('massOp', isFolder && 'isFolder', isFolderOpened && 'isOpened')}
+                    value={clicked} path={path} color={color} onClick={onClick}
+                    className={clsx('massOp', isFolder && 'isFolder', isOpened && 'isOpened')}
                 >
                     {icon &&
                         <ImageElement src={icon} className='textLineSize' color='adaptive' />}
-                    {nameFolded &&
-                        <span className='nameFolded'>{nameFolded}</span>}
-                    {name &&
-                        <span className={clsx(nameFolded && 'nameFull')}>{name}</span>}
+                    {nameFolded || name &&
+                        <span>{isInsideExpander && nameFolded || name}</span>}
                     
                     {folderPath &&
                         <span className='folderPath'>{folderPath}</span>}
 
-                    {isFolderOpened &&
+                    {isOpened &&
                         <PopupElement popupKey={path} lrMode={isInsideExpander} children={children} />}
                 </ButtonElement>
             </LabeledElement>

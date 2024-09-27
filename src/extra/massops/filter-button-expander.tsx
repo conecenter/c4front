@@ -50,9 +50,9 @@ function FilterButtonExpander({ identity, name, icon, color, optButtons = [], fi
     function filterMassOps(massOps: ReactElement[] = [], folderPath: string = ''): ReactElement<MassOp>[] {
         return massOps.reduce((accum: ReactElement<MassOp>[], massOp) => {
             if (isMassOpType(massOp)) {
-                const { isFolder, name, nameFolded } = massOp.props;
+                const { name, nameFolded, children } = massOp.props;
                 const massOpPath = (folderPath ? folderPath + ` ${FOLDER_PATH_DIVIDER} ` : '') + (nameFolded || name);
-                if (isFolder) return [...accum, ...filterMassOps(massOp.props.children, massOpPath)];
+                if (children) return [...accum, ...filterMassOps(massOp.props.children, massOpPath)];
                 if (isMassOpFiltered(massOpPath, filterValue!)) {
                     const massOpWithPath = cloneElement(massOp, { folderPath });
                     return [...accum, massOpWithPath];
@@ -93,7 +93,7 @@ function countMassOps(elems: ReactElement[] = []) {
     let count = 0;
     for (const elem of elems) {
         if (isMassOpType(elem)) {
-            count = elem.props.isFolder ? count + countMassOps(elem.props.children) : count + 1;
+            count = elem.props.children ? count + countMassOps(elem.props.children) : count + 1;
         }
     }
     return count;

@@ -1,6 +1,5 @@
 package ee.cone.c4ui
 
-import ee.cone.c4di._
 import ee.cone.c4ui.FrontTypes.Em
 import ee.cone.c4vdom.Types._
 import ee.cone.c4vdom._
@@ -128,17 +127,26 @@ case class NoReceiver[C]() extends Receiver[C] {
     filters: ElList[FilterItem] = Nil,
     buttons: ElList[FilterButton] = Nil,
   ): ToChildPair
+  @c4el("MassOp") def massOp(
+    key: String,
+    area: FilterButtonArea,
+    name: String = "",
+    nameFolded: String = "",
+    icon: String = "",
+    receiver: Receiver[C] = NoReceiver[C],
+    color: ColorDef,
+    umid: String = "",
+    children: ViewRes = Nil,
+  ): FilterButton
   @c4el("FilterButtonPlace") def filterButtonPlace(
     key: String,
     area: FilterButtonArea,
-    className: CSSClassName = NoCSSClassName,
     children: ViewRes = Nil,
-    isFolder: Boolean = false,
-    folderOpened: Boolean = false,
   ): FilterButton
   @c4el("FilterButtonExpander") def filterButtonExpander(
     key: String,
     area: FilterButtonArea,
+    color: ColorDef,
     name: String = "",
     icon: String = "",
     optButtons: ElList[FilterButton] = Nil,

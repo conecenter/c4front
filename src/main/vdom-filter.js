@@ -1,4 +1,5 @@
-import {createElement as $,cloneElement} from "react"
+import {createElement as $,cloneElement,useContext} from "react"
+import clsx from "clsx"
 import {em,sum,findLastIndex} from "./vdom-util.js"
 import {useWidths} from "../main/sizes.js"
 import {NoCaptionContext} from "./vdom-hooks.js"
@@ -125,4 +126,9 @@ export function FilterItem({className,children}){
         $("div",{className},children))
 }
 
-export const components = {FilterArea,FilterItem,FilterButtonExpander,MassOp}
+export function FilterButtonPlace({className,children}) {
+    const closeExpanderRef = useContext(FilterButtonExpanderContext);
+    return $("div", { className: clsx('filterButtonPlace', className), onClickCapture: closeExpanderRef?.current }, children);
+}
+
+export const components = {FilterArea,FilterItem,FilterButtonPlace,FilterButtonExpander,MassOp}
