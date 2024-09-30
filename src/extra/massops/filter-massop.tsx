@@ -54,8 +54,8 @@ function MassOp({ identity, name, nameFolded, color, icon, umid, receiver, folde
                     {icon &&
                         <ImageElement src={icon} className='textLineSize' color='adaptive' />}
                     {nameFolded || name &&
-                        <span>{isInsideExpander && nameFolded || name}</span>}
-                    
+                        <span className='text'>{isInsideExpander && nameFolded || name}</span>}
+
                     {folderPath &&
                         <span className='folderPath'>{folderPath}</span>}
 
