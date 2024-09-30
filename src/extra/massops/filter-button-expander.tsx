@@ -9,12 +9,14 @@ import { FilteringInput } from "./filtering-input";
 import { MassOp } from "./filter-massop";
 import { useLatest } from "../custom-hooks";
 import { Patch, usePatchSync } from '../exchange/patch-sync';
+import { LabeledElement } from "../labeled-element";
 
 const FilterButtonExpanderContext = createContext<MutableRefObject<() => void> | null>(null);
 FilterButtonExpanderContext.displayName = 'FilterButtonExpanderContext';
 
 const FILTER_INPUT_RECEIVER = 'filterInput';
 const FOLDER_PATH_DIVIDER = '>';
+const EXPANDER_UMID = "grouped-ops";
 
 const changeToPatch = (ch: string): Patch => ({ value: ch });
 const patchToChange = (p: Patch) => p.value;
@@ -63,20 +65,28 @@ function FilterButtonExpander({ identity, name, icon, color, optButtons = [], fi
     }
 
     return (
-        <ButtonElement value='' path={path} className='filterButtonExpander' color={color} onClick={() => toggle(!isOpened)} >
-            {icon && <ImageElement src={icon} className='textLineSize' color='adaptive' />}
-            {name}
-            {isOpened &&
-                <PopupElement popupKey={path}>
-                    <FilterButtonExpanderContext.Provider value={closeExpanderRef}>
-                        <NoCaptionContext.Provider value={true}>
-                            {showFilter &&
-                                <FilteringInput filterValue={filterValue} sendChange={sendTempChange} path={path} />}
-                            {massOps}
-                        </NoCaptionContext.Provider>
-                    </FilterButtonExpanderContext.Provider>
-                </PopupElement>}
-        </ButtonElement>
+        <LabeledElement umid={EXPANDER_UMID} >
+            <ButtonElement
+                value=''
+                path={path}
+                className='filterButtonExpander'
+                color={color}
+                onClick={() => toggle(!isOpened)}
+            >
+                {icon && <ImageElement src={icon} className='textLineSize' color='adaptive' />}
+                {name}
+                {isOpened &&
+                    <PopupElement popupKey={path}>
+                        <FilterButtonExpanderContext.Provider value={closeExpanderRef}>
+                            <NoCaptionContext.Provider value={true}>
+                                {showFilter &&
+                                    <FilteringInput filterValue={filterValue} sendChange={sendTempChange} path={path} />}
+                                {massOps}
+                            </NoCaptionContext.Provider>
+                        </FilterButtonExpanderContext.Provider>
+                    </PopupElement>}
+            </ButtonElement>
+        </LabeledElement>
     );
 }
 
