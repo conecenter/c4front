@@ -74,7 +74,7 @@ function FilterButtonExpander({ identity, name, icon, color, optButtons = [], fi
                 onClick={() => toggle(!isOpened)}
             >
                 {icon && <ImageElement src={icon} className='textLineSize' color='adaptive' />}
-                {name && <span className="text">{name}</span>}
+                {name && <span className="text">{`${name}...`}</span>}
                 {isOpened &&
                     <PopupElement popupKey={path}>
                         <FilterButtonExpanderContext.Provider value={closeExpanderRef}>
