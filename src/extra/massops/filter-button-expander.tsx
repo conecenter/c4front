@@ -64,7 +64,7 @@ function FilterButtonExpander({ identity, name, icon, color, optButtons = [], fi
 
     return (
         <ButtonElement value='' path={path} className='filterButtonExpander' color={color} onClick={() => toggle(!isOpened)} >
-            {!name && <ImageElement src='/mod/main/ee/cone/core/ui/c4view/burger.svg' className='textLineSize' color='adaptive' />}
+            {icon && <ImageElement src={icon} className='textLineSize' color='adaptive' />}
             {name}
             {isOpened &&
                 <PopupElement popupKey={path}>
