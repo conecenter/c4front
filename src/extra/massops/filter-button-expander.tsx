@@ -65,7 +65,7 @@ function FilterButtonExpander({ identity, name, icon, color, optButtons = [], fi
     }
 
     useEffect(function clearFilterOnPopupClose() {
-        if (!isOpened) sendTempChange('');
+        if (!isOpened && filterValue) sendTempChange('');
     }, [isOpened]);
 
     return (
