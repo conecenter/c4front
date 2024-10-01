@@ -26,8 +26,14 @@ interface MassOp {
 function MassOp({ identity, name, nameFolded, color, icon, umid, receiver, folderPath, children }: MassOp) {
     const path = usePath(identity);
 
-    const isFolder = !!children
-    const { isOpened, toggle } = usePopupState(isFolder ? path : null);
+    const closeExpanderRef = useContext(FilterButtonExpanderContext);
+
+    const isInsideExpander = !!closeExpanderRef;
+    const isFolder = !!children;
+
+    const popupKey = isInsideExpander ? `${path}/exp-massop` : path;
+
+    const { isOpened, toggle } = usePopupState(isFolder ? popupKey : null);
     const { clicked, onClick: sendClick } = useClickSyncOpt(identity, 'receiver', receiver);
 
     function onClick() {
@@ -35,14 +41,11 @@ function MassOp({ identity, name, nameFolded, color, icon, umid, receiver, folde
         isFolder && toggle(!isOpened);
     }
 
-    const closeExpanderRef = useContext(FilterButtonExpanderContext);
     useEffect(function closeExpanderAfterAction() {
         return () => {
             if (!isFolder && clicked) closeExpanderRef?.current();
         }
     }, [clicked]);
-
-    const isInsideExpander = !!closeExpanderRef;
 
     return (
         <NoCaptionContext.Provider value={true}>
@@ -60,7 +63,7 @@ function MassOp({ identity, name, nameFolded, color, icon, umid, receiver, folde
                         <span className='folderPath'>{folderPath}</span>}
 
                     {isOpened &&
-                        <PopupElement popupKey={path} lrMode={isInsideExpander} children={children} />}
+                        <PopupElement popupKey={popupKey} lrMode={isInsideExpander} children={children} />}
                 </ButtonElement>
             </LabeledElement>
         </NoCaptionContext.Provider>
