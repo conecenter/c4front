@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 import Lightbox, { ControllerRef, CloseIcon, IconButton, SlideImage } from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
@@ -69,20 +69,7 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
 
     const customSlides: CustomSlide[] = useMemo(() => slides.map(slide => isLoaded(slide.src)
         ? { ...slide, ...loadedSlides[slide.src], isLoaded: true } : slide
-    ), [slides, loadedSlides]);
-
-    useEffect(
-        function onServerSlideChange() {
-            const lightboxState = controller.current?.getLightboxState();
-            if (!lightboxState) return;
-            const { currentIndex: lightboxIndex, slides: lightboxSlides } = lightboxState;
-            if (lightboxIndex !== currentIndex && lightboxSlides.length === slides.length) {
-                const changed = currentIndex - lightboxIndex;
-                const direction = changed > 0 ? 'next' : 'prev';
-                controller.current?.[direction]({count: Math.abs(changed)});
-            }
-        }, [currentSrcId]
-    );
+    ), [JSON.stringify(slides), loadedSlides]);
 
     const handleClose = () => {
         controller.current?.close();
