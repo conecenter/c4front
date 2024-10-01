@@ -149,6 +149,8 @@ case class NoReceiver[C]() extends Receiver[C] {
     color: ColorDef,
     name: String = "",
     icon: String = "",
+    filterValue: String,
+    filterInput: Receiver[C],
     optButtons: ElList[FilterButton] = Nil,
   ): FilterButton
   @c4val("lt") def leftFilterButtonArea: FilterButtonArea
