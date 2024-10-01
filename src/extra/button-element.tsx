@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import { useFocusControl } from './focus-control';
 import { Patch } from './exchange/patch-sync';
 import { ColorDef, ColorProps, colorToProps } from './view-builder/common-api';
+import { useAddEventListener } from './custom-hooks';
 
 interface ButtonElement {
     value: boolean | '1' | '',
@@ -50,18 +51,11 @@ const ButtonElement = (props: ButtonElement) => {
         }
     }
 
-	useEffect(() => {
-		const onEnter = (e: CustomEvent) => {
-			e.stopPropagation()
-			elem.current?.click()
-			const cEvent = createCustomEvent('cTab', elem.current)
-			if (cEvent) elem.current?.dispatchEvent(cEvent)
-		}
-		elem.current?.addEventListener("enter", onEnter)
-		return () => {
-			elem.current?.removeEventListener("enter", onEnter)
-		}
-	}, [props.onClick, props.onChange, changing])
+	const onEnter = (e: CustomEvent) => {
+		e.stopPropagation();
+		elem.current?.click();
+	}
+	useAddEventListener(elem.current, "enter", onEnter);
 
 	const textContent = props.content && $('span', { className: 'text' }, props.content)
 	const children = props.children !== props.content && props.children
@@ -78,11 +72,6 @@ const ButtonElement = (props: ButtonElement) => {
 		textContent,
 		children
 	)
-}
-
-function createCustomEvent(name: string, elem: HTMLElement | null) {
-	const window = elem?.ownerDocument.defaultView;
-	return window ? new window.CustomEvent(name, { bubbles: true }) : undefined;
 }
 
 export { ButtonElement }
