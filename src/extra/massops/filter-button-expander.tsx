@@ -1,4 +1,4 @@
-import React, { cloneElement, createContext, MutableRefObject, ReactElement, useMemo } from "react";
+import React, { cloneElement, createContext, MutableRefObject, ReactElement, useEffect, useMemo } from "react";
 import { ButtonElement } from "../button-element";
 import { NoCaptionContext, usePath } from "../../main/vdom-hooks";
 import { ImageElement } from "../../main/image";
@@ -63,6 +63,10 @@ function FilterButtonExpander({ identity, name, icon, color, optButtons = [], fi
             return accum;
         }, []);
     }
+
+    useEffect(function clearFilterOnPopupClose() {
+        if (!isOpened) sendTempChange('');
+    }, [isOpened]);
 
     return (
         <LabeledElement umid={EXPANDER_UMID} >
