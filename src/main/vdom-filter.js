@@ -117,8 +117,8 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
     /* maxWidth: maxFilterAreaWidth ? em(maxFilterAreaWidth) : "100vw"*/
     const height = yRowToEm(groupedFilters.length)
     return $(NoCaptionContext.Provider, {value: true},
-        $(FilterButtonExpanderContext.Provider, {value: null}),
-            $("div",{className},addContainer(height,children)))
+        $(FilterButtonExpanderContext.Provider, {value: null},
+            $("div",{className},addContainer(height,children))))
 }
 
 export function FilterItem({className,children}){
