@@ -104,7 +104,22 @@ function elementHasFocus(element?: HTMLElement | null) {
 
 const isInstanceOfNode = (elem: EventTarget | null): elem is Node => !!elem && 'nodeType' in elem;
 
+interface DomEltAttributes {
+    [qualifiedName: string]: string
+}
+
+function domElem(name: string, attrs: DomEltAttributes, ...children: [Element]) {
+    let dom = document.createElement(name);
+    for (let attr of Object.keys(attrs)) {
+      dom.setAttribute(attr, attrs[attr]);
+    }
+    for (let child of children) {
+      dom.appendChild(child);
+    }
+    return dom;
+  }
+
 const InputsSizeContext = createContext(20);
 InputsSizeContext.displayName = 'InputsSizeContext';
 
-export { findClosestNode, InputsSizeContext, elementHasFocus, isInstanceOfNode };
+export { findClosestNode, InputsSizeContext, elementHasFocus, isInstanceOfNode, domElem };
