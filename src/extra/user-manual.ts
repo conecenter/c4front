@@ -29,7 +29,10 @@ function UserManualProvider({url, children}: UserManualProviderProps) {
     const [userManualText, setUserManualText] = useState<string>("{}")
     useEffect(() => {
         fetch(url)
-            .then(resp => resp.text())
+            .then(resp => {
+                if (!resp.ok) throw new Error('Network response was not OK');
+                return resp.text()
+        })
             .then(setUserManualText)
             .catch((reason) => {
                 console.log(reason)
