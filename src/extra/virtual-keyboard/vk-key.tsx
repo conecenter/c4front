@@ -15,11 +15,13 @@ function VKKey({keyCode, symbol, style, color, handleClick }: VKKey) {
     const { style: colorStyle, className }: ColorProps = color ? colorToProps(color) : {};
     const colorClass = className || 'bodyColorCss';
 
+    const key = keyCode === "Space" ? " " : keyCode;
+
     const onClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         if (handleClick) handleClick();
         else {
             const window = (e.target as HTMLButtonElement).ownerDocument.defaultView;
-            const customEvent = new KeyboardEvent('keydown', { key: keyCode, bubbles: true, code: 'vk' });
+            const customEvent = new KeyboardEvent('keydown', { key, bubbles: true, code: 'vk' });
             window?.dispatchEvent(customEvent);
         }
     }
