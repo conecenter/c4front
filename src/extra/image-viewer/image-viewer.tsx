@@ -1,6 +1,6 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
-import Lightbox, { ControllerRef, CloseIcon, IconButton, SlideImage } from "yet-another-react-lightbox";
+import Lightbox, { ControllerRef, CloseIcon, IconButton, SlideImage, ZoomRef } from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
 import Counter from "yet-another-react-lightbox/plugins/counter";
 import Inline from "yet-another-react-lightbox/plugins/inline";
@@ -37,7 +37,8 @@ interface ImageViewer {
     identity: object,
     current?: string,
     slides?: Slide[],
-    position?: 'fullscreen' | 'inline'
+    position?: 'fullscreen' | 'inline',
+    initialZoom?: number
 }
 
 // Server exchange
@@ -45,7 +46,7 @@ const changeToPatch = (ch: string) => ({ value: ch });
 const patchToChange = (p: Patch) => p.value;
 const applyChange = (prev: string, ch: string) => ch || prev;
 
-function ImageViewer({identity, current: state = '', slides = [], position }: ImageViewer) {
+function ImageViewer({identity, current: state = '', slides = [], position, initialZoom }: ImageViewer) {
     const {currentState: currentSrcId, sendTempChange, sendFinalChange} =
         usePatchSync(identity, 'slideChange', state, false, s => s, changeToPatch, patchToChange, applyChange);
 
@@ -82,6 +83,8 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
         if (activeSlide && activeSlide.srcId !== currentSrcId) sendTempChange(slides[index].srcId);
     }
 
+    const zoomRef = useInitialZoom(customSlides, currentIndex, initialZoom);
+
     const zipButton = <ZipButton key='zip-button' slides={slides} />;
 
     return (
@@ -97,7 +100,8 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
                 zoom={{
                     wheelZoomDistanceFactor: 500,
                     pinchZoomDistanceFactor: 200,
-                    maxZoomPixelRatio: 3
+                    maxZoomPixelRatio: 3,
+                    ref: zoomRef
                 }}
                 on={{ view: onViewChange }}
                 render={{
@@ -113,6 +117,20 @@ function ImageViewer({identity, current: state = '', slides = [], position }: Im
             />
         </div>
     );
+}
+
+function useInitialZoom(customSlides: CustomSlide[], currentIndex: number, initialZoom?: number) {
+    const zoomRef = useRef<ZoomRef | null>(null);
+    const isCurrentSlideLoaded = customSlides[currentIndex].isLoaded;
+    useEffect(
+        function applyInitialZoom() {
+            if (initialZoom && isCurrentSlideLoaded) {
+                // queueMicrotask allows zoomRef to be fully set up on first load
+                queueMicrotask(() => zoomRef?.current?.changeZoom(initialZoom));
+            }
+        }, [currentIndex, isCurrentSlideLoaded]
+    );
+    return zoomRef;
 }
 
 export type { Slide, CustomSlide }
