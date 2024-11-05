@@ -102,7 +102,7 @@ interface DomEltAttributes {
     [qualifiedName: string]: string
 }
 
-function domElem(name: string, attrs: DomEltAttributes, ...children: [Element]) {
+function domElem(name: string, attrs: DomEltAttributes, ...children: Element[]) {
     const dom = document.createElement(name);
     for (const attr of Object.keys(attrs)) {
       dom.setAttribute(attr, attrs[attr]);
@@ -111,7 +111,7 @@ function domElem(name: string, attrs: DomEltAttributes, ...children: [Element]) 
       dom.appendChild(child);
     }
     return dom;
-  }
+}
 
 const InputsSizeContext = createContext(20);
 InputsSizeContext.displayName = 'InputsSizeContext';
