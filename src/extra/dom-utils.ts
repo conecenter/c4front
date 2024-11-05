@@ -103,11 +103,11 @@ interface DomEltAttributes {
 }
 
 function domElem(name: string, attrs: DomEltAttributes, ...children: [Element]) {
-    let dom = document.createElement(name);
-    for (let attr of Object.keys(attrs)) {
+    const dom = document.createElement(name);
+    for (const attr of Object.keys(attrs)) {
       dom.setAttribute(attr, attrs[attr]);
     }
-    for (let child of children) {
+    for (const child of children) {
       dom.appendChild(child);
     }
     return dom;
