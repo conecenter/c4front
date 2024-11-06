@@ -1,4 +1,4 @@
-import React, { ReactNode, createContext, useEffect, useState } from "react";
+import React, { ReactNode, createContext, useEffect, useRef, useState } from "react";
 import { useAddEventListener } from "./custom-hooks";
 import { usePatchSync } from "./exchange/patch-sync";
 
@@ -10,7 +10,8 @@ interface PrintManager {
     identity: Object,
     children: ReactNode,
     printChildren: ReactNode,
-    printMode: boolean
+    printMode: boolean,
+    printTitle?: string
 }
 
 const changeToPatch = () => ({
@@ -18,7 +19,7 @@ const changeToPatch = () => ({
     value: ""
 });
 
-function PrintManager({ identity, children, printMode: state, printChildren }: PrintManager) {
+function PrintManager({ identity, children, printMode: state, printChildren, printTitle }: PrintManager) {
     const [elem, setElem] = useState<HTMLDivElement | null>(null);
     const window = elem?.ownerDocument.defaultView;
 
@@ -32,12 +33,22 @@ function PrintManager({ identity, children, printMode: state, printChildren }: P
         if (printMode) setTimeout(() => window?.print());
     }, [printMode]);
 
+    const pageTitle = useRef(document.title);
+
     // Make changes for print
+    const onBeforePrint = () => {
+        if (printTitle) {
+            pageTitle.current = document.title;
+            document.title = printTitle;
+        }
+        setIsPrinting(true);
+    }
     const onAfterPrint = () => {
+        document.title = pageTitle.current;
         setIsPrinting(false);
         printMode && sendFinalChange(false);
     }
-    useAddEventListener(window, 'beforeprint', () => setIsPrinting(true));
+    useAddEventListener(window, 'beforeprint', onBeforePrint);
     useAddEventListener(window, 'afterprint', onAfterPrint);
 
     return (

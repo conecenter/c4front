@@ -163,6 +163,7 @@ case class NoReceiver[C]() extends Receiver[C] {
     printChildren: ViewRes = Nil,
     printMode: Boolean = false,
     receiver: Receiver[C] = NoReceiver[C],
+    printTitle: String = "",
   ): ToChildPair
   //
   @c4el("Highlighter") def highlighter(
