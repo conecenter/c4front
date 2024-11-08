@@ -28,21 +28,23 @@ function PrintManager({ identity, children, printMode: state, printChildren, pri
     const {currentState: printMode, sendFinalChange} =
         usePatchSync(identity, 'receiver', state, false, (b) => b, changeToPatch, (p) => false, (prev, ch) => prev);
 
-    // Custom print from server
-    useEffect(() => {
-        if (printMode) setTimeout(() => window?.print());
+    const pageTitle = useRef(document.title);
+    function setTitleForPrint(title?: string) {
+        if (title) {
+            pageTitle.current = document.title;
+            document.title = title;
+        }
+    }
+
+    useEffect(function customPrintFromServer() {
+        if (printMode) setTimeout(() => {
+            setTitleForPrint(printTitle);
+            window?.print();
+        });
     }, [printMode]);
 
-    const pageTitle = useRef(document.title);
-
     // Make changes for print
-    const onBeforePrint = () => {
-        if (printTitle) {
-            pageTitle.current = document.title;
-            document.title = printTitle;
-        }
-        setIsPrinting(true);
-    }
+    const onBeforePrint = () => setIsPrinting(true);
     const onAfterPrint = () => {
         document.title = pageTitle.current;
         setIsPrinting(false);
