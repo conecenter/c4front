@@ -56,7 +56,7 @@ function FilterButtonExpander({ identity, name, icon, color, optButtons = [], fi
                 const massOpPath = (folderPath ? folderPath + ` ${FOLDER_PATH_DIVIDER} ` : '') + (nameFolded || name);
                 if (children) return [...accum, ...filterMassOps(massOp.props.children, massOpPath)];
                 if (isMassOpFiltered(massOpPath, filterValue!)) {
-                    const massOpWithPath = cloneElement(massOp, { folderPath });
+                    const massOpWithPath = cloneElement(massOp, { key: `${folderPath + '-'}${massOp.key}`, folderPath });
                     return [...accum, massOpWithPath];
                 }
             }
