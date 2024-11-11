@@ -22,6 +22,7 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
     current: String,
     slides: List[Slide],
     position: Position = fullscreen,
-    slideChange: Receiver[C] = NoReceiver[C]
+    slideChange: Receiver[C] = NoReceiver[C],
+    initialZoom: Option[Int] = None
   ): ToChildPair
 }
