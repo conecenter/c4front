@@ -54,6 +54,8 @@ function ImageViewer({identity, current: state = '', slides = [], position, init
 
     const inlinePos = position === 'inline';
 
+    const slidesJson = JSON.stringify(slides);
+
     // The lightbox reads this property when it opens and when slides change
     const currentIndex = getCurrentSlideIndex();
     function getCurrentSlideIndex() {
@@ -61,16 +63,11 @@ function ImageViewer({identity, current: state = '', slides = [], position, init
         return index < 0 ? 0 : index;
     }
 
-    const [loadedSlides, setLoadedSlides] = useState<LoadedSlidesInfo>({});
-    const isLoaded = (src: string) => !!loadedSlides[src];
-    const registerLoadedImage = (src: string) => (img?: HTMLImageElement) => {
-        const loadedImage = { [src]: { width: img?.naturalWidth, height: img?.naturalHeight } }
-        !isLoaded(src) && setLoadedSlides((prev) => ({ ...prev, ...loadedImage }));
-    }
+    const { loadedSlides, isLoaded, registerLoadedImage } = useLoadedSlides(slidesJson);
 
     const customSlides: CustomSlide[] = useMemo(() => slides.map(slide => isLoaded(slide.src)
         ? { ...slide, ...loadedSlides[slide.src], isLoaded: true } : slide
-    ), [JSON.stringify(slides), loadedSlides]);
+    ), [slidesJson, loadedSlides]);
 
     const handleClose = () => {
         controller.current?.close();
@@ -117,6 +114,21 @@ function ImageViewer({identity, current: state = '', slides = [], position, init
             />
         </div>
     );
+}
+
+function useLoadedSlides(slidesJson: string) {
+    const [loadedSlides, setLoadedSlides] = useState<LoadedSlidesInfo>({});
+    const isLoaded = (src: string) => !!loadedSlides[src];
+    const registerLoadedImage = (src: string) => (img?: HTMLImageElement) => {
+        const loadedImage = { [src]: { width: img?.naturalWidth, height: img?.naturalHeight } }
+        !isLoaded(src) && setLoadedSlides((prev) => ({ ...prev, ...loadedImage }));
+    }
+    useEffect(
+        function clearLoadedSlides() {
+            setLoadedSlides({});
+        }, [slidesJson]
+    );
+    return { loadedSlides, isLoaded, registerLoadedImage };
 }
 
 function useInitialZoom(customSlides: CustomSlide[], currentIndex: number, initialZoom?: number) {
