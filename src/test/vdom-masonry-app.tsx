@@ -7,7 +7,9 @@ import { LabeledElement } from "../extra/labeled-element";
 interface GridItemProps {
     gridId: string
 }
-type FlexGroup = { children: ReactNode } & GridItemProps;
+type FlexGroup = GridItemProps & {
+    children: ReactNode
+}
 
 const FlexGroup = ({ children }: FlexGroup) => (
     $("div", { className: 'groupBox' }, children)
@@ -44,13 +46,16 @@ function App() {
         ]})
     ];
 
-    const layout = [
+    const layout = JSON.stringify([
         { i: "aaa", x: 0, y: 0, w: 2, h: 10 },
-        { i: "bbb", x: 1, y: 0, w: 2, h: 8, minW: 2, maxW: 4 },
-        { i: "ccc", x: 3, y: 0, w: 1, h: 8 }
-    ];
+        { i: "bbb", x: 2, y: 0, w: 2, h: 8, minW: 2, maxW: 4 },
+        { i: "ccc", x: 4, y: 0, w: 1, h: 8 }
+    ]);
 
-    const children = $(MasonryLayout, { layout }, layoutItems);
+    const children = $(MasonryLayout, {
+        identity: { parent: "TEST_1" },
+        layout
+    }, layoutItems);
 
     return createSyncProviders({sender, ack, isRoot, branchKey: 'abc', children});
 }
