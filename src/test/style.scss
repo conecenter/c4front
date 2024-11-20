@@ -1640,3 +1640,30 @@ button {
     }
   }
 }
+
+/************** Masonry layout **************/
+@import "react-grid-layout/css/styles.css";
+@import "react-resizable/css/styles.css";
+
+.groupBox {
+  flex-grow: 1;
+  border-color: var(--color-dark-headerColor);
+  border-style: dashed;
+  margin: 0.4em;
+  position: relative;
+  display: flex;
+  flex-flow: column;
+  border-width: 1px;
+  padding: 0.5em 0.5em 1em;
+
+  .groupCaption {
+      color: #727272;
+      line-height: 1;
+      white-space: nowrap;
+      font-size: 0.875em;
+  }
+}
+
+.react-grid-item {
+  border: 1px solid black;
+}

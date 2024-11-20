@@ -3,7 +3,8 @@ import ReactDOM from "react-dom"
 import React from "react"
 const { createElement: $, useState, useMemo, cloneElement, useCallback, useEffect, useContext } = React
 
-import { FilterArea, FilterButtonExpander, FilterButtonPlace } from "../main/vdom-filter.js"
+import { FilterArea, FilterButtonPlace } from "../main/vdom-filter.js"
+import { FilterButtonExpander } from "../extra/massops/filter-button-expander"
 import { PopupManager } from "../extra/popup-elements/popup-manager"
 import { GridRoot, GridCell, Highlighter } from "../main/vdom-list.js"
 import { createSyncProviders, NoCaptionContext } from "../main/vdom-hooks.js"
