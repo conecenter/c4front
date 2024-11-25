@@ -1,0 +1,13 @@
+diff --git a/node_modules/react-grid-layout/build/ReactGridLayout.js b/node_modules/react-grid-layout/build/ReactGridLayout.js
+index 21a03ff..c9bcefe 100644
+--- a/node_modules/react-grid-layout/build/ReactGridLayout.js
++++ b/node_modules/react-grid-layout/build/ReactGridLayout.js
+@@ -503,7 +503,7 @@ class ReactGridLayout extends React.Component /*:: <Props, State>*/{
+ 
+     // Legacy support for compactType
+     // Allow parent to set layout directly.
+-    if (!(0, _fastEquals.deepEqual)(nextProps.layout, prevState.propsLayout) || nextProps.compactType !== prevState.compactType) {
++    if (nextProps.layout !== prevState.propsLayout || nextProps.compactType !== prevState.compactType) {
+       newLayoutBase = nextProps.layout;
+     } else if (!(0, _utils.childrenEqual)(nextProps.children, prevState.children)) {
+       // If children change, also regenerate the layout. Use our state

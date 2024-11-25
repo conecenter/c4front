@@ -42,7 +42,7 @@ const BusyMotionElement = (props) =>{
 			const params = {
 				...props,
 				elem:elem.current,
-				getComputedStyle: ()=>elem.curent.ownerDocument.defaultView.getComputedStyle
+				getComputedStyle: ()=>elem.current.ownerDocument.defaultView.getComputedStyle
 			}
 			timeout = elem.current.ownerDocument.defaultView.setInterval(startCircularMotion(params), 100)
 		}		
