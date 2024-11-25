@@ -1,4 +1,4 @@
-import React, { ReactElement, ReactNode, useState } from "react";
+import React, { Key, ReactNode, useState } from "react";
 import GridLayout, { WidthProvider } from 'react-grid-layout';
 import { Patch, usePatchSync } from "../exchange/patch-sync";
 import { GridItemWrapper } from "./grid-item";
@@ -16,7 +16,7 @@ const ResponsiveGridLayout = WidthProvider(GridLayout);
 interface MasonryLayout {
     identity: object,
     layout?: string,
-    children?: ReactNode
+    children?: ReactNode[]
 }
 
 function MasonryLayout({ identity, layout: layoutJSON, children }: MasonryLayout) {
@@ -28,17 +28,15 @@ function MasonryLayout({ identity, layout: layoutJSON, children }: MasonryLayout
 
     const [minHMap, setMinHMap] = useState<{ [key: string]: number | undefined }>({});
 
-    const correctHeight = (itemId: string) => (element: HTMLDivElement | null) => {
-        if (!element) return;
+    const correctHeight = (itemKey: Key | null) => (element: HTMLDivElement | null) => {
+        if (!element || !itemKey) return;
         const { offsetHeight, scrollHeight } = element;
         if (scrollHeight > offsetHeight) {
             const newRowHeight = Math.ceil((scrollHeight + GRID_MARGIN_SIZE) / (GRID_ROW_SIZE + GRID_MARGIN_SIZE));
-            setMinHMap((prev) => prev[itemId] === newRowHeight
-                ? prev : { ...prev, [itemId]: newRowHeight });
+            setMinHMap((prev) => prev[itemKey] === newRowHeight
+                ? prev : { ...prev, [itemKey]: newRowHeight });
         }
     }
-
-    const childrenArray = React.Children.toArray(children) as ReactElement<{ gridId?: string }>[];
 
     const layout = layoutState.map(item => {
         const minH = minHMap[item.i];
@@ -57,10 +55,9 @@ function MasonryLayout({ identity, layout: layoutJSON, children }: MasonryLayout
             onResizeStop={sendLayoutChange}
             onDragStop={sendLayoutChange}
         >
-            {layout.map((item) => {
-                const child = childrenArray.find((child) => child.props.gridId === item.i);
-                return <GridItemWrapper key={item.i} itemLayout={item} correctHeight={correctHeight(item.i)} children={child} />;
-            })}
+            {children?.map((child) => React.isValidElement(child)
+                ? <GridItemWrapper key={child.key} correctHeight={correctHeight(child.key)} children={child} />
+                : null)}
         </ResponsiveGridLayout>
     );
 }
