@@ -1,5 +1,5 @@
 import React, { ReactElement, ReactNode, useState } from "react";
-import GridLayout from 'react-grid-layout';
+import GridLayout, { WidthProvider } from 'react-grid-layout';
 import { Patch, usePatchSync } from "../exchange/patch-sync";
 import { GridItemWrapper } from "./grid-item";
 
@@ -11,6 +11,7 @@ const serverStateToState = (s?: string): GridLayout.Layout[] => s ? JSON.parse(s
 const changeToPatch = (ch: GridLayout.Layout[]): Patch => ({ value: JSON.stringify(ch) });
 const patchToChange = (p: Patch): GridLayout.Layout[] => JSON.parse(p.value);
 
+const ResponsiveGridLayout = WidthProvider(GridLayout);
 
 interface MasonryLayout {
     identity: object,
@@ -47,13 +48,12 @@ function MasonryLayout({ identity, layout: layoutJSON, children }: MasonryLayout
     });
 
     return (
-        <GridLayout
+        <ResponsiveGridLayout
             layout={layout}
             className="layout"
             cols={6}
             margin={[GRID_MARGIN_SIZE, GRID_MARGIN_SIZE]}
             rowHeight={GRID_ROW_SIZE}
-            width={1200}
             onResizeStop={sendLayoutChange}
             onDragStop={sendLayoutChange}
         >
@@ -61,7 +61,7 @@ function MasonryLayout({ identity, layout: layoutJSON, children }: MasonryLayout
                 const child = childrenArray.find((child) => child.props.gridId === item.i);
                 return <GridItemWrapper key={item.i} itemLayout={item} correctHeight={correctHeight(item.i)} children={child} />;
             })}
-        </GridLayout>
+        </ResponsiveGridLayout>
     );
 }
 
