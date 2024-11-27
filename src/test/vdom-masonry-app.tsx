@@ -46,15 +46,34 @@ function App() {
         ]})
     ];
 
-    const layout = JSON.stringify([
-        { i: "aaa", x: 0, y: 0, w: 2, h: 4, static: false },
-        { i: "bbb", x: 2, y: 0, w: 2, h: 8, static: false },
-        { i: "ccc", x: 4, y: 0, w: 1, h: 8, static: false }
-    ]);
+    const layout = JSON.stringify({
+        lg: [
+            { i: "aaa", x: 0, y: 0, w: 2, h: 4, minW: 2, static: false },
+            { i: "bbb", x: 2, y: 0, w: 2, h: 8, minW: 2, static: false },
+            { i: "ccc", x: 4, y: 0, w: 2, h: 8, minW: 2, static: false }
+        ],
+        md: [
+            { i: "aaa", x: 0, y: 0, w: 2, h: 4, minW: 2, static: false },
+            { i: "bbb", x: 2, y: 0, w: 2, h: 8, minW: 2, static: false },
+            { i: "ccc", x: 4, y: 0, w: 2, h: 8, minW: 2, static: false }
+        ],
+        sm: [
+            { i: "aaa", x: 0, y: 0, w: 2, h: 4, static: false },
+            { i: "bbb", x: 0, y: 1, w: 1, h: 4, static: false },
+            { i: "ccc", x: 1, y: 1, w: 1, h: 4, static: false }
+        ],
+        xs: [
+            { i: "aaa", x: 0, y: 0, w: 1, h: 4, static: false },
+            { i: "bbb", x: 0, y: 1, w: 1, h: 4, static: false },
+            { i: "ccc", x: 0, y: 2, w: 1, h: 4, static: false }
+        ]
+    });
 
     const children = $(MasonryLayout, {
         identity: { parent: "TEST_1" },
         layout,
+        breakpoints: { lg: 1728, md: 1152, sm: 768, xs: 0 },
+        cols: { lg: 8, md: 6, sm: 2, xs: 1 },
         children: layoutItems
     });
 

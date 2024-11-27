@@ -1665,10 +1665,15 @@ button {
 }
 
 .react-grid-item {
-  border: 1px solid black;
-
   > * {
     margin: 0;
     height: 100%;
   }
+
+  hr {
+    position: absolute;
+    width: 100%;
+    background-color: red;
+    top: 4em;
+    }
 }
