@@ -1665,6 +1665,8 @@ button {
 }
 
 .react-grid-item {
+  transition-property: transform, width !important;
+
   > * {
     margin: 0;
     height: 100%;
