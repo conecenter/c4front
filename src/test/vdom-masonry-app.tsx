@@ -74,6 +74,7 @@ function App() {
         layout,
         breakpoints: { lg: 1728, md: 1152, sm: 768, xs: 0 },
         cols: { lg: 8, md: 6, sm: 2, xs: 1 },
+        edit: false,
         children: layoutItems
     });
 

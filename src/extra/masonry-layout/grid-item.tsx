@@ -14,8 +14,6 @@ const GridItemWrapper = forwardRef<HTMLDivElement, GridItemWrapper>(
 
         useEffect(() => { correctHeight(domRef.current) });
 
-        console.log('GridItemWrapper', { props });
-
         return children ? (
             <div ref={ref} {...props} >
                 {children}
