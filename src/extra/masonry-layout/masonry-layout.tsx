@@ -1,4 +1,4 @@
-import React, { Key, ReactNode, useEffect, useRef, useState } from "react";
+import React, { Key, ReactNode, useEffect, useState } from "react";
 import GridLayout, { Responsive, WidthProvider } from 'react-grid-layout';
 import { Patch, usePatchSync } from "../exchange/patch-sync";
 import { GridItemWrapper } from "./grid-item";
@@ -98,14 +98,19 @@ function MasonryLayout({ identity, layout: layoutJSON, breakpoints, cols, edit, 
             isDraggable={edit ? true : false}
             isResizable={edit ? true : false}
         >
-            {children?.map((child) => React.isValidElement(child)
-                ? <GridItemWrapper
-                    key={child.key}
-                    correctHeight={correctHeight(child.key)}
-                    minH={edit ? getMinH(child.key) : null}
+            {children?.map((child) => {
+                if (!React.isValidElement(child)) return null;
+                const { gridId } = child.props;
+                if (!gridId) {
+                    console.error('MasonryLayout: child must have gridId prop');
+                    return null;
+                }
+                return <GridItemWrapper
+                    key={gridId}
+                    correctHeight={correctHeight(gridId)}
+                    minH={edit ? getMinH(gridId) : null}
                     children={child} />
-                : null
-            )}
+            })}
         </ResponsiveGridLayout>
     );
 }
