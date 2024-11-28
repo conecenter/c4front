@@ -3,6 +3,9 @@ import { createElement as $, ReactNode } from "react";
 import { createSyncProviders } from "../main/vdom-hooks";
 import { MasonryLayout } from "../extra/masonry-layout/masonry-layout";
 import { LabeledElement } from "../extra/labeled-element";
+import { flexibleComponents } from "../extra/view-builder/flexible-elements";
+
+const { FlexibleRow } = flexibleComponents;
 
 interface GridItemProps {
     gridId: string
@@ -30,8 +33,13 @@ function App() {
 
     const layoutItems = [
         $(FlexGroup, { key: 'aaa', gridId: 'aaa', children: [
-            $(LabeledElement, { key: 'a1', label: "Case Time", children: "17/07/2024 15:32" }), 
-            $(LabeledElement, { key: 'a2', label: "Number/Marking", children: "33AHD540" }), 
+            // @ts-ignore
+            $(FlexibleRow, { key: 'a', children: [
+                $(LabeledElement, { key: 'a1', label: "Case Time", children: "17/07/2024 15:32" }), 
+                $(LabeledElement, { key: 'a2', label: "Number/Marking", children: "33AHD540" }),
+            ]}),
+            $(LabeledElement, { key: 'a3', label: "Location", children: "CU_PARK_IMP" }),
+            $(LabeledElement, { key: 'a4', label: "Case Time", children: "17/07/2024 15:32" }),
             $(LabeledElement, { key: 'a3', label: "Location", children: "CU_PARK_IMP" }),
             $(LabeledElement, { key: 'a4', label: "Case Time", children: "17/07/2024 15:32" }), 
             $(LabeledElement, { key: 'a5', label: "Number/Marking", children: "33AHD540" }), 
