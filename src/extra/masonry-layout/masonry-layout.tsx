@@ -5,7 +5,7 @@ import { GridItemWrapper } from "./grid-item";
 
 const GRID_ROW_SIZE = 20;
 const GRID_MARGIN_SIZE = 10;
-const GRID_ITEM_PROPS = ['i', 'x', 'y', 'w', 'h', 'static'] as const;
+const GRID_ITEM_PROPS: (keyof GridLayout.Layout)[] = ['i', 'x', 'y', 'w', 'h', 'static'];
 
 const serverStateToState = (s?: string): GridLayout.Layouts => s ? JSON.parse(s) : [];
 const changeToPatch = (ch: GridLayout.Layouts): Patch => ({ value: JSON.stringify(ch) });
@@ -33,7 +33,7 @@ function MasonryLayout({ identity, layout: layoutJSON, breakpoints, cols, edit, 
         if (breakpoint && layoutState[breakpoint]) {
             const newLayouts = {
                 ...layoutState,
-                [breakpoint]: updatedLayout
+                [breakpoint]: updatedLayout.map((layout) => pickProperties(layout, GRID_ITEM_PROPS))
             };
             sendFinalChange(newLayouts);
         }
@@ -127,4 +127,13 @@ const updateLocalLayout = (itemKey: Key, currentBp: string, newRowHeight: number
     return { ...prev, [currentBp]: updatedLayout };
 }
 
+function pickProperties<T extends object, K extends keyof T>(
+    layout: T,
+    keys: K[]
+): Pick<T, K> {
+    return Object.fromEntries(
+        Object.entries(layout).filter(([key]) => keys.includes(key as K))
+    ) as Pick<T, K>;
+};
+ 
 export { MasonryLayout };
