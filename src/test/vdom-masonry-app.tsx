@@ -38,8 +38,8 @@ function App() {
                 $(LabeledElement, { key: 'a1', label: "Case Time", children: "17/07/2024 15:32" }), 
                 $(LabeledElement, { key: 'a2', label: "Number/Marking", children: "33AHD540" }),
             ]}),
-            $(LabeledElement, { key: 'a3', label: "Location", children: "CU_PARK_IMP" }),
-            $(LabeledElement, { key: 'a4', label: "Case Time", children: "17/07/2024 15:32" }),
+            $(LabeledElement, { key: 'a31', label: "Location", children: "CU_PARK_IMP" }),
+            $(LabeledElement, { key: 'a41', label: "Case Time", children: "17/07/2024 15:32" }),
             $(LabeledElement, { key: 'a3', label: "Location", children: "CU_PARK_IMP" }),
             $(LabeledElement, { key: 'a4', label: "Case Time", children: "17/07/2024 15:32" }), 
             $(LabeledElement, { key: 'a5', label: "Number/Marking", children: "33AHD540" }), 
@@ -59,9 +59,9 @@ function App() {
 
     const layout = JSON.stringify({
         lg: [
-            { i: "aaa", x: 0, y: 0, w: 2, h: 4, minW: 2, static: false },
-            { i: "bbb", x: 2, y: 0, w: 2, h: 8, minW: 2, static: false },
-            { i: "ccc", x: 4, y: 0, w: 2, h: 8, minW: 2, static: false }
+            { i: "aaa", x: 0, y: 0, w: 8, h: 4, minW: 2, static: false },
+            { i: "bbb", x: 2, y: 4, w: 2, h: 4, minW: 2, static: false },
+            { i: "ccc", x: 4, y: 4, w: 2, h: 4, minW: 2, static: false }
         ],
         md: [
             { i: "aaa", x: 0, y: 0, w: 2, h: 4, minW: 2, static: false },
@@ -83,7 +83,7 @@ function App() {
     const children = $(MasonryLayout, {
         identity: { parent: "TEST_1" },
         layout,
-        breakpoints: { lg: 1728, md: 1152, sm: 768, xs: 0 },
+        breakpoints: { lg: 1880, md: 1200, sm: 768, xs: 0 },
         cols: { lg: 8, md: 6, sm: 2, xs: 1 },
         edit: true,
         children: layoutItems

@@ -1650,11 +1650,15 @@ button {
   margin: 0.4em;
   position: relative;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(27em, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(24em, 1fr));
   align-items: start;
   align-content: start;
   padding: 0.5em 0.5em 1em;
   gap: 0 1em;
+
+  @media (min-width: 1600px) {
+    grid-template-columns: repeat(auto-fill, minmax(28em, 1fr));
+  }
 
   .groupCaption {
       color: #727272;
@@ -1663,21 +1667,27 @@ button {
       font-size: 0.875em;
   }
 
-  > * {
-    gap: .2em;
-    margin: 0 0.2em;
-  }
-
   .labeledElement {
     display: flex;
     align-items: center;
-    margin-bottom: 0.3em;
+    margin: 0.2em 0;
     flex: 1 1 0;
 
     .labelBox {
-      width: 15em;
-      min-width: 15em;
+      width: 12em;
+      min-width: 12em;
       color: #44474e;
+      padding-right: 0.2em;
+
+      @media (min-width: 1600px) {
+        width: 15em;
+        min-width: 15em;
+      }
+
+      > label {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
     }
 
     .contentBox {
@@ -1690,7 +1700,6 @@ button {
     margin-bottom: 0.5em;
     flex: 1 1 0;
   }
-
 }
 
 .react-grid-item {
@@ -1699,6 +1708,7 @@ button {
   > * {
     margin: 0;
     height: 100%;
+    min-height: min-content;
   }
 
   hr {
