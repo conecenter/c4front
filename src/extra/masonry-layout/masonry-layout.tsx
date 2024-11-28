@@ -44,10 +44,7 @@ function MasonryLayout({ identity, layout: layoutJSON, breakpoints, cols, edit, 
     const [localLayout, setLocalLayout] = useState(layoutState);
 
     useEffect(() => {
-        if (localLayout !== layoutState) {
-            console.log('useLayoutEffect, localLayout sync to serverState', { localLayout, layoutState });
-            setLocalLayout(layoutState);
-        }
+        if (localLayout !== layoutState) setLocalLayout(layoutState);
     }, [edit ? layoutState : layoutJSON, breakpoint]);
 
     const correctHeight = (itemKey: Key | null) => (element: HTMLDivElement | null) => {
@@ -69,7 +66,6 @@ function MasonryLayout({ identity, layout: layoutJSON, breakpoints, cols, edit, 
         if (!currentLayout) return;
         const updatedLayout = currentLayout.map((item) => item.i === newItem.i
             ? { ...item, w: newItem.w, h: newItem.h } : item);
-        console.log('resize stop', { updatedLayout });
         sendLayoutChange(updatedLayout);
     }
 
@@ -80,12 +76,9 @@ function MasonryLayout({ identity, layout: layoutJSON, breakpoints, cols, edit, 
             const updatedItem = layout.find((newItem) => newItem.i === currItem.i);
             return updatedItem ? { ...currItem, x: updatedItem.x, y: updatedItem.y } : currItem;
         });
-        console.log('drag stop', { updatedLayout });
         setIsDragging(false);
         sendLayoutChange(updatedLayout);
     }
-
-    console.log('rerender MasonryLayout', { localLayout, layoutState });
 
     return (
         <ResponsiveGridLayout
@@ -127,7 +120,6 @@ const updateLocalLayout = (itemKey: Key, currentBp: string, newRowHeight: number
         ...item,
         ...item.i === itemKey && { h: newRowHeight }
     }));
-    console.log('correctHeight', { itemKey, newRowHeight, updatedLayout });
     return { ...prev, [currentBp]: updatedLayout };
 }
 
