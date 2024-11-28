@@ -90,7 +90,7 @@ function MasonryLayout({ identity, layout: layoutJSON, breakpoints, cols, edit, 
     return (
         <ResponsiveGridLayout
             layouts={localLayout}
-            className={clsx('layout', isDragging && 'isDragging')}
+            className={clsx('layout', isDragging && 'isDragging', edit && 'editMode')}
             breakpoints={breakpoints}
             cols={cols}
             margin={[GRID_MARGIN_SIZE, GRID_MARGIN_SIZE]}

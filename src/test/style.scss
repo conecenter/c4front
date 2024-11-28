@@ -1702,7 +1702,7 @@ button {
   }
 }
 
-.react-grid-item {  
+.react-grid-item {
   &:not(.isDragging .react-grid-item) {
     transition-property: none !important;
   }
@@ -1719,4 +1719,8 @@ button {
     background-color: red;
     top: 4em;
     }
+}
+
+.editMode .react-grid-item {
+  cursor: move;
 }
