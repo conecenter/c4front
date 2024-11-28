@@ -1653,7 +1653,7 @@ button {
   grid-template-columns: repeat(auto-fill, minmax(24em, 1fr));
   align-items: start;
   align-content: start;
-  padding: 0.5em 0.5em 1em;
+  padding: 0.5em 0.5em;
   gap: 0 1em;
 
   @media (min-width: 1600px) {
@@ -1702,8 +1702,10 @@ button {
   }
 }
 
-.react-grid-item {
-  transition-property: transform, width !important;
+.react-grid-item {  
+  &:not(.isDragging .react-grid-item) {
+    transition-property: none !important;
+  }
 
   > * {
     margin: 0;

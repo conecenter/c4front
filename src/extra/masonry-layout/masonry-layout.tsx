@@ -1,9 +1,10 @@
 import React, { Key, ReactNode, useEffect, useState } from "react";
 import GridLayout, { Responsive, WidthProvider } from 'react-grid-layout';
+import clsx from "clsx";
 import { Patch, usePatchSync } from "../exchange/patch-sync";
 import { GridItemWrapper } from "./grid-item";
 
-const GRID_ROW_SIZE = 20;
+const GRID_ROW_SIZE = 10;
 const GRID_MARGIN_SIZE = 10;
 
 const serverStateToState = (s?: string): GridLayout.Layouts => s ? JSON.parse(s) : [];
@@ -28,6 +29,8 @@ function MasonryLayout({ identity, layout: layoutJSON, breakpoints, cols, edit, 
 
     const [breakpoint, setBreakpoint] = useState<string | null>(null);
 
+    const [isDragging, setIsDragging] = useState(false);
+
     function sendLayoutChange(updatedLayout: GridLayout.Layout[]) {
         if (breakpoint && layoutState[breakpoint]) {
             const newLayouts = {
@@ -45,7 +48,7 @@ function MasonryLayout({ identity, layout: layoutJSON, breakpoints, cols, edit, 
             console.log('useLayoutEffect, localLayout sync to serverState', { localLayout, layoutState });
             setLocalLayout(layoutState);
         }
-    }, [edit ? layoutState : layoutJSON]);
+    }, [edit ? layoutState : layoutJSON, breakpoint]);
 
     const correctHeight = (itemKey: Key | null) => (element: HTMLDivElement | null) => {
         if (!element || !itemKey || !breakpoint) return;
@@ -78,6 +81,7 @@ function MasonryLayout({ identity, layout: layoutJSON, breakpoints, cols, edit, 
             return updatedItem ? { ...currItem, x: updatedItem.x, y: updatedItem.y } : currItem;
         });
         console.log('drag stop', { updatedLayout });
+        setIsDragging(false);
         sendLayoutChange(updatedLayout);
     }
 
@@ -86,13 +90,14 @@ function MasonryLayout({ identity, layout: layoutJSON, breakpoints, cols, edit, 
     return (
         <ResponsiveGridLayout
             layouts={localLayout}
-            className="layout"
+            className={clsx('layout', isDragging && 'isDragging')}
             breakpoints={breakpoints}
             cols={cols}
             margin={[GRID_MARGIN_SIZE, GRID_MARGIN_SIZE]}
             rowHeight={GRID_ROW_SIZE}
             onResizeStop={onResizeStop}
             onDragStop={onDragStop}
+            onDragStart={() => setIsDragging(true)}
             onBreakpointChange={setBreakpoint}
             isDraggable={edit ? true : false}
             isResizable={edit ? true : false}
