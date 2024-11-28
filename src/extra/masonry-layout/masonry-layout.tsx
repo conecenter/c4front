@@ -5,7 +5,6 @@ import { GridItemWrapper } from "./grid-item";
 
 const GRID_ROW_SIZE = 20;
 const GRID_MARGIN_SIZE = 10;
-const GRID_ITEM_PROPS = ['i', 'x', 'y', 'w', 'h', 'static'] as const;
 
 const serverStateToState = (s?: string): GridLayout.Layouts => s ? JSON.parse(s) : [];
 const changeToPatch = (ch: GridLayout.Layouts): Patch => ({ value: JSON.stringify(ch) });
