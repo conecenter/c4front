@@ -48,7 +48,10 @@ export function CamView({url, height}){
     const onData = useCallback(data=>{
         //console.log(data)
         //console.log(btoa(data))
-        if(theElement) theElement.src = URL.createObjectURL(data)
+        if(theElement){
+            URL.revokeObjectURL(theElement.src)
+            theElement.src = URL.createObjectURL(data)
+        }
         //"data:image/jpeg;base64," + btoa(data)
     }, [theElement])
     useConnected(url, recentlySeen && onData)
