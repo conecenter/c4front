@@ -1,9 +1,10 @@
-import React, { createElement as $, useEffect, ReactNode, MutableRefObject } from 'react';
+import React, { createElement as $, useEffect, ReactNode, MutableRefObject, Children } from 'react';
 import clsx from 'clsx';
 import { useFocusControl } from './focus-control';
 import { Patch } from './exchange/patch-sync';
 import { ColorDef, ColorProps, colorToProps } from './view-builder/common-api';
 import { useAddEventListener } from './custom-hooks';
+import { ImageElement } from '../main/image';
 
 interface ButtonElement {
     value: boolean | '1' | '',
@@ -57,12 +58,14 @@ const ButtonElement = (props: ButtonElement) => {
 	}
 	useAddEventListener(elem.current, "enter", onEnter);
 
+	const isIconButton = !props.content && haveSingleImageElement(props.children);
+
 	const textContent = props.content && $('span', { className: 'text' }, props.content)
 	const children = props.children !== props.content && props.children
 
 	return $("button", {
 			ref: elem, onClick, title: props.hint, ...focusHtml,
-            className: clsx(props.className, focusClass, colorClass, noAction && 'noAction', markerClass),
+            className: clsx(props.className, focusClass, colorClass, noAction && 'noAction', markerClass, isIconButton && 'iconButton'),
 			onKeyDown: (e) => e.preventDefault(),
 			style: {
 				...disabled && { opacity: "0.4", cursor: 'default' },
@@ -72,6 +75,11 @@ const ButtonElement = (props: ButtonElement) => {
 		textContent,
 		children
 	)
+}
+
+function haveSingleImageElement(children: ReactNode) {
+	const childrenArray = Children.toArray(children);
+	return childrenArray.length === 1 && React.isValidElement(childrenArray[0]) && childrenArray[0].type === ImageElement;
 }
 
 export { ButtonElement }
