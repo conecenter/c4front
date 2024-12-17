@@ -1,5 +1,7 @@
 import {Patch, PatchHeaders, usePatchSync} from "./patch-sync";
 
+const applyChange = <State>(prev: State, ch: State) => ch;
+
 interface InputSyncState<State> {
   currentState: State,
   setTempState: (s: State) => void,
@@ -23,7 +25,7 @@ function useInputSync<ServerState, State>(
     serverToState,
     stateToPatch,
     patchToState,
-    ((prevState, ch) => ch)
+    applyChange
   )
   return {
     currentState,
