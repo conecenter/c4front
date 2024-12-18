@@ -66,7 +66,6 @@ const ButtonElement = (props: ButtonElement) => {
 	return $("button", {
 			ref: elem, onClick, title: props.hint, ...focusHtml,
             className: clsx(props.className, focusClass, colorClass, noAction && 'noAction', markerClass, isIconButton && 'iconButton'),
-			onKeyDown: (e) => e.preventDefault(),
 			style: {
 				...disabled && { opacity: "0.4", cursor: 'default' },
 				...colorStyle
