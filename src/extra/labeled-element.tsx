@@ -19,6 +19,7 @@ interface LabeledElement {
     clickable?: boolean,
     labelChildren?: ReactNode,
     umid?: string,
+    hint?: string,
     className?: string, // front only
     children: ReactNode
 }
@@ -72,6 +73,7 @@ function LabeledElement({ path, label, sizes, accented, clickable, labelChildren
                 style={style}
                 onKeyDown={onKeyDown}
                 data-umid={umid}
+                title={props.hint}
             >
                 {showCaption ? (
                     <NoCaptionContext.Provider value={true}>
