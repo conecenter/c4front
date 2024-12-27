@@ -5,6 +5,7 @@ import { Patch } from './exchange/patch-sync';
 import { ColorDef, ColorProps, colorToProps } from './view-builder/common-api';
 import { useAddEventListener } from './custom-hooks';
 import { ImageElement } from '../main/image';
+import { PopupElement } from './popup-elements/popup-element';
 
 interface ButtonElement {
     value: boolean | '1' | '',
@@ -78,7 +79,9 @@ const ButtonElement = (props: ButtonElement) => {
 
 function haveSingleImageElement(children: ReactNode) {
 	const childrenArray = Children.toArray(children);
-	return childrenArray.length === 1 && React.isValidElement(childrenArray[0]) && childrenArray[0].type === ImageElement;
+	const nonImageElements = childrenArray.filter(child => !React.isValidElement(child)
+		|| (child.type !== ImageElement && child.type !== PopupElement));
+	return nonImageElements.length === 0;
 }
 
 export { ButtonElement }
