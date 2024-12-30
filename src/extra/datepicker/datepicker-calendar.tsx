@@ -140,8 +140,10 @@ export function DatepickerCalendar({
   const secondsTimeSection = getTimeSection('s');
 
   function getTimeSection(symbol: 'H' | 'm' | 's') {
-    const currValue = isEmpty(currentDateOpt) ? 0 : symbol === 'H'
-      ? currentDateOpt.getHours() : symbol === 'm' ? currentDateOpt.getMinutes() : currentDateOpt.getSeconds();
+    const currValue = isEmpty(currentDateOpt) ? 0
+      : symbol === 'H' ? currentDateOpt.getHours()
+      : symbol === 'm' ? currentDateOpt.getMinutes()
+      : currentDateOpt.getSeconds();
     return (
       <div className='dpTimeSection'>
         <span>{currValue.toString().padStart(2, '0')}</span>
@@ -229,8 +231,11 @@ export function DatepickerCalendar({
           {hoursTimeSection}
           <span className='dpTimeSeparator'>:</span>
           {minsTimeSection}
-          {dateSettings.timestampFormat.has('s') && <span className='dpTimeSeparator'>:</span>}
-          {dateSettings.timestampFormat.has('s') && secondsTimeSection}
+          {dateSettings.timestampFormat.has('s') &&
+            <>
+              <span className='dpTimeSeparator'>:</span>
+              {secondsTimeSection}
+            </>}
         </div>}
 
       <div className='dpCtrlBtnsCont'>
