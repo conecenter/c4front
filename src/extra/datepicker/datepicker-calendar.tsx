@@ -147,10 +147,13 @@ export function DatepickerCalendar({
   */
   const hoursTimeSection = getTimeSection('H');
   const minsTimeSection = getTimeSection('m');
+  const secondsTimeSection = getTimeSection('s');
 
-  function getTimeSection(symbol: 'H' | 'm') {
-    const currValue = isEmpty(currentDateOpt) ? 0 : symbol === 'H' 
-      ? currentDateOpt.getHours() : currentDateOpt.getMinutes();
+  function getTimeSection(symbol: 'H' | 'm' | 's') {
+    const currValue = isEmpty(currentDateOpt) ? 0
+      : symbol === 'H' ? currentDateOpt.getHours()
+      : symbol === 'm' ? currentDateOpt.getMinutes()
+      : currentDateOpt.getSeconds();
     return (
       <div className='dpTimeSection'>
         <span>{currValue.toString().padStart(2, '0')}</span>
@@ -159,7 +162,7 @@ export function DatepickerCalendar({
     );
   }
 
-  function getOnTimeBtnClick(symbol: 'H' | 'm') {
+  function getOnTimeBtnClick(symbol: 'H' | 'm' | 's') {
     return (e: React.MouseEvent<HTMLButtonElement>) => {
       if (!e.currentTarget.dataset.change) return;
       if (nonEmpty(currentDateOpt)) {
@@ -241,6 +244,11 @@ export function DatepickerCalendar({
           {hoursTimeSection}
           <span className='dpTimeSeparator'>:</span>
           {minsTimeSection}
+          {dateSettings.timestampFormat.has('s') &&
+            <>
+              <span className='dpTimeSeparator'>:</span>
+              {secondsTimeSection}
+            </>}
         </div>}
 
       <div className='dpCtrlBtnsCont'>
