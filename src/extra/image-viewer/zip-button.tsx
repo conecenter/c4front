@@ -2,6 +2,7 @@ import React from "react";
 import JSZip from "jszip";
 import ZipIcon from "./zip.svg";
 import { Slide } from "./image-viewer";
+import { SVGElement } from "../../main/image";
 
 interface ZipButton {
     slides: Slide[]
@@ -20,7 +21,7 @@ function ZipButton({ slides }: ZipButton) {
     }
     return (
         <button type='button' style={{ order: -1 }} className="yarl__button" onClick={downloadZip}>
-            <img src={ZipIcon} className="yarl__icon" />
+            <SVGElement url={ZipIcon} className="yarl__icon" alt="Zip button" />
         </button>
     );
 }
