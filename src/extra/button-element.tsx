@@ -4,8 +4,6 @@ import { useFocusControl } from './focus-control';
 import { Patch } from './exchange/patch-sync';
 import { ColorDef, ColorProps, colorToProps } from './view-builder/common-api';
 import { useAddEventListener } from './custom-hooks';
-import { ImageElement } from '../main/image';
-import { PopupElement } from './popup-elements/popup-element';
 
 interface ButtonElement {
     value: boolean | '1' | '',
@@ -59,14 +57,12 @@ const ButtonElement = (props: ButtonElement) => {
 	}
 	useAddEventListener(elem.current, "enter", onEnter);
 
-	const isIconButton = !props.content && haveSingleImageElement(props.children);
-
 	const textContent = props.content && $('span', { className: 'text' }, props.content)
 	const children = props.children !== props.content && props.children
 
 	return $("button", {
 			ref: elem, onClick, title: props.hint, ...focusHtml,
-            className: clsx(props.className, focusClass, colorClass, noAction && 'noAction', markerClass, isIconButton && 'iconButton'),
+            className: clsx(props.className, focusClass, colorClass, noAction && 'noAction', markerClass),
 			style: {
 				...disabled && { opacity: "0.4", cursor: 'default' },
 				...colorStyle
@@ -75,13 +71,6 @@ const ButtonElement = (props: ButtonElement) => {
 		textContent,
 		children
 	)
-}
-
-function haveSingleImageElement(children: ReactNode) {
-	const childrenArray = Children.toArray(children);
-	const nonImageElements = childrenArray.filter(child => !React.isValidElement(child)
-		|| (child.type !== ImageElement && child.type !== PopupElement));
-	return nonImageElements.length === 0;
 }
 
 export { ButtonElement }
