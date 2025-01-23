@@ -43,11 +43,11 @@ export function PivotCell({identity, colKey, rowKey, classNames, children}) {
     const gridArea = `${fromKey(rowKey)} / ${fromKey(colKey)} / ${toKey(rowKey)} / ${toKey(colKey)}`
     const [clickActionPatches, enqueueClickActionPatch] = useSync(clickActionIdOf(identity))
     const onClick = useCallback(ev => {
-        enqueueClickActionPatch({});
+        enqueueClickActionPatch({value: ''});
     }, [enqueueClickActionPatch])
     const [clickDoubleActionPatches, enqueueDoubleClickActionPatch] = useSync(doubleClickActionOf(identity))
     const onDoubleClick = useCallback(ev => {
-        enqueueDoubleClickActionPatch({});
+        enqueueDoubleClickActionPatch({value: ''});
     }, [enqueueDoubleClickActionPatch])
     return $("div", {style: {gridArea}, className, children, onClick, onDoubleClick})
 }
