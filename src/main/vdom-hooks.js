@@ -3,8 +3,8 @@ import {createElement,useState,useContext,createContext,useCallback,useEffect,us
 
 /********* sync ***************************************************************/
 
-const NoContext = createContext()
-const AckContext = createContext()
+const NoContext = createContext(0)
+const AckContext = createContext(0)
 AckContext.displayName = "AckContext"
 
 /** @typedef {{ enqueue: Function, ctxToPath: (ctx?: Object) => string, busyFor: (qKey: string) => number }} Sender */
@@ -16,7 +16,7 @@ SenderContext.displayName = "SenderContext"
 export const RootBranchContext = createContext({isRoot: true, branchKey: ''})
 RootBranchContext.displayName = 'RootBranchContext'
 
-const nonMerged = ack => aPatch => !(aPatch && ack && aPatch.sentIndex <= ack.index)
+const nonMerged = ack => aPatch => !(aPatch && ack && aPatch.sentIndex <= ack)
 export const useSender = () => useContext(SenderContext)
 
 /**
