@@ -27,7 +27,8 @@ export const useSync = identity => {
     const [patches,setPatches] = useState([])
     const sender = useSender()
     const enqueuePatch = useCallback(({onAck,...aPatch})=>{
-        setPatches(aPatches=>[...aPatches,{onAck, ...aPatch, sentIndex: sender.enqueue(identity,aPatch)}])
+        const index = sender.enqueue(identity,aPatch)
+        setPatches(aPatches=>[...aPatches,{onAck, ...aPatch, sentIndex: index }])
     },[sender,identity])
     const ack = useContext(patches.length>0 ? AckContext : NoContext)
     useEffect(()=>{

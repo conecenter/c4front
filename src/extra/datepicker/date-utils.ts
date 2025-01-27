@@ -173,7 +173,6 @@ function tryRegexes(value: string): Option<Token> {
     let i = 0
     while (i < dateExtractors.length) {
         const result = tryRegex(value, dateExtractors[i])
-        console.log({result})
         if (nonEmpty(result)) return result
         i++
     }
