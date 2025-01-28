@@ -13,6 +13,7 @@ import {ItemTypes, PartNames} from "./pivot-const";
 import {HTML5Backend} from "react-dnd-html5-backend";
 import type {XYCoord} from "react-dnd/dist";
 import {usePatchSync} from "../exchange/patch-sync";
+import {Identity} from "../utils";
 
 
 export interface PivotField {
@@ -42,7 +43,7 @@ export type PivotSettingsPartClass = 'pivotFilters' | 'pivotBreaks' | 'pivotRows
 
 export interface PivotSettingsProps extends PivotSettingsState {
     // @ts-ignore
-    identity: object
+    identity: Identity
 }
 
 export function PivotSettings(props: PivotSettingsProps) {
