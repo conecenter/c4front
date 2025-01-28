@@ -12,6 +12,7 @@ import { focusFirstMenuItem } from './main-menu-utils';
 import { SVGElement } from '../../main/image';
 import { identityAt } from '../../main/vdom-util';
 import { Identity } from '../utils';
+import { useSender } from '../../main/vdom-hooks';
 
 const receiverIdOf = identityAt('receiver');
 
@@ -86,11 +87,13 @@ function MenuPopupElement({popupLrMode, keyboardOperation, children}: MenuPopupE
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
     const [popupPos] = usePopupPos(popupElement, popupLrMode);
 
+    const { ctxToPath } = useSender();
+
     const hasIcon = children ? children.some(hasIconProp) : false;
 
     useEffect(() => {
         if (popupPos.visibility !== 'hidden' && keyboardOperation.current) {
-            focusFirstMenuItem(popupElement, children);
+            focusFirstMenuItem(popupElement, ctxToPath, children);
             keyboardOperation.current = false;
         }
         return () => { 

@@ -9,7 +9,7 @@ import {ARROW_DOWN_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY, M_
 import {MenuCustomItem, MenuExecutableItem, MenuItemsGroup, MenuPopupElement, MenuUserItem} from './main-menu-items';
 import {MenuFolderItem} from "./menu-folder-item";
 import {BindGroupElement} from "../binds/binds-elements";
-import {NoCaptionContext, usePath} from "../../main/vdom-hooks";
+import {NoCaptionContext, usePath, useSender} from "../../main/vdom-hooks";
 import {isInstanceOfNode} from "../dom-utils";
 import {VISIBLE_CHILD_SELECTOR} from "../css-selectors";
 import {identityAt} from "../../main/vdom-util";
@@ -113,6 +113,7 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
   );
 
   // Open menu by keyboard combination
+  const { ctxToPath } = useSender();
   useEffect(() => {
     const doc =  domRef.current?.ownerDocument;
     const window = doc?.defaultView;
@@ -123,12 +124,12 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
         const isBurgerMenu = domRef.current?.matches(VISIBLE_CHILD_SELECTOR);
         if (isBurgerMenu) setFinalState({ opened: true });
         window!.scrollTo({top: 0});
-        const firstFocusablePath = leftChildren[0].props.path;
+        const firstFocusablePath = ctxToPath(leftChildren[0].props.identity);
         const pathSelector = `[data-path='${firstFocusablePath}']`;
-        const firstFocusableItem: HTMLElement | null = isBurgerMenu 
+        setTimeout(() => {
+          const firstFocusableItem: HTMLElement | null = isBurgerMenu 
             ? domRef.current!.querySelector(pathSelector)
             : doc!.querySelector(`${pathSelector}${VISIBLE_CHILD_SELECTOR}`);
-        setTimeout(() => {
           firstFocusableItem?.focus();
           if (!isBurgerMenu) firstFocusableItem?.click();
         }, 10); // timeout until menu bar appears on screen
@@ -165,14 +166,14 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
     ready.current = false;
     const menuItems = [...leftChildren, ...(rightChildren || [])];
     const doc =  elem.ownerDocument;
-    const openedMenuFolderIndex = menuItems.findIndex(child => child.props.identity === path);
+    const openedMenuFolderIndex = menuItems.findIndex(child => ctxToPath(child.props.identity) === path);
     if (openedMenuFolderIndex === -1 || !doc) return;
     const nextMenuItemIndex = openedMenuFolderIndex + KEY_MODIFICATOR[key];
     if (nextMenuItemIndex < 0 || nextMenuItemIndex >= menuItems.length) {
       ready.current = true;
       return;
     }
-    const nextFocusablePath = menuItems[nextMenuItemIndex].props.identity;
+    const nextFocusablePath = ctxToPath(menuItems[nextMenuItemIndex].props.identity);
     const selector = `[data-path='${nextFocusablePath}']${VISIBLE_CHILD_SELECTOR}`;
     const nextFocusableItem: HTMLElement | null = doc.querySelector(selector);
     nextFocusableItem?.focus();
@@ -250,6 +251,8 @@ function BurgerMenu({ identity, opened, domRef, setFinalState, children}: Burger
 
   const currentPath = useContext(PathContext);
 
+  const { ctxToPath } = useSender();
+
   // Keyboard controls logic
   const keyboardOperation = useRef(false);
   
@@ -280,7 +283,7 @@ function BurgerMenu({ identity, opened, domRef, setFinalState, children}: Burger
           break;
         }
         if (!opened || !domRef.current) break;
-        handleArrowUpDown(e, domRef.current, currentPath, children);
+        handleArrowUpDown(e, domRef.current, currentPath, ctxToPath, children);
     }
   };
 
