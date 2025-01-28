@@ -1,4 +1,5 @@
 import {usePatchSync} from "./patch-sync";
+import {Identity} from "../utils";
 
 interface ClickSync {
   clicked: boolean,
@@ -6,7 +7,7 @@ interface ClickSync {
 }
 
 function useClickSync(
-  identity: object,
+  identity: Identity,
   receiverName: string,
 ): ClickSync {
   const {currentState, sendFinalChange} = usePatchSync<boolean, boolean, boolean>(
@@ -34,7 +35,7 @@ interface ClickSyncOpt {
 }
 
 function useClickSyncOpt(
-  identity: object,
+  identity: Identity,
   receiverName: string,
   needsReceiver?: boolean
 ): ClickSyncOpt {

@@ -51,4 +51,6 @@ function escapeRegex(string: string) {
     return string.replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&');
 }
 
+export type Identity = string
+
 export { copyToClipboard, inRange, clamp, throttleWithTrailing, escapeRegex }

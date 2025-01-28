@@ -9,6 +9,7 @@ import {useFocusControl} from '../focus-control';
 import {VISIBLE_CHILD_SELECTOR} from '../css-selectors';
 import type { Locale } from 'date-fns'
 import type { SendPatch } from '../exchange/patch-sync';
+import {Identity} from '../utils';
 
 interface IntlLocales {
   [name: string]: Locale
@@ -17,7 +18,7 @@ const INTL_LOCALES: IntlLocales = { bg, de, daDK: da, et, en: enGB, lt, pl, rmRO
 
 interface MainMenuClock {
   key: string,
-  identity: object,
+  identity: Identity,
   serverTime: string,
   timestampFormatId: number,
   path: string

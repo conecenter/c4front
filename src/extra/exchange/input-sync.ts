@@ -1,4 +1,5 @@
 import {Patch, PatchHeaders, usePatchSync} from "./patch-sync";
+import {Identity} from "../utils";
 
 interface InputSyncState<State> {
   currentState: State,
@@ -7,7 +8,7 @@ interface InputSyncState<State> {
 }
 
 function useInputSync<ServerState, State>(
-  identity: object,
+  identity: Identity,
   receiverName: string,
   serverState: ServerState,
   deferredSend: boolean,

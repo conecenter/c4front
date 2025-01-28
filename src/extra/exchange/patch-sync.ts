@@ -1,6 +1,7 @@
 import {useSync} from "../../main/vdom-hooks";
 import {useCallback, useMemo, useRef} from "react";
 import {identityAt} from "../../main/vdom-util";
+import {Identity} from "../utils";
 
 interface PatchHeaders {
     [name: string]: string
@@ -47,7 +48,7 @@ function stateToSendPatch(patch: Patch, changing: boolean, deferredSend: boolean
 }
 
 function usePatchSync<ServerState, State, StateChange>(
-    identity: object,
+    identity: Identity,
     receiverName: string,
     serverState: ServerState,
     deferredSend: boolean,
