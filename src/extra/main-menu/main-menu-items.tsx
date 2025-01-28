@@ -11,12 +11,13 @@ import { useBinds } from '../binds/key-binding';
 import { focusFirstMenuItem } from './main-menu-utils';
 import { SVGElement } from '../../main/image';
 import { identityAt } from '../../main/vdom-util';
+import { Identity } from '../utils';
 
 const receiverIdOf = identityAt('receiver');
 
 interface MenuExecutableItem {
     key: string,
-	identity: object,
+	identity: Identity,
     name: string,
     current: boolean,
     path?: string,
@@ -59,7 +60,7 @@ function MenuExecutableItem({identity, name, current, path, icon, bindSrcId}: Me
 
 interface MenuCustomItem {
     key: string,
-	identity: object,
+	identity: Identity,
     path?: string,
     children?: ReactNode
 }
@@ -117,7 +118,7 @@ function hasIconProp(child: JSX.Element): string | undefined {
 
 interface MenuItemsGroup {
     key: string,
-	identity?: object,
+	identity?: Identity,
     children: ReactElement<MenuItem>[]
 }
 
@@ -132,7 +133,7 @@ function MenuItemsGroup({children}: MenuItemsGroup) {
 
 interface MenuUserItem {
     key: string,
-	identity: object,
+	identity: Identity,
     shortName: string,
     longName: string,
     current: boolean,

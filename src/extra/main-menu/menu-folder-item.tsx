@@ -27,6 +27,7 @@ const patchSyncTransformers = {
     patchToChange: patchToState,
     applyChange: (prev: MenuItemState, ch: MenuItemState) => prev
 }
+import { Identity } from '../utils';
 
 const ARROW_DOWN_ICON = (
     <svg xmlns="http://www.w3.org/2000/svg" className='menuFolderIcon' fill="currentColor" viewBox="0 0 18000 18000" width="18000" height="18000">
@@ -36,7 +37,7 @@ const ARROW_DOWN_ICON = (
 
 interface MenuFolderItem {
     key: string,
-	identity: object,
+	identity: Identity,
     name: string,
     shortName?: string,
     current: boolean,
