@@ -28,6 +28,7 @@ const patchSyncTransformers = {
     applyChange: (prev: MenuItemState, ch: MenuItemState) => prev
 }
 import { Identity } from '../utils';
+import { useSender } from '../../main/vdom-hooks';
 
 const ARROW_DOWN_ICON = (
     <svg xmlns="http://www.w3.org/2000/svg" className='menuFolderIcon' fill="currentColor" viewBox="0 0 18000 18000" width="18000" height="18000">
@@ -69,6 +70,7 @@ function MenuFolderItem(props: MenuFolderItem) {
     const currentPath = useContext(PathContext);
 
     // Keyboard controls logic
+    const { ctxToPath } = useSender();
     const {onArrowLeftRight, setReadyArrowLeftRight} = useContext(MenuControlsContext);
     useEffect(() => { if (opened) setReadyArrowLeftRight?.() }, [opened]);
 
@@ -112,7 +114,7 @@ function MenuFolderItem(props: MenuFolderItem) {
             case ARROW_DOWN_KEY:
             case ARROW_UP_KEY:
                 if (!opened || !menuFolder) break;
-                handleArrowUpDown(e, menuFolder, currentPath, children);
+                handleArrowUpDown(e, menuFolder, currentPath, ctxToPath, children);
         }
     };
     
