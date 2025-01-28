@@ -4,12 +4,12 @@ import {createElement,useState,useContext,createContext,useCallback,useEffect,us
 /********* sync ***************************************************************/
 
 const NoContext = createContext(0)
-const AckContext = createContext(0)
+export const AckContext = createContext(0)
 AckContext.displayName = "AckContext"
 
-/** @typedef {{ enqueue: Function, ctxToPath: (ctx?: Object) => string, busyFor: (qKey: string) => number }} Sender */
+/** @typedef {{ enqueue: Function, ctxToPath: (ctx?: Object) => string, isBusy: (ack: number) => boolean }} Sender */
 /** @type {React.Context<Sender>} */
-const SenderContext = createContext()
+const SenderContext = createContext({ enqueue: () => {}, ctxToPath: () => '', isBusy: () => false })
 SenderContext.displayName = "SenderContext"
 
 /** @type {React.Context<{isRoot: boolean, branchKey: string}>} */
