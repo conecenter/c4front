@@ -56,4 +56,6 @@ function createArray(start: number, end: number) {
     return Array.from({length: end - start + 1}, (_, i) => i + start);
 }
 
+export type Identity = string
+
 export { copyToClipboard, inRange, clamp, throttleWithTrailing, escapeRegex, createArray }
