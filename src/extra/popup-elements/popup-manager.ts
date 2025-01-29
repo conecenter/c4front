@@ -3,6 +3,7 @@ import { PopupElement } from "./popup-element";
 import { Patch, usePatchSync } from "../exchange/patch-sync";
 import { PopupStateContext, PopupDrawerContext, PopupStack } from "./popup-contexts";
 import { identityAt } from "../../main/vdom-util";
+import { Identity } from "../utils";
 
 // Server sync functions
 const receiverIdOf = identityAt('receiver');
@@ -13,7 +14,7 @@ const applyChange = (_prevState: PopupStack, ch: PopupStack) => ch;
 const patchSyncTransformers = { serverToState, changeToPatch, patchToChange, applyChange };
 
 interface PopupManager {
-    identity: object,
+    identity: Identity,
     openedPopups: PopupStack,
     children: ReactNode
 }
