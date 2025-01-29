@@ -3,10 +3,11 @@ import {ColorDef, colorToProps} from "./common-api";
 import {useClickSyncOpt} from "../exchange/click-sync";
 import clsx from "clsx";
 import {CLICKED_CLASSNAME, INLINE_BUTTON_CLASSNAME, INLINE_CHIP_CLASSNAME} from "./css-classes";
+import { Identity } from "../utils";
 
 interface InlineButton {
   key: string,
-  identity: object
+  identity: Identity
   receiver: boolean
   color: ColorDef
   children: ReactNode[]
@@ -25,7 +26,7 @@ function InlineButton({key, identity, receiver, color, children}: InlineButton) 
 
 interface InlineChip {
   key: string
-  identity: object
+  identity: Identity
   receiver: boolean
   color: ColorDef
   children: ReactNode[]

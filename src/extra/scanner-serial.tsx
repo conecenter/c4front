@@ -2,6 +2,7 @@ import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { useSync } from "../main/vdom-hooks";
 import { identityAt } from "../main/vdom-util";
 import { useLatest } from "./custom-hooks";
+import { Identity } from "./utils";
 
 /*
  * Reference for scanner interface - OPTICON Universal menu book
@@ -17,7 +18,7 @@ const barcodeActionIdOf = identityAt('barcodeAction');
 
 interface ScannerSerialElement {
     key: string,
-    identity: object,
+    identity: Identity,
     barcodeReader: boolean,
     children?: ReactNode
 }

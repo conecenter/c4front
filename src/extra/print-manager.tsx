@@ -1,13 +1,14 @@
 import React, { ReactNode, createContext, useEffect, useState } from "react";
 import { useAddEventListener } from "./custom-hooks";
 import { usePatchSync } from "./exchange/patch-sync";
+import { Identity } from "./utils";
 
 const PrintContext = createContext(false);
 PrintContext.displayName = 'PrintContext';
 
 interface PrintManager {
     key: string,
-    identity: object,
+    identity: Identity,
     children: ReactNode,
     printChildren: ReactNode,
     printMode: boolean

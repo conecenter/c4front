@@ -4,9 +4,10 @@ import {HexColorInput, HexColorPicker} from "react-colorful";
 import {usePopupPos} from "../main/popup";
 import {isInstanceOfNode} from "./dom-utils";
 import {ENTER_KEY} from "../main/keyboard-keys";
+import {Identity} from "./utils";
 
 interface ColorPickerProps {
-	identity: object,
+	identity: Identity,
 	value: string,
 	ro: boolean
 }

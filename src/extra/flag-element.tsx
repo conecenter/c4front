@@ -5,9 +5,10 @@ import { ButtonElement } from "./button-element";
 import { usePath } from "../main/vdom-hooks";
 import { useFocusControl } from "./focus-control";
 import { useUserManual } from "./user-manual";
+import { Identity } from "./utils";
 
 interface FlagElement {
-    identity: Object,
+    identity: Identity,
     imageSrc: string,
     name: string,
     umid?: string

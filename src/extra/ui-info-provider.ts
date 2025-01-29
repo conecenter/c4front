@@ -2,6 +2,7 @@ import { createElement as $, ReactNode, createContext, useContext, useLayoutEffe
 import { usePatchSync, Patch } from "./exchange/patch-sync";
 import { useAddEventListener } from "./custom-hooks";
 import { RootBranchContext } from '../main/vdom-hooks';
+import { Identity } from './utils';
 
 const DEFAULT_UI_TYPE = 'pointer';
 
@@ -31,7 +32,7 @@ const patchToChange = (patch: Patch) => patch.headers!["x-r-ui-type"] as UiType;
 
 interface UiInfoProvider {
     key: string,
-    identity: object,
+    identity: Identity,
     uiType?: UiType,
     children: ReactNode
 }

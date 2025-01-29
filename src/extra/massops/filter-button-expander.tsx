@@ -10,6 +10,7 @@ import { MassOp } from "./filter-massop";
 import { useLatest } from "../custom-hooks";
 import { Patch, usePatchSync } from '../exchange/patch-sync';
 import { LabeledElement } from "../labeled-element";
+import { Identity } from "../utils";
 
 const FilterButtonExpanderContext = createContext<MutableRefObject<() => void> | null>(null);
 FilterButtonExpanderContext.displayName = 'FilterButtonExpanderContext';
@@ -23,7 +24,7 @@ const patchToChange = (p: Patch) => p.value;
 const applyChange = (prev: string, ch: string) => ch;
 
 interface FilterButtonExpander {
-    identity: object,
+    identity: Identity,
     area: string,
     name?: string,
     icon?: string,

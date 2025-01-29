@@ -2,6 +2,7 @@ import { createElement as $, useMemo, useContext, ReactNode, useState } from "re
 import { PopupElement } from "./popup-element";
 import { Patch, usePatchSync } from "../exchange/patch-sync";
 import { PopupStateContext, PopupDrawerContext, PopupStack } from "./popup-contexts";
+import { Identity } from "../utils";
 
 // Server sync functions
 const changeToPatch = (ch: PopupStack): Patch => ({ value: ch.join('|') });
@@ -10,7 +11,7 @@ const applyChange = (_prevState: PopupStack, ch: PopupStack) => ch;
 
 
 interface PopupManager {
-    identity: object,
+    identity: Identity,
     openedPopups: PopupStack,
     children: ReactNode
 }

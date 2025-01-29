@@ -3,13 +3,13 @@ import clsx from 'clsx'
 import closeImg from './close.svg'
 import { ImageElement, SVGElement } from '../../main/image'
 import { useFocusControl } from '../focus-control'
-import { copyToClipboard } from '../utils'
+import { copyToClipboard, Identity } from '../utils'
 import { ColorDef, colorToProps } from '../view-builder/common-api'
 import { useClickSyncOpt } from '../exchange/click-sync'
 import { usePath } from '../../main/vdom-hooks'
 
 interface ChipElement {
-    identity: object,
+    identity: Identity,
     receiver?: boolean,
     text: string,
     color: ColorDef,

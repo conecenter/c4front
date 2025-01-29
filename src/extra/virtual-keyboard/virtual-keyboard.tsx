@@ -8,6 +8,7 @@ import { ScrollInfoContext } from '../scroll-info-context';
 import { VKKey } from './vk-key';
 import { usePath } from '../../main/vdom-hooks';
 import { VkInfoContext } from '../ui-info-provider';
+import { Identity } from '../utils';
 
 const SWITCHER_KEYS = ['Switcher1', 'Switcher2', 'Switcher3'];
 const BOTTOM_ROW_CLASS = "bottom-row";
@@ -17,7 +18,7 @@ const VK_OFFSET = 0.2;
 
 interface VirtualKeyboard {
     key: string,
-    identity: object,
+    identity: Identity,
     hash: string,
     position: "left" | "right" | "bottom" | "static",
     setupType?: string,

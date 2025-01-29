@@ -9,9 +9,10 @@ import { PopupElement } from "../popup-elements/popup-element";
 import { useClickSyncOpt } from "../exchange/click-sync";
 import { LabeledElement } from "../labeled-element";
 import { FilterButtonExpanderContext } from "./filter-button-expander";
+import { Identity } from "../utils";
 
 interface MassOp {
-    identity: object,
+    identity: Identity,
     area: string,
     name?: string,
     nameFolded?: string,

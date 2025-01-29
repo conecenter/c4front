@@ -2,7 +2,7 @@ import React, { ReactElement, useContext, useRef } from 'react';
 import clsx from 'clsx';
 import { COPY_EVENT, CUT_EVENT, DELETE_EVENT, PASTE_EVENT, useExternalKeyboardControls } from './focus-module-interface';
 import { NoFocusContext } from './labeled-element';
-import { copyToClipboard } from './utils';
+import { copyToClipboard, Identity } from './utils';
 import { usePath, useSync } from '../main/vdom-hooks';
 import { identityAt } from '../main/vdom-util';
 import { useFocusControl } from './focus-control';
@@ -13,7 +13,7 @@ const keyboardActionIdOf = identityAt('keyboardAction');
 
 interface RouteElementProps {
     key: string,
-    identity: object,
+    identity: Identity,
     keyboardAction?: boolean,
     compact?: boolean,
     routeParts: ReactElement[],  // ChipElements

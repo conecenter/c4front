@@ -6,12 +6,13 @@ import { usePatchSync, Patch } from '../exchange/patch-sync';
 import { JSONSchema7 } from "json-schema";
 import { linter, lintGutter, Diagnostic } from "@codemirror/lint";
 import { load, YAMLException } from 'js-yaml';
+import { Identity } from '../utils';
 
 const changeToPatch = (ch: string): Patch => ({ value: ch });
 const patchToChange = (patch: Patch): string => patch.value;
 
 interface YamlEditorProps {
-    identity: object,
+    identity: Identity,
     value: string,
     jsonSchema?: string
 }

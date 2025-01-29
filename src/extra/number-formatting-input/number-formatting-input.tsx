@@ -3,12 +3,12 @@ import { InputElement } from "../input-element";
 import { usePatchSync, Patch } from "../exchange/patch-sync";
 import { changeToPatch, patchToChange, InputStateChange } from "./number-formatting-input-exchange";
 import { useUserLocale } from "../locale";
-import { escapeRegex } from "../utils";
+import { escapeRegex, Identity } from "../utils";
 import { usePath } from "../../main/vdom-hooks";
 
 interface NumberFormattingInput {
     key?: string,
-    identity: object,
+    identity: Identity,
     state: NumberFormattingInputState,
     showThousandSeparator: boolean,
     scale: number,    // round decimal part to this many numbers RoundingMode.HALF_UP
