@@ -1,7 +1,7 @@
 import React, { ReactElement, useContext, useRef } from 'react';
 import clsx from 'clsx';
 import { COPY_EVENT, CUT_EVENT, DELETE_EVENT, PASTE_EVENT, useExternalKeyboardControls } from './focus-module-interface';
-import { copyToClipboard } from './utils';
+import { copyToClipboard, Identity } from './utils';
 import { usePath, useSync } from '../main/vdom-hooks';
 import { identityAt } from '../main/vdom-util';
 import { useFocusControl } from './focus-control';
@@ -11,7 +11,7 @@ import { UiInfoContext } from './ui-info-provider';
 const keyboardActionIdOf = identityAt('keyboardAction');
 
 interface SegmentedChipProps {
-    identity: object,
+    identity: Identity,
     keyboardAction?: boolean,
     compact?: boolean,
     routeParts: ReactElement[],  // ChipElements
@@ -73,7 +73,7 @@ function SegmentedChip({identity, keyboardAction, compact, routeParts, extraPart
              onMouseDownCapture={preventMenuItemsFocus}
         >
             {routeParts}
-            {extraParts && 
+            {extraParts &&
                 <span className='extraParts'>{extraParts}</span>}
         </div>
     );

@@ -9,6 +9,7 @@ import { usePath } from '../../main/vdom-hooks';
 import { VkInfoContext } from '../ui-info-provider';
 import { identityAt } from '../../main/vdom-util';
 import { PathContext } from '../focus-announcer';
+import { Identity } from '../utils';
 
 const receiverIdOf = identityAt('receiver');
 
@@ -20,7 +21,7 @@ const VK_OFFSET = 0.2;
 
 interface VirtualKeyboard {
     key: string,
-    identity: object,
+    identity: Identity,
     hash: string,
     position: "left" | "right" | "bottom" | "static",
     setupType?: string,
