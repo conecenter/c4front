@@ -46,7 +46,7 @@ function PrintManager({ identity, children, printMode: state, printChildren }: P
             {isPrinting && (
                 <div className='printContent'>
                     <PrintContext.Provider value={true}>
-                        printMode ? printChildren : children
+                        {printMode ? printChildren : children}
                     </PrintContext.Provider>
                 </div>
             )}

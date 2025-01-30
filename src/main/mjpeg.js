@@ -15,6 +15,7 @@ const useConnectedInner = extractedUse((setConnected,url,cb) => {
         const at = now()
         setConnected(was => was && ws === was.ws && at < was.at+1000 ? was : {at,ws})
     }
+    ws.onerror = ev => setConnected({at:0})
     return ()=>{
         ws.close()
         setConnected(null)
