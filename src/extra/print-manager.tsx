@@ -1,4 +1,4 @@
-import React, { ReactNode, createContext, useEffect, useState } from "react";
+import React, { ReactNode, createContext, useEffect, useRef, useState } from "react";
 import { useAddEventListener } from "./custom-hooks";
 import { usePatchSync } from "./exchange/patch-sync";
 
@@ -10,7 +10,8 @@ interface PrintManager {
     identity: object,
     children: ReactNode,
     printChildren: ReactNode,
-    printMode: boolean
+    printMode: boolean,
+    printTitle?: string
 }
 
 const changeToPatch = () => ({
@@ -18,7 +19,7 @@ const changeToPatch = () => ({
     value: ""
 });
 
-function PrintManager({ identity, children, printMode: state, printChildren }: PrintManager) {
+function PrintManager({ identity, children, printMode: state, printChildren, printTitle }: PrintManager) {
     const [elem, setElem] = useState<HTMLDivElement | null>(null);
     const window = elem?.ownerDocument.defaultView;
 
@@ -27,17 +28,29 @@ function PrintManager({ identity, children, printMode: state, printChildren }: P
     const {currentState: printMode, sendFinalChange} =
         usePatchSync(identity, 'receiver', state, false, (b) => b, changeToPatch, (p) => false, (prev, ch) => prev);
 
-    // Custom print from server
-    useEffect(() => {
-        if (printMode) setTimeout(() => window?.print());
+    const pageTitle = useRef(document.title);
+    function setTitleForPrint(title?: string) {
+        if (title) {
+            pageTitle.current = document.title;
+            document.title = title;
+        }
+    }
+
+    useEffect(function customPrintFromServer() {
+        if (printMode) setTimeout(() => {
+            setTitleForPrint(printTitle);
+            window?.print();
+        });
     }, [printMode]);
 
     // Make changes for print
+    const onBeforePrint = () => setIsPrinting(true);
     const onAfterPrint = () => {
+        document.title = pageTitle.current;
         setIsPrinting(false);
         printMode && sendFinalChange(false);
     }
-    useAddEventListener(window, 'beforeprint', () => setIsPrinting(true));
+    useAddEventListener(window, 'beforeprint', onBeforePrint);
     useAddEventListener(window, 'afterprint', onAfterPrint);
 
     return (
