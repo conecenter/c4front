@@ -125,7 +125,9 @@ export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, spanRi
     }
     const {focusClass, focusHtml} = useFocusControl(path);
     const className = clsx(argClassNames, !noDefCellClass && GRID_CLASS_NAMES.CELL, focusClass, dragHandle && 'gridDragCell', hoverClass);
-    return $("div", {ref, ...props, ...expanderProps, 'data-col-key': colKey, 'data-row-key': rowKey, "data-drag-handle": dragHandle, ...focusHtml, style, className, ...hoverProps}, children)
+    return $("div", {ref, ...props, ...expanderProps, 'data-col-key': colKey, 'data-row-key': rowKey, "data-drag-handle": dragHandle, ...focusHtml, style, className, ...hoverProps},
+        gridColumn === spanAll ? $(NoCaptionContext.Provider, {value: false}, children) : children
+    )
 }
 
 const colKeysOf = children => children.map(c => c.colKey)
