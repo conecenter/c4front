@@ -48,12 +48,12 @@ interface Text {
 	text: string
 }
 
+const receiverIdOf = identityAt('receiver');
 const isChip = (item: Content): item is Chip => (item as Chip).bgColor !== undefined;
 
 export function DropdownCustom({ identity, state, content, popupChildren, ro, popupClassname, children }: DropdownProps) {
 	const { currentState, sendTempChange, sendFinalChange } = usePatchSync<DropdownState, DropdownState, DropdownChange>(
-        identity,
-        'receiver',
+        receiverIdOf(identity),
         state,
         false,
         s => s,

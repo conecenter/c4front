@@ -4,6 +4,9 @@ import {HexColorInput, HexColorPicker} from "react-colorful";
 import {usePopupPos} from "../main/popup";
 import {isInstanceOfNode} from "./dom-utils";
 import {ENTER_KEY} from "../main/keyboard-keys";
+import {identityAt} from "../main/vdom-util";
+
+const receiverIdOf = identityAt('receiver');
 
 interface ColorPickerProps {
 	identity: object,
@@ -14,8 +17,7 @@ interface ColorPickerProps {
 export function ColorPicker({identity, value, ro}: ColorPickerProps) {
 
 	const { currentState, setTempState, setFinalState } = useInputSync<string, string>(
-		identity,
-		'receiver',
+		receiverIdOf(identity),
 		value,
 		true,
 		(p: Patch) => p.value,

@@ -3,9 +3,12 @@ import GridLayout, { Responsive, WidthProvider } from 'react-grid-layout';
 import clsx from "clsx";
 import { Patch, usePatchSync } from "../exchange/patch-sync";
 import { GridItemWrapper } from "./grid-item";
+import { identityAt } from "../../main/vdom-util";
 
 const GRID_ROW_SIZE = 10;
 const GRID_MARGIN_SIZE = 10;
+
+const receiverIdOf = identityAt('receiver');
 
 const serverStateToState = (s?: string): GridLayout.Layouts => s ? JSON.parse(s) : [];
 const changeToPatch = (ch: GridLayout.Layouts): Patch => ({ value: JSON.stringify(ch) });
@@ -25,7 +28,7 @@ interface MasonryLayout {
 
 function MasonryLayout({ identity, layout: layoutJSON, breakpoints, cols, edit, children }: MasonryLayout) {
     const { currentState: layoutState, sendFinalChange } =
-        usePatchSync(identity, 'receiver', layoutJSON, false, serverStateToState, changeToPatch, patchToChange, applyChange);
+        usePatchSync(receiverIdOf(identity), layoutJSON, false, serverStateToState, changeToPatch, patchToChange, applyChange);
 
     const [breakpoint, setBreakpoint] = useState<string | null>(null);
 

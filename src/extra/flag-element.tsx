@@ -5,6 +5,9 @@ import { ButtonElement } from "./button-element";
 import { usePath } from "../main/vdom-hooks";
 import { useFocusControl } from "./focus-control";
 import { useUserManual } from "./user-manual";
+import { identityAt } from "../main/vdom-util";
+
+const receiverIdOf = identityAt('receiver');
 
 interface FlagElement {
     identity: Object,
@@ -14,7 +17,7 @@ interface FlagElement {
 }
 
 function FlagElement ({ identity, imageSrc, name, umid }: FlagElement) {
-    const { clicked, onClick } = useClickSync(identity, 'receiver');
+    const { clicked, onClick } = useClickSync(receiverIdOf(identity));
 
     const path = usePath(identity);
     const { focusClass, focusHtml, isFocused } = useFocusControl(path);

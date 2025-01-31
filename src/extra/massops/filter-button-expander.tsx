@@ -10,13 +10,15 @@ import { MassOp } from "./filter-massop";
 import { useLatest } from "../custom-hooks";
 import { Patch, usePatchSync } from '../exchange/patch-sync';
 import { LabeledElement } from "../labeled-element";
+import { identityAt } from "../../main/vdom-util";
 
 const FilterButtonExpanderContext = createContext<MutableRefObject<() => void> | null>(null);
 FilterButtonExpanderContext.displayName = 'FilterButtonExpanderContext';
 
-const FILTER_INPUT_RECEIVER = 'filterInput';
 const FOLDER_PATH_DIVIDER = '>';
 const EXPANDER_UMID = "grouped-ops";
+
+const filterInputIdOf = identityAt('filterInput');
 
 const changeToPatch = (ch: string): Patch => ({ value: ch });
 const patchToChange = (p: Patch) => p.value;
@@ -40,7 +42,7 @@ function FilterButtonExpander({ identity, name, icon, color, optButtons = [], fi
     const closeExpanderRef = useLatest(() => toggle(false));
 
     const { currentState: filterValue, sendTempChange } = usePatchSync(
-        identity, FILTER_INPUT_RECEIVER, sFilterValue, false, s => s, changeToPatch, patchToChange, applyChange
+        filterInputIdOf(identity), sFilterValue, false, s => s, changeToPatch, patchToChange, applyChange
     );
 
     const showFilter = countMassOps(optButtons) > 5;

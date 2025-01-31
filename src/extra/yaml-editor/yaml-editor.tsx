@@ -6,6 +6,9 @@ import { usePatchSync, Patch } from '../exchange/patch-sync';
 import { JSONSchema7 } from "json-schema";
 import { linter, lintGutter, Diagnostic } from "@codemirror/lint";
 import { load, YAMLException } from 'js-yaml';
+import { identityAt } from '../../main/vdom-util';
+
+const receiverIdOf = identityAt('receiver');
 
 const changeToPatch = (ch: string): Patch => ({ value: ch });
 const patchToChange = (patch: Patch): string => patch.value;
@@ -22,7 +25,7 @@ function YamlEditor({ identity, value, jsonSchema }: YamlEditorProps) {
     const schemaExtension = jsonSchema ? yamlSchema(parseJsonSchema(jsonSchema)) : [];
 
     const { currentState, sendTempChange, sendFinalChange, wasChanged } =
-        usePatchSync(identity, 'receiver', value, true, s => s, changeToPatch, patchToChange, (prev, ch) => ch);
+        usePatchSync(receiverIdOf(identity), value, true, s => s, changeToPatch, patchToChange, (prev, ch) => ch);
 
     function lintErrors() {
         const diagnostics: Diagnostic[] = [];

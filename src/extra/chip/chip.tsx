@@ -7,6 +7,9 @@ import { copyToClipboard } from '../utils'
 import { ColorDef, colorToProps } from '../view-builder/common-api'
 import { useClickSyncOpt } from '../exchange/click-sync'
 import { usePath } from '../../main/vdom-hooks'
+import { identityAt } from '../../main/vdom-util'
+
+const receiverIdOf = identityAt('receiver');
 
 interface ChipElement {
     identity: object,
@@ -24,7 +27,7 @@ interface ChipElement {
 
 const ChipElement = ({identity, receiver, text, color, tooltip, iconPath, link, withDelete, callbackRef, children, ...props}: ChipElement) => {
     // Server sync
-    const { onClick } = useClickSyncOpt(identity, 'receiver', receiver);
+    const { onClick } = useClickSyncOpt(receiverIdOf(identity), receiver);
 
     // Focus functionality
     const path = usePath(identity);

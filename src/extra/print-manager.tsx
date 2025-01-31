@@ -1,6 +1,7 @@
 import React, { ReactNode, createContext, useEffect, useRef, useState } from "react";
 import { useAddEventListener } from "./custom-hooks";
 import { usePatchSync } from "./exchange/patch-sync";
+import { identityAt } from "../main/vdom-util";
 
 const PrintContext = createContext(false);
 PrintContext.displayName = 'PrintContext';
@@ -14,6 +15,8 @@ interface PrintManager {
     printTitle?: string
 }
 
+const receiverIdOf = identityAt('receiver');
+
 const changeToPatch = () => ({
     headers: {"x-r-printmode": "0"},
     value: ""
@@ -26,7 +29,7 @@ function PrintManager({ identity, children, printMode: state, printChildren, pri
     const [isPrinting, setIsPrinting] = useState(false);
 
     const {currentState: printMode, sendFinalChange} =
-        usePatchSync(identity, 'receiver', state, false, (b) => b, changeToPatch, (p) => false, (prev, ch) => prev);
+        usePatchSync(receiverIdOf(identity), state, false, (b) => b, changeToPatch, (p) => false, (prev, ch) => prev);
 
     const pageTitle = useRef(document.title);
     function setTitleForPrint(title?: string) {

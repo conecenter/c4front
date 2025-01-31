@@ -3,6 +3,9 @@ import {ColorDef, colorToProps} from "./common-api";
 import {useClickSyncOpt} from "../exchange/click-sync";
 import clsx from "clsx";
 import {CLICKED_CLASSNAME, INLINE_BUTTON_CLASSNAME, INLINE_CHIP_CLASSNAME} from "./css-classes";
+import {identityAt} from "../../main/vdom-util";
+
+const receiverIdOf = identityAt('receiver');
 
 interface InlineButton {
   key: string,
@@ -13,8 +16,8 @@ interface InlineButton {
 
 }
 
-function InlineButton({key, identity, receiver, color, children}: InlineButton) {
-  const {clicked, onClick} = useClickSyncOpt(identity, "receiver", receiver)
+function InlineButton({identity, receiver, color, children}: InlineButton) {
+  const {clicked, onClick} = useClickSyncOpt(receiverIdOf(identity), receiver)
   const {style, className} = colorToProps(color)
   return el("button", {
     style,
@@ -31,8 +34,8 @@ interface InlineChip {
   children: ReactNode[]
 }
 
-function InlineChip({key, identity, receiver, color, children}: InlineButton) {
-  const {clicked, onClick} = useClickSyncOpt(identity, "receiver", receiver)
+function InlineChip({identity, receiver, color, children}: InlineButton) {
+  const {clicked, onClick} = useClickSyncOpt(receiverIdOf(identity), receiver)
   const {style, className} = colorToProps(color)
   return el("div", {
     style,

@@ -10,7 +10,9 @@ import { BindingElement } from '../binds/binds-elements';
 import { useBinds } from '../binds/key-binding';
 import { focusFirstMenuItem } from './main-menu-utils';
 import { SVGElement } from '../../main/image';
+import { identityAt } from '../../main/vdom-util';
 
+const receiverIdOf = identityAt('receiver');
 
 interface MenuExecutableItem {
     key: string,
@@ -23,7 +25,7 @@ interface MenuExecutableItem {
 }
 
 function MenuExecutableItem({identity, name, current, path, icon, bindSrcId}: MenuExecutableItem) {
-    const { clicked, onClick } = useClickSync(identity, 'receiver');
+    const { clicked, onClick } = useClickSync(receiverIdOf(identity));
 
     const { focusClass, focusHtml } = useFocusControl(path);
 

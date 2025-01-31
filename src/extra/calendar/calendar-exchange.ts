@@ -8,6 +8,9 @@ import type { CalendarEvent, ViewInfo, ViewType } from "./calendar";
 import type { EventInput } from '@fullcalendar/core';
 import type { EventImpl } from '@fullcalendar/core/internal';
 
+const changeEventIdOf = identityAt('changeEvent');
+const changeViewIdOf = identityAt('changeView');
+
 const HEADERS = {
     id: 'x-r-event-id',
     start: 'x-r-event-start',
@@ -19,7 +22,7 @@ const HEADERS = {
 
 const useEventsSync = (identity: object, events: CalendarEvent[]) => {
     const { currentState, sendFinalChange } = usePatchSync(
-        identity, 'changeEvent', events, false, serverStateToState(transformColor), changeToPatch, patchToChange, applyChange
+        changeEventIdOf(identity), events, false, serverStateToState(transformColor), changeToPatch, patchToChange, applyChange
     );
     return { eventsState: currentState, sendEventsChange: sendFinalChange };
 }
@@ -73,7 +76,7 @@ const useEventClickAction = (identity: object) => {
 /////
 function useViewSync(identity: object, serverView: ViewInfo | undefined) {
     const { currentState, sendTempChange } = usePatchSync(
-        identity, 'changeView', serverView, false, s => s, viewChangeToPatch, viewPatchToChange, (prev, ch) => ch
+        changeViewIdOf(identity), serverView, false, s => s, viewChangeToPatch, viewPatchToChange, (prev, ch) => ch
     );
     return { currentView: currentState, sendViewChange: sendTempChange };
 }

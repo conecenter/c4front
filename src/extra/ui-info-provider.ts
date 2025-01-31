@@ -2,6 +2,7 @@ import { createElement as $, ReactNode, createContext, useContext, useLayoutEffe
 import { usePatchSync, Patch } from "./exchange/patch-sync";
 import { useAddEventListener } from "./custom-hooks";
 import { RootBranchContext } from '../main/vdom-hooks';
+import { identityAt } from '../main/vdom-util';
 
 const DEFAULT_UI_TYPE = 'pointer';
 
@@ -21,6 +22,8 @@ VkInfoContext.displayName = 'VkInfoContext';
 
 
 // Server exchange
+const receiverIdOf = identityAt('receiver');
+
 const changeToPatch = (ch: UiType) => ({
     headers: { "x-r-ui-type": ch },
     value: ""
@@ -39,7 +42,7 @@ interface UiInfoProvider {
 function UiInfoProvider({identity, uiType: state, children}: UiInfoProvider) {
     // UiType functionality
     const {currentState: uiType, sendFinalChange} =
-        usePatchSync(identity, 'receiver', state, false, (b) => b, changeToPatch, patchToChange, (prev, ch) => ch);
+        usePatchSync(receiverIdOf(identity), state, false, (b) => b, changeToPatch, patchToChange, (prev, ch) => ch);
 
     const { isRoot } = useContext(RootBranchContext);
 

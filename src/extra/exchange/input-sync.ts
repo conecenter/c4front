@@ -10,7 +10,6 @@ interface InputSyncState<State> {
 
 function useInputSync<ServerState, State>(
   identity: object,
-  receiverName: string,
   serverState: ServerState,
   deferredSend: boolean,
   patchToState: (p: Patch) => State,
@@ -19,7 +18,6 @@ function useInputSync<ServerState, State>(
 ): InputSyncState<State> {
   const {currentState, sendTempChange, sendFinalChange} = usePatchSync<ServerState, State, State>(
     identity,
-    receiverName,
     serverState,
     deferredSend,
     serverToState,

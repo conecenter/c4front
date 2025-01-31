@@ -5,6 +5,9 @@ import { changeToPatch, patchToChange, InputStateChange } from "./number-formatt
 import { useUserLocale } from "../locale";
 import { escapeRegex } from "../utils";
 import { usePath } from "../../main/vdom-hooks";
+import { identityAt } from "../../main/vdom-util";
+
+const receiverIdOf = identityAt('receiver');
 
 interface NumberFormattingInput {
     key?: string,
@@ -35,7 +38,7 @@ function NumberFormattingInput(
     const path = usePath(identity);
 
     const { currentState, sendTempChange, sendFinalChange, wasChanged } = usePatchSync(
-        identity, 'receiver', state, false, s => s, changeToPatch, patchToChange, (_prev, ch) => ch
+        receiverIdOf(identity), state, false, s => s, changeToPatch, patchToChange, (_prev, ch) => ch
     );
 
     const [isFocused, setIsFocused] = useState(false);

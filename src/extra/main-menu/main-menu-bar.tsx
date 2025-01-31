@@ -13,9 +13,12 @@ import {BindGroupElement} from "../binds/binds-elements";
 import {NoCaptionContext, usePath} from "../../main/vdom-hooks";
 import {isInstanceOfNode} from "../dom-utils";
 import {VISIBLE_CHILD_SELECTOR} from "../css-selectors";
+import {identityAt} from "../../main/vdom-util";
 
 const MENU_BAR_PATH = 'main-menu-bar';
 const KEY_MODIFICATOR = { ArrowLeft: -1, ArrowRight: 1 };
+
+const receiverIdOf = identityAt('receiver');
 
 type OnArrowLeftRight = (path: string, elem: HTMLElement, key: 'ArrowLeft' | 'ArrowRight', isOpened: boolean) => void;
 
@@ -49,7 +52,7 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
   const {
     currentState: {opened},
     setFinalState
-  } = useInputSync(identity, 'receiver', state, false, patchToState, s => s, stateToPatch);
+  } = useInputSync(receiverIdOf(identity), state, false, patchToState, s => s, stateToPatch);
 
   const domRef = useRef<HTMLDivElement>(null);
 

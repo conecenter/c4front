@@ -10,6 +10,7 @@ import {useFocusControl} from '../focus-control';
 import {VkInfoContext} from "../ui-info-provider";
 import { usePopupState } from "../popup-elements/popup-manager";
 import { PopupElement } from "../popup-elements/popup-element";
+import { identityAt } from "../../main/vdom-util";
 import {
 	BACKSPACE_EVENT,
 	COPY_EVENT,
@@ -67,6 +68,8 @@ interface DatePickerProps {
 	children?: ReactNode[]
 }
 
+const receiverIdOf = identityAt('receiver');
+
 export function DatePickerInputElement({
 		identity,
 		state,
@@ -84,8 +87,7 @@ export function DatePickerInputElement({
 	const dateChanged = useRef(false);
 
 	const { currentState, sendTempChange: onTempChange, sendFinalChange: onFinalChange } = usePatchSync(
-        identity,
-        'receiver',
+        receiverIdOf(identity),
         state,
         !!deferredSend,
         serverStateToState,

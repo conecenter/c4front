@@ -2,8 +2,10 @@ import { createElement as $, useMemo, useContext, ReactNode, useState } from "re
 import { PopupElement } from "./popup-element";
 import { Patch, usePatchSync } from "../exchange/patch-sync";
 import { PopupStateContext, PopupDrawerContext, PopupStack } from "./popup-contexts";
+import { identityAt } from "../../main/vdom-util";
 
 // Server sync functions
+const receiverIdOf = identityAt('receiver');
 const changeToPatch = (ch: PopupStack): Patch => ({ value: ch.join('|') });
 const patchToChange = (p: Patch): PopupStack => p.value.split('|').filter(Boolean);
 const applyChange = (_prevState: PopupStack, ch: PopupStack) => ch;
@@ -17,7 +19,7 @@ interface PopupManager {
 
 function PopupManager({identity, openedPopups=[], children}: PopupManager) {
     const { currentState, sendFinalChange } =
-        usePatchSync(identity, 'receiver', openedPopups, false, s => s, changeToPatch, patchToChange, applyChange);
+        usePatchSync(receiverIdOf(identity), openedPopups, false, s => s, changeToPatch, patchToChange, applyChange);
 
     const [popupDrawer, setPopupDrawer] = useState<HTMLElement | null>(null);
 

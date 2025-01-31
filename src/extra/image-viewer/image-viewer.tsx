@@ -12,6 +12,7 @@ import { Patch, usePatchSync } from "../exchange/patch-sync";
 import { Thumbnail, thumbnailsProps } from "./image-viewer-thumbnails";
 import { ZipButton } from "./zip-button";
 import { LazyImageSlide } from "./lazy-image-slide";
+import { identityAt } from "../../main/vdom-util";
 
 interface Slide {
     srcId: string,
@@ -42,13 +43,14 @@ interface ImageViewer {
 }
 
 // Server exchange
+const slideChangeIdOf = identityAt('slideChange');
 const changeToPatch = (ch: string) => ({ value: ch });
 const patchToChange = (p: Patch) => p.value;
 const applyChange = (prev: string, ch: string) => ch || prev;
 
 function ImageViewer({identity, current: state = '', slides = [], position, initialZoom }: ImageViewer) {
     const {currentState: currentSrcId, sendTempChange, sendFinalChange} =
-        usePatchSync(identity, 'slideChange', state, false, s => s, changeToPatch, patchToChange, applyChange);
+        usePatchSync(slideChangeIdOf(identity), state, false, s => s, changeToPatch, patchToChange, applyChange);
 
     const controller = useRef<ControllerRef>(null);
 

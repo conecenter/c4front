@@ -8,6 +8,9 @@ import { ScrollInfoContext } from '../scroll-info-context';
 import { VKKey } from './vk-key';
 import { usePath } from '../../main/vdom-hooks';
 import { VkInfoContext } from '../ui-info-provider';
+import { identityAt } from '../../main/vdom-util';
+
+const receiverIdOf = identityAt('receiver');
 
 const SWITCHER_KEYS = ['Switcher1', 'Switcher2', 'Switcher3'];
 const BOTTOM_ROW_CLASS = "bottom-row";
@@ -56,8 +59,7 @@ function VirtualKeyboard({ identity, hash, position, setupType, setupMode, switc
 
     // Exchange with server
     const {currentState, sendFinalChange} = usePatchSync<VkState, VkState, VkChange>(
-        identity,
-        'receiver',
+        receiverIdOf(identity),
         switchedMode,
         false,
         b => b,

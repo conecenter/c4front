@@ -9,6 +9,9 @@ import { PopupElement } from "../popup-elements/popup-element";
 import { useClickSyncOpt } from "../exchange/click-sync";
 import { LabeledElement } from "../labeled-element";
 import { FilterButtonExpanderContext } from "./filter-button-expander";
+import { identityAt } from "../../main/vdom-util";
+
+const receiverIdOf = identityAt('receiver');
 
 interface MassOp {
     identity: object,
@@ -34,7 +37,7 @@ function MassOp({ identity, name, nameFolded, color, icon, umid, receiver, folde
     const popupKey = isInsideExpander ? `${path}/exp-massop` : path;
 
     const { isOpened, toggle } = usePopupState(isFolder ? popupKey : null);
-    const { clicked, onClick: sendClick } = useClickSyncOpt(identity, 'receiver', receiver);
+    const { clicked, onClick: sendClick } = useClickSyncOpt(receiverIdOf(identity), receiver);
 
     function onClick() {
         sendClick?.();

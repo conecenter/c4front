@@ -13,7 +13,9 @@ import {ItemTypes, PartNames} from "./pivot-const";
 import {HTML5Backend} from "react-dnd-html5-backend";
 import type {XYCoord} from "react-dnd/dist";
 import {usePatchSync} from "../exchange/patch-sync";
+import { identityAt } from "../../main/vdom-util";
 
+const receiverIdOf = identityAt('receiver');
 
 export interface PivotField {
     id: string,
@@ -53,8 +55,7 @@ export function PivotSettings(props: PivotSettingsProps) {
 
 function PivotSettingsInner(props: PivotSettingsProps) {
     const {currentState: state, sendTempChange, sendFinalChange} = usePatchSync(
-        props.identity,
-        'receiver',
+        receiverIdOf(props.identity),
         props,
         false,
         pivotServerStateToState,

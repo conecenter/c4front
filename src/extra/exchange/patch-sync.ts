@@ -1,6 +1,5 @@
 import {useSync} from "../../main/vdom-hooks";
 import {useCallback, useMemo, useRef} from "react";
-import {identityAt} from "../../main/vdom-util";
 
 interface PatchHeaders {
     [name: string]: string
@@ -29,8 +28,6 @@ interface SendPatch {
     defer?: boolean
 }
 
-const receiverId = (name: string) => identityAt(name)
-
 function stateToSendPatch(patch: Patch, changing: boolean, deferredSend: boolean): SendPatch {
     const changingHeaders: SendPatchHeaders = changing ? {"x-r-changing": "1"} : {}
     const headers: SendPatchHeaders = {
@@ -48,7 +45,6 @@ function stateToSendPatch(patch: Patch, changing: boolean, deferredSend: boolean
 
 function usePatchSync<ServerState, State, StateChange>(
     identity: object,
-    receiverName: string,
     serverState: ServerState,
     deferredSend: boolean,
     serverToState: (s: ServerState) => State,
@@ -56,7 +52,7 @@ function usePatchSync<ServerState, State, StateChange>(
     patchToChange: (p: Patch) => StateChange,
     applyChange: (prevState: State, ch: StateChange) => State,
 ): SyncState<State, StateChange> {
-    const [patches, enqueuePatch] = useSync(receiverId(receiverName)(identity))
+    const [patches, enqueuePatch] = useSync(identity)
     const wasChanged = useRef(false);
     const convertedFromServer: State = useMemo(() => serverToState(serverState), [serverState])
     const patchedState: State = useMemo(
