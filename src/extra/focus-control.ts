@@ -12,19 +12,14 @@ interface FocusControlObj {
 }
 
 function useFocusControl(path: string | undefined): FocusControlObj {
-    if (!path) return {};
     const noFocusCtx = useContext(NoFocusContext);
-    const isFocused = isCurrentlyFocused(path);
+    const currentPath = useContext(PathContext);
+    if (!path) return {};
+    const isFocused = currentPath === path;
     const focusHtml = { 'data-path': path, tabIndex: 1 };
     const focusClass = clsx(!noFocusCtx && 'focusWrapper', isFocused && 'activeFocusWrapper');
     return { focusClass, focusHtml, isFocused };
 }
-
-function isCurrentlyFocused(path: string | undefined) {
-    const currentPath = useContext(PathContext);
-    return currentPath === path;
-}
-
 
 interface FocusableProps {
     path?: string,

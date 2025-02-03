@@ -74,10 +74,13 @@ const BindingElement = (props) => {
 }
 
 const BindGroupElement = (props) => {
-	const { bindSrcId, groupId, showBtn, forceAtStart, additionChange, additionChangeOnClose, children } = props
-	const { activeBindGroup, addGroup, removeGroup, escapeBindSrcId, haveBackOption, goBackInHistory, isBindMode } = useBinds()
+	const { isBindMode } = useBinds()
+	return !isBindMode ? props.children : $(BindGroupElementInner, props);
+}
 
-	if (!isBindMode) return children;
+function BindGroupElementInner(props) {
+	const { bindSrcId, groupId, showBtn, forceAtStart, additionChange, additionChangeOnClose, children } = props
+	const { activeBindGroup, addGroup, removeGroup, escapeBindSrcId, haveBackOption, goBackInHistory } = useBinds()
 
 	const { provideBinds, updateBindProvider } = useProvideBinds(groupId)
 

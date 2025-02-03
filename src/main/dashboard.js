@@ -25,10 +25,10 @@ export const DashboardRoot = ({
     children=[], cardsColor, boardStyle, // board is inside container
     minColWidth, maxColWidth, minScale, maxScale, cardStyles, rowGap, colGap // col widths are in em-s before scaling
 }) => {
-    if(children.length <= 0) return null
     const [containerWidth,ref] = useWidth()
     const [theHeights,addObserved] =
         useObservedChildSizes("data-unscaled-height-key",elementToUnscaledHeightUpdater)
+    if(children.length <= 0) return null
     const containerInnerWidth = Math.max(0, containerWidth - containerPaddingLeft * 2)
     const containerInnerHeight = Math.max(0, containerHeight - containerPaddingTop * 2)
     const cardHeights = children.map(c=>theHeights[c.key]||0)
