@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import { formatInTimeZone } from 'date-fns-tz'
 import { identityAt } from '../../main/vdom-util';
 import { useSync } from '../../main/vdom-hooks';
-import { Patch } from '../exchange/input-sync';
+import { Patch } from '../../extra/exchange/patch-sync';
 import { useUserLocale } from '../locale';
 import { bg, de, da, et, enGB, lt, pl, ro, ru, uk, it } from 'date-fns/locale';
 import { useFocusControl } from '../focus-control';

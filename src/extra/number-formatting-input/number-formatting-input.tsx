@@ -1,7 +1,7 @@
 import React, { useRef, useState, useLayoutEffect, ReactNode } from "react";
 import { InputElement } from "../input-element";
 import { usePatchSync, Patch } from "../exchange/patch-sync";
-import { changeToPatch, patchToChange, InputStateChange } from "./number-formatting-input-exchange";
+import { patchSyncTransformers, InputStateChange } from "./number-formatting-input-exchange";
 import { useUserLocale } from "../locale";
 import { escapeRegex } from "../utils";
 import { usePath } from "../../main/vdom-hooks";
@@ -38,7 +38,7 @@ function NumberFormattingInput(
     const path = usePath(identity);
 
     const { currentState, sendTempChange, sendFinalChange, wasChanged } = usePatchSync(
-        receiverIdOf(identity), state, false, s => s, changeToPatch, patchToChange, (_prev, ch) => ch
+        receiverIdOf(identity), state, false, patchSyncTransformers
     );
 
     const [isFocused, setIsFocused] = useState(false);
@@ -141,5 +141,5 @@ function calcCorrectedCaretPosition(input: HTMLInputElement, separator: string) 
     return separatorsBeforeCaret ? caretPos - separatorsBeforeCaret : caretPos;
 }
 
-export type { InputState, NumberState };
+export type { NumberFormattingInputState, InputState, NumberState };
 export { NumberFormattingInput, parseInputValue };

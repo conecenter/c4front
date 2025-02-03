@@ -20,9 +20,11 @@ const EXPANDER_UMID = "grouped-ops";
 
 const filterInputIdOf = identityAt('filterInput');
 
+const serverToState = (s: string) => s;
 const changeToPatch = (ch: string): Patch => ({ value: ch });
 const patchToChange = (p: Patch) => p.value;
 const applyChange = (prev: string, ch: string) => ch;
+const patchSyncTransformers = { serverToState, changeToPatch, patchToChange, applyChange };
 
 interface FilterButtonExpander {
     identity: object,
@@ -42,7 +44,7 @@ function FilterButtonExpander({ identity, name, icon, color, optButtons = [], fi
     const closeExpanderRef = useLatest(() => toggle(false));
 
     const { currentState: filterValue, sendTempChange } = usePatchSync(
-        filterInputIdOf(identity), sFilterValue, false, s => s, changeToPatch, patchToChange, applyChange
+        filterInputIdOf(identity), sFilterValue, false, patchSyncTransformers
     );
 
     const showFilter = countMassOps(optButtons) > 5;

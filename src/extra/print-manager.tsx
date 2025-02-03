@@ -1,10 +1,22 @@
 import React, { ReactNode, createContext, useEffect, useRef, useState } from "react";
 import { useAddEventListener } from "./custom-hooks";
-import { usePatchSync } from "./exchange/patch-sync";
+import { PatchSyncTransformers, usePatchSync } from "./exchange/patch-sync";
 import { identityAt } from "../main/vdom-util";
 
 const PrintContext = createContext(false);
 PrintContext.displayName = 'PrintContext';
+
+const receiverIdOf = identityAt('receiver');
+
+const patchSyncTransformers: PatchSyncTransformers<boolean, boolean, boolean> = {
+    serverToState: (s: boolean) => s,
+    changeToPatch: () => ({
+        headers: {"x-r-printmode": "0"},
+        value: ""
+    }),
+    patchToChange: (_p) => false,
+    applyChange: (prev, _ch) => prev
+};
 
 interface PrintManager {
     key: string,
@@ -15,13 +27,6 @@ interface PrintManager {
     printTitle?: string
 }
 
-const receiverIdOf = identityAt('receiver');
-
-const changeToPatch = () => ({
-    headers: {"x-r-printmode": "0"},
-    value: ""
-});
-
 function PrintManager({ identity, children, printMode: state, printChildren, printTitle }: PrintManager) {
     const [elem, setElem] = useState<HTMLDivElement | null>(null);
     const window = elem?.ownerDocument.defaultView;
@@ -29,7 +34,7 @@ function PrintManager({ identity, children, printMode: state, printChildren, pri
     const [isPrinting, setIsPrinting] = useState(false);
 
     const {currentState: printMode, sendFinalChange} =
-        usePatchSync(receiverIdOf(identity), state, false, (b) => b, changeToPatch, (p) => false, (prev, ch) => prev);
+        usePatchSync(receiverIdOf(identity), state, false, patchSyncTransformers);
 
     const pageTitle = useRef(document.title);
     function setTitleForPrint(title?: string) {

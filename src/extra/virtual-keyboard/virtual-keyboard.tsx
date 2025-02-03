@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import { PathContext } from '../focus-control';
 import { ColorDef } from '../view-builder/common-api';
 import { usePatchSync } from '../exchange/patch-sync';
-import { applyChange, changeToPatch, patchToChange, POSITIONING_STYLES, VkChange } from './vk-utils';
+import { patchSyncTransformers, POSITIONING_STYLES } from './vk-utils';
 import { ScrollInfoContext } from '../scroll-info-context';
 import { VKKey } from './vk-key';
 import { usePath } from '../../main/vdom-hooks';
@@ -58,14 +58,8 @@ function VirtualKeyboard({ identity, hash, position, setupType, setupMode, switc
     const vkRef = useRef<HTMLDivElement | null>(null);
 
     // Exchange with server
-    const {currentState, sendFinalChange} = usePatchSync<VkState, VkState, VkChange>(
-        receiverIdOf(identity),
-        switchedMode,
-        false,
-        b => b,
-        changeToPatch,
-        patchToChange,
-        applyChange
+    const {currentState, sendFinalChange} = usePatchSync(
+        receiverIdOf(identity), switchedMode, false, patchSyncTransformers
     );
 
     // Get keyboard types data

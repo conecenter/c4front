@@ -1,12 +1,11 @@
 import { ReactElement } from 'react';
 import { KEY_TO_DIRECTION } from '../../main/keyboard-keys';
-import { Patch, PatchHeaders } from '../exchange/input-sync';
+import { Patch, PatchHeaders } from '../exchange/patch-sync';
 import { MenuItemState } from './main-menu-bar';
 import { MenuItem, MenuItemsGroup } from './main-menu-items';
 import { isInstanceOfNode } from '../dom-utils';
 
 // Server sync functionality
-
 function patchToState(patch: Patch): MenuItemState {
     const headers = patch.headers as PatchHeaders;
 	return { opened: !!headers['x-r-opened'] };

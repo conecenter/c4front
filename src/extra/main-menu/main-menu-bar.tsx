@@ -1,7 +1,6 @@
 import React, {createContext, ReactElement, useCallback, useContext, useEffect, useRef, useState} from "react";
 import clsx from 'clsx';
 import {Expander, ExpanderArea} from '../../main/expander-area';
-import {useInputSync} from '../exchange/input-sync';
 import {handleArrowUpDown, handleMenuBlur, patchToState, stateToPatch} from './main-menu-utils';
 import {MainMenuClock} from './main-menu-clock';
 import {ScrollInfoContext} from '../scroll-info-context';
@@ -14,11 +13,19 @@ import {NoCaptionContext, usePath} from "../../main/vdom-hooks";
 import {isInstanceOfNode} from "../dom-utils";
 import {VISIBLE_CHILD_SELECTOR} from "../css-selectors";
 import {identityAt} from "../../main/vdom-util";
+import {usePatchSync} from "../exchange/patch-sync";
 
 const MENU_BAR_PATH = 'main-menu-bar';
 const KEY_MODIFICATOR = { ArrowLeft: -1, ArrowRight: 1 };
 
 const receiverIdOf = identityAt('receiver');
+
+const patchSyncTransformers = {
+  serverToState: (s: MenuItemState) => s,
+  changeToPatch: stateToPatch,
+  patchToChange: patchToState,
+  applyChange: (prev: MenuItemState, ch: MenuItemState) => ch
+}
 
 type OnArrowLeftRight = (path: string, elem: HTMLElement, key: 'ArrowLeft' | 'ArrowRight', isOpened: boolean) => void;
 
@@ -51,8 +58,8 @@ interface MenuItemState {
 function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainMenuBar) {
   const {
     currentState: {opened},
-    setFinalState
-  } = useInputSync(receiverIdOf(identity), state, false, patchToState, s => s, stateToPatch);
+    sendFinalChange: setFinalState
+  } = usePatchSync(receiverIdOf(identity), state, false, patchSyncTransformers);
 
   const domRef = useRef<HTMLDivElement>(null);
 

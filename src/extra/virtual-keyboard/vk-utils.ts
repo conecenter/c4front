@@ -107,5 +107,9 @@ function applyChange(prevState: VkState, ch: VkChange): VkState {
     }
 }
 
+const serverToState = (serverState: VkState) => serverState;
+
+const patchSyncTransformers = { serverToState, changeToPatch, patchToChange, applyChange };
+
 export type { VkChange };
-export { POSITIONING_STYLES, changeToPatch, patchToChange, applyChange };
+export { POSITIONING_STYLES, patchSyncTransformers };

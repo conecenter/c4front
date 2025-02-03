@@ -6,8 +6,9 @@ import {
     PivotDragItem,
     PivotDropAction,
     getPivotChange,
-    pivotServerStateToState,
-    pivotChangeToState, patchToPivotChange, applyPivotChange, PivotClickAction, getClickChange
+    patchSyncTransformers,
+    PivotClickAction,
+    getClickChange
 } from "./pivot-exchange";
 import {ItemTypes, PartNames} from "./pivot-const";
 import {HTML5Backend} from "react-dnd-html5-backend";
@@ -58,10 +59,7 @@ function PivotSettingsInner(props: PivotSettingsProps) {
         receiverIdOf(props.identity),
         props,
         false,
-        pivotServerStateToState,
-        pivotChangeToState,
-        patchToPivotChange,
-        applyPivotChange
+        patchSyncTransformers
     )
     const ref = useRef()
     const dropAction: PivotDropAction = useCallback((event: PivotDragItem, dropLocation: string, dropCoordinates?: XYCoord | null, temporary?: boolean) => {

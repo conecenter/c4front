@@ -10,8 +10,12 @@ import { identityAt } from '../../main/vdom-util';
 
 const receiverIdOf = identityAt('receiver');
 
-const changeToPatch = (ch: string): Patch => ({ value: ch });
-const patchToChange = (patch: Patch): string => patch.value;
+const patchSyncTransformers = {
+    serverToState: (s: string) => s,
+    changeToPatch: (ch: string): Patch => ({ value: ch }),
+    patchToChange: (patch: Patch): string => patch.value,
+    applyChange: (prev: string, ch: string) => ch
+};
 
 interface YamlEditorProps {
     identity: object,
@@ -25,7 +29,7 @@ function YamlEditor({ identity, value, jsonSchema }: YamlEditorProps) {
     const schemaExtension = jsonSchema ? yamlSchema(parseJsonSchema(jsonSchema)) : [];
 
     const { currentState, sendTempChange, sendFinalChange, wasChanged } =
-        usePatchSync(receiverIdOf(identity), value, true, s => s, changeToPatch, patchToChange, (prev, ch) => ch);
+        usePatchSync(receiverIdOf(identity), value, true, patchSyncTransformers);
 
     function lintErrors() {
         const diagnostics: Diagnostic[] = [];

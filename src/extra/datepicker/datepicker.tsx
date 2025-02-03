@@ -21,15 +21,12 @@ import {
 	useExternalKeyboardControls
 } from '../focus-module-interface';
 import {
-	applyChange,
-	changeToPatch,
+	patchSyncTransformers,
 	createInputChange,
 	createPopupChange,
 	createTimestampChange,
 	DatepickerChange,
-	DatePickerState,
-	patchToChange,
-	serverStateToState
+	DatePickerState
 } from "./datepicker-exchange";
 import {
 	getOnBlur,
@@ -90,10 +87,7 @@ export function DatePickerInputElement({
         receiverIdOf(identity),
         state,
         !!deferredSend,
-        serverStateToState,
-        changeToPatch,
-        patchToChange,
-        applyChange
+        patchSyncTransformers
     );
 	const sendTempChange = (change: DatepickerChange) => {
 		if (change.tp === 'dateChange') dateChanged.current = true;

@@ -1,5 +1,5 @@
 import { createElement as $, ReactNode, createContext, useContext, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { usePatchSync, Patch } from "./exchange/patch-sync";
+import { usePatchSync, Patch, PatchSyncTransformers } from "./exchange/patch-sync";
 import { useAddEventListener } from "./custom-hooks";
 import { RootBranchContext } from '../main/vdom-hooks';
 import { identityAt } from '../main/vdom-util';
@@ -30,6 +30,13 @@ const changeToPatch = (ch: UiType) => ({
 });
 
 const patchToChange = (patch: Patch) => patch.headers!["x-r-ui-type"] as UiType;
+
+const patchSyncTransformers: PatchSyncTransformers<UiType | undefined, UiType | undefined, UiType> = {
+    serverToState: (s) => s,
+    changeToPatch,
+    patchToChange,
+    applyChange: (_, ch) => ch
+};
 //
 
 interface UiInfoProvider {
@@ -42,7 +49,7 @@ interface UiInfoProvider {
 function UiInfoProvider({identity, uiType: state, children}: UiInfoProvider) {
     // UiType functionality
     const {currentState: uiType, sendFinalChange} =
-        usePatchSync(receiverIdOf(identity), state, false, (b) => b, changeToPatch, patchToChange, (prev, ch) => ch);
+        usePatchSync(receiverIdOf(identity), state, false, patchSyncTransformers);
 
     const { isRoot } = useContext(RootBranchContext);
 

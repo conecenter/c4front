@@ -10,10 +10,11 @@ const GRID_MARGIN_SIZE = 10;
 
 const receiverIdOf = identityAt('receiver');
 
-const serverStateToState = (s?: string): GridLayout.Layouts => s ? JSON.parse(s) : [];
+const serverToState = (s?: string): GridLayout.Layouts => s ? JSON.parse(s) : [];
 const changeToPatch = (ch: GridLayout.Layouts): Patch => ({ value: JSON.stringify(ch) });
 const patchToChange = (p: Patch): GridLayout.Layouts => JSON.parse(p.value);
 const applyChange = (prev: GridLayout.Layouts, ch: GridLayout.Layouts) => ch;
+const patchSyncTransformers = { serverToState, changeToPatch, patchToChange, applyChange };
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -28,7 +29,7 @@ interface MasonryLayout {
 
 function MasonryLayout({ identity, layout: layoutJSON, breakpoints, cols, edit, children }: MasonryLayout) {
     const { currentState: layoutState, sendFinalChange } =
-        usePatchSync(receiverIdOf(identity), layoutJSON, false, serverStateToState, changeToPatch, patchToChange, applyChange);
+        usePatchSync(receiverIdOf(identity), layoutJSON, false, patchSyncTransformers);
 
     const [breakpoint, setBreakpoint] = useState<string | null>(null);
 

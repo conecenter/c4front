@@ -291,11 +291,15 @@ function getClickChange(origin: string, itemId: string): PivotChange {
   }
 }
 
+const patchSyncTransformers = {
+  serverToState: pivotServerStateToState,
+  changeToPatch: pivotChangeToState,
+  patchToChange: patchToPivotChange,
+  applyChange: applyPivotChange
+}
+
 export {
-  applyPivotChange,
-  patchToPivotChange,
-  pivotChangeToState,
-  pivotServerStateToState,
+  patchSyncTransformers,
   getPivotChange,
   getClickChange
 }

@@ -44,13 +44,15 @@ interface ImageViewer {
 
 // Server exchange
 const slideChangeIdOf = identityAt('slideChange');
+const serverToState = (s: string) => s;
 const changeToPatch = (ch: string) => ({ value: ch });
 const patchToChange = (p: Patch) => p.value;
 const applyChange = (prev: string, ch: string) => ch || prev;
+const patchSyncTransformers = { serverToState, changeToPatch, patchToChange, applyChange };
 
 function ImageViewer({identity, current: state = '', slides = [], position, initialZoom }: ImageViewer) {
     const {currentState: currentSrcId, sendTempChange, sendFinalChange} =
-        usePatchSync(slideChangeIdOf(identity), state, false, s => s, changeToPatch, patchToChange, applyChange);
+        usePatchSync(slideChangeIdOf(identity), state, false, patchSyncTransformers);
 
     const controller = useRef<ControllerRef>(null);
 

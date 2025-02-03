@@ -20,10 +20,15 @@ const HEADERS = {
     to: 'x-r-to'
 }
 
+const changeEventSyncTransformers = {
+    serverToState: serverStateToState(transformColor),
+    changeToPatch,
+    patchToChange,
+    applyChange
+};
+
 const useEventsSync = (identity: object, events: CalendarEvent[]) => {
-    const { currentState, sendFinalChange } = usePatchSync(
-        changeEventIdOf(identity), events, false, serverStateToState(transformColor), changeToPatch, patchToChange, applyChange
-    );
+    const { currentState, sendFinalChange } = usePatchSync(changeEventIdOf(identity), events, false, changeEventSyncTransformers);
     return { eventsState: currentState, sendEventsChange: sendFinalChange };
 }
 
@@ -74,9 +79,16 @@ const useEventClickAction = (identity: object) => {
 }
 
 /////
+const changeViewSyncTransformers = {
+    serverToState: (s?: ViewInfo) => s,
+    changeToPatch: viewChangeToPatch,
+    patchToChange: viewPatchToChange,
+    applyChange: (_prev: ViewInfo | undefined, ch: ViewInfo) => ch
+};
+
 function useViewSync(identity: object, serverView: ViewInfo | undefined) {
     const { currentState, sendTempChange } = usePatchSync(
-        changeViewIdOf(identity), serverView, false, s => s, viewChangeToPatch, viewPatchToChange, (prev, ch) => ch
+        changeViewIdOf(identity), serverView, false, changeViewSyncTransformers
     );
     return { currentView: currentState, sendViewChange: sendTempChange };
 }

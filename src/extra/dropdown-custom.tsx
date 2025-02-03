@@ -49,17 +49,16 @@ interface Text {
 }
 
 const receiverIdOf = identityAt('receiver');
+const patchSyncTransformers = { serverToState, changeToPatch, patchToChange, applyChange };
+
 const isChip = (item: Content): item is Chip => (item as Chip).bgColor !== undefined;
 
 export function DropdownCustom({ identity, state, content, popupChildren, ro, popupClassname, children }: DropdownProps) {
-	const { currentState, sendTempChange, sendFinalChange } = usePatchSync<DropdownState, DropdownState, DropdownChange>(
+	const { currentState, sendTempChange, sendFinalChange } = usePatchSync(
         receiverIdOf(identity),
         state,
         false,
-        s => s,
-        changeToPatch,
-        patchToChange,
-        applyChange
+        patchSyncTransformers
     );
 
 	const { inputValue, mode, popupOpen } = currentState;
@@ -225,6 +224,10 @@ interface DropdownPatchHeaders {
 	'x-r-inputValue'?: string,
 	'x-r-mode'?: Mode,
 	'x-r-popupOpen'?: string
+}
+
+function serverToState(s: DropdownState): DropdownState {
+	return s;
 }
 
 function changeToPatch(change: DropdownChange): Patch {

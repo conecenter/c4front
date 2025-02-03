@@ -1,10 +1,9 @@
 import React, { ReactElement, useContext, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
-import { useInputSync } from '../exchange/input-sync';
 import { PathContext, useFocusControl } from '../focus-control';
 import { MenuItemState, MenuControlsContext } from './main-menu-bar';
 import { MenuItem, MenuItemsGroup, MenuPopupElement } from './main-menu-items';
-import { handleArrowUpDown, handleMenuBlur, stateToPatch } from './main-menu-utils';
+import { handleArrowUpDown, handleMenuBlur, patchToState, stateToPatch } from './main-menu-utils';
 import {
     ARROW_DOWN_KEY,
     ARROW_LEFT_KEY,
@@ -17,8 +16,16 @@ import { BindGroupElement } from '../binds/binds-elements';
 import { useBinds } from '../binds/key-binding';
 import { SVGElement } from '../../main/image';
 import { identityAt } from '../../main/vdom-util';
+import { usePatchSync } from '../exchange/patch-sync';
 
 const receiverIdOf = identityAt('receiver');
+
+const patchSyncTransformers = {
+    serverToState: (s: MenuItemState) => s,
+    changeToPatch: stateToPatch,
+    patchToChange: patchToState,
+    applyChange: (prev: MenuItemState, ch: MenuItemState) => prev
+}
 
 const ARROW_DOWN_ICON = (
     <svg xmlns="http://www.w3.org/2000/svg" className='menuFolderIcon' fill="currentColor" viewBox="0 0 18000 18000" width="18000" height="18000">
@@ -45,8 +52,8 @@ function MenuFolderItem(props: MenuFolderItem) {
 
     const {
         currentState: { opened },
-        setFinalState
-    } = useInputSync(receiverIdOf(identity), state, false, p => state, s => s, stateToPatch);
+        sendFinalChange: setFinalState
+    } = usePatchSync(receiverIdOf(identity), state, false, patchSyncTransformers);
 
     const menuFolderRef = useRef<HTMLDivElement>(null);
     const menuFolder = menuFolderRef.current;

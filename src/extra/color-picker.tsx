@@ -1,12 +1,19 @@
 import React, {useState} from "react"
-import {Patch, useInputSync} from "./exchange/input-sync";
 import {HexColorInput, HexColorPicker} from "react-colorful";
 import {usePopupPos} from "../main/popup";
 import {isInstanceOfNode} from "./dom-utils";
 import {ENTER_KEY} from "../main/keyboard-keys";
 import {identityAt} from "../main/vdom-util";
+import { usePatchSync, Patch } from "./exchange/patch-sync";
 
 const receiverIdOf = identityAt('receiver');
+
+const patchSyncTransformers = {
+	serverToState: (s: string) => s,
+	changeToPatch: (s: string) => ({value: s}),
+	patchToChange: (p: Patch) => p.value,
+	applyChange: (prev: string, ch: string) => ch
+};
 
 interface ColorPickerProps {
 	identity: object,
@@ -15,14 +22,8 @@ interface ColorPickerProps {
 }
 
 export function ColorPicker({identity, value, ro}: ColorPickerProps) {
-
-	const { currentState, setTempState, setFinalState } = useInputSync<string, string>(
-		receiverIdOf(identity),
-		value,
-		true,
-		(p: Patch) => p.value,
-		s => s,
-		s => ({value: s})
+	const { currentState, sendTempChange, sendFinalChange } = usePatchSync(
+		receiverIdOf(identity), value, true, patchSyncTransformers
 	);
 
 	const [active, setActive] = useState(false);
@@ -38,12 +39,12 @@ export function ColorPicker({identity, value, ro}: ColorPickerProps) {
 	*/
 	function handleBlur(e: React.FocusEvent) {
 		if (isInstanceOfNode(e.relatedTarget) && e.currentTarget.contains(e.relatedTarget)) return;
-		setFinalState(currentState);
+		sendFinalChange(currentState);
 		setActive(false);
 	}
 
 	function handleInput(e: React.FormEvent<HTMLInputElement>) {
-		if (['', '#'].includes(e.currentTarget.value)) setTempState('');
+		if (['', '#'].includes(e.currentTarget.value)) sendTempChange('');
 	}
 
 	function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -68,7 +69,7 @@ export function ColorPicker({identity, value, ro}: ColorPickerProps) {
 					className={active? undefined : 'colorPickerChip'}
 					style={active? undefined : {background: currentState}}
 					color={currentState}
-					onChange={setTempState}
+					onChange={sendTempChange}
 					onInput={handleInput}
 					onKeyDown={handleKeyDown}
 					onFocus={handleInputFocus}
@@ -78,7 +79,7 @@ export function ColorPicker({identity, value, ro}: ColorPickerProps) {
 
 			{active &&
 				<div ref={setPopupRef} className='colorPickerPopup' tabIndex={-1} style={popupPos} >
-					<HexColorPicker color={currentState} onChange={setTempState} />
+					<HexColorPicker color={currentState} onChange={sendTempChange} />
 				</div>}
 		</div>
 	);

@@ -1,5 +1,5 @@
 import { Patch } from "../exchange/patch-sync";
-import type { InputState, NumberState } from "./number-formatting-input";
+import type { InputState, NumberFormattingInputState, NumberState } from "./number-formatting-input";
 
 type StateChange = InputStateChange | NumberStateChange;
 
@@ -10,6 +10,8 @@ interface InputStateChange extends InputState {
 interface NumberStateChange extends NumberState {
     tp: 'numberState'
 }
+
+const serverToState = (s: NumberFormattingInputState) => s
 
 function changeToPatch(ch: StateChange): Patch {
     const getTpHeader = (tp: 'inputState' | 'numberState') => ({ 'x-r-change-tp': tp });
@@ -51,5 +53,9 @@ function patchToChange({ value, headers }: Patch): StateChange {
     }
 }
 
+const applyChange = (_prev: NumberFormattingInputState, ch: StateChange) => ch;
+
+const patchSyncTransformers = { serverToState, changeToPatch, patchToChange, applyChange };
+
 export type { InputStateChange };
-export { changeToPatch, patchToChange };
+export { patchSyncTransformers };

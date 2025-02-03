@@ -1,4 +1,4 @@
-import React, { createElement as $, useEffect, ReactNode, MutableRefObject, Children } from 'react';
+import React, { createElement as $, useEffect, ReactNode, MutableRefObject } from 'react';
 import clsx from 'clsx';
 import { useFocusControl } from './focus-control';
 import { Patch } from './exchange/patch-sync';

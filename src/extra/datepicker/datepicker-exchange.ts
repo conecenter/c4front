@@ -129,15 +129,19 @@ function applyChange(prevState: DatePickerState, ch: DatepickerChange): DatePick
     }
 }
 
+const patchSyncTransformers = {
+    serverToState: serverStateToState,
+    changeToPatch,
+    patchToChange,
+    applyChange
+};
+
 export { 
     isInputState,
     isTimestampState, 
     createTimestampChange, 
     createInputChange, 
-    serverStateToState, 
-    changeToPatch, 
-    patchToChange, 
-    applyChange, 
+    patchSyncTransformers, 
     createPopupChange 
 };
 export type { DatePickerState, PopupDate, TimestampState, InputState, DatepickerChange }

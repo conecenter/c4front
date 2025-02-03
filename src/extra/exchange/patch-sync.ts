@@ -10,6 +10,13 @@ interface Patch {
     value: string
 }
 
+interface PatchSyncTransformers<ServerState, State, StateChange> {
+    serverToState: (s: ServerState) => State;
+    changeToPatch: (ch: StateChange) => Patch;
+    patchToChange: (p: Patch) => StateChange;
+    applyChange: (prevState: State, ch: StateChange) => State;
+};
+
 interface SyncState<State, StateChange> {
     currentState: State,
     sendTempChange: (change: StateChange) => void,
@@ -47,13 +54,11 @@ function usePatchSync<ServerState, State, StateChange>(
     identity: object,
     serverState: ServerState,
     deferredSend: boolean,
-    serverToState: (s: ServerState) => State,
-    changeToPatch: (ch: StateChange) => Patch,
-    patchToChange: (p: Patch) => StateChange,
-    applyChange: (prevState: State, ch: StateChange) => State,
+    transformers: PatchSyncTransformers<ServerState, State, StateChange>
 ): SyncState<State, StateChange> {
     const [patches, enqueuePatch] = useSync(identity)
-    const wasChanged = useRef(false);
+    const wasChanged = useRef(false)
+    const {serverToState, changeToPatch, patchToChange, applyChange} = transformers
     const convertedFromServer: State = useMemo(() => serverToState(serverState), [serverState, serverToState])
     const patchedState: State = useMemo(
         () => patches.reduce<State>((prev, patch) => applyChange(prev, patchToChange(patch)), convertedFromServer),
@@ -77,4 +82,4 @@ function usePatchSync<ServerState, State, StateChange>(
 }
 
 export {usePatchSync}
-export type {Patch, PatchHeaders, SendPatch}
+export type {Patch, PatchHeaders, SendPatch, PatchSyncTransformers}
