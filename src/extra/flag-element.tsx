@@ -10,7 +10,7 @@ import { identityAt } from "../main/vdom-util";
 const receiverIdOf = identityAt('receiver');
 
 interface FlagElement {
-    identity: Object,
+    identity: object,
     imageSrc: string,
     name: string,
     umid?: string
@@ -20,10 +20,10 @@ function FlagElement ({ identity, imageSrc, name, umid }: FlagElement) {
     const { clicked, onClick } = useClickSync(receiverIdOf(identity));
 
     const path = usePath(identity);
-    const { focusClass, focusHtml, isFocused } = useFocusControl(path);
+    const { focusClass, focusHtml } = useFocusControl(path);
 
     // User manual logic
-    const {button: umButton, onKeyDown} = useUserManual(isFocused, umid);
+    const {button: umButton, onKeyDown} = useUserManual(umid);
 
     return (
         <div className={clsx('flagElement', focusClass)} {...focusHtml} onKeyDown={onKeyDown} >

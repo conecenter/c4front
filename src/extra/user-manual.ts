@@ -1,5 +1,6 @@
 import {createContext, createElement as $, ReactNode, useContext, useEffect, useState, useMemo} from "react"
-import type {KeyboardEvent, SyntheticEvent} from "react"
+import type {MouseEvent, KeyboardEvent} from "react"
+import {SVGElement} from "../main/image"
 
 interface UserManual {
     has: (umid: string | undefined) => boolean
@@ -13,12 +14,6 @@ const defaultUserManual: UserManual = {
 
 const UserManualContext = createContext<UserManual>(defaultUserManual)
 UserManualContext.displayName = "UserManualContext"
-
-const useUserManual = (isFocused: boolean | undefined, umid?: string) => {
-    const userManual = useContext(UserManualContext);
-    const umUrl = isFocused ? userManual.getUrl(umid) : null;
-    return getUserManualUtils(umUrl);
-}
 
 interface UserManualProviderProps {
     url: string,
@@ -49,37 +44,35 @@ function UserManualProvider({url, children}: UserManualProviderProps) {
     return $(UserManualContext.Provider, {value: providerValue, children})
 }
 
-function getUserManualUtils(url: string | null): { button?: ReactNode, onKeyDown?: ((e: KeyboardEvent) => void) } {
-    const action = (e: SyntheticEvent) => {
-        if (url) {
-            e.stopPropagation()
-            e.preventDefault()
-            window.open(url)
+const useUserManual = (umid?: string) => {
+    const userManual = useContext(UserManualContext);
+    const umUrl = userManual.getUrl(umid);
+
+    const userManualButton = !umUrl ? null : $(UserManualButton, { url: umUrl });
+
+    const onKeyDown = (e: KeyboardEvent) => {
+        if (umUrl && e.code == "F1") {
+            e.stopPropagation();
+            e.preventDefault();
+            window.open(umUrl);
         }
     }
-    const keyDown = (e: KeyboardEvent) => {
-        if (e.code == "F1") {
-            action(e)
-        }
+
+    return { button: userManualButton, onKeyDown };
+}
+
+function UserManualButton({ url }: { url: string }) {
+    const onClick = (e: MouseEvent | KeyboardEvent) => {
+        e.stopPropagation();
+        e.preventDefault();
+        window.open(url!);
     }
-    return url ? {button: UserManualButton(action), onKeyDown: keyDown} : {}
+
+    return !url ? null : (
+        $("div", { className: 'umButton', onClick },
+            $(SVGElement, { url: '/mod/main/ee/cone/core/ui/c4view/info.svg', className: 'bodyColorCss' })
+        )
+    );
 }
 
-function UserManualButton(action: (e: SyntheticEvent) => void) {
-    return $("div", {
-            className: 'umButton',
-            onClick: action,
-            style: {
-                cursor: "pointer",
-                width: "0.8em",
-                position: "absolute",
-                right: "0em",
-                top: "-1em",
-                zIndex: "150000"
-            }
-        },
-        $("img", { src: '/mod/main/ee/cone/core/ui/c4view/info.svg' })
-    )
-}
-
-export {UserManualProvider, useUserManual, getUserManualUtils}
+export {UserManualProvider, useUserManual}

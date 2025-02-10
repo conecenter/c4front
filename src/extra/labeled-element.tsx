@@ -30,7 +30,7 @@ function LabeledElement({ path, label, sizes, accented, clickable, labelChildren
 
     const isEmptyLabel = !(label || labelChildren);
 
-    const { focusClass, focusHtml, isFocused } = useFocusControl(isEmptyLabel ? '' : path);
+    const { focusClass, focusHtml } = useFocusControl(isEmptyLabel ? '' : path);
 
     // Disable focusable descendants focus if LE has single childless focusable descendant
     const [disableChildFocus, setDisableChildFocus] = useState(false);
@@ -41,7 +41,7 @@ function LabeledElement({ path, label, sizes, accented, clickable, labelChildren
     }, [isEmptyLabel, labelChildren, children]);
 
     // User manual functionality
-    const { button: umButton, onKeyDown } = useUserManual(isFocused, umid);
+    const { button: umButton, onKeyDown } = useUserManual(umid);
 
     // const { clicked, onClick } = useClickSyncOpt(identity, 'receiver', clickable);
 
