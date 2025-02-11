@@ -7,9 +7,9 @@ const NoContext = createContext(0)
 export const AckContext = createContext(0)
 AckContext.displayName = "AckContext"
 
-/** @typedef {{ enqueue: Function, ctxToPath: (ctx?: Object) => string, isBusy: (ack: number) => boolean }} Sender */
+/** @typedef {{ enqueue: Function, ctxToPath: (ctx?: Object) => string, busyFor: () => number }} Sender */
 /** @type {React.Context<Sender>} */
-const SenderContext = createContext({ enqueue: () => {}, ctxToPath: () => '', isBusy: () => false })
+const SenderContext = createContext({ enqueue: () => {}, ctxToPath: () => '', busyFor: () => 0 })
 SenderContext.displayName = "SenderContext"
 
 /** @type {React.Context<{isRoot: boolean, branchKey: string}>} */
