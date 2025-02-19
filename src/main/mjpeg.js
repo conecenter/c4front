@@ -1,63 +1,40 @@
 
-import {createElement,useState,useEffect,useCallback} from "react"
-
-import {useAnimationFrame,extractedUse} from "./vdom-hooks.js"
+import {createElement,useState,useEffect} from "react"
 
 const now = () => Date.now()
 
-const useConnectedInner = extractedUse((setConnected,url,cb) => {
-    if(!cb) return
-    const ws = new WebSocket(url)
-    setConnected({at:now()})
-    ws.onmessage = ev => {
-        //console.log(ev)
-        if(ev.data) cb(ev.data)
-        const at = now()
-        setConnected(was => was && ws === was.ws && at < was.at+1000 ? was : {at,ws})
+const manageCam = (url,theElement) => {
+    let wasAt = 0
+    let ws = undefined
+    const close = () => {
+        try { ws && ws.readyState <= ws.OPEN && ws.close() } catch(e){ console.trace(e) }
     }
-    ws.onerror = ev => setConnected({at:0})
-    return ()=>{
-        ws.close()
-        setConnected(null)
+    const activate = () => {
+        if(document.hidden) close()
+        else if(ws && ws.readyState <= ws.OPEN && now() - wasAt < 5000) ws.readyState === ws.OPEN && ws.send("")
+        else {
+            close()
+            ws = new WebSocket(url)
+            ws.addEventListener("message", ev => {
+                URL.revokeObjectURL(theElement.src)
+                theElement.src = URL.createObjectURL(ev.data)
+                wasAt = now()
+            })
+            wasAt = now()
+        }
     }
-},useEffect)
-const usePong = extractedUse(theConnected=>{
-    theConnected && theConnected.ws && theConnected.ws.send("")
-},useEffect)
-const useConnected = (url, cb)=>{
-    const [theConnected,setConnected] = useState(null)
-    const needConnected = !theConnected ? true :
-        now() < theConnected.at + 5000
-    useConnectedInner(setConnected, url, needConnected && cb)
-    usePong(theConnected)
-}
-
-const useEverySec = extractedUse((period,set)=>{
-    const will = now()
-    set(was => will < was + period ? was : will)
-},useCallback)
-const useRecentlySeen = element => {
-    const [theLastSeenAt,setLastSeenAt] = useState(0)
-    const updateLastSeenAt = useEverySec(3000,setLastSeenAt)
-    useAnimationFrame(element,updateLastSeenAt)
-    return now() < theLastSeenAt + 6000
+    const interval = setInterval(() => activate(), 1000)
+    activate()
+    return () => {
+        clearInterval(interval)
+        close()
+    }
 }
 
 export function CamView({url, height}){
     const [theElement,setElement] = useState(null)
-    const recentlySeen = useRecentlySeen(theElement)
-    const onData = useCallback(data=>{
-        //console.log(data)
-        //console.log(btoa(data))
-        if(theElement){
-            URL.revokeObjectURL(theElement.src)
-            theElement.src = URL.createObjectURL(data)
-        }
-        //"data:image/jpeg;base64," + btoa(data)
-    }, [theElement])
-    useConnected(url, recentlySeen && onData)
-    console.log("render")
+    useEffect(() => url && theElement ? manageCam(url, theElement) : undefined, [url, theElement])
     return createElement("img",{ref:setElement, style:{height:height+"px"}})
 }
-
+//"data:image/jpeg;base64," + btoa(data)
 export const components = {CamView}
