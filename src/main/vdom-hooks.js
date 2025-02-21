@@ -81,3 +81,4 @@ export const NoCaptionContext = createContext(false)
 NoCaptionContext.displayName = 'NoCaptionContext'
 
 export const HorizontalCaptionContext = createContext(false);
+HorizontalCaptionContext.displayName = 'HorizontalCaptionContext';

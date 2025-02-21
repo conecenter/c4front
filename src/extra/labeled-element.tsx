@@ -5,12 +5,12 @@ import { useFocusControl } from './focus-control';
 import { useUserManual } from './user-manual';
 import { FlexibleSizes } from './view-builder/flexible-api';
 import { SEL_FOCUSABLE_ATTR } from './css-selectors';
+import { ChipElement } from './chip/chip';
 
 const NoFocusContext = React.createContext(false);
 NoFocusContext.displayName = "NoFocusContext";
 
 interface LabeledElement {
-    key?: string,
     identity?: object,
     path?: string,
     label?: string,
@@ -21,6 +21,7 @@ interface LabeledElement {
     umid?: string,
     hint?: string,
     className?: string, // front only
+    transitionUrl?: string,
     children: ReactNode
 }
 
@@ -43,6 +44,8 @@ function LabeledElement({ path, label, sizes, accented, clickable, labelChildren
     // User manual functionality
     const { button: umButton, onKeyDown } = useUserManual(umid);
 
+    const transitionChip = !!transitionUrl && getTransitionChip(transitionUrl);
+
     // const { clicked, onClick } = useClickSyncOpt(identity, 'receiver', clickable);
 
     const className = clsx(
@@ -61,8 +64,7 @@ function LabeledElement({ path, label, sizes, accented, clickable, labelChildren
             flexBasis: `${sizes.min}em`,
             maxWidth: sizes.max ? `${sizes.max}em` : undefined
         },
-        ...clickable && { cursor: 'pointer' },
-        ...umButton && { position: 'relative' }
+        ...clickable && { cursor: 'pointer' }
     };
 
     return (
@@ -86,11 +88,24 @@ function LabeledElement({ path, label, sizes, accented, clickable, labelChildren
                         </div>
                     </NoCaptionContext.Provider>)
                     : children }
-                {umButton}
+
+                {(umButton || transitionChip) &&
+                    <div className='contextActionsBox'>{umButton}{transitionChip}</div>}
             </div>
         </NoFocusContext.Provider>
     );
 }
+
+const getTransitionChip = (transitionUrl: string): ReactNode => (
+    <ChipElement
+        identity={{}}
+        receiver={false}
+        text=''
+        tooltip={transitionUrl}
+        color={{ tp: 'p', cssClass: 'bodyColorCss' }}
+        link={transitionUrl}
+        iconPath='/mod/main/ee/cone/core/ui/c4view/link.svg' />
+);
 
 function hasSingleChildlessFocusable(elem: HTMLDivElement | null) {
     const focusableDescendants = elem?.querySelectorAll(SEL_FOCUSABLE_ATTR);
