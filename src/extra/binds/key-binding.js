@@ -1,5 +1,6 @@
 import React, { createElement as $, useMemo, useState, useContext, useEffect } from 'react'
 import { BindingElement, AuxBindGroup, AUX_GROUP_ID } from './binds-elements'
+import { BottomBarContent } from '../bottom-bar-manager'
 
  /** @type {Object} */
 const KeyBindContext = React.createContext({})
@@ -52,27 +53,13 @@ const KeyBindingsManager = ({ links, children, bindSrcId, escapeBindSrcId, noTou
   const [bindHistory, setBindHistory] = useState([]) //List of bind call history
   const [availableGroups, setAvailableGroups] = useState([]) //List of groups Ids
   const [activeBindGroup, setActiveBindGroup] = useState("") //Currently active group
-  const [elem, setElem] = useState(null)
-  const [overlayElem, setOverlayElem] = useState(null)
-  const [isBindMode, setIsBindMode] = useState(false)
-  const [isNoTouchMode, setNoTouchMode] = useState(false)
+  const isBindMode = links.length > 0
+  const isNoTouchMode = Boolean(noTouch)
 
   const bindMap = useMemo(() => groupBy(links, "bind"), [links])
 
   const keyData = BindKeyData(bindMap, bindSrcId);
   const keyCode = (keyData !== null) ? keyData.keyCode : null;
-
-  useEffect(() => {
-    setIsBindMode(links.length > 0)
-  }, [links])
-
-  useEffect(() => {
-    const v = typeof noTouch !== "undefined" && noTouch
-    setNoTouchMode(v)
-    return () => {
-      setNoTouchMode(false)
-    }
-  }, [noTouch])
 
   const addGroupToHistory = (group) => setBindHistory(prev => calculateNewHistoryArray(prev, group))
 
@@ -97,9 +84,7 @@ const KeyBindingsManager = ({ links, children, bindSrcId, escapeBindSrcId, noTou
   }
 
   useEffect(() => {
-    window.onhelp = function () {
-      return (false);
-    };
+    window.onhelp = () => false
   }, [isBindMode])
 
   const getLastBindFromHistory = () => { return (bindHistory.length === 0) ? null : bindHistory[0] }
@@ -142,7 +127,9 @@ const KeyBindingsManager = ({ links, children, bindSrcId, escapeBindSrcId, noTou
     onChange: switchToNextGroup,
     children: ""
   }
-  const switchBtn = (isBindMode && drawSwitchBtn) ? [$(BindingElement, { ...btnProps }, ["Switch"])] : []
+  const switchBtn = isBindMode && drawSwitchBtn &&
+    $(BottomBarContent, null, $(BindingElement, { ...btnProps }, "Switch"))
+  
   /*const backBtnProps = {
     escapeBindSrcId,
     onChange: goBackInHistory,
@@ -151,9 +138,11 @@ const KeyBindingsManager = ({ links, children, bindSrcId, escapeBindSrcId, noTou
   const drawBackButton = true
   const backBtn = (isBindMode && drawSwitchBtn && drawBackButton) ? [$(BindingElement, { ...backBtnProps }, ["Back"])] : []*/
 
-  const footer = isBindMode && drawSwitchBtn
-    ? [$("div", {className: "footerForBinds bottom-row", 'data-path': '/KeyBindingsManager/footerForBinds'}, [...switchBtn])] : []
-  const overlay = (isNoTouchMode) ? [$("div", { ref: setOverlayElem, className: "noTouchOverlay" }, [])] : []
+  const overlayCallBack = (event) => {
+    event.stopPropagation()
+  }
+  const overlay = isNoTouchMode && $("div", { className: "noTouchOverlay", onClickCapture: overlayCallBack }, [])
+
   const auxBindGroup = isBindMode && $(AuxBindGroup, null)
 
   const onChangeAction = (event) => {
@@ -168,24 +157,8 @@ const KeyBindingsManager = ({ links, children, bindSrcId, escapeBindSrcId, noTou
     }
   }
 
-  const overlayCallBack = (event) => {
-    event.stopPropagation()
-  }
-  useEffect(() => {
-    if (overlayElem && isNoTouchMode) {
-      overlayElem.addEventListener("click", overlayCallBack, true)
-    } else if (overlayElem && overlayElem != null) {
-      overlayElem.removeEventListener("click", overlayCallBack, true)
-    }
-    return () => {
-      if (overlayElem && overlayElem != null) {
-        overlayElem.removeEventListener("click", overlayCallBack, true)
-      }
-    }
-  }, [isNoTouchMode, overlayElem])
-
-  return $("div", { ref: setElem, onFocus: onChangeAction, onClickCapture: onChangeAction },
-    $(KeyBindContext.Provider, { value: contextValue }, [...children, auxBindGroup, ...footer, ...overlay])
+  return $("div", { onFocus: onChangeAction, onClickCapture: onChangeAction },
+    $(KeyBindContext.Provider, { value: contextValue }, children, auxBindGroup, switchBtn, overlay)
   )
 }
 
