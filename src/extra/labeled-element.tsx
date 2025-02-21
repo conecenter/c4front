@@ -25,7 +25,7 @@ interface LabeledElement {
     children: ReactNode
 }
 
-function LabeledElement({ path, label, sizes, accented, clickable, labelChildren, umid, children, ...props }: LabeledElement) {
+function LabeledElement({ path, label, sizes, accented, clickable, labelChildren, umid, transitionUrl, children, ...props }: LabeledElement) {
     const showCaption = !useContext(NoCaptionContext);
     const isHorizontalCaption = useContext(HorizontalCaptionContext);
 
