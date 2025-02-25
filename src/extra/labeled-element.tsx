@@ -7,9 +7,6 @@ import { FlexibleSizes } from './view-builder/flexible-api';
 import { SEL_FOCUSABLE_ATTR } from './css-selectors';
 import { ChipElement } from './chip/chip';
 
-const NoFocusContext = React.createContext(false);
-NoFocusContext.displayName = "NoFocusContext";
-
 interface LabeledElement {
     identity?: object,
     path?: string,
@@ -68,31 +65,29 @@ function LabeledElement({ path, label, sizes, accented, clickable, labelChildren
     };
 
     return (
-        <NoFocusContext.Provider value={disableChildFocus} >
-            <div ref={refLE}
-                className={className}
-                {...focusHtml}
-                style={style}
-                onKeyDown={onKeyDown}
-                data-umid={umid}
-                title={props.hint}
-            >
-                {showCaption ? (
-                    <NoCaptionContext.Provider value={true}>
-                        <div className='labelBox' /*style={clicked ? { opacity: 0.8 } : undefined}*/>
-                            {label && <label>{label}</label>}
-                            {labelChildren}
-                        </div>
-                        <div className='contentBox'>
-                            {children}
-                        </div>
-                    </NoCaptionContext.Provider>)
-                    : children }
+        <div ref={refLE}
+            className={className}
+            {...focusHtml}
+            style={style}
+            onKeyDown={onKeyDown}
+            data-umid={umid}
+            title={props.hint}
+        >
+            {showCaption ? (
+                <NoCaptionContext.Provider value={true}>
+                    <div className='labelBox' /*style={clicked ? { opacity: 0.8 } : undefined}*/>
+                        {label && <label>{label}</label>}
+                        {labelChildren}
+                    </div>
+                    <div className='contentBox'>
+                        {children}
+                    </div>
+                </NoCaptionContext.Provider>)
+                : children }
 
-                {(umButton || transitionChip) &&
-                    <div className='contextActionsBox'>{umButton}{transitionChip}</div>}
-            </div>
-        </NoFocusContext.Provider>
+            {(umButton || transitionChip) &&
+                <div className='contextActionsBox'>{umButton}{transitionChip}</div>}
+        </div>
     );
 }
 
@@ -123,4 +118,4 @@ function hasSingleChildlessFocusable(elem: HTMLDivElement | null) {
     return count === 1;
 }
 
-export { LabeledElement, NoFocusContext };
+export { LabeledElement };

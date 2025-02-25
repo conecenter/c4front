@@ -105,10 +105,7 @@ function BindGroupElementInner(props) {
 
 	const checkForFocus = () => {
 		if (elem !== null) {
-			const active = firstChild(elem,
-				el => el.classList && el.classList.contains("activeFocusWrapper"),
-				el => el.classList && el.classList.contains("activeFocusWrapper"),
-				true)
+			const active = elem.contains(elem.ownerDocument?.activeElement);
 
 			const el = firstChild(elem,
 				el => el.classList && el.classList.contains("focusWrapper") && el.matches(VISIBLE_CHILD_SELECTOR),

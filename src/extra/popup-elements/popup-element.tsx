@@ -8,7 +8,6 @@ import { usePopupState } from './popup-manager';
 import { useAddEventListener } from '../custom-hooks';
 import { isInstanceOfNode } from '../dom-utils';
 import { PopupOverlay } from './popup-overlay';
-import { NoFocusContext } from '../labeled-element';
 import { SEL_FOCUSABLE_ATTR, VISIBLE_CHILD_SELECTOR } from '../css-selectors';
 
 interface PopupElement {
@@ -79,10 +78,8 @@ function PopupElement({ popupKey, className, forceOverlay, lrMode, children }: P
         <PopupWrapperKeyContext.Provider value={popupKey} >
             <PopupDrawerContext.Provider value={popupElement} >
                 <NoCaptionContext.Provider value={false} >
-                    <NoFocusContext.Provider value={false} >
-                        {isOpened && isVisible && popupDrawer && createPortal(popup, popupDrawer)}
-                        <span ref={setPopupParent} style={{display: 'none'}}></span>
-                    </NoFocusContext.Provider>
+                    {isOpened && isVisible && popupDrawer && createPortal(popup, popupDrawer)}
+                    <span ref={setPopupParent} style={{display: 'none'}}></span>
                 </NoCaptionContext.Provider>
             </PopupDrawerContext.Provider>
         </PopupWrapperKeyContext.Provider>

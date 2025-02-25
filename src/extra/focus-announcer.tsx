@@ -20,8 +20,8 @@ function FocusAnnouncerElement({ path, value, onChange, children }: FocusAnnounc
 
     const isMounted = useRef(true);
     useLayoutEffect(() => {
-            isMounted.current = true;
-            return () => { isMounted.current = false; }
+        isMounted.current = true;
+        return () => { isMounted.current = false; }
     });
 
     const isFocusedView = useRef(false);
@@ -67,6 +67,14 @@ function FocusAnnouncerElement({ path, value, onChange, children }: FocusAnnounc
         }
     );
 
+    const focusFrameStyle = `
+        .focusWrapper[data-path='${value}'],
+        .focusFrameProvider:has([data-path='${value}']) {
+            outline: currentcolor dashed 0.1em;
+            outline-offset: 0.1em;
+        }
+    `;
+
     return (
         <div
             ref={elem => setDoc(elem?.ownerDocument)}
@@ -74,6 +82,7 @@ function FocusAnnouncerElement({ path, value, onChange, children }: FocusAnnounc
             tabIndex={-1}
             data-path={path}
         >
+            <style>{focusFrameStyle}</style>
             <PathContext.Provider value={value}>
                 {children}
             </PathContext.Provider>

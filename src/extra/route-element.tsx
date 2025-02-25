@@ -1,7 +1,6 @@
 import React, { ReactElement, useContext, useRef } from 'react';
 import clsx from 'clsx';
 import { COPY_EVENT, CUT_EVENT, DELETE_EVENT, PASTE_EVENT, useExternalKeyboardControls } from './focus-module-interface';
-import { NoFocusContext } from './labeled-element';
 import { copyToClipboard } from './utils';
 import { usePath, useSync } from '../main/vdom-hooks';
 import { identityAt } from '../main/vdom-util';
@@ -74,11 +73,9 @@ function RouteElement({identity, keyboardAction, compact, routeParts, extraParts
              style={{...readOnly && {borderColor: "transparent"}}}
              onMouseDownCapture={preventMenuItemsFocus}
         >
-            <NoFocusContext.Provider value={true} >
-                {routeParts}
-                {extraParts && 
-                    <span className='extraParts'>{extraParts}</span>}
-            </NoFocusContext.Provider>
+            {routeParts}
+            {extraParts && 
+                <span className='extraParts'>{extraParts}</span>}
         </div>
     );
 }
