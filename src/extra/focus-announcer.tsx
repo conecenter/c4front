@@ -2,7 +2,9 @@ import React, { useRef, ReactNode, useEffect, useState, useLayoutEffect } from '
 import { PathContext } from './focus-control';
 import { Patch } from './exchange/patch-sync';
 import { useAddEventListener } from './custom-hooks';
-import { VISIBLE_CHILD_SELECTOR } from './css-selectors';
+import { SEL_FOCUS_FRAME, VISIBLE_CHILD_SELECTOR } from './css-selectors';
+
+const getFocusFramePath = (elem?: Element | null) => elem?.closest<HTMLElement>(SEL_FOCUS_FRAME)?.dataset.path;
 
 interface FocusAnnouncerElement {
     path: string,
@@ -29,7 +31,7 @@ function FocusAnnouncerElement({ path, value, onChange, children }: FocusAnnounc
 
     function onFocus(e: FocusEvent) {
         isFocusedView.current = true;
-        const newPath = (e.target as Element).closest<HTMLElement>('[data-path]')?.dataset.path;
+        const newPath = getFocusFramePath(e.target as Element);
         if (newPath) sendChange(newPath);
     }
     const sendChange = (path: string) => {
@@ -55,14 +57,14 @@ function FocusAnnouncerElement({ path, value, onChange, children }: FocusAnnounc
     useAddEventListener(doc, 'focusout', onBlur);
 
     useEffect(
-        function alignFocusWithFocusFrame() {
+        function alignFocusWithServerValue() {
             if (!isFocusedView.current) return;
             if (!value) findAutofocusCandidate(doc)?.focus();
             const activeElem = doc?.activeElement;
-            const activeElemPath = activeElem?.closest<HTMLElement>('[data-path]')?.dataset.path;
+            const activeElemPath = getFocusFramePath(activeElem);
             if (activeElemPath !== value) {
-                const focusFrameElem = doc?.querySelector<HTMLElement>(`*[data-path='${value}']${VISIBLE_CHILD_SELECTOR}`);
-                focusFrameElem?.focus();
+                const elemToFocus = doc?.querySelector<HTMLElement>(`[data-path='${value}']${VISIBLE_CHILD_SELECTOR}`);
+                elemToFocus?.focus();
             }
         }
     );
@@ -70,15 +72,14 @@ function FocusAnnouncerElement({ path, value, onChange, children }: FocusAnnounc
     const focusFrameStyle = `
         .focusWrapper[data-path='${value}'],
         .focusFrameProvider:has([data-path='${value}']) {
-            outline: currentcolor dashed 0.1em;
-            outline-offset: 0.1em;
+            outline-style: dashed;
         }
     `;
 
     return (
         <div
             ref={elem => setDoc(elem?.ownerDocument)}
-            style={{ minHeight: "100vh" }}
+            className='focusAnnouncer focusWrapper'
             tabIndex={-1}
             data-path={path}
         >
@@ -106,7 +107,7 @@ function getFocusableAncestors(elem: HTMLElement | null) {
     let currentElem = elem;
     const focusableAncestors = [];
     while(currentElem) {
-        const closestFocusable = currentElem.closest<HTMLElement>('[data-path], [tabindex]');
+        const closestFocusable = currentElem.closest<HTMLElement>(`${SEL_FOCUS_FRAME}, [tabindex]`);
         if (!closestFocusable) break;
         focusableAncestors.push(closestFocusable);
         currentElem = closestFocusable.parentElement
