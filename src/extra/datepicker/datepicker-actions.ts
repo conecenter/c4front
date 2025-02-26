@@ -3,6 +3,7 @@ import {getOrElse, mapOption, nonEmpty, Option} from "../../main/option";
 import React, {ChangeEvent, KeyboardEvent} from "react";
 import { ARROW_DOWN_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY } from "../../main/keyboard-keys";
 import { CALENDAR_CLASSNAME } from "./datepicker-calendar";
+import { SEL_FOCUS_FRAME } from "../css-selectors";
 import {
     createInputChange,
     createPopupChange,
@@ -99,7 +100,7 @@ function getOnKeyDown(
                         createInputChange(inputVal)
                     )
                 );
-                const closestWrapper = inputBoxRef.current?.parentElement?.closest('.focusWrapper') as HTMLElement | null;
+                const closestWrapper = inputBoxRef.current?.parentElement?.closest(SEL_FOCUS_FRAME) as HTMLElement | null;
                 setTimeout(() => closestWrapper?.focus());
             }
         }

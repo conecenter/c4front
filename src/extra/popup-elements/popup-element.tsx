@@ -8,7 +8,7 @@ import { usePopupState } from './popup-manager';
 import { useAddEventListener } from '../custom-hooks';
 import { isInstanceOfNode } from '../dom-utils';
 import { PopupOverlay } from './popup-overlay';
-import { SEL_FOCUSABLE_ATTR, VISIBLE_CHILD_SELECTOR } from '../css-selectors';
+import { SEL_FOCUS_FRAME, VISIBLE_CHILD_SELECTOR } from '../css-selectors';
 
 interface PopupElement {
     popupKey: string,
@@ -64,7 +64,7 @@ function PopupElement({ popupKey, className, forceOverlay, lrMode, children }: P
     const popup = (
         <>
             <div ref={setPopupElement}
-                className={clsx('popupEl', className)}
+                className={clsx('popupEl', 'focusWrapper', className)}
                 style={popupStyle}
                 onClick={(e) => e.stopPropagation()}
                 tabIndex={-1}
@@ -100,7 +100,7 @@ function elementHasFocus(element?: HTMLElement | null) {
 }
 
 function findFocusableAncestor(elem?: HTMLElement | null) {
-    return elem?.closest<HTMLElement>(SEL_FOCUSABLE_ATTR) || null;
+    return elem?.closest<HTMLElement>(SEL_FOCUS_FRAME) || null;
 }
 
 export { PopupElement }

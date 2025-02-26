@@ -4,7 +4,7 @@ import { HorizontalCaptionContext, NoCaptionContext } from '../main/vdom-hooks';
 import { useFocusControl } from './focus-control';
 import { useUserManual } from './user-manual';
 import { FlexibleSizes } from './view-builder/flexible-api';
-import { SEL_FOCUSABLE_ATTR } from './css-selectors';
+import { SEL_FOCUS_FRAME } from './css-selectors';
 import { ChipElement } from './chip/chip';
 
 interface LabeledElement {
@@ -103,13 +103,13 @@ const getTransitionChip = (transitionUrl: string): ReactNode => (
 );
 
 function hasSingleChildlessFocusable(elem: HTMLDivElement | null) {
-    const focusableDescendants = elem?.querySelectorAll(SEL_FOCUSABLE_ATTR);
+    const focusableDescendants = elem?.querySelectorAll(SEL_FOCUS_FRAME);
     if (!focusableDescendants) return false;
     if (focusableDescendants.length === 1) return true;
 
     let count = 0;
     for (const elem of focusableDescendants) {
-        const focusableInside = elem.querySelector(SEL_FOCUSABLE_ATTR);
+        const focusableInside = elem.querySelector(SEL_FOCUS_FRAME);
         if (!focusableInside) {
             count++;
             if (count > 1) break;

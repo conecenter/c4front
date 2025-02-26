@@ -7,7 +7,7 @@ import { firstChild } from './binds-utils'
 import { useFocusControl } from '../focus-control'
 import { TAB_EVENT } from '../focus-module-interface'
 import { useAddEventListener } from '../custom-hooks'
-import { VISIBLE_CHILD_SELECTOR } from '../css-selectors'
+import { SEL_FOCUS_FRAME, VISIBLE_CHILD_SELECTOR } from '../css-selectors'
 
 
 const GetButtonCaption = (keyData, buttonCaption) => {
@@ -157,8 +157,8 @@ function BindGroupElementInner(props) {
 	const tabInsideGroup = (e) => {
 		e.preventDefault();
 		e.stopPropagation();
-		const currFocusedElement = e.target?.closest('.focusWrapper');
-		const groupFocusables = Array.from(elem.querySelectorAll(`.focusWrapper${VISIBLE_CHILD_SELECTOR}`));
+		const currFocusedElement = e.target?.closest(SEL_FOCUS_FRAME);
+		const groupFocusables = Array.from(elem.querySelectorAll(`${SEL_FOCUS_FRAME}${VISIBLE_CHILD_SELECTOR}`));
 		const currFocusedIndex = groupFocusables.findIndex(elem => elem === currFocusedElement);
 		const nextFocusableIndex = (currFocusedIndex + 1 + groupFocusables.length) % groupFocusables.length;
 		groupFocusables[nextFocusableIndex]?.focus();
