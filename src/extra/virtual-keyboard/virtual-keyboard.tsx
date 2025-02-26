@@ -1,6 +1,5 @@
 import React, { CSSProperties, MutableRefObject, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
-import { PathContext } from '../focus-control';
 import { ColorDef } from '../view-builder/common-api';
 import { usePatchSync } from '../exchange/patch-sync';
 import { patchSyncTransformers, POSITIONING_STYLES } from './vk-utils';
@@ -9,6 +8,7 @@ import { VKKey } from './vk-key';
 import { usePath } from '../../main/vdom-hooks';
 import { VkInfoContext } from '../ui-info-provider';
 import { identityAt } from '../../main/vdom-util';
+import { PathContext } from '../focus-announcer';
 
 const receiverIdOf = identityAt('receiver');
 

@@ -1,8 +1,10 @@
 import React, { useRef, ReactNode, useEffect, useState, useLayoutEffect } from 'react';
-import { PathContext } from './focus-control';
 import { Patch } from './exchange/patch-sync';
 import { useAddEventListener } from './custom-hooks';
 import { SEL_FOCUS_FRAME, VISIBLE_CHILD_SELECTOR } from './css-selectors';
+
+const PathContext = React.createContext("path");
+PathContext.displayName = "PathContext";
 
 const getFocusFramePath = (elem?: Element | null) => elem?.closest<HTMLElement>(SEL_FOCUS_FRAME)?.dataset.path;
 
@@ -115,4 +117,4 @@ function getFocusableAncestors(elem: HTMLElement | null) {
     return focusableAncestors;
 }
 
-export { FocusAnnouncerElement }
+export { FocusAnnouncerElement, PathContext }

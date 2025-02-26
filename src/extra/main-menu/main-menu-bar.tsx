@@ -4,7 +4,7 @@ import {Expander, ExpanderArea} from '../../main/expander-area';
 import {handleArrowUpDown, handleMenuBlur, patchToState, stateToPatch} from './main-menu-utils';
 import {MainMenuClock} from './main-menu-clock';
 import {ScrollInfoContext} from '../scroll-info-context';
-import {PathContext, useFocusControl} from "../focus-control";
+import {useFocusControl} from "../focus-control";
 import {ARROW_DOWN_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY, M_KEY} from "../../main/keyboard-keys";
 import {MenuCustomItem, MenuExecutableItem, MenuItemsGroup, MenuPopupElement, MenuUserItem} from './main-menu-items';
 import {MenuFolderItem} from "./menu-folder-item";
@@ -14,6 +14,7 @@ import {isInstanceOfNode} from "../dom-utils";
 import {VISIBLE_CHILD_SELECTOR} from "../css-selectors";
 import {identityAt} from "../../main/vdom-util";
 import {usePatchSync} from "../exchange/patch-sync";
+import {PathContext} from "../focus-announcer";
 
 const MENU_BAR_PATH = 'main-menu-bar';
 const KEY_MODIFICATOR = { ArrowLeft: -1, ArrowRight: 1 };

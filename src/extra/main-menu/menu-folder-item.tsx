@@ -1,6 +1,6 @@
 import React, { ReactElement, useContext, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
-import { PathContext, useFocusControl } from '../focus-control';
+import { useFocusControl } from '../focus-control';
 import { MenuItemState, MenuControlsContext } from './main-menu-bar';
 import { MenuItem, MenuItemsGroup, MenuPopupElement } from './main-menu-items';
 import { handleArrowUpDown, handleMenuBlur, patchToState, stateToPatch } from './main-menu-utils';
@@ -17,6 +17,7 @@ import { useBinds } from '../binds/key-binding';
 import { SVGElement } from '../../main/image';
 import { identityAt } from '../../main/vdom-util';
 import { usePatchSync } from '../exchange/patch-sync';
+import { PathContext } from "../focus-announcer";
 
 const receiverIdOf = identityAt('receiver');
 

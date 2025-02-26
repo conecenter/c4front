@@ -1,11 +1,11 @@
 import React from 'react';
 
-const PathContext = React.createContext("path");
-PathContext.displayName = "PathContext";
+// .focusWrapper - ability to have focus frame
+// [data-path] - unique element id (used not just for focus frame)
 
 interface FocusControlObj {
     focusClass?: string,
-    focusHtml?: { 'data-path': string, tabIndex: number }
+    focusHtml?: { 'data-path': string, tabIndex: 1 }
 }
 
 function useFocusControl(path: string | undefined): FocusControlObj {
@@ -25,5 +25,4 @@ const Focusable = ({path, children}: FocusableProps) => {
     return children(focusProps);
 }
 
-export type { FocusControlObj };
-export { PathContext, useFocusControl, Focusable };
+export { useFocusControl, Focusable };

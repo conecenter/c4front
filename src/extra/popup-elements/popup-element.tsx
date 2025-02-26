@@ -9,6 +9,7 @@ import { useAddEventListener } from '../custom-hooks';
 import { isInstanceOfNode } from '../dom-utils';
 import { PopupOverlay } from './popup-overlay';
 import { SEL_FOCUS_FRAME, VISIBLE_CHILD_SELECTOR } from '../css-selectors';
+import { useFocusControl } from '../focus-control';
 
 interface PopupElement {
     popupKey: string,
@@ -26,6 +27,8 @@ function PopupElement({ popupKey, className, forceOverlay, lrMode, children }: P
     const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
 
     const { isOpened, toggle } = usePopupState(popupKey);
+
+    const { focusClass, focusHtml } = useFocusControl(`/popup-${popupKey}`);
 
     const [parent, setParent] = useState<HTMLElement | null>(null);
     const setPopupParent = useCallback((elem: HTMLElement | null) => setParent(elem && elem.parentElement), []);
@@ -64,11 +67,11 @@ function PopupElement({ popupKey, className, forceOverlay, lrMode, children }: P
     const popup = (
         <>
             <div ref={setPopupElement}
-                className={clsx('popupEl', 'focusWrapper', className)}
+                className={clsx('popupEl', focusClass, className)}
                 style={popupStyle}
                 onClick={(e) => e.stopPropagation()}
+                {...focusHtml}
                 tabIndex={-1}
-                data-path={`/popup-${popupKey}`}  // needed for FocusAnnouncer's focus loss prevention
                 children={children} />
             <PopupOverlay popupElement={popupElement} forceOverlay={!!forceOverlay} />
         </>
