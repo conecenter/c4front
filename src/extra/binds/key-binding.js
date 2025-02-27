@@ -17,10 +17,6 @@ const useProvideBinds = (groupId) => {
     setProvideBinds(newValue)
   }, [activeBindGroup])
 
-  /*useEffect(() => {
-    console.log("activeBindGroup: " + activeBindGroup + ", provideBinds: " + provideBinds + ", for group: " + groupId)
-  }, [provideBinds])*/
-
   const updateBindProvider = () => {
     /*console.log("updateBindProvider(" + groupId + ")")*/
     updateActiveGroup(groupId)
@@ -42,12 +38,6 @@ const groupBy = function (xs, key) {
     return rv;
   }, {});
 };
-
-// const BindDocumentHolder = (() => {
-//   const listeners = []
-//   const add = ()
-//   return { add, clear, remove }
-// })()
 
 const KeyBindingsManager = ({ links, children, bindSrcId, escapeBindSrcId, noTouch }) => {
   const [bindHistory, setBindHistory] = useState([]) //List of bind call history
@@ -129,14 +119,6 @@ const KeyBindingsManager = ({ links, children, bindSrcId, escapeBindSrcId, noTou
   }
   const switchBtn = isBindMode && drawSwitchBtn &&
     $(BottomBarContent, null, $(BindingElement, { ...btnProps }, "Switch"))
-  
-  /*const backBtnProps = {
-    escapeBindSrcId,
-    onChange: goBackInHistory,
-    children: ""
-  }
-  const drawBackButton = true
-  const backBtn = (isBindMode && drawSwitchBtn && drawBackButton) ? [$(BindingElement, { ...backBtnProps }, ["Back"])] : []*/
 
   const overlayCallBack = (event) => {
     event.stopPropagation()
