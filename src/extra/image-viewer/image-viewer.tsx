@@ -137,14 +137,14 @@ function useLoadedSlides(slidesJson: string) {
 
 function useInitialZoom(customSlides: CustomSlide[], currentIndex: number, initialZoom?: number) {
     const zoomRef = useRef<ZoomRef | null>(null);
-    const isCurrentSlideLoaded = customSlides[currentIndex].isLoaded;
+    const isCurrentSlideLoaded = customSlides[currentIndex]?.isLoaded;
     useEffect(
         function applyInitialZoom() {
             if (initialZoom && isCurrentSlideLoaded) {
                 // queueMicrotask allows zoomRef to be fully set up on first load
                 queueMicrotask(() => zoomRef?.current?.changeZoom(initialZoom));
             }
-        }, [currentIndex, isCurrentSlideLoaded]
+        }, [currentIndex, initialZoom, isCurrentSlideLoaded]
     );
     return zoomRef;
 }
