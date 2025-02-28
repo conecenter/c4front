@@ -6,6 +6,21 @@ import { SEL_FOCUS_FRAME, VISIBLE_CHILD_SELECTOR } from './css-selectors';
 const PathContext = React.createContext("path");
 PathContext.displayName = "PathContext";
 
+/*
+- Focus change cases:
+    1) to element with ancestor having 'data-path'
+        -- focus REPORT NEW PATH
+    2) to element without ancestor having 'data-path' - FocusAnnouncerElement wraps UI
+        -- focus: path = FocusAnnouncerElement path
+    3) is lost (focused element removed)
+        -- no focus event
+        -- blur: to == null, from doesn't exist after timeout --> findAutoFocus
+    4) - focus goes from top window to iframe
+       - focus goes from iframe to top window
+       - focus goes to browser tools
+        -- blur: to == null, from exists -- do nothing
+*/
+
 const getFocusFramePath = (elem?: Element | null) => elem?.closest<HTMLElement>(SEL_FOCUS_FRAME)?.dataset.path;
 
 interface FocusAnnouncerElement {
