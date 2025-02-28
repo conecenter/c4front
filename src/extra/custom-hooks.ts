@@ -2,8 +2,9 @@ import { Children, ReactNode, isValidElement, useEffect, useRef } from "react";
 import { FlexibleSizes } from "./view-builder/flexible-api";
 import { flexibleComponents } from "./view-builder/flexible-elements";
 
+// if element is ref object and changes during component lifecycle, it will not be updated in effect
 function useAddEventListener<T extends Event>(
-    element: React.RefObject<EventTarget | null> | EventTarget | null,
+    element: React.RefObject<EventTarget | null> | EventTarget | null | undefined,
     eventName: string,
     handler: (event: T) => void,
     capture: boolean = false
