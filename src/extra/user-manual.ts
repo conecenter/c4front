@@ -1,6 +1,5 @@
 import {createContext, createElement as $, ReactNode, useContext, useEffect, useState, useMemo} from "react"
-import type {MouseEvent, KeyboardEvent} from "react"
-import {SVGElement} from "../main/image"
+import { ChipElement } from "./chip/chip"
 
 interface UserManual {
     has: (umid: string | undefined) => boolean
@@ -48,7 +47,12 @@ const useUserManual = (umid?: string) => {
     const userManual = useContext(UserManualContext);
     const umUrl = userManual.getUrl(umid);
 
-    const userManualButton = !umUrl ? null : $(UserManualButton, { url: umUrl });
+    const userManualButton = !umUrl ? null : $(ChipElement, {
+        identity: {},
+        iconPath: '/mod/main/ee/cone/core/ui/c4view/info.svg',
+        link: umUrl,
+        tooltip: 'Go to User Manual'
+    });
 
     const onKeyDown = (e: KeyboardEvent) => {
         if (umUrl && e.code == "F1") {
@@ -59,20 +63,6 @@ const useUserManual = (umid?: string) => {
     }
 
     return { button: userManualButton, onKeyDown };
-}
-
-function UserManualButton({ url }: { url: string }) {
-    const onClick = (e: MouseEvent | KeyboardEvent) => {
-        e.stopPropagation();
-        e.preventDefault();
-        window.open(url!);
-    }
-
-    return !url ? null : (
-        $("div", { className: 'umButton', onClick },
-            $(SVGElement, { url: '/mod/main/ee/cone/core/ui/c4view/info.svg', className: 'bodyColorCss' })
-        )
-    );
 }
 
 export {UserManualProvider, useUserManual}

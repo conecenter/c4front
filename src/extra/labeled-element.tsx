@@ -2,10 +2,9 @@ import React, { useContext, ReactNode, useEffect, useRef, useState, CSSPropertie
 import clsx from 'clsx';
 import { HorizontalCaptionContext, NoCaptionContext } from '../main/vdom-hooks';
 import { useFocusControl } from './focus-control';
-import { useUserManual } from './user-manual';
 import { FlexibleSizes } from './view-builder/flexible-api';
 import { SEL_FOCUS_FRAME } from './css-selectors';
-import { ChipElement } from './chip/chip';
+import { ContextActionsElement } from './context-actions-element';
 
 interface LabeledElement {
     identity?: object,
@@ -38,11 +37,6 @@ function LabeledElement({ path, label, sizes, accented, clickable, labelChildren
         else setDisableChildFocus(hasSingleChildlessFocusable(refLE.current));
     }, [isEmptyLabel, labelChildren, children]);
 
-    // User manual functionality
-    const { button: umButton, onKeyDown } = useUserManual(umid);
-
-    const transitionChip = !!transitionUrl && getTransitionChip(transitionUrl);
-
     // const { clicked, onClick } = useClickSyncOpt(identity, 'receiver', clickable);
 
     const className = clsx(
@@ -69,7 +63,6 @@ function LabeledElement({ path, label, sizes, accented, clickable, labelChildren
             className={className}
             {...focusHtml}
             style={style}
-            onKeyDown={onKeyDown}
             data-umid={umid}
             title={props.hint}
         >
@@ -79,28 +72,15 @@ function LabeledElement({ path, label, sizes, accented, clickable, labelChildren
                         {label && <label>{label}</label>}
                         {labelChildren}
                     </div>
-                    <div className='contentBox'>
-                        {children}
-                    </div>
+                    <div className='contentBox'>{children}</div>
                 </NoCaptionContext.Provider>)
                 : children }
 
-            {(umButton || transitionChip) &&
-                <div className='contextActionsBox'>{umButton}{transitionChip}</div>}
+                {(umid || transitionUrl) &&
+                    <ContextActionsElement umid={umid} transitionUrl={transitionUrl} refLE={refLE} />}
         </div>
     );
 }
-
-const getTransitionChip = (transitionUrl: string): ReactNode => (
-    <ChipElement
-        identity={{}}
-        receiver={false}
-        text=''
-        tooltip={transitionUrl}
-        color={{ tp: 'p', cssClass: 'bodyColorCss' }}
-        link={transitionUrl}
-        iconPath='/mod/main/ee/cone/core/ui/c4view/link.svg' />
-);
 
 function hasSingleChildlessFocusable(elem: HTMLDivElement | null) {
     const focusableDescendants = elem?.querySelectorAll(SEL_FOCUS_FRAME);

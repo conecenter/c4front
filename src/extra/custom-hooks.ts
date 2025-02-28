@@ -3,25 +3,22 @@ import { FlexibleSizes } from "./view-builder/flexible-api";
 import { flexibleComponents } from "./view-builder/flexible-elements";
 
 function useAddEventListener<T extends Event>(
-    element: EventTarget | null | undefined,
+    element: React.RefObject<EventTarget | null> | EventTarget | null,
     eventName: string,
     handler: (event: T) => void,
-    capture: boolean = false,
-    dependencies: unknown[] = []
+    capture: boolean = false
 ) {
     // Create a ref that stores handler
     const savedHandler = useRef(handler);
-
     // Update ref.current value if handler changes to always get latest handler without needing to pass it in effect deps array
-    useEffect(() => {
-        savedHandler.current = handler;
-    }, [handler]);
+    savedHandler.current = handler;
 
     useEffect(() => {
+        const targetEl = element && 'current' in element ? element.current : element
         const listener = (e: Event) => savedHandler.current(e as T);
-        element?.addEventListener(eventName, listener, capture);
-        return () => element?.removeEventListener(eventName, listener, capture);
-    }, [eventName, element, ...dependencies]);
+        targetEl?.addEventListener(eventName, listener, capture);
+        return () => targetEl?.removeEventListener(eventName, listener, capture);
+    }, [eventName, element, capture]);
 }
 
 const useLatest = <T>(current: T) => {

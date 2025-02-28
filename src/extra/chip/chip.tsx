@@ -14,8 +14,8 @@ const receiverIdOf = identityAt('receiver');
 interface ChipElement {
     identity: object,
     receiver?: boolean,
-    text: string,
-    color: ColorDef,
+    text?: string,
+    color?: ColorDef,
     tooltip?: string,
     iconPath?: string,
     link?: string,
@@ -25,7 +25,7 @@ interface ChipElement {
     children?: ReactNode
 }
 
-const ChipElement = ({identity, receiver, text, color, tooltip, iconPath, link, withDelete, callbackRef, children, ...props}: ChipElement) => {
+const ChipElement = ({identity, receiver, text = '', color, tooltip, iconPath, link, withDelete, callbackRef, children, ...props}: ChipElement) => {
     // Server sync
     const { onClick } = useClickSyncOpt(receiverIdOf(identity), receiver);
 
