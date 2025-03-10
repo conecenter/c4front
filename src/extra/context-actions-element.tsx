@@ -1,6 +1,5 @@
-import React, { useContext, useState } from 'react';
+import React, { ReactNode, useContext, useState } from 'react';
 import { useUserManual } from './user-manual';
-import { ChipElement } from './chip/chip';
 import { UiInfoContext } from './ui-info-provider';
 import { BottomBarContent } from './bottom-bar-manager';
 import { useAddEventListener } from './custom-hooks';
@@ -9,11 +8,11 @@ const preventFocusin = (e: React.MouseEvent) => e.preventDefault();
 
 interface ContextActionsElement {
     umid?: string,
-    transitionUrl?: string,
+    goToChip?: ReactNode,
     refLE: React.RefObject<HTMLDivElement | null>
 }
 
-function ContextActionsElement({ umid, transitionUrl, refLE }: ContextActionsElement) {
+function ContextActionsElement({ umid, goToChip, refLE }: ContextActionsElement) {
     const isFocused = useIsFocused(refLE);
 
     const { button: umButton, onKeyDown } = useUserManual(umid);
@@ -26,12 +25,7 @@ function ContextActionsElement({ umid, transitionUrl, refLE }: ContextActionsEle
     const contextActionsElems =
         <div className='contextActionsBox' onMouseDown={preventFocusin}>
             {umButton}
-            {transitionUrl && <ChipElement
-                identity={{}}
-                receiver={false}
-                tooltip={transitionUrl}
-                link={transitionUrl}
-                iconPath='/mod/main/ee/cone/core/ui/c4view/link.svg' />}
+            {goToChip}
         </div>
 
     return uiType === 'touch'

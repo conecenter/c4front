@@ -17,11 +17,11 @@ interface LabeledElement {
     umid?: string,
     hint?: string,
     className?: string, // front only
-    transitionUrl?: string,
+    goToChip?: ReactNode,
     children: ReactNode
 }
 
-function LabeledElement({ path, label, sizes, accented, clickable, labelChildren, umid, transitionUrl, children, ...props }: LabeledElement) {
+function LabeledElement({ path, label, sizes, accented, clickable, labelChildren, umid, goToChip, children, ...props }: LabeledElement) {
     const showCaption = !useContext(NoCaptionContext);
     const isHorizontalCaption = useContext(HorizontalCaptionContext);
 
@@ -76,8 +76,8 @@ function LabeledElement({ path, label, sizes, accented, clickable, labelChildren
                 </NoCaptionContext.Provider>)
                 : children }
 
-                {(umid || transitionUrl) &&
-                    <ContextActionsElement umid={umid} transitionUrl={transitionUrl} refLE={refLE} />}
+                {(umid || goToChip) &&
+                    <ContextActionsElement umid={umid} goToChip={goToChip} refLE={refLE} />}
         </div>
     );
 }
