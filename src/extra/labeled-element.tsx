@@ -1,10 +1,11 @@
-import React, { useContext, ReactNode, useEffect, useRef, useState, CSSProperties } from 'react';
+import React, { useContext, ReactNode, useEffect, useRef, useState, CSSProperties, ReactElement } from 'react';
 import clsx from 'clsx';
 import { HorizontalCaptionContext, NoCaptionContext } from '../main/vdom-hooks';
 import { useFocusControl } from './focus-control';
 import { FlexibleSizes } from './view-builder/flexible-api';
 import { SEL_FOCUS_FRAME } from './css-selectors';
 import { ContextActionsElement } from './context-actions-element';
+import { ChipElement } from './chip/chip';
 
 interface LabeledElement {
     identity?: object,
@@ -17,7 +18,7 @@ interface LabeledElement {
     umid?: string,
     hint?: string,
     className?: string, // front only
-    goToChip?: ReactNode,
+    goToChip?: [ReactElement<ChipElement>],
     children: ReactNode
 }
 
