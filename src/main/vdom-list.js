@@ -69,13 +69,13 @@ const calcHiddenCols = (cols, outerWidth, scrollbarAdjustment = 0) => {
 
 const getExpandedForRows = rows => Object.fromEntries(rows.filter(row=>row.isExpanded).map(row=>[row.rowKey,true]))
 
-const setupExpanderElements = (rows, rowsWithHiddenContent) => {
+const setupExpanderElements = (rows, rowsWithHiddenContent, alwaysShowExpander) => {
     const expanded = getExpandedForRows(rows)
     return children => children.map(c => {
         const { expanding, rowKey } = c.props
         return expanding==="expander" && rowKey ? cloneElement(c, {
-            expander: !rowsWithHiddenContent.has(rowKey) ? 'passive' : expanded[rowKey]
-                ? 'expanded' : 'collapsed'
+            expander: !(alwaysShowExpander || rowsWithHiddenContent.has(rowKey)) ? 'passive'
+                : expanded[rowKey] ? 'expanded' : 'collapsed'
         }) : c
     })
 }
@@ -264,7 +264,7 @@ const useValueToServer = (identity, value) => {
     }, [value, enqueuePatch])
 }
 
-export function GridRoot({ identity, rows: argRows, cols: argCols, children: rawChildren = [], gridKey }) {
+export function GridRoot({ identity, rows: argRows, cols: argCols, children: rawChildren = [], gridKey, alwaysShowExpander }) {
     const printMode = useContext(PrintContext);
     const rows = printMode ? argRows.map(row => ({...row, isExpanded: true})) : argRows
     const cols = printMode ? argCols.filter(col => !isServiceCol(col.colKey)) : argCols
@@ -293,9 +293,9 @@ export function GridRoot({ identity, rows: argRows, cols: argCols, children: raw
     const { hasHiddenCols, hideElementsForHiddenCols } =
         useMemo(() => calcHiddenCols(cols, contentWidth, scrollbarWidth), [cols, contentWidth])
     const gridTemplateColumns = useMemo(() => getGridTemplateColumns(
-        hideExpander(hasHiddenCols)(hideElementsForHiddenCols(false,col=>col.colKey)(cols)),
+        hideExpander(hasHiddenCols || alwaysShowExpander)(hideElementsForHiddenCols(false,col=>col.colKey)(cols)),
         fixedCellsSize
-    ), [cols, hideElementsForHiddenCols, hasHiddenCols, fixedCellsSize])
+    ), [cols, hideElementsForHiddenCols, hasHiddenCols, alwaysShowExpander, fixedCellsSize])
 
     useValueToServer(hasHiddenColsIdOf(identity), hasHiddenCols)
 
@@ -303,8 +303,8 @@ export function GridRoot({ identity, rows: argRows, cols: argCols, children: raw
     //todo: fix expand+drag -- may be prepend with bg-cell with rowspan 2
 
     const allChildren = useMemo(()=>getAllChildren({
-        children,rows,cols,hasHiddenCols,hideElementsForHiddenCols,dragRowKey
-    }),[children,rows,cols,hasHiddenCols,hideElementsForHiddenCols,dragRowKey,printMode])
+        children,rows,cols,hasHiddenCols,alwaysShowExpander,hideElementsForHiddenCols,dragRowKey
+    }),[children,rows,cols,hasHiddenCols,alwaysShowExpander,hideElementsForHiddenCols,dragRowKey,printMode])
 
     const headerRowKeys = rows.filter(row => row.isHeader).map(row => row.rowKey).join(' ')
     const dragBGEl = $("div", { key: "gridBG", className: "gridBG", style: { gridColumn: spanAll, gridRow: spanAll }})
@@ -329,7 +329,7 @@ export function GridRoot({ identity, rows: argRows, cols: argCols, children: raw
     )
 }
 
-const getAllChildren = ({children,rows,cols,hasHiddenCols,hideElementsForHiddenCols,dragRowKey}) => {
+const getAllChildren = ({children,rows,cols,hasHiddenCols,alwaysShowExpander,hideElementsForHiddenCols,dragRowKey}) => {
     const rowsWithHiddenContent = new Set();
     hideElementsForHiddenCols(true,c=>c.props.colKey)(children).forEach(cell => {
         if (cell.props.children) rowsWithHiddenContent.add(cell.props.rowKey);
@@ -347,7 +347,8 @@ const getAllChildren = ({children,rows,cols,hasHiddenCols,hideElementsForHiddenC
             needsHoverExpander: false,
             children: $(NoCaptionContext.Provider, {value:false}, pairs.map(([col, cell]) => cell.props.children))
         }))
-    const toExpanderElements = hasHiddenCols ? setupExpanderElements(rows, rowsWithHiddenContent) : hideExpanderElements(cols)
+    const toExpanderElements = alwaysShowExpander || hasHiddenCols
+        ? setupExpanderElements(rows, rowsWithHiddenContent, alwaysShowExpander) : hideExpanderElements(cols)
     const allChildren = spanRightElements(cols, toExpanderElements(hideElementsForHiddenCols(false,cell=>cell.props.colKey)([
         ...children, ...expandedElements
     ])))
