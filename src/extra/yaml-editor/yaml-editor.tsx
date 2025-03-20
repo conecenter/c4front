@@ -47,7 +47,8 @@ function YamlEditor({ identity, value, jsonSchema }: YamlEditorProps) {
         value={currentState}
         extensions={[yamlSupport, schemaExtension, linter(lintErrors), lintGutter()]}
         onBlur={() => wasChanged && sendFinalChange(currentState)}
-        onChange={(value) => sendTempChange(value)} />
+        onChange={(value) => sendTempChange(value)}
+        onKeyDown={(e) => e.stopPropagation()} />
 }
 
 function parseJsonSchema(jsonSchema: string) {
