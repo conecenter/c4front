@@ -18,7 +18,7 @@ import { createInputChange, createTimestampChange, parseStringToTime, isInputSta
 
 interface TimePickerProps {
 	key: string,
-	identity: Object,
+	identity: object,
 	state: TimePickerState,
     offset?: number,
     timestampFormatId: number,
@@ -95,14 +95,16 @@ function TimePicker({identity, state, offset, timestampFormatId, readonly, child
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         switch (e.key) {
-            case ENTER_KEY:
+            case ENTER_KEY: {
                 e.stopPropagation();
                 const input = e.currentTarget;
                 input.dispatchEvent(new CustomEvent("cTab", { bubbles: true }));
                 break;
+            }
             case ARROW_DOWN_KEY:
                 if (e.altKey) return toggle(!isOpened);
-            case ARROW_UP_KEY:
+                // fallthrough
+            case ARROW_UP_KEY: {
                 if (isInputState(currentState)) break;
                 e.preventDefault();
                 e.stopPropagation();
@@ -114,11 +116,13 @@ function TimePicker({identity, state, offset, timestampFormatId, readonly, child
                 sendTempChange(createTimestampChange(adjustedTime));
                 setSelection(pattern.indexOf(currentFMTChar), pattern.lastIndexOf(currentFMTChar) + 1);
                 break;
-            case ESCAPE_KEY:
+            }
+            case ESCAPE_KEY: {
                 const change = createFinalChange(lastFinalState.current);
                 sendTempChange(change);
                 toggle(false);
                 setTimeout(() => inputBoxRef.current?.focus());
+            }
         }
     }
 
