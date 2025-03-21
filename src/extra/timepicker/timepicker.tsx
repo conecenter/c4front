@@ -1,20 +1,23 @@
-import React, { ReactNode, useMemo, useRef } from "react";
+import React, { ReactNode, useRef } from "react";
 import clsx from "clsx";
 import { usePatchSync } from "../exchange/patch-sync";
-import { changeToPatch, patchToChange } from "./timepicker-exchange";
+import { patchSyncTransformers } from "./timepicker-exchange";
 import { ARROW_DOWN_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY } from "../../main/keyboard-keys";
 import { useSelectionEditableInput } from "../datepicker/selection-control";
 import { useUserLocale } from "../locale";
-import { getPath, useFocusControl } from "../focus-control";
-import { NewPopupElement } from "../popup-elements/popup-element";
+import { useFocusControl } from "../focus-control";
+import { usePath } from "../../main/vdom-hooks";
+import { PopupElement } from "../popup-elements/popup-element";
 import { usePopupState } from "../popup-elements/popup-manager";
 import { TimeSliderBlock, TIME_ITEM_HEIGHT } from "./time-slider";
 import { copyToClipboard } from "../utils";
+import { identityAt } from "../../main/vdom-util";
 import { BACKSPACE_EVENT, COPY_EVENT, CUT_EVENT, DELETE_EVENT, ENTER_EVENT, PASTE_EVENT, useExternalKeyboardControls }
     from "../focus-module-interface";
 import { createInputChange, createTimestampChange, parseStringToTime, isInputState, formatTimestamp, getCurrentFMTChar, 
     getCurrentTokenValue, getAdjustedTime, MAX_TIMESTAMP, TIME_TOKENS, TOKEN_DATA } from "./time-utils";
 
+const receiverIdOf = identityAt('receiver');
 
 interface TimePickerProps {
 	key: string,
@@ -46,7 +49,7 @@ function TimePicker({identity, state, offset, timestampFormatId, readonly, child
 
     // Server exchange initialization
     const { currentState, sendTempChange, sendFinalChange: onFinalChange } =
-        usePatchSync(identity, 'receiver', state, true, s => s, changeToPatch, patchToChange, (prev, ch) => ch);
+        usePatchSync(receiverIdOf(identity), state, true, patchSyncTransformers);
 
     const sendFinalChange = (change: TimePickerState) => {
         lastFinalState.current = change;
@@ -64,13 +67,13 @@ function TimePicker({identity, state, offset, timestampFormatId, readonly, child
         ? currentState.inputValue : formatTimestamp(currentState.timestamp, usedTokens, offset);
     
     // Focus functionality
-    const path = useMemo(() => getPath(identity), [identity]);
+    const path = usePath(identity);
     const { focusClass, focusHtml } = useFocusControl(path);
 
     const setSelection = useSelectionEditableInput(inputRef);
 
     // Popup functionality
-    const [isOpened, toggle] = usePopupState(identity);
+    const { isOpened, toggle } = usePopupState(path);
 
     const onTimeSliderClick = (i: number, token: string) => {
         const newTimestamp = isInputState(currentState)
@@ -181,7 +184,7 @@ function TimePicker({identity, state, offset, timestampFormatId, readonly, child
                 <div className='sideContent'>{children}</div>}
 
             {isOpened && 
-                <NewPopupElement identity={identity} className='timepickerPopup'>
+                <PopupElement popupKey={path} className='timepickerPopup'>
                     <div className='timepickerPopupBox' 
                          onKeyDown={(e) => e.stopPropagation()} 
                          style={{ height: `${7*TIME_ITEM_HEIGHT}em`}}>
@@ -192,7 +195,7 @@ function TimePicker({identity, state, offset, timestampFormatId, readonly, child
                                             current={getCurrentTokenValue(currentState, token)} 
                                             onClick={onTimeSliderClick} />))}
                     </div>
-                </NewPopupElement>}
+                </PopupElement>}
         </div>
     );
 }

@@ -188,7 +188,7 @@ function tryRegex(value: string, regexExtractor: RegExpExtractor): Option<Token>
     } else return None
 }
 
-function tokenizeString(value: String, timeOnly?: boolean): Token[] {
+function tokenizeString(value: string, timeOnly?: boolean): Token[] {
     let currentValue = value.toLowerCase()
     const tokens: Token[] = []
 
