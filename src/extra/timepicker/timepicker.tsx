@@ -59,7 +59,7 @@ function TimePicker({identity, state, offset, timestampFormatId, readonly, child
     // Getting time pattern from locale
     const locale = useUserLocale();
 	const timestampFormat = locale.timeFormats.find(format => format.id === timestampFormatId);
-    const pattern = timestampFormat?.pattern || 'hh:mm';
+    const pattern = timestampFormat?.pattern || 'HH:mm';
     const usedTokens = TIME_TOKENS.filter(token => pattern.includes(token));
 
     // Get formatted input value
