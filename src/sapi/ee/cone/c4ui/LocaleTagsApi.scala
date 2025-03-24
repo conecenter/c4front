@@ -23,6 +23,10 @@ trait NumberInputProps extends ToChildPair
 @c4tagSwitch("FrontApp") trait InputNumberServerState extends NumberInputServerState
 @c4tagSwitch("FrontApp") trait NumberNumberServerState extends NumberInputServerState
 
+trait TimePickerProps extends ToChildPair
+@c4tagSwitch("FrontApp") trait TimePickerState extends ToJson
+@c4tagSwitch("FrontApp") trait InputTimePickerState extends TimePickerState
+@c4tagSwitch("FrontApp") trait TimestampTimePickerState extends TimePickerState
 
 @c4tags("FrontApp") trait LocaleInputTags[C] {
   @c4elPath("DatePickerInputElement") def datePicker(
@@ -65,6 +69,24 @@ trait NumberInputProps extends ToChildPair
     inputValue: String,
     tempNumber: String = "",
   ): InputNumberServerState
+
+  @c4el("TimePicker") def timePicker(
+    key: String,
+    state: TimePickerState,
+    timestampFormatId: Int,
+    receiver: Receiver[C],
+    deferredSend: Boolean = false,
+    children: ViewRes = Nil,
+  ): TimePickerProps
+
+  @c4val("timestamp-state") def timepickerTimestampState(
+    timestamp: Int,
+  ): TimestampTimePickerState
+
+  @c4val("input-state") def timepickerInputState(
+    inputValue: String,
+    tempTimestamp: Option[Int] = None,
+  ): InputTimePickerState
 }
 
 @c4tags("FrontApp") trait LocaleTags {
