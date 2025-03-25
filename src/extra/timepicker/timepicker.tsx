@@ -97,6 +97,7 @@ function TimePicker({identity, state, offset, timestampFormatId, readonly, child
     }
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        e.stopPropagation();
         switch (e.key) {
             case ENTER_KEY: {
                 e.stopPropagation();
