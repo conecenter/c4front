@@ -14,7 +14,7 @@ import { copyToClipboard } from "../utils";
 import { identityAt } from "../../main/vdom-util";
 import { BACKSPACE_EVENT, COPY_EVENT, CUT_EVENT, DELETE_EVENT, ENTER_EVENT, PASTE_EVENT, useExternalKeyboardControls }
     from "../focus-module-interface";
-import { createInputChange, createTimestampChange, parseStringToTime, isInputState, formatTimestamp, getCurrentFMTChar, 
+import { createInputChange, createTimestampChange, parseStringToTime, isInputState, formatTimestamp, getCurrentFMTChar,
     getCurrentTokenValue, getAdjustedTime, MAX_TIMESTAMP, TIME_TOKENS, TOKEN_DATA } from "./time-utils";
 
 const receiverIdOf = identityAt('receiver');
@@ -63,9 +63,9 @@ function TimePicker({identity, state, offset, timestampFormatId, readonly, child
     const usedTokens = TIME_TOKENS.filter(token => pattern.includes(token));
 
     // Get formatted input value
-    const inputValue = isInputState(currentState) 
+    const inputValue = isInputState(currentState)
         ? currentState.inputValue : formatTimestamp(currentState.timestamp, usedTokens, offset);
-    
+
     // Focus functionality
     const path = usePath(identity);
     const { focusClass, focusHtml } = useFocusControl(path);
@@ -85,8 +85,8 @@ function TimePicker({identity, state, offset, timestampFormatId, readonly, child
     // Helper functions
     const createFinalChange = (state: TimePickerState) => {
         const timestamp = isInputState(state) ? parseStringToTime(state.inputValue, usedTokens) : state.timestamp;
-        return timestamp 
-            ? createTimestampChange(timestamp % MAX_TIMESTAMP) 
+        return timestamp
+            ? createTimestampChange(timestamp % MAX_TIMESTAMP)
             : createInputChange((state as InputState).inputValue);
     }
 
@@ -158,42 +158,44 @@ function TimePicker({identity, state, offset, timestampFormatId, readonly, child
 		[COPY_EVENT]: handleClipboardWrite,
 		[CUT_EVENT]: handleClipboardWrite
 	};
-    
+
 	useExternalKeyboardControls(!readonly ? inputRef.current : null, keyboardEventHandlers);
 
     return (
-        <div ref={inputBoxRef} 
+        <div ref={inputBoxRef}
              className={clsx('inputBox', focusClass)}
              style={{...readonly && {borderColor: 'transparent'}}}
-             onClick={(e) => e.stopPropagation()} 
+             onClick={(e) => e.stopPropagation()}
+             onBlur={!readonly ? handleBlur : undefined}
              {...focusHtml} >
 
             <input type='text'
+                   size={6}
                    ref={inputRef}
                    value={inputValue}
                    readOnly={readonly}
                    onChange={(e) => sendTempChange(createInputChange(e.target.value))}
-                   onBlur={!readonly ? handleBlur : undefined}
                    onKeyDown={!readonly ? handleKeyDown : undefined} />
 
-            {!readonly && 
+            {!readonly &&
                 <button type='button'
                         className={clsx('btnTimepicker', isOpened && 'rotate180deg')}
                         onClick={() => toggle(!isOpened)} />}
-                   
+
             {children &&
                 <div className='sideContent'>{children}</div>}
 
-            {isOpened && 
+            {isOpened &&
                 <PopupElement popupKey={path} className='timepickerPopup'>
-                    <div className='timepickerPopupBox' 
-                         onKeyDown={(e) => e.stopPropagation()} 
+                    <div className='timepickerPopupBox'
+                         onMouseDown={(e) => e.preventDefault()}
+                         onKeyDown={(e) => e.stopPropagation()}
                          style={{ height: `${7*TIME_ITEM_HEIGHT}em`}}>
 
                         {usedTokens.map(token => (
-                            <TimeSliderBlock key={token} 
-                                            token={token} 
-                                            current={getCurrentTokenValue(currentState, token)} 
+                            <TimeSliderBlock key={token}
+                                            token={token}
+                                            current={getCurrentTokenValue(currentState, token)}
                                             onClick={onTimeSliderClick} />))}
                     </div>
                 </PopupElement>}
