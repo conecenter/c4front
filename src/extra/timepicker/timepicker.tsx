@@ -48,12 +48,14 @@ function TimePicker({identity, state, offset, timestampFormatId, readonly, child
     const lastFinalState = useRef(state);  // return last final state on Esc
 
     // Server exchange initialization
-    const { currentState, sendTempChange, sendFinalChange: onFinalChange } =
+    const { currentState, sendTempChange, sendFinalChange: onFinalChange, wasChanged } =
         usePatchSync(receiverIdOf(identity), state, true, patchSyncTransformers);
 
     const sendFinalChange = (change: TimePickerState) => {
-        lastFinalState.current = change;
-        onFinalChange(change);
+        if (wasChanged) {
+            lastFinalState.current = change;
+            onFinalChange(change);
+        }
     }
 
     // Getting time pattern from locale
@@ -170,10 +172,10 @@ function TimePicker({identity, state, offset, timestampFormatId, readonly, child
              {...focusHtml} >
 
             <input type='text'
-                   size={6}
                    ref={inputRef}
                    value={inputValue}
                    readOnly={readonly}
+                   style={{ minWidth: '2em' }}  // override for CSS
                    onChange={(e) => sendTempChange(createInputChange(e.target.value))}
                    onKeyDown={!readonly ? handleKeyDown : undefined} />
 
