@@ -8,6 +8,7 @@ function getHeaders(ch: TimePickerState): PatchHeaders {
         ? { ...ch.tempTimestamp && {'x-r-temp-timestamp':  String(ch.tempTimestamp)} } 
         : { 'x-r-timestamp': String(ch.timestamp) };
     return {
+        "x-r-change-type": "dateChange",  // compatibility with datePicker receiver
         "x-r-type": ch.tp,
         ...headers
     };
