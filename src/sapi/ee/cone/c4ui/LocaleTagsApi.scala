@@ -73,6 +73,7 @@ trait TimePickerProps extends ToChildPair
   @c4el("TimePicker") def timePicker(
     key: String,
     state: TimePickerState,
+    offset: Option[Int] = None,
     timestampFormatId: Int,
     receiver: Receiver[C],
     deferredSend: Boolean = false,
