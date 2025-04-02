@@ -2,7 +2,7 @@ import React, { MouseEvent } from "react";
 import { useUserLocale } from "../locale";
 import { addMonths, getDate as getDayOfMonth, getDaysInMonth, getWeek, isMonday, set, startOfWeek } from "date-fns";
 import { isEmpty, nonEmpty, Option, toOption } from '../../main/option';
-import { adjustDate, DateSettings, getDate, getTimestamp, getPopupDate } from "./date-utils";
+import { adjustDate, DateSettings, getDate, getTimestamp, getPopupDate, getTimestampNow } from "./date-utils";
 import { createPopupChange, createTimestampChange, DatepickerChange, DatePickerState, PopupDate } from "./datepicker-exchange";
 import { PopupElement } from "../popup-elements/popup-element";
 import { usePopupState } from "../popup-elements/popup-manager";
@@ -161,7 +161,7 @@ export function DatepickerCalendar({
           const adjustedDate = adjustDate(currentDateOpt, symbol, +e.currentTarget.dataset.change, true);
           sendTempChange(createTimestampChange(getTimestamp(adjustedDate, dateSettings)));
       }
-      else sendTempChange(createTimestampChange(Date.now()));
+      else sendTempChange(createTimestampChange(getTimestampNow(dateSettings)));
     }
   }
 
@@ -169,7 +169,7 @@ export function DatepickerCalendar({
    * Now & Close buttons functionality
   */
   const onNowBtnClick = () => {
-    sendFinalChange(createTimestampChange(Date.now()), true);
+    sendFinalChange(createTimestampChange(getTimestampNow(dateSettings)), true);
     closePopup();
   }
 

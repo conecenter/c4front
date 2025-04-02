@@ -8,6 +8,7 @@ import {
     addMonths,
     addSeconds,
     addYears,
+    format,
     getDate as getDayOfMonth,
     getDaysInMonth,
     getHours,
@@ -18,6 +19,7 @@ import {
     getTime,
     getYear,
     isValid,
+    parse,
     setDate,
     setHours,
     setMilliseconds,
@@ -369,7 +371,19 @@ function incrementDate(
 
 function getPopupDate(date: Date): PopupDate {
     return { year: date.getFullYear(), month: date.getMonth() };
-  }
+}
 
-export {incrementDate, formatDate, getDate, parseStringToDate, getTimestamp, adjustDate, getPopupDate, tokenizeString}
+function getTimestampNow(dateSettings: DateSettings) {
+    const { pattern } = dateSettings.timestampFormat;
+    const now = Date.now();
+    return getTime(
+        parse(
+            format(now, pattern),
+            pattern,
+            now
+        )
+    );
+}
+
+export {incrementDate, formatDate, getDate, parseStringToDate, getTimestamp, adjustDate, getPopupDate, tokenizeString, getTimestampNow}
 export type {DateSettings, RegExpExtractor, Token, TimeToken, NumberToken}
