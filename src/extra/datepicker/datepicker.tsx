@@ -1,4 +1,4 @@
-import React, {ReactNode, useContext, useEffect, useMemo, useRef} from "react";
+import React, {ReactNode, useContext, useEffect, useRef} from "react";
 import clsx from 'clsx';
 import {getDateTimeFormat, useUserLocale} from "../locale";
 import {DateSettings, formatDate, getDate, getPopupDate, parseStringToDate} from "./date-utils";
@@ -79,7 +79,7 @@ export function DatePickerInputElement({
 	const locale = useUserLocale()
 	const timezoneId = userTimezoneId ? userTimezoneId : locale.timezoneId
 	const timestampFormat = getDateTimeFormat(timestampFormatId, locale)
-	const dateSettings: DateSettings = {timestampFormat: timestampFormat, locale: locale, timezoneId: timezoneId}
+	const dateSettings: DateSettings = {timestampFormat, locale, timezoneId}
 
 	const dateChanged = useRef(false);
 
@@ -101,11 +101,7 @@ export function DatePickerInputElement({
 
 	const memoInputValue = useRef('')
 
-	const {
-		date: currentDateOpt,
-		dateFormat,
-		inputValue
-	} = useMemo(() => getCurrentProps(currentState, dateSettings, memoInputValue), [currentState, dateSettings])
+	const { date: currentDateOpt, dateFormat, inputValue } = getCurrentProps(currentState, dateSettings, memoInputValue)
 
 	const inputRef = useRef<HTMLInputElement>(null)
 	const inputBoxRef = useRef<HTMLDivElement>(null)
@@ -280,7 +276,7 @@ function getCurrentProps(
 			const formatInfo = mapOption(date, date => formatDate(date, dateSettings))
 			const [formattedDate, dateFormat] = nonEmpty(formatInfo) ? formatInfo : ["", None]
 			memoInputValue.current = formattedDate;
-			return {date: date, dateFormat: dateFormat, inputValue: formattedDate}
+			return {date, dateFormat, inputValue: formattedDate}
 		}
 	}
 }
