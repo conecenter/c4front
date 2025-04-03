@@ -109,7 +109,7 @@ export function DatepickerCalendar({
     const isDateAvailable = nonEmpty(currentDateOpt);
     const baseDate = isDateAvailable ? currentDateOpt : getDate(Date.now(), dateSettings);
     if (isEmpty(baseDate)) return;
-    const timeSettings = isDateAvailable ? {} : { hours: 0, minutes: 0, seconds: 0 };
+    const timeSettings = isDateAvailable ? {} : { hours: 0, minutes: 0, seconds: 0, milliseconds: 0 };
     const chosenDate = set(baseDate, {
         year: +dateValues[2],
         month: +dateValues[1],
