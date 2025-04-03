@@ -21,8 +21,6 @@ PathContext.displayName = "PathContext";
         -- blur: to == null, from exists -- do nothing
 */
 
-const getFocusFramePath = (elem?: Element | null) => elem?.closest<HTMLElement>(SEL_FOCUS_FRAME)?.dataset.path;
-
 interface FocusAnnouncerElement {
     path: string,
     value: string,
@@ -34,7 +32,7 @@ interface FocusChange {
     target: Patch
 }
 
-function FocusAnnouncerElement({ path, value, onChange, children }: FocusAnnouncerElement) {
+function FocusAnnouncerElement({ path: thisPath, value, onChange, children }: FocusAnnouncerElement) {
     const [doc, setDoc] = useState<Document | undefined>(undefined);
 
     const isMounted = useRef(true);
@@ -45,6 +43,8 @@ function FocusAnnouncerElement({ path, value, onChange, children }: FocusAnnounc
 
     const isFocusedView = useRef(false);
     useEffect(() => { isFocusedView.current = isRootBranch(doc) }, [doc]);
+
+    const getFocusFramePath = (elem?: Element | null) => elem?.closest<HTMLElement>(SEL_FOCUS_FRAME)?.dataset.path || thisPath;
 
     function onFocus(e: FocusEvent) {
         isFocusedView.current = true;
@@ -66,7 +66,7 @@ function FocusAnnouncerElement({ path, value, onChange, children }: FocusAnnounc
             // hasNoFocusedElement gives other routines (e.g. popup) chance to do its own focus loss prevention
             const isFocusLost = doc && !doc.contains(target) && hasNoFocusedElement(doc);
             if (isFocusLost && isMounted.current) {
-                const aliveFocusableAncestor = focusableAncestors.find((elem) => doc?.contains(elem) && elem.dataset.path !== path);
+                const aliveFocusableAncestor = focusableAncestors.find((elem) => doc?.contains(elem));
                 (aliveFocusableAncestor || findAutofocusCandidate(doc))?.focus();
             }
         });
@@ -96,9 +96,9 @@ function FocusAnnouncerElement({ path, value, onChange, children }: FocusAnnounc
     return (
         <div
             ref={elem => setDoc(elem?.ownerDocument)}
-            className='focusAnnouncer focusWrapper'
+            className='focusAnnouncer'
             tabIndex={-1}
-            data-path={path}
+            data-path={thisPath}
         >
             <style>{focusFrameStyle}</style>
             <PathContext.Provider value={value}>
