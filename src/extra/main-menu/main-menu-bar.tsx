@@ -15,6 +15,7 @@ import {VISIBLE_CHILD_SELECTOR} from "../css-selectors";
 import {identityAt} from "../../main/vdom-util";
 import {usePatchSync} from "../exchange/patch-sync";
 import {PathContext} from "../focus-announcer";
+import { SVGElement } from "../../main/image";
 
 const MENU_BAR_PATH = 'main-menu-bar';
 const KEY_MODIFICATOR = { ArrowLeft: -1, ArrowRight: 1 };
@@ -73,7 +74,7 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
   const leftMenuWithLogo = !icon ? undefined : (
     <Expander key='left-menu-with-logo' className='leftMenuBox' area="lt">
       <div className='menuCustomItem menuLogo'>
-        <img src={icon} alt='menu-logo'/>
+        <SVGElement url={icon} alt='menu-logo'/>
       </div>
       {leftChildren}
     </Expander>
