@@ -3,11 +3,12 @@ import clsx from 'clsx';
 import { formatInTimeZone } from 'date-fns-tz'
 import { identityAt } from '../../main/vdom-util';
 import { useSync } from '../../main/vdom-hooks';
-import { Patch } from '../exchange/input-sync';
 import { useUserLocale } from '../locale';
 import { bg, de, da, et, enGB, lt, pl, ro, ru, uk, it } from 'date-fns/locale';
 import { useFocusControl } from '../focus-control';
+import { VISIBLE_CHILD_SELECTOR } from '../css-selectors';
 import type { Locale } from 'date-fns'
+import type { SendPatch } from '../exchange/patch-sync';
 
 interface IntlLocales {
 	[name: string]: Locale
@@ -23,6 +24,8 @@ interface MainMenuClock {
 }
 
 const SYNC_INTERVAL = 600000;
+
+const timeSyncIdOf = identityAt('timeSync');
 
 const calcOffset = (timestamp: number) => timestamp - Date.now();
 
@@ -47,13 +50,15 @@ function MainMenuClock({ identity, serverTime, timestampFormatId, path }: MainMe
 	const [date, time] = formattedDate.split('|');
 
 	// Time sync with server
-	const timeSyncIdOf = identityAt('timeSync');
-	const [_, enqueueTimeSyncPatch] = useSync(timeSyncIdOf(identity)) as [Patch[], (patch: Patch) => void];
+	const ref = useRef<HTMLDivElement>(null);
+	
+	const [_, enqueueTimeSyncPatch] = useSync(timeSyncIdOf(identity)) as [SendPatch[], (patch: SendPatch) => void];
 
-	const syncWithServer = () => {
-		// condition can be removed after transition to WebSockets
-		if (!document.hidden) enqueueTimeSyncPatch({value: '1'});
-	}
+	const syncWithServer = () => setTimeout(() => {
+		// menu have multiple copies of elements - hidden & visible
+		const isVisible = ref.current?.matches(VISIBLE_CHILD_SELECTOR);
+		if (isVisible && !document.hidden) enqueueTimeSyncPatch({value: '1'});	// condition document.hidden can be removed after transition to WebSockets
+	});
 
 	useEffect(() => {
 		syncWithServer();
@@ -80,6 +85,7 @@ function MainMenuClock({ identity, serverTime, timestampFormatId, path }: MainMe
 
 	return (
 		<div
+			ref={ref}
 			style={isSynced ? undefined : { visibility: 'hidden' }}
 			className={clsx('menuCustomItem dateTimeClock', focusClass)}
 			{...focusHtml}
