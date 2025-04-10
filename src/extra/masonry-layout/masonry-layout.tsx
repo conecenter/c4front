@@ -10,7 +10,7 @@ const GRID_MARGIN_SIZE = 10;
 
 const receiverIdOf = identityAt('receiver');
 
-const serverToState = (s?: GridLayout.Layouts) => s;
+const serverToState = (s: GridLayout.Layouts) => s;
 const changeToPatch = (ch: GridLayout.Layouts): Patch => ({ value: JSON.stringify(ch) });
 const patchToChange = (p: Patch): GridLayout.Layouts => JSON.parse(p.value);
 const applyChange = (prev: GridLayout.Layouts, ch: GridLayout.Layouts) => ch;
@@ -20,7 +20,7 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 
 interface MasonryLayout {
     identity: object,
-    layout?: GridLayout.Layouts,
+    layout: GridLayout.Layouts,
     breakpoints: { [P: string]: number },
     cols: { [P: string]: number },
     edit: boolean,
