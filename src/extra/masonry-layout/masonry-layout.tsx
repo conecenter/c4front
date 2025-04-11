@@ -53,8 +53,8 @@ function MasonryLayout({ identity, layout, breakpoints, cols, edit, children }: 
 
     const correctHeight = (itemKey: Key | null) => (element: HTMLDivElement | null) => {
         if (!element || !itemKey || !breakpoint) return;
-        const { offsetHeight, scrollHeight } = element;
-        if (scrollHeight > offsetHeight) {
+        const { clientHeight, scrollHeight } = element;
+        if (scrollHeight > clientHeight) {
             const newRowHeight = Math.ceil((scrollHeight + GRID_MARGIN_SIZE) / (GRID_ROW_SIZE + GRID_MARGIN_SIZE));
             setLocalLayout(updateLocalLayout(itemKey, breakpoint, newRowHeight));
         }
