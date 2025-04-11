@@ -9,8 +9,6 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
 
 @c4tagSwitch("FrontApp") trait Layout extends ToJson
 
-@c4tagSwitch("FrontApp") trait BreakpointLayout extends ToJson
-
 @c4tags("FrontApp") trait MasonryLayout[C] {
   @c4val def breakpoint(
     lg: Int,
@@ -35,19 +33,12 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
     minW: Int,
   ): Layout
 
-  @c4val def breakpointLayout(
-    lg: List[Layout],
-    md: List[Layout],
-    sm: List[Layout],
-    xs: List[Layout],
-  ): BreakpointLayout
-
   @c4el("MasonryLayout") def masonryLayout(
     key: String,
-    layout: BreakpointLayout,
+    layout: String,
     breakpoints: Breakpoint,
     cols: Col,
-    edit: Boolean = false,
+    edit: Boolean,
     children: ViewRes,
     receiver: Receiver[C] = NoReceiver[C],
   ): ToChildPair
