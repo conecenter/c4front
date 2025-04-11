@@ -256,15 +256,15 @@ const useGridKeyboardAction = identity => {
     }, [enqueueKeyboardActionPatch])
 }
 
-const useValueToServer = (identity, value) => {
+const useValueToServer = (identity, value, hasReceiver) => {
     const {isRoot} = useContext(RootBranchContext)
     const [patches, enqueuePatch] = useSync(identity)
     useEffect(() => {
-        if (isRoot) enqueuePatch({ value, skipByPath: true, retry: true })
-    }, [value, enqueuePatch])
+        if (hasReceiver && isRoot) enqueuePatch({ value, skipByPath: true, retry: true })
+    }, [value, enqueuePatch, hasReceiver, isRoot])
 }
 
-export function GridRoot({ identity, rows: argRows, cols: argCols, children: rawChildren = [], gridKey, alwaysShowExpander }) {
+export function GridRoot({ identity, rows: argRows, cols: argCols, children: rawChildren = [], gridKey, alwaysShowExpander, hasHiddenCols: hasHiddenColsReceiver }) {
     const printMode = useContext(PrintContext);
     const rows = printMode ? argRows.map(row => ({...row, isExpanded: true})) : argRows
     const cols = printMode ? argCols.filter(col => !isServiceCol(col.colKey)) : argCols
@@ -297,7 +297,7 @@ export function GridRoot({ identity, rows: argRows, cols: argCols, children: raw
         fixedCellsSize
     ), [cols, hideElementsForHiddenCols, hasHiddenCols, alwaysShowExpander, fixedCellsSize])
 
-    useValueToServer(hasHiddenColsIdOf(identity), hasHiddenCols)
+    useValueToServer(hasHiddenColsIdOf(identity), hasHiddenCols, hasHiddenColsReceiver)
 
     const dragRowKey = dragData.axis === "y" && dragData.drag && dragData.drag.key
     //todo: fix expand+drag -- may be prepend with bg-cell with rowspan 2
