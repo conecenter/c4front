@@ -1,11 +1,11 @@
 import ReactDOM from "react-dom"
 import { createElement as $ } from "react"
 import {createSyncProviders} from "../main/vdom-hooks";
-import { RouteElement } from "../extra/route-element";
+import { SegmentedChip } from "../extra/segmented-chip";
 
 
 function App() {
-    const child = $('div', {style: { margin: '3em', width: 'max-content' }}, $(RouteElement, {
+    const child = $('div', {style: { margin: '3em', width: 'max-content' }}, $(SegmentedChip, {
         key: "TEST1",
         identity: {parent: "TEST_1"},
         compact: false,

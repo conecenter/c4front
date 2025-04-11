@@ -16,7 +16,7 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, c4el, c4tags}
     children: ViewRes = Nil,
   ): ToChildPair
 
-  @c4el("RouteElement") def routeElement(
+  @c4el("SegmentedChip") def segmentedChip(
     key: String,
     routeParts: ViewRes = Nil, // ChipElement
     compact: Boolean = false,
