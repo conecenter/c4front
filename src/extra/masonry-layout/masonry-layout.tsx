@@ -10,7 +10,7 @@ const GRID_MARGIN_SIZE = 10;
 
 const receiverIdOf = identityAt('receiver');
 
-const serverToState = (s: GridLayout.Layouts) => s;
+const serverToState = (s?: string): GridLayout.Layouts => s ? JSON.parse(s) : [];
 const changeToPatch = (ch: GridLayout.Layouts): Patch => ({ value: JSON.stringify(ch) });
 const patchToChange = (p: Patch): GridLayout.Layouts => JSON.parse(p.value);
 const applyChange = (prev: GridLayout.Layouts, ch: GridLayout.Layouts) => ch;
@@ -20,16 +20,16 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 
 interface MasonryLayout {
     identity: object,
-    layout: GridLayout.Layouts,
+    layout?: string,
     breakpoints: { [P: string]: number },
     cols: { [P: string]: number },
     edit: boolean,
     children?: ReactNode[]
 }
 
-function MasonryLayout({ identity, layout, breakpoints, cols, edit, children }: MasonryLayout) {
+function MasonryLayout({ identity, layout: layoutJSON, breakpoints, cols, edit, children }: MasonryLayout) {
     const { currentState: layoutState, sendFinalChange } =
-        usePatchSync(receiverIdOf(identity), layout, false, patchSyncTransformers);
+        usePatchSync(receiverIdOf(identity), layoutJSON, false, patchSyncTransformers);
 
     const [breakpoint, setBreakpoint] = useState<string | null>(null);
 
@@ -49,7 +49,7 @@ function MasonryLayout({ identity, layout, breakpoints, cols, edit, children }: 
 
     useEffect(() => {
         if (localLayout !== layoutState) setLocalLayout(layoutState);
-    }, [layoutState, breakpoint]);
+    }, [edit ? layoutState : layoutJSON, breakpoint]);
 
     const correctHeight = (itemKey: Key | null) => (element: HTMLDivElement | null) => {
         if (!element || !itemKey || !breakpoint) return;
