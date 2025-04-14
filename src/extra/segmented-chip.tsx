@@ -10,7 +10,7 @@ import { UiInfoContext } from './ui-info-provider';
 
 const keyboardActionIdOf = identityAt('keyboardAction');
 
-interface RouteElementProps {
+interface SegmentedChipProps {
     key: string,
     identity: object,
     keyboardAction?: boolean,
@@ -19,7 +19,7 @@ interface RouteElementProps {
     extraParts?: ReactElement[]
 }
 
-function RouteElement({identity, keyboardAction, compact, routeParts, extraParts}: RouteElementProps) {
+function SegmentedChip({identity, keyboardAction, compact, routeParts, extraParts}: SegmentedChipProps) {
     const routeElemRef = useRef(null);
 
     const readOnly = !keyboardAction;
@@ -31,7 +31,7 @@ function RouteElement({identity, keyboardAction, compact, routeParts, extraParts
     const uiType = useContext(UiInfoContext);
 
     const className = clsx(
-        'routeElement focusFrameProvider',
+        'segmentedChip focusFrameProvider',
         focusClass,
         compact && 'compact',
         uiType === 'touch' && 'fingerSized'
@@ -80,4 +80,4 @@ function RouteElement({identity, keyboardAction, compact, routeParts, extraParts
     );
 }
 
-export { RouteElement };
+export { SegmentedChip };

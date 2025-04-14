@@ -204,12 +204,14 @@ export function DatePickerInputElement({
 	const onChange = getOnChange(dateSettings, sendTempChange)
 	const onKeyDown = getOnKeyDown(
 		currentDateOpt,
+		currentState,
 		dateFormat,
 		dateSettings,
 		memoInputValue,
 		onTimestampChange,
 		setSelection,
 		sendTempChange,
+		sendFinalChange,
 		inputBoxRef,
 		togglePopup
 	)

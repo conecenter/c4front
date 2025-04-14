@@ -2,7 +2,7 @@ import {createElement as $,cloneElement,useContext} from "react"
 import clsx from "clsx"
 import {em,sum,findLastIndex} from "./vdom-util.js"
 import {useWidths} from "../main/sizes.js"
-import {NoCaptionContext} from "./vdom-hooks.js"
+import {NoCaptionContext, HorizontalCaptionContext} from "./vdom-hooks.js"
 import {FilterButtonExpander, FilterButtonExpanderContext} from '../extra/massops/filter-button-expander'
 import {MassOp} from '../extra/massops/filter-massop'
 
@@ -117,8 +117,9 @@ export function FilterArea({filters,buttons,className/*,maxFilterAreaWidth*/}){
     /* maxWidth: maxFilterAreaWidth ? em(maxFilterAreaWidth) : "100vw"*/
     const height = yRowToEm(groupedFilters.length)
     return $(NoCaptionContext.Provider, {value: true},
-        $(FilterButtonExpanderContext.Provider, {value: null},
-            $("div",{className},addContainer(height,children))))
+        $(HorizontalCaptionContext.Provider, {value: false},
+            $(FilterButtonExpanderContext.Provider, {value: null},
+                $("div",{className},addContainer(height,children)))))
 }
 
 export function FilterItem({className,children}){

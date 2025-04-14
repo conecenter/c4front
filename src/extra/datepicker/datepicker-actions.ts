@@ -46,12 +46,14 @@ const onTimestampChangeAction = (
 
 function getOnKeyDown(
     currentDateOpt: Option<Date>,
+    currentState: DatePickerState,
     dateFormat: Option<string>,
     dateSettings: DateSettings,
     memoInputValue: React.MutableRefObject<string>,
     onTimestampChange: (timestamp: number) => void,
     setSelection: (from: number, to: number) => void,
     sendTempChange: (ch: DatepickerChange) => void,
+    sendFinalChange: (ch: DatepickerChange) => void,
     inputBoxRef: React.MutableRefObject<HTMLElement | null>,
     togglePopup: () => void
     ): (event: KeyboardEvent<HTMLInputElement>) => void {
@@ -59,6 +61,7 @@ function getOnKeyDown(
         switch (e.key) {
             case ENTER_KEY: {
                 e.stopPropagation();
+                handleChangeOnBlur(currentState, memoInputValue, sendFinalChange);
                 // Async "cTab" event dispatch to fix edit icon blinking
                 const currTarget = e.currentTarget;
                 setTimeout(() => currTarget.dispatchEvent(new CustomEvent("cTab", { bubbles: true })));
@@ -142,6 +145,18 @@ function getOnBlur(
     }
 }
 
+function handleChangeOnBlur(
+    currentState: DatePickerState,
+    memoInputValue: React.MutableRefObject<string>,
+    sendFinalChange: (change: DatepickerChange) => void
+) {
+    const timestamp = isTimestampState(currentState) ? currentState.timestamp : currentState.tempTimestamp;
+    if (timestamp) return sendFinalChange(createTimestampChange(timestamp));
+    const {inputValue} = currentState as InputState;
+    sendFinalChange(createInputChange(inputValue));
+    memoInputValue.current = inputValue;
+}
+
 function getOnInputBoxBlur(
     currentState: DatePickerState,
     memoInputValue: React.MutableRefObject<string>,
@@ -150,11 +165,7 @@ function getOnInputBoxBlur(
     const isCalendarPopupChild = (elem: EventTarget | null) => !!(elem instanceof Element && elem.closest(`.${CALENDAR_CLASSNAME}`));
     return (e: React.FocusEvent<HTMLDivElement>) => {
         if (e.currentTarget.contains(e.relatedTarget as Node) || isCalendarPopupChild(e.relatedTarget)) return;
-        const timestamp = isTimestampState(currentState) ? currentState.timestamp : currentState.tempTimestamp;
-        if (timestamp) return sendFinalChange(createTimestampChange(timestamp));
-        const {inputValue} = currentState as InputState;
-        sendFinalChange(createInputChange(inputValue));
-        memoInputValue.current = inputValue;
+        handleChangeOnBlur(currentState, memoInputValue, sendFinalChange);
     }
 }
 
