@@ -10,7 +10,6 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
 @c4tagSwitch("FrontApp") trait Layout extends ToJson
 
 @c4tags("FrontApp") trait MasonryLayout[C] {
-
   @c4val def breakpoint(
     lg: Int,
     md: Int,
