@@ -25,14 +25,14 @@ interface MasonryLayout {
     breakpoints: { [P: string]: number },
     cols: { [P: string]: number },
     edit: boolean,
-    children: ReactElement[]
+    children?: ReactElement[]
 }
 
 function MasonryLayout({ identity, layout: layoutJSON, breakpoints, cols, edit, children }: MasonryLayout) {
     const { currentState: layoutServerState, sendFinalChange } =
         usePatchSync(receiverIdOf(identity), layoutJSON, false, patchSyncTransformers);
     
-    const layoutState = useDefaultLayout(layoutServerState, breakpoints, children, cols, sendFinalChange);
+    const layoutState = useDefaultLayout(layoutServerState, breakpoints, cols, sendFinalChange, children);
 
     const [breakpoint, setBreakpoint] = useState<string | null>(null);
 
@@ -133,20 +133,21 @@ function MasonryLayout({ identity, layout: layoutJSON, breakpoints, cols, edit, 
 function useDefaultLayout(
     layoutServerState: GridLayout.Layouts | null,
     breakpoints: { [P: string]: number },
-    children: ReactElement[],
     cols: { [P: string]: number },
-    sendFinalChange: (layout: GridLayout.Layouts) => void
+    sendFinalChange: (layout: GridLayout.Layouts) => void,
+    children?: ReactElement[]
 ) {
     const checkApplyDefaultLayout = () => {
         if (layoutServerState) return layoutServerState;
-        const newLayouts = createDefaultLayout(breakpoints, children, cols);
+        const newLayouts = createDefaultLayout(breakpoints, cols, children);
         sendFinalChange(newLayouts);
         return newLayouts;
     }
     return checkApplyDefaultLayout();
 }
 
-function createDefaultLayout(breakpoints: { [P: string]: number }, children: ReactElement[], cols: { [P: string]: number }): GridLayout.Layouts {
+function createDefaultLayout(breakpoints: { [P: string]: number }, cols: { [P: string]: number }, children?: ReactElement[]): GridLayout.Layouts {
+    if (!children) return {};
     const bps = Object.keys(breakpoints);
     const childrenKeys = children.map((child) => child.key as string | null);
     return bps.reduce<GridLayout.Layouts>((acc, bp) => {
