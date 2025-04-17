@@ -57,14 +57,39 @@ function App() {
             $(LabeledElement, { key: 'c2', label: "Number/Marking_2", children: "33AHD540" }), 
             $(LabeledElement, { key: 'c3', label: "Location_2", children: "CU_PARK_IMP" })
         ]}),
-        $(FlexGroup, { key: 'eee', children: [
+        /*$(FlexGroup, { key: 'eee', children: [
             $(LabeledElement, { key: 'c1', label: "Case Time_2", children: "17/07/2024 15:32" }), 
             $(LabeledElement, { key: 'c2', label: "Number/Marking_2", children: "33AHD540" }), 
             $(LabeledElement, { key: 'c3', label: "Location_2", children: "CU_PARK_IMP" })
-        ]})
+        ]})*/
     ];
 
-    const layout = "";
+    const layout = JSON.stringify({
+        lg: [
+            { i: "aaa", x: 0, y: 0, w: 2, h: 4, minW: 2 },
+            { i: "bbb", x: 2, y: 4, w: 2, h: 4, minW: 2 },
+            { i: "ccc", x: 4, y: 4, w: 2, h: 4, minW: 2 },
+            { i: "ddd", x: 0, y: 0, w: 2, h: 4, minW: 2 }
+        ],
+        md: [
+            { i: "aaa", x: 0, y: 0, w: 2, h: 4, minW: 2 },
+            { i: "bbb", x: 2, y: 0, w: 2, h: 8, minW: 2 },
+            { i: "ccc", x: 4, y: 0, w: 2, h: 8, minW: 2 },
+            { i: "ddd", x: 0, y: 0, w: 2, h: 4, minW: 2 }
+        ],
+        sm: [
+            { i: "aaa", x: 0, y: 0, w: 2, h: 4 },
+            { i: "bbb", x: 0, y: 1, w: 1, h: 4 },
+            { i: "ccc", x: 1, y: 1, w: 1, h: 4 },
+            { i: "ddd", x: 0, y: 0, w: 1, h: 4 }
+        ],
+        xs: [
+            { i: "aaa", x: 0, y: 0, w: 1, h: 4 },
+            { i: "bbb", x: 0, y: 1, w: 1, h: 4 },
+            { i: "ccc", x: 0, y: 2, w: 1, h: 4 },
+            { i: "ddd", x: 0, y: 0, w: 1, h: 4 }
+        ]
+    });
 
     const children = $(MasonryLayout, {
         identity: { parent: "TEST_1" },
