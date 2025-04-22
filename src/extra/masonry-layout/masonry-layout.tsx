@@ -47,7 +47,8 @@ function MasonryLayout({ identity, layout, breakpoints, cols, edit, children }: 
                 [breakpoint]: updatedLayout
             };
             console.log('MasonryLayout: sendLayoutChange', { newLayouts });
-            sendFinalChange(newLayouts);
+            JSON.stringify(layoutState[breakpoint]) === JSON.stringify(updatedLayout)
+                ? setLocalLayout(newLayouts) : sendFinalChange(newLayouts);
         }
     }
 
