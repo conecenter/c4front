@@ -44,9 +44,8 @@ function MasonryLayout({ identity, layout, breakpoints, cols, edit, children }: 
     function sendLayoutChange(updatedLayout: GridLayout.Layout[]) {
         if (breakpoint) {
             const newLayouts = { ...layoutState, [breakpoint]: updatedLayout };
-            console.log('MasonryLayout: sendLayoutChange', { newLayouts });
-            equal(layoutState[breakpoint], updatedLayout)
-                ? setLocalLayout(newLayouts) : sendFinalChange(newLayouts);
+            if (equal(layoutState[breakpoint], updatedLayout)) setLocalLayout(newLayouts);
+            else sendFinalChange(newLayouts);
         }
     }
 
@@ -54,19 +53,13 @@ function MasonryLayout({ identity, layout, breakpoints, cols, edit, children }: 
     const [localLayout, setLocalLayout] = useState(layoutState);
 
     useMemo(function alignLocalLayoutWithServer() {
-        if (!equal(localLayout, layoutState)) {
-            console.log('useMemo - CHANGED LAYOUTSTATE', { localLayout, layoutState });
-            setLocalLayout(layoutState);
-        }
+        if (!equal(localLayout, layoutState)) setLocalLayout(layoutState);
     }, [JSON.stringify(layoutState)]);
-
-    console.log('RENDER', { layoutServerState, layoutState, localLayout, breakpoint });
 
     const correctHeight = (itemKey: Key | null) => (element: HTMLDivElement | null) => {
         if (!element || !itemKey || !breakpoint || isDragging || isResizingRef.current) return;
         const { clientHeight, scrollHeight } = element;
         if (scrollHeight > clientHeight) {
-            console.log('CORRECT HEIGHT', { itemKey, scrollHeight, clientHeight });
             const newRowHeight = Math.ceil((scrollHeight + GRID_MARGIN_SIZE) / (GRID_ROW_SIZE + GRID_MARGIN_SIZE));
             setLocalLayout(updateLocalLayout(itemKey, breakpoint, newRowHeight));
         }
@@ -138,13 +131,9 @@ function useBreakpoint(breakpoints: { [P: string]: number }) {
         if (prev) return prev;
         const sortedBreakpoints = Object.entries(breakpoints).sort((a, b) => b[1] - a[1]);
         const newBreakpoint = sortedBreakpoints.find(([_, width]) => containerWidth > width)?.[0];
-        if (newBreakpoint) console.log('setting new breakpoint', { newBreakpoint });
         return newBreakpoint || null;
     });
-    const onBreakpointChange = (newBreakpoint: string) => {
-        console.log('onBreakpointChange', { newBreakpoint });
-        setBreakpoint(newBreakpoint);
-    }
+    const onBreakpointChange = (newBreakpoint: string) => setBreakpoint(newBreakpoint);
     return { breakpoint, onBreakpointChange, onWidthChange };
 }
 
@@ -167,10 +156,7 @@ export function getAlignedLayout(
             layoutServerState[bp]?.find((item) => item.i === key) || getDefaultItemLayout(key as string, bp));
         return alignedLayout;
     }, {});
-    if (!equal(alignedLayout, layoutServerState)) {
-        console.log('send alignedLayout to server', { alignedLayout, layoutServerState });
-        sendFinalChange(alignedLayout);
-    }
+    if (!equal(alignedLayout, layoutServerState)) sendFinalChange(alignedLayout);
     return alignedLayout;
 }
 
