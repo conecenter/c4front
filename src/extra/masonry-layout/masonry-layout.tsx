@@ -35,7 +35,7 @@ function MasonryLayout({ identity, layout, breakpoints, cols, edit, children }: 
     
     const layoutState = edit ? getAlignedLayout(layoutServerState, breakpoints, sendFinalChange, children) : layoutServerState;
 
-    const [breakpoint, setBreakpoint] = useState<string | null>(null);
+    const { breakpoint, onBreakpointChange, onWidthChange } = useBreakpoint(breakpoints);
 
     const [isDragging, setIsDragging] = useState(false);
     const isResizingRef = useRef(false);
@@ -111,7 +111,8 @@ function MasonryLayout({ identity, layout, breakpoints, cols, edit, children }: 
             onResizeStop={onResizeStop}
             onDragStop={onDragStop}
             onDragStart={() => setIsDragging(true)}
-            onBreakpointChange={setBreakpoint}
+            onBreakpointChange={onBreakpointChange}
+            onWidthChange={onWidthChange}
             isDraggable={edit ? true : false}
             isResizable={edit ? true : false}
         >
@@ -130,6 +131,19 @@ function MasonryLayout({ identity, layout, breakpoints, cols, edit, children }: 
             })}
         </ResponsiveGridLayout>
     );
+}
+
+function useBreakpoint(breakpoints: { [P: string]: number }) {
+    const [breakpoint, setBreakpoint] = useState<string | null>(null);
+    const onWidthChange = (containerWidth: number) => {
+        if (!breakpoint) {
+            const sortedBreakpoints = Object.entries(breakpoints).sort((a, b) => b[1] - a[1]);
+            const newBreakpoint = sortedBreakpoints.find(([_, width]) => containerWidth > width)?.[0];
+            newBreakpoint && setBreakpoint(newBreakpoint);
+        }
+    }
+    const onBreakpointChange = (newBreakpoint: string) => setBreakpoint(newBreakpoint);
+    return { breakpoint, onBreakpointChange, onWidthChange };
 }
 
 const getDefaultItemLayout = (key: string, bp: string): GridLayout.Layout => {
