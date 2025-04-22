@@ -1,5 +1,6 @@
 import React, { Key, ReactElement, useMemo, useRef, useState } from "react";
 import GridLayout, { Responsive, WidthProvider } from 'react-grid-layout';
+import equal from "fast-deep-equal";
 import clsx from "clsx";
 import { Patch, usePatchSync } from "../exchange/patch-sync";
 import { GridItemWrapper } from "./grid-item";
@@ -41,26 +42,23 @@ function MasonryLayout({ identity, layout, breakpoints, cols, edit, children }: 
     const isResizingRef = useRef(false);
 
     function sendLayoutChange(updatedLayout: GridLayout.Layout[]) {
-        if (breakpoint && layoutState[breakpoint]) {
-            const newLayouts = {
-                ...layoutState,
-                [breakpoint]: updatedLayout
-            };
+        if (breakpoint) {
+            const newLayouts = { ...layoutState, [breakpoint]: updatedLayout };
             console.log('MasonryLayout: sendLayoutChange', { newLayouts });
-            JSON.stringify(layoutState[breakpoint]) === JSON.stringify(updatedLayout)
+            equal(layoutState[breakpoint], updatedLayout)
                 ? setLocalLayout(newLayouts) : sendFinalChange(newLayouts);
         }
     }
 
+    // Local layout to correct real height of grid items based on content
     const [localLayout, setLocalLayout] = useState(layoutState);
 
-    const layoutStateJson = JSON.stringify(layoutState);
-    useMemo(() => {
-        if (JSON.stringify(localLayout) !== layoutStateJson) {
+    useMemo(function alignLocalLayoutWithServer() {
+        if (!equal(localLayout, layoutState)) {
             console.log('useMemo - CHANGED LAYOUTSTATE', { localLayout, layoutState });
             setLocalLayout(layoutState);
         }
-    }, [layoutStateJson]);
+    }, [JSON.stringify(layoutState)]);
 
     console.log('RENDER', { layoutServerState, layoutState, localLayout, breakpoint });
 
@@ -79,7 +77,7 @@ function MasonryLayout({ identity, layout, breakpoints, cols, edit, children }: 
         return h ? h * GRID_ROW_SIZE + (h - 1) * GRID_MARGIN_SIZE : null;
     }
 
-    function onResizeStop(layout: GridLayout.Layout[], oldItem: GridLayout.Layout, newItem: GridLayout.Layout) {
+    function onResizeStop(_layout: GridLayout.Layout[], _oldItem: GridLayout.Layout, newItem: GridLayout.Layout) {
         isResizingRef.current = false;
         const currentLayout = breakpoint && layoutState[breakpoint];
         if (!currentLayout) return;
@@ -136,14 +134,17 @@ function MasonryLayout({ identity, layout, breakpoints, cols, edit, children }: 
 
 function useBreakpoint(breakpoints: { [P: string]: number }) {
     const [breakpoint, setBreakpoint] = useState<string | null>(null);
-    const onWidthChange = (containerWidth: number) => {
-        if (!breakpoint) {
-            const sortedBreakpoints = Object.entries(breakpoints).sort((a, b) => b[1] - a[1]);
-            const newBreakpoint = sortedBreakpoints.find(([_, width]) => containerWidth > width)?.[0];
-            newBreakpoint && setBreakpoint(newBreakpoint);
-        }
+    const onWidthChange = (containerWidth: number) => setBreakpoint((prev) => {
+        if (prev) return prev;
+        const sortedBreakpoints = Object.entries(breakpoints).sort((a, b) => b[1] - a[1]);
+        const newBreakpoint = sortedBreakpoints.find(([_, width]) => containerWidth > width)?.[0];
+        if (newBreakpoint) console.log('setting new breakpoint', { newBreakpoint });
+        return newBreakpoint || null;
+    });
+    const onBreakpointChange = (newBreakpoint: string) => {
+        console.log('onBreakpointChange', { newBreakpoint });
+        setBreakpoint(newBreakpoint);
     }
-    const onBreakpointChange = (newBreakpoint: string) => setBreakpoint(newBreakpoint);
     return { breakpoint, onBreakpointChange, onWidthChange };
 }
 
@@ -156,18 +157,17 @@ export function getAlignedLayout(
     layoutServerState: GridLayout.Layouts,
     breakpoints: { [P: string]: number },
     sendFinalChange: (layout: GridLayout.Layouts) => void,
-    children: ReactElement[] = []
+    children?: ReactElement[]
 ): GridLayout.Layouts {
+    if (!children) return {};
     const bps = Object.keys(breakpoints);
-    console.log('getAlignedLayout', { layoutServerState, breakpoints, children });
-    const alignedLayout = children?.reduce<GridLayout.Layouts>((alignedLayout, child) => {
-        bps.forEach((bp) => {
-            const savedItemLayout = layoutServerState[bp]?.find((item) => item.i === child.key);
-            alignedLayout[bp] = [...(alignedLayout[bp] || []), savedItemLayout || getDefaultItemLayout(child.key as string, bp)];
-        });
+    const childrenKeys = children.map((child) => child.key);
+    const alignedLayout = bps.reduce<GridLayout.Layouts>((alignedLayout, bp) => {
+        alignedLayout[bp] = childrenKeys.map((key) =>
+            layoutServerState[bp]?.find((item) => item.i === key) || getDefaultItemLayout(key as string, bp));
         return alignedLayout;
     }, {});
-    if (JSON.stringify(alignedLayout) !== JSON.stringify(layoutServerState)) {
+    if (!equal(alignedLayout, layoutServerState)) {
         console.log('send alignedLayout to server', { alignedLayout, layoutServerState });
         sendFinalChange(alignedLayout);
     }
@@ -178,10 +178,7 @@ const updateLocalLayout = (itemKey: Key, currentBp: string, newRowHeight: number
     const currentLayout = prev[currentBp];
     const currentGridItem = currentLayout?.find((item) => item.i === itemKey);
     if (!currentGridItem || currentGridItem.h === newRowHeight) return prev;
-    const updatedLayout = currentLayout.map((item) => ({
-        ...item,
-        ...item.i === itemKey && { h: newRowHeight }
-    }));
+    const updatedLayout = currentLayout.map((item) => item.i === itemKey ? { ...item, h: newRowHeight } : item);
     return { ...prev, [currentBp]: updatedLayout };
 }
 
