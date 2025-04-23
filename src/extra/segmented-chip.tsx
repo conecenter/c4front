@@ -11,7 +11,6 @@ import { UiInfoContext } from './ui-info-provider';
 const keyboardActionIdOf = identityAt('keyboardAction');
 
 interface SegmentedChipProps {
-    key: string,
     identity: object,
     keyboardAction?: boolean,
     compact?: boolean,
