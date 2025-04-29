@@ -135,6 +135,10 @@ function getCurrentFMTChar(pattern: string, cursorPosition: number) {
     }
 }
 
+function isNumber(value: unknown): value is number {
+    return typeof value === 'number';
+}
+
 export {
     formatTimestamp,
     parseStringToTime,
@@ -144,6 +148,7 @@ export {
     getCurrentFMTChar,
     getAdjustedTime,
     getCurrentTokenValue,
+    isNumber,
     MAX_TIMESTAMP,
     TIME_TOKENS,
     TOKEN_DATA
