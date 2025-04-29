@@ -140,7 +140,7 @@ const month: RegExpExtractor = {
     extractor: match => ({type: 'month', value: match[0], length: match[0].length})
 }
 const Hm: RegExpExtractor = {
-    regex: /^(\d{1,2}):(\d{1,2})/,
+    regex: /^(\d{1,2}):(\d{1,2})$/,
     extractor: match => ({
         type: 'time',
         H: parseInt(match[1]) || 0,
@@ -149,7 +149,7 @@ const Hm: RegExpExtractor = {
     })
 }
 const Hms: RegExpExtractor = {
-    regex: /^(\d{1,2}):(\d{1,2}):(\d{1,2})/,
+    regex: /^(\d{1,2}):(\d{1,2}):(\d{1,2})$/,
     extractor: match => ({
         type: 'time',
         H: parseInt(match[1]) || 0,
@@ -159,7 +159,7 @@ const Hms: RegExpExtractor = {
     })
 }
 const HmsS: RegExpExtractor = {
-    regex: /^(\d{1,2}):(\d{1,2}):(\d{1,2})\.(\d{1,3})/,
+    regex: /^(\d{1,2}):(\d{1,2}):(\d{1,2})\.(\d{1,3})$/,
     extractor: match => ({
         type: 'time',
         H: parseInt(match[1]) || 0,

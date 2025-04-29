@@ -15,7 +15,7 @@ import { identityAt } from "../../main/vdom-util";
 import { BACKSPACE_EVENT, COPY_EVENT, CUT_EVENT, DELETE_EVENT, ENTER_EVENT, PASTE_EVENT, useExternalKeyboardControls }
     from "../focus-module-interface";
 import { createInputChange, createTimestampChange, parseStringToTime, isInputState, formatTimestamp, getCurrentFMTChar,
-    getCurrentTokenValue, getAdjustedTime, isNumber, MAX_TIMESTAMP, TIME_TOKENS, TOKEN_DATA } from "./time-utils";
+    getCurrentTokenValue, getAdjustedTime, isNumber, TIME_TOKENS, TOKEN_DATA } from "./time-utils";
 
 const receiverIdOf = identityAt('receiver');
 
@@ -88,7 +88,7 @@ function TimePicker({identity, state, offset, timestampFormatId, readonly, child
     const createFinalChange = (state: TimePickerState) => {
         const timestamp = isInputState(state) ? parseStringToTime(state.inputValue, usedTokens) : state.timestamp;
         return isNumber(timestamp)
-            ? createTimestampChange(timestamp % MAX_TIMESTAMP)
+            ? createTimestampChange(timestamp)
             : createInputChange((state as InputState).inputValue);
     }
 

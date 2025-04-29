@@ -86,32 +86,34 @@ function formatTimestamp(milliseconds: number, usedTokens: string[], offset = 0)
 
 
 // Time parsing functionality
-function parseStringToTime(value: string, usedTokens: string[]): number | undefined {
+function parseStringToTime(value: string, usedTokens: string[]): number | null {
     const tokens = tokenizeString(value, true);
-    if (tokens.length > 0) {
-        const timeToken = <TimeToken | undefined>tokens.find((value: Token) => value.type === 'time');
-        const numberTokens = tokens.filter((value): value is NumberToken => value.type !== 'time');
-        if (timeToken) return timeTokenToMs(usedTokens, timeToken, numberTokens);
-        else {
-            const [H, m, s, S] = numberTokens;
-            const customTimeToken: TimeToken = {
-                type: 'time',
-                H: H?.value,
-                m: m?.value,
-                s: s?.value,
-                S: S?.value,
-                length: tokens.length
-            };
-            return timeTokenToMs(usedTokens, customTimeToken);
-        }
+    if (tokens.length === 0) return null;
+    const timeToken = <TimeToken | undefined>tokens.find((value: Token) => value.type === 'time');
+    const numberTokens = tokens.filter((value): value is NumberToken => value.type !== 'time');
+    if (timeToken) return timeTokenToMs(usedTokens, timeToken, numberTokens);
+    else {
+        const [H, m, s, S] = numberTokens;
+        const customTimeToken: TimeToken = {
+            type: 'time',
+            H: H?.value,
+            m: m?.value,
+            s: s?.value,
+            S: S?.value,
+            length: tokens.length
+        };
+        return timeTokenToMs(usedTokens, customTimeToken);
     }
 }
 
 function timeTokenToMs(usedTokens: string[], timeToken: TimeToken, numberTokens?: NumberToken[]) {
-    return usedTokens.reduce((acc: number, token) => {
+    let ms = 0;
+    for (const token of usedTokens) {
         const tokenValue = (timeToken[token as keyof TimeToken] as number) ?? numberTokens?.shift()?.value ?? 0;
-        return acc + tokenValue * TOKEN_DATA[token].ms;
-    }, 0);
+        if (tokenValue >= TOKEN_DATA[token].max) return null;
+        ms += tokenValue * TOKEN_DATA[token].ms;
+    }
+    return ms;
 }
 
 
