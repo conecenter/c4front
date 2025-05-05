@@ -10,26 +10,26 @@ import { usePath } from '../../main/vdom-hooks'
 import { identityAt } from '../../main/vdom-util'
 
 const receiverIdOf = identityAt('receiver');
+const delActionIdOf = identityAt('delAction');
 
 interface ChipElement {
     identity: object,
     receiver?: boolean,
+    delAction?: boolean,
     text?: string,
     color?: ColorDef,
     tooltip?: string,
     iconPath?: string,
     link?: string,
-    withDelete?: boolean,
     onClick?: () => void,
     callbackRef?: (elem: HTMLDivElement | null) => void,
     children?: ReactNode
 }
 
-const ChipElement = ({identity, receiver, text = '', color, tooltip, iconPath, link, withDelete, callbackRef, children, ...props}: ChipElement) => {
-    // Server sync
+const ChipElement = ({identity, receiver, delAction, text = '', color, tooltip, iconPath, link, callbackRef, children, ...props}: ChipElement) => {
     const { onClick } = useClickSyncOpt(receiverIdOf(identity), receiver);
+    const { onClick: onDelete } = useClickSyncOpt(delActionIdOf(identity), delAction);
 
-    // Focus functionality
     const path = usePath(identity);
     const { focusClass, focusHtml } = useFocusControl(path);
 
@@ -39,10 +39,8 @@ const ChipElement = ({identity, receiver, text = '', color, tooltip, iconPath, l
         if (copyState) setTimeout(() => setCopyState(false), 150);
     }, [copyState]);
 
-    // Readonly
     const readOnly = !(onClick || props.onClick || link);
 
-    // Styles & classes
     const { className: colorClass, style: rawColorStyle } = colorToProps(color);
 
     const className = clsx('button chipItem', colorClass, focusClass);
@@ -54,7 +52,6 @@ const ChipElement = ({identity, receiver, text = '', color, tooltip, iconPath, l
         ...rawColorStyle
     };
 
-    // Event handlers
     async function handleClick(e: React.MouseEvent<HTMLDivElement>) {
         if (readOnly && !e.ctrlKey) return;
         e.stopPropagation();
@@ -74,7 +71,8 @@ const ChipElement = ({identity, receiver, text = '', color, tooltip, iconPath, l
         <div ref={callbackRef} style={inlineStyle} className={className} title={tooltip} onClick={handleClick} {...focusHtml} >
             {iconPath && <ImageElement {...props} key="chipIcon" src={iconPath} color='adaptive' className='chipIcon' />}
             {text}
-            {withDelete && <SVGElement url={closeImg} className='closeIcon' />}
+            {delAction &&
+                <SVGElement url={closeImg} className='closeIcon' onClick={onDelete} style={{ cursor: 'pointer' }} />}
             {children}
         </div>
     );

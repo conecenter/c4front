@@ -12,7 +12,7 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, c4el, c4tags}
     iconPath: String = "",
     link: String = "",
     receiver: Receiver[C] = NoReceiver[C],
-    withDelete: Boolean = false,
+    delAction: Receiver[C] = NoReceiver[C],
     children: ViewRes = Nil,
   ): ToChildPair
 
