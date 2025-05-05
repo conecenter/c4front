@@ -70,7 +70,7 @@ const ChipElement = ({identity, receiver, delAction, text = '', color, tooltip, 
     return (
         <div ref={callbackRef} style={inlineStyle} className={className} title={tooltip} onClick={handleClick} {...focusHtml} >
             {iconPath && <ImageElement {...props} key="chipIcon" src={iconPath} color='adaptive' className='chipIcon' />}
-            {text}
+            {text && <span className='chipLabel'>{text}</span>}
             {delAction &&
                 <SVGElement url={closeImg} className='closeIcon' onClick={onDelete} style={{ cursor: 'pointer' }} />}
             {children}
