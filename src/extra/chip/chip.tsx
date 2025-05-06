@@ -43,7 +43,7 @@ const ChipElement = ({identity, receiver, delAction, text = '', color, tooltip, 
 
     const { className: colorClass, style: rawColorStyle } = colorToProps(color);
 
-    const className = clsx('button chipItem', colorClass, focusClass);
+    const className = clsx('button chipItem', readOnly && 'noAction', colorClass, focusClass);
 
     const inlineStyle = {
         ...!readOnly && {cursor: 'pointer'},
