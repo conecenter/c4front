@@ -46,7 +46,6 @@ const ChipElement = ({identity, receiver, delAction, text = '', color, tooltip, 
     const className = clsx('button chipItem', readOnly && 'noAction', colorClass, focusClass);
 
     const inlineStyle = {
-        ...!readOnly && {cursor: 'pointer'},
         ...!text && {minWidth: '0.5em'},
         ...copyState && {userSelect: 'text' as const},
         ...rawColorStyle
@@ -72,7 +71,7 @@ const ChipElement = ({identity, receiver, delAction, text = '', color, tooltip, 
             {iconPath && <ImageElement {...props} key="chipIcon" src={iconPath} color='adaptive' className='chipIcon' />}
             {text && <span className='chipLabel'>{text}</span>}
             {delAction &&
-                <SVGElement url={closeImg} className='closeIcon' onClick={onDelete} style={{ cursor: 'pointer' }} />}
+                <SVGElement url={closeImg} className='closeIcon' onClick={onDelete} />}
             {children}
         </div>
     );
