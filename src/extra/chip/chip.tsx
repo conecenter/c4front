@@ -66,12 +66,17 @@ const ChipElement = ({identity, receiver, delAction, text = '', color, tooltip, 
         props.onClick?.();
     }
 
+    function handleDelete(e: React.MouseEvent<SVGElement>) {
+        e.stopPropagation();
+        onDelete?.();
+    }
+
     return (
         <div ref={callbackRef} style={inlineStyle} className={className} title={tooltip} onClick={handleClick} {...focusHtml} >
             {iconPath && <ImageElement {...props} key="chipIcon" src={iconPath} color='adaptive' className='chipIcon' />}
             {text && <span className='chipLabel'>{text}</span>}
             {delAction &&
-                <SVGElement url={closeImg} className='closeIcon' onClick={onDelete} />}
+                <SVGElement url={closeImg} className='closeIcon' onClick={handleDelete} />}
             {children}
         </div>
     );
