@@ -81,7 +81,7 @@ function FocusAnnouncerElement({ path: thisPath, value, onChange, children }: Fo
             const activeElemPath = getFocusFramePath(activeElem);
             if (activeElemPath !== value) {
                 const elemToFocus = doc?.querySelector<HTMLElement>(`[data-path='${value}']${VISIBLE_CHILD_SELECTOR}`);
-                elemToFocus?.focus();
+                (elemToFocus || findAutofocusCandidate(doc))?.focus();
             }
         }
     );
@@ -124,7 +124,7 @@ function getFocusableAncestors(elem: HTMLElement | null) {
     let currentElem = elem;
     const focusableAncestors = [];
     while(currentElem) {
-        const closestFocusable = currentElem.closest<HTMLElement>(`${SEL_FOCUS_FRAME}, [tabindex]`);
+        const closestFocusable = currentElem.closest<HTMLElement>(`${SEL_FOCUS_FRAME}, [tabindex="1"]`);
         if (!closestFocusable) break;
         focusableAncestors.push(closestFocusable);
         currentElem = closestFocusable.parentElement
