@@ -44,17 +44,23 @@ function FocusAnnouncerElement({ path: thisPath, value, onChange, children }: Fo
     const isFocusedView = useRef(false);
     useEffect(() => { isFocusedView.current = isRootBranch(doc) }, [doc]);
 
-    const getFocusFramePath = (elem?: Element | null) => elem?.closest<HTMLElement>(SEL_FOCUS_FRAME)?.dataset.path || thisPath;
+    const getFocusFramePath = (elem?: Element | null) => elem?.closest<HTMLElement>(SEL_FOCUS_FRAME)?.dataset.path;
 
     function onFocus(e: FocusEvent) {
         isFocusedView.current = true;
-        const newPath = getFocusFramePath(e.target as Element);
+        const newPath = getFocusFramePath(e.target as Element) || thisPath;
         if (newPath) sendChange(newPath);
     }
     const sendChange = (path: string) => {
         if (path !== value) onChange({ target: { headers: { "x-r-action": "change" }, value: path } });
     }
     useAddEventListener(doc, 'focusin', onFocus, true);
+
+    function focusElementOrBackup(elem: HTMLElement | null | undefined) {
+        const focusTo = elem || findAutofocusCandidate(doc);
+        if (focusTo) focusTo.focus();
+        else sendChange('');
+    }
 
     function onBlur(e: FocusEvent) {
         isFocusedView.current = false;
@@ -67,7 +73,7 @@ function FocusAnnouncerElement({ path: thisPath, value, onChange, children }: Fo
             const isFocusLost = doc && !doc.contains(target) && hasNoFocusedElement(doc);
             if (isFocusLost && isMounted.current) {
                 const aliveFocusableAncestor = focusableAncestors.find((elem) => doc?.contains(elem));
-                (aliveFocusableAncestor || findAutofocusCandidate(doc))?.focus();
+                focusElementOrBackup(aliveFocusableAncestor);
             }
         });
     }
@@ -81,7 +87,7 @@ function FocusAnnouncerElement({ path: thisPath, value, onChange, children }: Fo
             const activeElemPath = getFocusFramePath(activeElem);
             if (activeElemPath !== value) {
                 const elemToFocus = doc?.querySelector<HTMLElement>(`[data-path='${value}']${VISIBLE_CHILD_SELECTOR}`);
-                (elemToFocus || findAutofocusCandidate(doc))?.focus();
+                focusElementOrBackup(elemToFocus);
             }
         }
     );
