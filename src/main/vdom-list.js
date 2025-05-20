@@ -264,7 +264,16 @@ const useValueToServer = (identity, value, hasReceiver) => {
     }, [value, enqueuePatch, hasReceiver, isRoot])
 }
 
-export function GridRoot({ identity, rows: argRows, cols: argCols, children: rawChildren = [], gridKey, alwaysShowExpander, hasHiddenCols: hasHiddenColsReceiver }) {
+export function GridRoot({
+    identity,
+    rows: argRows,
+    cols: argCols,
+    children: rawChildren = [],
+    gridKey,
+    alwaysShowExpander,
+    hasHiddenCols: hasHiddenColsReceiver,
+    rowHeightMultiplier = 1
+}) {
     const printMode = useContext(PrintContext);
     const rows = printMode ? argRows.map(row => ({...row, isExpanded: true})) : argRows
     const cols = printMode ? argCols.filter(col => !isServiceCol(col.colKey)) : argCols
@@ -308,7 +317,13 @@ export function GridRoot({ identity, rows: argRows, cols: argCols, children: raw
 
     const headerRowKeys = rows.filter(row => row.isHeader).map(row => row.rowKey).join(' ')
     const dragBGEl = $("div", { key: "gridBG", className: "gridBG", style: { gridColumn: spanAll, gridRow: spanAll }})
-    const style = { display: "grid", gridTemplateRows, gridTemplateColumns, ...printMode && {fontSize: '1vw'} }
+    const style = {
+        display: "grid",
+        gridTemplateRows,
+        gridTemplateColumns,
+        ...printMode && {fontSize: '1vw'},
+        '--row-height-multiplier': rowHeightMultiplier
+    }
     const res = $("div", {
         onMouseDown,
         onClickCapture: clickAction,

@@ -72,7 +72,8 @@ case class NoReceiver[C]() extends Receiver[C] {
     children: ElList[GridCell],
     clickAction: Receiver[C] = NoReceiver[C],
     hasHiddenCols: Receiver[C] = NoReceiver[C],
-    alwaysShowExpander: Boolean = false
+    alwaysShowExpander: Boolean = false,
+    rowHeightMultiplier: Int = 1,
   ): GridRoot
   @c4val def gridRow(
     rowKey: String,
