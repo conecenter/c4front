@@ -67,6 +67,7 @@ function FocusAnnouncerElement({ path: thisPath, value, onChange, children }: Fo
         if (e.relatedTarget === null) preventFocusLoss(e.target as HTMLElement | null);
     }
     function preventFocusLoss(target: HTMLElement | null) {
+        if (isNavTransition()) return;
         const focusableAncestors = getFocusableAncestors(target);
         setTimeout(() => {  // without setTimeout target still exists in doc
             // hasNoFocusedElement gives other routines (e.g. popup) chance to do its own focus loss prevention
@@ -81,8 +82,8 @@ function FocusAnnouncerElement({ path: thisPath, value, onChange, children }: Fo
 
     useEffect(
         function alignFocusWithServerValue() {
-            if (!isFocusedView.current) return;
-            if (!value) findAutofocusCandidate(doc)?.focus();
+            if (!isFocusedView.current || isNavTransition()) return;
+            if (!value) return findAutofocusCandidate(doc)?.focus();
             const activeElem = doc?.activeElement;
             const activeElemPath = getFocusFramePath(activeElem);
             if (activeElemPath !== value) {
@@ -136,6 +137,11 @@ function getFocusableAncestors(elem: HTMLElement | null) {
         currentElem = closestFocusable.parentElement
     }
     return focusableAncestors;
+}
+
+// Interaction with NavigationEffector
+function isNavTransition() {
+    return Boolean(history.state?.navTransition);
 }
 
 export { FocusAnnouncerElement, PathContext }
