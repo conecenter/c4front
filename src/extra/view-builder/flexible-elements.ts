@@ -169,13 +169,14 @@ interface FlexibleCell {
 }
 
 function FlexibleCell({align, sizes, className, children}: FlexibleCell) {
+  const hasMaxSize = !!sizes && typeof sizes.max === 'number';
   return el("div", {
     className: clsx(FLEXIBLE_CELL_CLASSNAME, className),
     style: {
-      ...align && !sizes?.max && { flexGrow: 0 },
+      ...align && !hasMaxSize && { flexGrow: 0 },
       ...sizes && {
         minWidth: `${sizes.min}em`,
-        maxWidth: sizes.max ? `${sizes.max}em` : undefined
+        ...hasMaxSize && { maxWidth: `${sizes.max}em` }
       }
     }
   }, children)
