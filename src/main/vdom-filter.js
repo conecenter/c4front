@@ -129,7 +129,8 @@ export function FilterItem({className,children}){
 
 export function FilterButtonPlace({className,children}) {
     const closeExpanderRef = useContext(FilterButtonExpanderContext);
-    return $("div", { className: clsx('filterButtonPlace', className), onClickCapture: closeExpanderRef?.current }, children);
+    const onClick = () => setTimeout(() => closeExpanderRef?.current(), 300);
+    return $("div", { className: clsx('filterButtonPlace', className), onClickCapture: onClick }, children);
 }
 
 export const components = {FilterArea,FilterItem,FilterButtonPlace,FilterButtonExpander,MassOp}
