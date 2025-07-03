@@ -2,7 +2,7 @@ import {cloneElement, createElement as $, useCallback, useEffect, useMemo, useSt
 import clsx from 'clsx'
 
 import {findFirstParent, identityAt, never, sortedWith} from "./vdom-util.js"
-import {NoCaptionContext, HorizontalCaptionContext, RootBranchContext, useEventListener, useSync, usePath} from "./vdom-hooks.js"
+import {NoCaptionContext, RootBranchContext, useEventListener, useSync, usePath} from "./vdom-hooks.js"
 import {useWidth,useMergeRef} from "./sizes.js"
 import {useGridDrag} from "./grid-drag.js"
 import {ESCAPE_KEY} from "./keyboard-keys"
@@ -338,9 +338,8 @@ export function GridRoot({
     const dragCSSEl = $("style",{dangerouslySetInnerHTML: { __html: dragCSSContent}})
 
     return $(NoCaptionContext.Provider,{value:true},
-        $(HorizontalCaptionContext.Provider, {value: false},
             $(InputsSizeContext.Provider,{value: fixedCellsSize ? 50 : 25},
-                $(BindGroupElement,{groupId:'grid-list-bind'},dragCSSEl,res))))
+                $(BindGroupElement,{groupId:'grid-list-bind'},dragCSSEl,res)))
 }
 
 const getAllChildren = ({children,rows,cols,hasHiddenCols,alwaysShowExpander,hideElementsForHiddenCols,dragRowKey}) => {
