@@ -43,9 +43,10 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
 
     const [popupStyle] = usePopupPos(popupElement, lrMode, parent);
 
+    const closePopup = () => sendClose ? sendClose() : toggle(false);
     function closeOnBlur(e: FocusEvent) {
         if (!e.relatedTarget || elementsContainTarget([popupElement, parent], e.relatedTarget)) return;
-        sendClose ? sendClose() : toggle(false);
+        closePopup();
 	}
     useAddEventListener(popupElement?.ownerDocument, 'focusout', closeOnBlur);
 
@@ -78,7 +79,12 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
                 {...focusHtml}
                 tabIndex={-1}
                 children={children} />
-            <PopupOverlay popupElement={popupElement} forceOverlay={!!forceOverlay} />
+
+            <PopupOverlay
+                closePopup={closePopup}
+                popupElement={popupElement}
+                forceOverlay={!!forceOverlay || isModal}
+                transparent={!!closeReceiver} />
         </>
     );
 

@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { identityAt } from "../../main/vdom-util";
 import { usePatchSync } from "../exchange/patch-sync";
 
@@ -24,9 +25,10 @@ function useCloseSync(
 
     const sendClose = identity && needsReceiver ? () => sendTempChange(true) : undefined;
 
-    const isModal = wasChanged && !isClosing;
+    const isModalRef = useRef(false);
+    if (wasChanged && !isClosing) isModalRef.current = true;
 
-    return { isModal, sendClose };
+    return { isModal: isModalRef.current, sendClose };
 }
 
 export { useCloseSync };

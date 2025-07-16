@@ -1,27 +1,42 @@
-import React, { useLayoutEffect, useState } from "react";
+import React, { useLayoutEffect, useState, MouseEvent } from "react";
 
 const POPUP_AREA_OVERLAY_THRESHOLD = 50;
 
 interface PopupOverlay {
     popupElement: HTMLDivElement | null,
+    closePopup: () => void,
     forceOverlay: boolean,
+    transparent: boolean
 }
 
-function PopupOverlay({ popupElement, forceOverlay }: PopupOverlay) {
-    const [overlay, setOverlay] = useState(false);
+function PopupOverlay({ popupElement, closePopup, forceOverlay, transparent }: PopupOverlay) {
+    const [areaOverlay, setAreaOverlay] = useState(false);
     useLayoutEffect(
         function checkApplyOverlay() {
             if (!popupElement || forceOverlay) return;
             const { offsetWidth, offsetHeight } = popupElement;
             const { clientWidth, clientHeight } = popupElement.ownerDocument.documentElement;
             const popupAreaPercentage = (offsetWidth * offsetHeight) * 100 / (clientWidth * clientHeight);
-            setOverlay(popupAreaPercentage > POPUP_AREA_OVERLAY_THRESHOLD);
+            setAreaOverlay(popupAreaPercentage > POPUP_AREA_OVERLAY_THRESHOLD);
         },
         [popupElement, forceOverlay]
     );
-    const needOverlay = forceOverlay || overlay;
-    return needOverlay
-        ? <div onClick={(e) => e.stopPropagation()} tabIndex={-1} className='popupOverlay' />
+
+    const preventFocus = (e: MouseEvent) => e.preventDefault();
+
+    const onClick = (e: MouseEvent) => {
+        e.stopPropagation();
+        closePopup();
+    }
+
+    const isDarkOverlay = forceOverlay || areaOverlay;
+
+    return isDarkOverlay || transparent
+        ? <div
+            onMouseDown={preventFocus}
+            onClick={onClick}
+            className='popupOverlay'
+            style={{ background: isDarkOverlay ? "rgba(0,0,0,0.4)" : "transparent" }} />
         : null;
 }
 
