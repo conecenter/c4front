@@ -10,16 +10,19 @@ import { isInstanceOfNode } from '../dom-utils';
 import { PopupOverlay } from './popup-overlay';
 import { SEL_FOCUS_FRAME, VISIBLE_CHILD_SELECTOR } from '../css-selectors';
 import { useFocusControl } from '../focus-control';
+import { useCloseSync } from './popup-element-sync';
 
 interface PopupElement {
+    identity?: object,
     popupKey: string,
     className?: string,
     forceOverlay?: boolean,
     lrMode?: boolean,
+    closeReceiver?: boolean,
     children?: ReactNode
 }
 
-function PopupElement({ popupKey, className, forceOverlay, lrMode, children }: PopupElement) {
+function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, closeReceiver, children }: PopupElement) {
     const { openedPopups, sendFinalChange } = useContext(PopupStateContext);
     const popupAncestorKey = useContext(PopupWrapperKeyContext);
     const popupDrawer = useContext(PopupDrawerContext);
@@ -33,6 +36,8 @@ function PopupElement({ popupKey, className, forceOverlay, lrMode, children }: P
     const [parent, setParent] = useState<HTMLElement | null>(null);
     const setPopupParent = useCallback((elem: HTMLElement | null) => setParent(elem && elem.parentElement), []);
 
+    const { isModal, sendClose } = useCloseSync(identity, closeReceiver);
+
     // menu & filters have multiple copies - hidden & visible - of some elements
     const isVisible = parent?.matches(VISIBLE_CHILD_SELECTOR);
 
@@ -40,7 +45,7 @@ function PopupElement({ popupKey, className, forceOverlay, lrMode, children }: P
 
     function closeOnBlur(e: FocusEvent) {
         if (!e.relatedTarget || elementsContainTarget([popupElement, parent], e.relatedTarget)) return;
-        toggle(false);
+        sendClose ? sendClose() : toggle(false);
 	}
     useAddEventListener(popupElement?.ownerDocument, 'focusout', closeOnBlur);
 

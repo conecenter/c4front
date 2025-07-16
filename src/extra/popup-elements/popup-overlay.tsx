@@ -21,7 +21,8 @@ function PopupOverlay({ popupElement, forceOverlay }: PopupOverlay) {
     );
     const needOverlay = forceOverlay || overlay;
     return needOverlay
-        ? <div tabIndex={-1} className='popupOverlay' /> : null;
+        ? <div onClick={(e) => e.stopPropagation()} tabIndex={-1} className='popupOverlay' />
+        : null;
 }
 
 export { PopupOverlay }
