@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useContext, useLayoutEffect, useState } from 'react';
+import React, { ReactNode, useCallback, useContext, useEffect, useLayoutEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import clsx from 'clsx';
 import { PopupStateContext, PopupDrawerContext, PopupWrapperKeyContext } from './popup-contexts';
@@ -11,6 +11,7 @@ import { PopupOverlay } from './popup-overlay';
 import { SEL_FOCUS_FRAME, VISIBLE_CHILD_SELECTOR } from '../css-selectors';
 import { useFocusControl } from '../focus-control';
 import { useCloseSync } from './popup-element-sync';
+import { useAreaOverlay } from './use-area-overlay';
 
 interface PopupElement {
     identity?: object,
@@ -37,6 +38,10 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
     const setPopupParent = useCallback((elem: HTMLElement | null) => setParent(elem && elem.parentElement), []);
 
     const { isModal, sendClose } = useCloseSync(identity, closeReceiver);
+
+    const needAreaOverlay = useAreaOverlay(popupElement, forceOverlay || isModal);
+
+    const isModalMode = forceOverlay || isModal || needAreaOverlay;
 
     // menu & filters have multiple copies - hidden & visible - of some elements
     const isVisible = parent?.matches(VISIBLE_CHILD_SELECTOR);
@@ -70,6 +75,19 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
         }, [popupElement]
     );
 
+    useEffect(
+        function moveFocusIfModal() {
+            if (isModalMode && popupElement) {
+                const activeElem = popupElement.ownerDocument.activeElement;
+                if (!popupElement.contains(activeElem)) {
+                    const focusTo = popupElement.querySelector<HTMLElement>('input, button');
+                    (focusTo || popupElement).focus();
+                }
+            }
+        },
+        [isModalMode, popupElement]
+    );
+
     const popup = (
         <>
             <div ref={setPopupElement}
@@ -82,8 +100,7 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
 
             <PopupOverlay
                 closePopup={closePopup}
-                popupElement={popupElement}
-                forceOverlay={!!forceOverlay || isModal}
+                isModalMode={isModalMode}
                 transparent={!!closeReceiver} />
         </>
     );
