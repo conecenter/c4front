@@ -9,20 +9,24 @@ import { SEL_FOCUS_FRAME } from "../css-selectors";
 const nestedFocusable = `:scope ${SEL_FOCUS_FRAME} ${SEL_FOCUS_FRAME}`;
 const labelDescendant = `:scope .labelBox *`;
 
-function useArrowNavigation(ref: MutableRefObject<Document | Element | null>) {
+function useArrowNavigation(
+    rootRefOrElem: MutableRefObject<Document | Element | null> | Element | null,
+    disable?: boolean
+) {
     function onKeyDown(e: KeyboardEvent) {
-        if (!ref.current) return;
+        const root = (rootRefOrElem && 'current' in rootRefOrElem) ? rootRefOrElem.current : rootRefOrElem;
+        if (!root) return;
         switch (e.key) {
             case "ArrowUp":
             case "ArrowDown":
             case "ArrowLeft":
             case "ArrowRight":
                 e.stopPropagation();
-                findNestedFocusable(findClosestFocusable(e.key, ref.current))?.focus();
+                findNestedFocusable(findClosestFocusable(e.key, root))?.focus();
         }
     }
 
-    useAddEventListener(ref, 'keydown', onKeyDown);
+    useAddEventListener(disable ? null : rootRefOrElem, 'keydown', onKeyDown);
 }
 
 function findClosestFocusable(eventKey: "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight", root: Element | Document) {

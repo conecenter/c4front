@@ -12,6 +12,8 @@ import { SEL_FOCUS_FRAME, VISIBLE_CHILD_SELECTOR } from '../css-selectors';
 import { useFocusControl } from '../focus-control';
 import { useCloseSync } from './popup-element-sync';
 import { useAreaOverlay } from './use-area-overlay';
+import { useFocusTrap } from '../hooks/use-focus-trap';
+import { useArrowNavigation } from '../hooks/use-arrow-navigation';
 
 interface PopupElement {
     identity?: object,
@@ -23,7 +25,7 @@ interface PopupElement {
     children?: ReactNode
 }
 
-function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, closeReceiver, children }: PopupElement) {
+function PopupElement({ identity, popupKey, className, forceOverlay=true, lrMode, closeReceiver, children }: PopupElement) {
     const { openedPopups, sendFinalChange } = useContext(PopupStateContext);
     const popupAncestorKey = useContext(PopupWrapperKeyContext);
     const popupDrawer = useContext(PopupDrawerContext);
@@ -77,7 +79,7 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
 
     useEffect(
         function moveFocusIfModal() {
-            if (isModalMode && popupElement) {
+            if (isModalMode && popupElement && popupStyle.visibility !== "hidden") {
                 const activeElem = popupElement.ownerDocument.activeElement;
                 if (!popupElement.contains(activeElem)) {
                     const focusTo = popupElement.querySelector<HTMLElement>('input, button');
@@ -85,8 +87,11 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
                 }
             }
         },
-        [isModalMode, popupElement]
+        [isModalMode, popupElement, popupStyle.visibility]
     );
+
+    useFocusTrap(popupElement, !isModalMode);
+    useArrowNavigation(popupElement, !isModalMode);
 
     const popup = (
         <>

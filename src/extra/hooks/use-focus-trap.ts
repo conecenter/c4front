@@ -2,7 +2,10 @@ import { MutableRefObject } from "react";
 import { getActiveFocusWrapper, getFocusableNodes } from "../focus-control";
 import { useAddEventListener } from "../custom-hooks";
 
-function useFocusTrap(ref: MutableRefObject<Document | Element | null>) {
+function useFocusTrap(
+    rootRefOrElem: MutableRefObject<Document | Element | null> | Element | null,
+    disable?: boolean
+) {
     function onKeyDown(e: KeyboardEvent) {
         if (e.key === "Tab") {
             e.preventDefault();
@@ -13,7 +16,7 @@ function useFocusTrap(ref: MutableRefObject<Document | Element | null>) {
 
     function onTab(e: Event) {
         const target = e.target as Element;
-        const root = ref.current;
+        const root = (rootRefOrElem && 'current' in rootRefOrElem) ? rootRefOrElem.current : rootRefOrElem;
         if (!root || target.className.includes("public-DraftEditor-content")) return;
         const doc = root.ownerDocument || root;
         const cNode = getActiveFocusWrapper(doc);
@@ -27,8 +30,10 @@ function useFocusTrap(ref: MutableRefObject<Document | Element | null>) {
         (nextElem || cNode).focus();
     }
 
-    useAddEventListener(ref, 'keydown', onKeyDown);
-    useAddEventListener(ref, 'cTab', onTab);
+    const enabledRoot = disable ? null : rootRefOrElem;
+
+    useAddEventListener(enabledRoot, 'keydown', onKeyDown);
+    useAddEventListener(enabledRoot, 'cTab', onTab);
 }
 
 export { useFocusTrap }
