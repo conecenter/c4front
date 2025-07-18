@@ -25,7 +25,7 @@ interface PopupElement {
     children?: ReactNode
 }
 
-function PopupElement({ identity, popupKey, className, forceOverlay=true, lrMode, closeReceiver, children }: PopupElement) {
+function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, closeReceiver, children }: PopupElement) {
     const { openedPopups, sendFinalChange } = useContext(PopupStateContext);
     const popupAncestorKey = useContext(PopupWrapperKeyContext);
     const popupDrawer = useContext(PopupDrawerContext);
