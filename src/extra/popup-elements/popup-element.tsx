@@ -90,6 +90,13 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
         [isModalMode, popupElement, popupStyle.visibility]
     );
 
+    function closeOnEsc(e: React.KeyboardEvent) {
+        if (e.key === "Escape") {
+            e.stopPropagation();
+            closePopup();
+        }
+    }
+
     useFocusTrap(popupElement, !isModalMode);
     useArrowNavigation(popupElement, !isModalMode);
 
@@ -99,6 +106,7 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
                 className={clsx('popupEl', focusClass, className)}
                 style={popupStyle}
                 onClick={(e) => e.stopPropagation()}
+                onKeyDown={closeOnEsc}
                 {...focusHtml}
                 tabIndex={-1}
                 children={children} />
