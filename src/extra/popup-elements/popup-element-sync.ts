@@ -27,6 +27,7 @@ function useCloseSync(
 
     const isModalRef = useRef(false);
     if (wasChanged && !isClosing) isModalRef.current = true;
+    if (!needsReceiver) isModalRef.current = false;
 
     return { isModal: isModalRef.current, sendClose };
 }
