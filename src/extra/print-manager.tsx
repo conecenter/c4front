@@ -15,7 +15,7 @@ const patchSyncTransformers: PatchSyncTransformers<boolean, boolean, boolean> = 
         value: ""
     }),
     patchToChange: (_p) => false,
-    applyChange: (prev, _ch) => prev
+    applyChange: (_prev, ch) => ch
 };
 
 interface PrintManager {
@@ -31,11 +31,34 @@ function PrintManager({ identity, children, printMode: state, printChildren, pri
     const [elem, setElem] = useState<HTMLDivElement | null>(null);
     const window = elem?.ownerDocument.defaultView;
 
-    const [isPrinting, setIsPrinting] = useState(false);
-
     const {currentState: printMode, sendFinalChange} =
         usePatchSync(receiverIdOf(identity), state, false, patchSyncTransformers);
 
+    usePrintTitle(printMode, printTitle);
+
+    useEffect(function customPrintFromServer() {
+        if (printMode) window?.print();
+    }, [printMode]);
+
+    // Make changes for print
+    const onAfterPrint = () => printMode && sendFinalChange(false);
+    useAddEventListener(window, 'afterprint', onAfterPrint);
+
+    return (
+        <>
+            <div ref={setElem} className='mainContent'>{children}</div>
+            {printMode && (
+                <div className='printContent'>
+                    <PrintContext.Provider value={true}>
+                        {printChildren || children}
+                    </PrintContext.Provider>
+                </div>
+            )}
+        </>
+    );
+}
+
+function usePrintTitle(printMode: boolean, title?: string) {
     const pageTitle = useRef(document.title);
     function setTitleForPrint(title?: string) {
         if (title) {
@@ -43,36 +66,10 @@ function PrintManager({ identity, children, printMode: state, printChildren, pri
             document.title = title;
         }
     }
-
-    useEffect(function customPrintFromServer() {
-        if (printMode) setTimeout(() => {
-            setTitleForPrint(printTitle);
-            window?.print();
-        });
+    useEffect(() => {
+        if (printMode) setTitleForPrint(title);
+        else document.title = pageTitle.current;
     }, [printMode]);
-
-    // Make changes for print
-    const onBeforePrint = () => setIsPrinting(true);
-    const onAfterPrint = () => {
-        document.title = pageTitle.current;
-        setIsPrinting(false);
-        printMode && sendFinalChange(false);
-    }
-    useAddEventListener(window, 'beforeprint', onBeforePrint);
-    useAddEventListener(window, 'afterprint', onAfterPrint);
-
-    return (
-        <>
-            <div ref={setElem} className='mainContent'>{children}</div>
-            {isPrinting && (
-                <div className='printContent'>
-                    <PrintContext.Provider value={true}>
-                        {printMode ? printChildren : children}
-                    </PrintContext.Provider>
-                </div>
-            )}
-        </>
-    );
 }
 
 export { PrintManager, PrintContext }
