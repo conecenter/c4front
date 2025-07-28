@@ -48,7 +48,7 @@ const useUserManual = (umid?: string) => {
     const umUrl = userManual.getUrl(umid);
 
     const userManualButton = !umUrl ? null : $(ChipElement, {
-        identity: {},
+        identity: '',
         iconPath: '/mod/main/ee/cone/core/ui/c4view/info.svg',
         link: umUrl,
         tooltip: 'Go to User Manual'
