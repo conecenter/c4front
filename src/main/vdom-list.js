@@ -271,12 +271,17 @@ export function GridRoot({
     children: rawChildren = [],
     gridKey,
     alwaysShowExpander,
-    hasHiddenCols: hasHiddenColsReceiver,
+    hasHiddenCols: hasHiddenColsReceiver, 
     rowHeightMultiplier = 1
 }) {
     const printMode = useContext(PrintContext);
     const rows = printMode ? argRows.map(row => ({...row, isExpanded: true})) : argRows
-    const cols = printMode ? argCols.filter(col => !isServiceCol(col.colKey)) : argCols
+    const cols = printMode
+        ? argCols
+            .filter(col => !isServiceCol(col.colKey))
+            .map((col, i, arr) => (i === arr.length - 1) ? { ...col, width: { ...col.width, tp: "unbound" }} : col)
+        : argCols
+
     const children = printMode ? rawChildren.filter(child => !isServiceCol(child.props.colKey)) : rawChildren
 
     const uiType = useContext(UiInfoContext)
@@ -321,7 +326,6 @@ export function GridRoot({
         display: "grid",
         gridTemplateRows,
         gridTemplateColumns,
-        ...printMode && {fontSize: '1vw'},
         '--row-height-multiplier': rowHeightMultiplier
     }
     const res = $("div", {
