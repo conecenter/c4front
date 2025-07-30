@@ -61,7 +61,7 @@ const ButtonElement = (props: ButtonElement) => {
 	const textContent = props.content && $('span', { className: 'text' }, props.content)
 	const children = props.children !== props.content && props.children
 
-	return $(Tooltip, { content: props.hint },
+	return $(Tooltip, { content: props.hint, children:
 		$("button", {
 			ref: elem, onClick, ...focusHtml,
 			className: clsx(props.className, focusClass, colorClass, noAction && 'noAction', markerClass),
@@ -72,7 +72,7 @@ const ButtonElement = (props: ButtonElement) => {
 		},
 		textContent,
 		children)
-	);
+	});
 }
 
 export { ButtonElement }

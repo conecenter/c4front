@@ -1,9 +1,9 @@
-import React, { ReactNode } from "react";
+import React, { ReactElement } from "react";
 import { Root, Trigger, Content, Arrow, Portal } from "@radix-ui/react-tooltip";
 
 interface TooltipProps {
 	content?: string,
-	children?: ReactNode
+	children: ReactElement
 }
 
 function Tooltip({ content, children }: TooltipProps) {
