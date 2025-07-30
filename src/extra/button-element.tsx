@@ -4,6 +4,7 @@ import { useFocusControl } from './focus-control';
 import { Patch } from './exchange/patch-sync';
 import { ColorDef, ColorProps, colorToProps } from './view-builder/common-api';
 import { useAddEventListener } from './custom-hooks';
+import { Tooltip } from './tooltip';
 
 interface ButtonElement {
     value: boolean | '1' | '',
@@ -60,17 +61,18 @@ const ButtonElement = (props: ButtonElement) => {
 	const textContent = props.content && $('span', { className: 'text' }, props.content)
 	const children = props.children !== props.content && props.children
 
-	return $("button", {
-			ref: elem, onClick, title: props.hint, ...focusHtml,
-            className: clsx(props.className, focusClass, colorClass, noAction && 'noAction', markerClass),
+	return $(Tooltip, { content: props.hint },
+		$("button", {
+			ref: elem, onClick, ...focusHtml,
+			className: clsx(props.className, focusClass, colorClass, noAction && 'noAction', markerClass),
 			style: {
 				...disabled && { opacity: "0.4", cursor: 'default' },
 				...colorStyle
 			}
 		},
 		textContent,
-		children
-	)
+		children)
+	);
 }
 
 export { ButtonElement }

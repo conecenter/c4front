@@ -8,6 +8,7 @@ import { ColorDef, colorToProps } from '../view-builder/common-api'
 import { useClickSyncOpt } from '../exchange/click-sync'
 import { usePath } from '../../main/vdom-hooks'
 import { identityAt } from '../../main/vdom-util'
+import { Tooltip } from '../tooltip'
 
 const receiverIdOf = identityAt('receiver');
 const delActionIdOf = identityAt('delAction');
@@ -72,13 +73,16 @@ const ChipElement = ({identity, receiver, delAction, text = '', color, tooltip, 
     }
 
     return (
-        <div ref={callbackRef} style={inlineStyle} className={className} title={tooltip} onClick={handleClick} {...focusHtml} >
-            {iconPath && <ImageElement {...props} key="chipIcon" src={iconPath} color='adaptive' className='chipIcon' />}
-            {text && <span className='chipLabel'>{text}</span>}
-            {delAction &&
-                <SVGElement url={closeImg} className='closeIcon' onClick={handleDelete} />}
-            {children}
-        </div>
+        <Tooltip content={tooltip}>
+            <div ref={callbackRef} style={inlineStyle} className={className} onClick={handleClick} {...focusHtml} >
+                {iconPath && <ImageElement {...props} key="chipIcon" src={iconPath} color='adaptive' className='chipIcon' />}
+                {text &&
+                    <span className='chipLabel'>{text}</span>}
+                {delAction &&
+                    <SVGElement url={closeImg} className='closeIcon' onClick={handleDelete} />}
+                {children}
+            </div>
+        </Tooltip>
     );
 }
 

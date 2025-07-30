@@ -2,6 +2,7 @@ import React, { createElement as $ } from 'react'
 import clsx from 'clsx'
 import { useFocusControl } from './focus-control'
 import { useExternalKeyboardControls } from './focus-module-interface'
+import { Tooltip } from './tooltip'
 
 const CheckboxElement = (props) => {
     const getChildrenByClass = (cl) => {
@@ -35,12 +36,13 @@ const CheckboxElement = (props) => {
     const {focusClass, focusHtml} = useFocusControl(props.path);
 
     return $("div", {ref: checkBoxRef, className: clsx("checkBox", focusClass), ...focusHtml},
-        $("div", {
-            ...props.changing && { style: { opacity: "0.4" }},
-            className: clsx(props.isRadioButton ? 'radioButton' : 'imageBox', stateClass, props.className),
-            title: props.tooltip,
-            onClick, readOnly
-        }),
+        $(Tooltip, { content: props.tooltip },
+            $("div", {
+                ...props.changing && { style: { opacity: "0.4" }},
+                className: clsx(props.isRadioButton ? 'radioButton' : 'imageBox', stateClass, props.className),
+                onClick, readOnly
+            })
+        ),
         errorChildren,
         props.label && $("label", {onClick}, props.label)
     );

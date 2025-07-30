@@ -6,6 +6,7 @@ import { FlexibleSizes } from './view-builder/flexible-api';
 import { SEL_FOCUS_FRAME } from './css-selectors';
 import { ContextActionsElement } from './context-actions-element';
 import { ChipElement } from './chip/chip';
+import { Tooltip } from './tooltip';
 
 interface LabeledElement {
     identity?: object,
@@ -60,26 +61,27 @@ function LabeledElement({ path, label, sizes, accented, clickable, labelChildren
     };
 
     return (
-        <div ref={refLE}
-            className={className}
-            {...focusHtml}
-            style={style}
-            data-umid={umid}
-            title={props.hint}
-        >
-            {showCaption ? (
-                <NoCaptionContext.Provider value={true}>
-                    <div className='labelBox' /*style={clicked ? { opacity: 0.8 } : undefined}*/>
-                        {label && <label>{label}</label>}
-                        {labelChildren}
-                    </div>
-                    <div className='contentBox'>{children}</div>
-                </NoCaptionContext.Provider>)
-                : children }
+        <Tooltip content={props.hint}>
+            <div ref={refLE}
+                className={className}
+                {...focusHtml}
+                style={style}
+                data-umid={umid}
+            >
+                {showCaption ? (
+                    <NoCaptionContext.Provider value={true}>
+                        <div className='labelBox' /*style={clicked ? { opacity: 0.8 } : undefined}*/>
+                            {label && <label>{label}</label>}
+                            {labelChildren}
+                        </div>
+                        <div className='contentBox'>{children}</div>
+                    </NoCaptionContext.Provider>)
+                    : children }
 
-                {(umid || goToChip) &&
-                    <ContextActionsElement umid={umid} goToChip={goToChip} refLE={refLE} />}
-        </div>
+                    {(umid || goToChip) &&
+                        <ContextActionsElement umid={umid} goToChip={goToChip} refLE={refLE} />}
+            </div>
+        </Tooltip>
     );
 }
 
