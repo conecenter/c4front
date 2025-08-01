@@ -61,7 +61,7 @@ function PivotSettingsInner(props: PivotSettingsProps) {
         false,
         patchSyncTransformers
     )
-    const ref = useRef()
+    const ref = useRef(undefined)
     const dropAction: PivotDropAction = useCallback((event: PivotDragItem, dropLocation: string, dropCoordinates?: XYCoord | null, temporary?: boolean) => {
         const change = getPivotChange(state, ref?.current, {...event, dropLocation, dropCoordinates}, temporary)
         if (change.tp === "noop") return

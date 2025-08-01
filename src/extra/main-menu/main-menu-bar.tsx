@@ -217,7 +217,8 @@ function getRightMenuCompressed(rightChildren: ReactElement<MenuItem>[]) {
   if (!menuUserItem) return null;
 
   const rightChildrenFiltered = rightChildren
-     .filter((child: JSX.Element) => ![MenuUserItem, MainMenuClock].includes(child.type));
+  // @ts-ignore
+     .filter((child: ReactElement<MenuItem>) => ![MenuUserItem, MainMenuClock].includes(child.type));
   const rightChildrenGroup = (
     <MenuItemsGroup key=':right-children-compressed'>
       {rightChildrenFiltered}
@@ -225,7 +226,8 @@ function getRightMenuCompressed(rightChildren: ReactElement<MenuItem>[]) {
   );
 
   const menuUserChildren = React.Children.toArray(menuUserItem.props.children);
-  const logOutIndex = menuUserChildren.findIndex(child => (child as React.ReactElement).props.name === 'Log out');
+  // @ts-ignore
+  const logOutIndex = menuUserChildren.findIndex(child => (child as ReactElement<MenuItem | MenuItemsGroup>).props.name === 'Log out');
   const insertIndex = logOutIndex < 0 ? menuUserChildren.length : logOutIndex;
   menuUserChildren.splice(insertIndex, 0, rightChildrenGroup)
 
@@ -236,7 +238,7 @@ function getRightMenuCompressed(rightChildren: ReactElement<MenuItem>[]) {
 interface BurgerMenu {
   identity: object,
   opened: boolean,
-  domRef: React.RefObject<HTMLDivElement>,
+  domRef: React.RefObject<HTMLDivElement | null>,
   setFinalState: (s: MenuItemState) => void,
   children: ReactElement<MenuItem>[]
 }

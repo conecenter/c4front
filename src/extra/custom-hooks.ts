@@ -1,6 +1,4 @@
-import { Children, ReactNode, isValidElement, useEffect, useRef } from "react";
-import { FlexibleSizes } from "./view-builder/flexible-api";
-import { flexibleComponents } from "./view-builder/flexible-elements";
+import { useEffect, useRef } from "react";
 
 // if element is ref object and changes during component lifecycle, it will not be updated in effect
 function useAddEventListener<T extends Event>(
@@ -40,25 +38,4 @@ function useInterval(callback: () => void, delay: number | null) {
     }, [delay]);
 }
 
-// element width shouldn't depend on content if not explicitly sized from server
-const useFlexBasisFromSizes = (children: ReactNode, sizes?: FlexibleSizes) => {
-    const flexBasis = sizes?.min || calcChildrenSize(children);
-    return { flexBasis: `${flexBasis}em` };
-}
-
-// TODO: add logic for calc min-width for lists
-function calcChildrenSize(children: ReactNode): number {
-    const childrenArray = Children.toArray(children);
-    return childrenArray.reduce<number>((accum, child) => {
-        if (!isValidElement(child)) return accum;
-        const { sizes }: { sizes?: FlexibleSizes } = child.props;
-        if (sizes) return Math.max(sizes.min, accum);
-        if (child.type === flexibleComponents.FlexibleRow) {
-            const rowChildrenArray = Children.toArray(child.props.children);
-            return Math.max(rowChildrenArray.reduce<number>((accum, rowChild) => accum + calcChildrenSize(rowChild), 0), accum);
-        }
-        return Math.max(calcChildrenSize(child.props.children), accum);
-    }, 0);
-}
-
-export { useAddEventListener, useLatest, useInterval, useFlexBasisFromSizes };
+export { useAddEventListener, useLatest, useInterval };

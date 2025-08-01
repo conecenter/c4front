@@ -107,11 +107,12 @@ function MenuPopupElement({popupLrMode, keyboardOperation, children}: MenuPopupE
     );
 }
 
-function hasIconProp(child: JSX.Element): string | undefined {
+function hasIconProp(child: ReactElement<MenuItem | MenuItemsGroup>): boolean {
     if (child.type === MenuItemsGroup) {
-        return child.props.children.some(hasIconProp);
-    }    
-    return child.props.icon;
+        return (child as ReactElement<MenuItemsGroup>).props.children.some(hasIconProp);
+    }
+    // @ts-ignore
+    return !!child.props.icon;
 }
 
 

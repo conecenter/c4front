@@ -7,6 +7,7 @@ import { identityAt } from '../main/vdom-util';
 import { useFocusControl } from './focus-control';
 import { useAddEventListener } from './custom-hooks';
 import { UiInfoContext } from './ui-info-provider';
+import { ChipElement } from './chip/chip';
 
 const keyboardActionIdOf = identityAt('keyboardAction');
 
@@ -14,8 +15,8 @@ interface SegmentedChipProps {
     identity: object,
     keyboardAction?: boolean,
     compact?: boolean,
-    routeParts: ReactElement[],  // ChipElements
-    extraParts?: ReactElement[]
+    routeParts: ReactElement<ChipElement>[],  // ChipElements
+    extraParts?: ReactElement<ChipElement>[]
 }
 
 function SegmentedChip({identity, keyboardAction, compact, routeParts, extraParts}: SegmentedChipProps) {

@@ -24,11 +24,8 @@ interface SyncState<State, StateChange> {
     wasChanged: boolean
 }
 
-interface SendPatchHeaders extends PatchHeaders {
-}
-
 interface SendPatch {
-    headers?: SendPatchHeaders
+    headers?: PatchHeaders
     value: string
     skipByPath?: boolean
     retry?: boolean
@@ -36,8 +33,8 @@ interface SendPatch {
 }
 
 function stateToSendPatch(patch: Patch, changing: boolean, deferredSend: boolean): SendPatch {
-    const changingHeaders: SendPatchHeaders = changing ? {"x-r-changing": "1"} : {}
-    const headers: SendPatchHeaders = {
+    const changingHeaders: PatchHeaders = changing ? {"x-r-changing": "1"} : {}
+    const headers: PatchHeaders = {
         ...changingHeaders,
         ...patch.headers,
     }
