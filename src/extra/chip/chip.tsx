@@ -74,7 +74,14 @@ const ChipElement = ({identity, receiver, delAction, text = '', color, tooltip, 
 
     return (
         <Tooltip content={tooltip}>
-            <div ref={callbackRef} style={inlineStyle} className={className} onClick={handleClick} {...focusHtml} >
+            <div
+                ref={callbackRef}
+                style={inlineStyle}
+                className={className}
+                onClick={handleClick}
+                {...focusHtml}
+                data-title={tooltip}  // used for tests
+            >
                 {iconPath && <ImageElement {...props} key="chipIcon" src={iconPath} color='adaptive' className='chipIcon' />}
                 {text &&
                     <span className='chipLabel'>{text}</span>}

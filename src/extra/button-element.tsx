@@ -63,7 +63,7 @@ const ButtonElement = (props: ButtonElement) => {
 
 	return $(Tooltip, { content: props.hint, children:
 		$("button", {
-			ref: elem, onClick, ...focusHtml,
+			ref: elem, onClick, ...focusHtml, "data-title": props.hint,
 			className: clsx(props.className, focusClass, colorClass, noAction && 'noAction', markerClass),
 			style: {
 				...disabled && { opacity: "0.4", cursor: 'default' },

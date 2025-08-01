@@ -40,6 +40,7 @@ const CheckboxElement = (props) => {
             $("div", {
                 ...props.changing && { style: { opacity: "0.4" }},
                 className: clsx(props.isRadioButton ? 'radioButton' : 'imageBox', stateClass, props.className),
+                "data-title": props.tooltip,
                 onClick, readOnly
             })
         ),

@@ -67,6 +67,7 @@ function LabeledElement({ path, label, sizes, accented, clickable, labelChildren
                 {...focusHtml}
                 style={style}
                 data-umid={umid}
+                data-title={props.hint}
             >
                 {showCaption ? (
                     <NoCaptionContext.Provider value={true}>
