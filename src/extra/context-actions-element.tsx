@@ -1,7 +1,7 @@
 import React, { cloneElement, ReactElement, useContext, useState } from 'react';
 import { useUserManual } from './user-manual';
 import { UiInfoContext } from './ui-info-provider';
-import { BottomBarContent } from './bottom-bar-manager';
+import { BottomBarElement } from './bottom-bar/bottom-bar-element';
 import { useAddEventListener } from './custom-hooks';
 import { ChipElement } from './chip/chip';
 
@@ -34,7 +34,7 @@ function ContextActionsElement({ umid, goToChip, refLE }: ContextActionsElement)
         </div>
 
     return isTouch
-        ? <BottomBarContent>{contextActionsElems}</BottomBarContent>
+        ? <BottomBarElement id={`umid-${umid}`}>{contextActionsElems}</BottomBarElement>
         : contextActionsElems;
 }
 

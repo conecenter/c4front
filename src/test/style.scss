@@ -1788,3 +1788,46 @@ button {
   min-width: 1.4em;
   transition: all 200ms ease;
 }
+
+.bottomBar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999999;
+    display: flex;
+    gap: 0.2em;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    column-gap: 1em;
+    background-color: var(--color-body);
+    border: 0.05em solid var(--color-borderColor) !important;
+    box-shadow: 0 0 0.3125em var(--color-dark-borderColor);
+
+    > div {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    &:empty {
+        display: none;
+    }
+}
+
+.lAlign {
+  justify-content: flex-start;
+  justify-self: start;
+}
+
+.cAlign {
+  justify-content: center;
+  justify-self: center;
+  max-width: 100%;
+}
+
+.rAlign {
+  justify-content: flex-end;
+  justify-self: end;
+}

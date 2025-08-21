@@ -1,6 +1,6 @@
 import React, { createElement as $, useMemo, useState, useContext, useEffect } from 'react'
 import { BindingElement, AuxBindGroup, AUX_GROUP_ID } from './binds-elements'
-import { BottomBarContent } from '../bottom-bar-manager'
+import { BottomBarElement } from '../bottom-bar/bottom-bar-element'
 
  /** @type {Object} */
 const KeyBindContext = React.createContext({})
@@ -118,7 +118,7 @@ const KeyBindingsManager = ({ links, children, bindSrcId, escapeBindSrcId, noTou
     children: ""
   }
   const switchBtn = isBindMode && drawSwitchBtn &&
-    $(BottomBarContent, null, $(BindingElement, { ...btnProps }, "Switch"))
+    $(BottomBarElement, { id: 'switch' }, $(BindingElement, { ...btnProps }, "Switch"))
 
   const overlayCallBack = (event) => {
     event.stopPropagation()

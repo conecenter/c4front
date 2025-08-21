@@ -54,4 +54,12 @@ import ee.cone.c4vdom.{ToChildPair, ToJson, c4el, c4tagSwitch, c4tags, c4val}
     level: Int,
     children: ViewRes,
   ): ToChildPair
+
+  @c4el("BottomBarElement") def bottomBarElement(
+    key: String,
+    id: String,
+    align: Option[Align] = None,
+    priority: Option[Int] = None,
+    children: ViewRes
+  ): ToChildPair
 }
