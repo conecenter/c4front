@@ -1,5 +1,6 @@
 import React, { createContext, ReactNode, useCallback, useMemo, useState } from "react";
 import { NoCaptionContext } from "../../main/vdom-hooks";
+import { useAddEventListener } from "../custom-hooks";
 
 const ALIGN_VALS = ['l', 'c', 'r'] as const;
 
@@ -45,6 +46,8 @@ function BottomBarManager({ children }: { children?: ReactNode }) {
 
     const contextValue = useMemo(() => ({ register, unregister }), [register, unregister]);
 
+    const { setBottomBarElem, offset } = useSystemVkOffset();
+
     const items = Array.from(registry.values()).sort(sortDesc);
 
     const getFilteredJsx = (align: Align) => items
@@ -60,12 +63,38 @@ function BottomBarManager({ children }: { children?: ReactNode }) {
             {children}
             {items.length > 0 &&
                 <NoCaptionContext.Provider value={true}>
-                    <div className="bottomBar bottom-row">
+                    <div
+                        ref={setBottomBarElem}
+                        className="bottomBar bottom-row"
+                        style={{ bottom: `${offset}px` }}
+                    >
                         {getBottomBarElems()}
                     </div>
                 </NoCaptionContext.Provider>}
         </BottomBarContext.Provider>
     );
+}
+
+const OFFSET_THRESHOLD = 50;
+
+function useSystemVkOffset() {
+    const [offset, setOffset] = useState(0);
+
+    const [bottomBarElem, setBottomBarElem] = useState<HTMLDivElement | null>(null);
+    const window = bottomBarElem?.ownerDocument.defaultView;
+    const visualViewport = window?.visualViewport;
+
+    useAddEventListener(visualViewport, 'resize', calcOffset);
+    useAddEventListener(visualViewport, 'scroll', calcOffset);
+
+    function calcOffset() {
+        if (!visualViewport) return;
+        const offset = Math.max(0, window.innerHeight - (visualViewport.offsetTop + visualViewport.height));
+        if (offset > OFFSET_THRESHOLD) setOffset(offset);
+        else setOffset(0);
+    }
+
+    return { setBottomBarElem, offset };
 }
 
 export type { Align, Id, BottomBarItem }
