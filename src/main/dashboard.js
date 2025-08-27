@@ -118,8 +118,8 @@ export const Dashboard = ({
 
 function countFreeVpSpace(element) {
     const vpHeight = element.ownerDocument.documentElement.clientHeight;
-    const contentHeight = element.ownerDocument.body.scrollHeight - element.scrollHeight;
-    const freeSpaceHeight = vpHeight  - contentHeight;
+    const offsetTop = Math.ceil(element.getBoundingClientRect().top + element.ownerDocument.defaultView.scrollY);
+    const freeSpaceHeight = vpHeight  - offsetTop;
     const heightEm = freeSpaceHeight < 0 ? 0 : Math.floor(freeSpaceHeight / getFontSize(element));
     return heightEm;
 }
