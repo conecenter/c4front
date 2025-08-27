@@ -150,6 +150,7 @@ function VirtualKeyboard({ identity, hash, position, setupType, setupMode, switc
             onMouseDownCapture={(e) => e.preventDefault()}
             data-path={path}
             style={{
+                ...!vkType && { display: 'none' }, 
                 '--vk-height': `clamp(${1.6 * rowsTotal}em, ${VK_ROW_HEIGHT * rowsTotal + 2 * VK_OFFSET}em, 40vh)`,
                 '--vk-row-height': `calc((var(--vk-height) - ${2 * VK_OFFSET}em) / ${rowsTotal})`,
                 height: 'var(--vk-height)',
