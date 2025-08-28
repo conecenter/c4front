@@ -66,16 +66,22 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
         }, [popupElement]
     );
 
-    useLayoutEffect(
-        function preventFocusLossOnClosing() {
-            return () => {
-                if (popupElement && elementHasFocus(popupElement)) {
-                    // run focus() after React operations finished to avoid triggering events/effects with stale state
-                    setTimeout(() => findFocusableAncestor(parent)?.focus());
-                }
-            }
-        }, [popupElement]
-    );
+    function moveFocusToParent() {
+        if (popupElement && elementHasFocus(popupElement)) {
+            // run focus() after React operations finished to avoid triggering events/effects with stale state
+            setTimeout(() => findFocusableAncestor(parent)?.focus());
+        }
+    }
+
+    useLayoutEffect(() => moveFocusToParent, [popupElement]);
+
+    function closeOnEsc(e: React.KeyboardEvent) {
+        if (e.key === "Escape") {
+            e.stopPropagation();
+            moveFocusToParent();
+            closePopup();
+        }
+    }
 
     useEffect(
         function moveFocusIfModal() {
@@ -90,14 +96,7 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
         [isModalMode, popupElement, popupStyle.visibility]
     );
 
-    function closeOnEsc(e: React.KeyboardEvent) {
-        if (e.key === "Escape") {
-            e.stopPropagation();
-            closePopup();
-        }
-    }
-
-    useFocusTrap(popupElement, !isModalMode);
+    useFocusTrap(popupElement);
     useArrowNavigation(popupElement, !isModalMode);
 
     const popup = (
