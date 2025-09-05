@@ -12,7 +12,7 @@ import {useHoverExpander} from "../extra/hover-expander"
 import {InputsSizeContext} from "../extra/dom-utils"
 import {PrintContext} from "../extra/print-manager"
 import {UiInfoContext} from "../extra/ui-info-provider"
-import useResizeObserver from "@react-hook/resize-observer"
+import {useBatchedResizeObserver} from "../extra/hooks/use-batched-resize-observer"
 
 const dragRowIdOf = identityAt('dragRow')
 const dragColIdOf = identityAt('dragCol')
@@ -115,6 +115,16 @@ const getGridCol = ({ colKey }) => colKey === GRIDCELL_COLSPAN_ALL ? spanAll : C
 
 const hasOverflow = (elem) => elem && (elem.scrollWidth - elem.clientWidth) > 4 || false;
 
+function useOverflowObserver(parentRef, children) {
+    const [overflow, setOverflow] = useState(false);
+    const onCellResize = useCallback((entry) => setOverflow(hasOverflow(entry.target)), []);
+    useBatchedResizeObserver(parentRef, onCellResize);
+    useEffect(() => {
+        setOverflow(hasOverflow(parentRef.current));
+    }, [children]);
+    return overflow;
+}
+
 const spanAll = "1 / -1"
 
 export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, spanRight, spanRightTo, expanding, expander, dragHandle, noDefCellClass, classNames: argClassNames, gridRow: argGridRow, gridColumn: argGridColumn, needsHoverExpander=true, ...props }) {
@@ -125,8 +135,7 @@ export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, spanRi
     const align = argClassNames?.includes('gridGoRight') ? 'r' : 'l';
     const {hoverStyle, hoverClass, ...hoverProps} = useHoverExpander(ref, align, needsHoverExpander);
 
-    const [overflow, setOverflow] = useState(false);
-    useResizeObserver(ref, (entry) => setOverflow(hasOverflow(entry.target)));
+    const isOverflow = useOverflowObserver(ref, children);
 
     const style = {...props.style, gridRow, gridColumn, ...hoverStyle}
     const expanderProps = expanding === "expander" && {
@@ -138,7 +147,7 @@ export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, spanRi
         argClassNames, focusClass, hoverClass,
         !noDefCellClass && GRID_CLASS_NAMES.CELL,
         dragHandle && 'gridDragCell',
-        overflow && 'overflownCell'
+        isOverflow && 'overflownCell'
     );
     return $("div", {ref, ...props, ...expanderProps, 'data-col-key': colKey, 'data-row-key': rowKey, "data-drag-handle": dragHandle, ...focusHtml, style, className, ...hoverProps},
         gridColumn === spanAll ? $(NoCaptionContext.Provider, {value: false}, children) : children
