@@ -15,6 +15,7 @@ import {HTML5Backend} from "react-dnd-html5-backend";
 import type {XYCoord} from "react-dnd/dist";
 import {usePatchSync} from "../exchange/patch-sync";
 import { identityAt } from "../../main/vdom-util";
+import { DragScroller } from "./drag-scroller";
 
 const receiverIdOf = identityAt('receiver');
 
@@ -50,6 +51,7 @@ export interface PivotSettingsProps extends PivotSettingsState {
 
 export function PivotSettings(props: PivotSettingsProps) {
     return el(DndProvider, {backend: HTML5Backend},
+        el(DragScroller),
         el(PivotSettingsInner, {...props})
     )
 }
@@ -61,9 +63,9 @@ function PivotSettingsInner(props: PivotSettingsProps) {
         false,
         patchSyncTransformers
     )
-    const ref = useRef()
+    const ref = useRef<HTMLDivElement | null>(null)
     const dropAction: PivotDropAction = useCallback((event: PivotDragItem, dropLocation: string, dropCoordinates?: XYCoord | null, temporary?: boolean) => {
-        const change = getPivotChange(state, ref?.current, {...event, dropLocation, dropCoordinates}, temporary)
+        const change = getPivotChange(state, ref.current, {...event, dropLocation, dropCoordinates}, temporary)
         if (change.tp === "noop") return
         else if (temporary) sendTempChange(change)
         else sendFinalChange(change)

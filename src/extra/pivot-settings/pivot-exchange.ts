@@ -217,7 +217,7 @@ interface ReorderCommand {
 
 const NO_OP: NoAction = {tp: "noop"}
 
-function getPivotChange(state: PivotSettingsState, root: Element | undefined, event: PivotDragEvent, temporary?: boolean): PivotChange {
+function getPivotChange(state: PivotSettingsState, root: Element | null, event: PivotDragEvent, temporary?: boolean): PivotChange {
   if (event.dragOrigin == event.dropLocation && event.dropCoordinates) { // Reorder
     const childrenList = root?.querySelector<HTMLDivElement>("." + event.dragOrigin)?.childNodes
     const children = childrenList ? [...childrenList] : []
