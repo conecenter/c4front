@@ -11,6 +11,8 @@ import { PathContext } from "./focus-announcer";
 const SESSION_STORAGE_KEY = 'visitsState';
 const DEFAULT_VISIT_STATE = { focus: '', scroll: 0 };
 
+const FOCUS_BLOCKER_CLASS = 'autoFocusBlocker';
+
 function NavigationEffector() {
     const { isRoot, branchKey } = useContext(RootBranchContext);
 
@@ -66,10 +68,12 @@ function useSaveVisitState() {
     useAddEventListener(isRoot ? window : null, 'hashchange', storeVisitState);
 }
 
+const getAutoFocusSelector = () => document.querySelector(`.${FOCUS_BLOCKER_CLASS}`) ? null : 'input';
+
 function applyNavEffects(visitState: { focus: string, scroll: number }) {
     const { focus, scroll } = visitState;
-    const focusToSelector = focus ? `[data-path="${focus}"]` : 'input';
-    document.querySelector<HTMLElement>(focusToSelector)?.focus();
+    const focusToSelector = focus ? `[data-path="${focus}"]` : getAutoFocusSelector();
+    focusToSelector && document.querySelector<HTMLElement>(focusToSelector)?.focus();
     window.scrollTo(0, scroll);
 }
 
@@ -114,4 +118,4 @@ function getSessionItem<T>(key: string): T | null {
     return item ? (JSON.parse(item) as T) : null;
 }
 
-export { NavigationEffector }
+export { NavigationEffector, FOCUS_BLOCKER_CLASS }
