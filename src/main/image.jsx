@@ -32,7 +32,7 @@ const SVGElement = ({ url, color = ADAPTIVE_COLOR, ...props }) => {
             style={props.style}
             onClick={props.onClick}
             alt={props.alt} // used for testing & ensure unified API with ImageElement
-            {...sizes} />
+            {...sizes} /> 
     );
 }
 
