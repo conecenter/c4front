@@ -19,8 +19,7 @@ const SVGElement = ({ url, color = ADAPTIVE_COLOR, ...props }) => {
     const { data: fetched } = useSWR(toDecode ? null : url, fetcher)
     const decodedContent = fetched || toDecode && decodeBase64String(url.replace(/data:.+?,/, ""));
     if (!decodedContent) return null;
-    const sizes = extractSizes(decodedContent)
-    const viewBox = getViewBox(decodedContent, sizes)
+    const viewBox = getViewBox(decodedContent)
     const content = replaceSvgTag(decodedContent)
     const fillColor = color == ADAPTIVE_COLOR ? "currentColor" : color
     return (
@@ -32,7 +31,7 @@ const SVGElement = ({ url, color = ADAPTIVE_COLOR, ...props }) => {
             style={props.style}
             onClick={props.onClick}
             alt={props.alt} // used for testing & ensure unified API with ImageElement
-            {...sizes} /> 
+        />
     );
 }
 
@@ -47,11 +46,11 @@ function decodeBase64String(base64) {
     }
 }
 
-function getViewBox(str, fallbackSizes) {
+function getViewBox(str) {
     const reg = /\bviewBox=(?:"([^"]+)"|'([^']+)')/
     const res = str.match(reg)
     if (res) return res[1] || res[2];
-    const { width = 0, height = 0 } = fallbackSizes;
+    const { width = 0, height = 0 } = extractSizes(str);
     return `0 0 ${width} ${height}`;
 }
 
