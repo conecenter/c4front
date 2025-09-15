@@ -1,7 +1,7 @@
 import React, { useRef, ReactNode, useEffect, useState, useLayoutEffect } from 'react';
 import { Patch } from './exchange/patch-sync';
 import { useAddEventListener } from './custom-hooks';
-import { SEL_FOCUS_FRAME, VISIBLE_CHILD_SELECTOR } from './css-selectors';
+import { SEL_FOCUS_FRAME, VISIBLE_CHILD_SELECTOR, FOCUS_BLOCKER_CLASS } from './css-selectors';
 
 const PathContext = React.createContext("path");
 PathContext.displayName = "PathContext";
@@ -120,7 +120,8 @@ function isRootBranch(doc: Document | undefined) {
 }
 
 function findAutofocusCandidate(doc: Document | undefined) {
-    return doc?.querySelector<HTMLElement>('input');
+    const autoFocusBlock = Boolean(doc?.querySelector(`.${FOCUS_BLOCKER_CLASS}`));
+    return autoFocusBlock ? null : doc?.querySelector<HTMLElement>('input');
 }
 
 function hasNoFocusedElement(doc: Document) {
