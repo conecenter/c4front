@@ -66,4 +66,9 @@ import ee.cone.c4vdom.{ToChildPair, ToJson, c4el, c4tagSwitch, c4tags, c4val}
   @c4el("AutoFocusBlocker") def autoFocusBlocker(
     key: String,
   ): ToChildPair
+
+  @c4el("ExternalApplication") def externalApplication(
+    key: String,
+    url: String,
+  ): ToChildPair
 }
