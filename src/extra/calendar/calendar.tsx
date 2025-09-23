@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
+import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid';
 import luxon3Plugin from '@fullcalendar/luxon3';
 import interactionPlugin from '@fullcalendar/interaction';
 import allLocales from '@fullcalendar/core/locales-all';
@@ -31,7 +32,8 @@ interface Calendar<DateFormat = number> {
     businessHours?: BusinessHours<DateFormat>,
     allDaySlot?: boolean,
     timeSlotsRange?: TimeRange<DateFormat>,
-    eventsChildren?: ReactElement[]
+    eventsChildren?: ReactElement[],
+    resources?: Resource[]
 }
 
 interface CalendarEvent<DateFormat = number> {
@@ -41,7 +43,9 @@ interface CalendarEvent<DateFormat = number> {
     title?: string,
     allDay?: boolean,
     color?: ColorDef,
-    editable?: boolean
+    editable?: boolean,
+    resourceIds?: string[],
+    resourceEditable?: boolean
 }
 
 interface TimeRange<DateFormat = number> {
@@ -61,9 +65,16 @@ interface BusinessHours<DateFormat = number> {
     endTime: DateFormat
 }
 
+interface Resource {
+    id: string,
+    title: string
+}
+
 function Calendar(props: Calendar<string>) {
-    const { identity, events, currentView: serverView, slotDuration, businessHours, allDaySlot, timeSlotsRange, eventsChildren } =
+    const { identity, events, currentView: serverView, slotDuration, businessHours, allDaySlot, timeSlotsRange, eventsChildren, resources } =
         useMemo(() => transformDateFormatProps(props), [props]);
+
+    const isResourceView = !!resources && resources.length > 0;
 
     const calendarRef = useRef<FullCalendar>(null);
     const locale = useUserLocale();
@@ -103,7 +114,7 @@ function Calendar(props: Calendar<string>) {
             || currentView.from < serverView.from || currentView.to > serverView.to;
         if (needNewEvents && !isLoading) setIsLoading(true);
         else if (!needNewEvents && isLoading) setIsLoading(false);
-    });
+    }, [serverView, currentView, isLoading]);
 
     const renderEventContent = useCallback((eventInfo: EventContentArg) => {
         // TODO: refactor, key can have ":" added in the beginning of string, keys API can change
@@ -116,8 +127,9 @@ function Calendar(props: Calendar<string>) {
         <>
             <FullCalendar
                 ref={calendarRef}
-                plugins={[dayGridPlugin, timeGridPlugin, luxon3Plugin, interactionPlugin]}
-                initialView="dayGridMonth"
+                plugins={[dayGridPlugin, timeGridPlugin, luxon3Plugin, interactionPlugin, resourceTimeGridPlugin]}
+                initialView={isResourceView ? "resourceTimeGridDay" : "dayGridMonth"}
+                resources={resources}
                 firstDay={1}
                 slotDuration={slotDuration || '00:15'}
                 slotLabelFormat={TIME_FORMAT}
@@ -136,11 +148,12 @@ function Calendar(props: Calendar<string>) {
                 headerToolbar={{
                     left: 'prev today next',
                     center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    right: isResourceView ? '' : 'dayGridMonth,timeGridWeek,timeGridDay'
                 }}
                 events={eventsState}
                 eventTimeFormat={TIME_FORMAT}
                 eventContent={renderEventContent}
+                eventOverlap={isResourceView ? false : true}
                 eventChange={(changedEvent) => sendEventsChange(changedEvent.event)}
                 datesSet={onDatesSet}
                 viewDidMount={(viewMount) => viewRoot.current = viewMount.el}
