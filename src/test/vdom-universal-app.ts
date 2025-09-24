@@ -1,15 +1,10 @@
 import ReactDOM from "react-dom";
 import { createElement as $ } from "react";
 import { createSyncProviders } from "../main/vdom-hooks";
-import { ScalingElement } from "../extra/scaling-element";
+import { ExternalApplication } from "../extra/external-application";
 
 function App() {
-    const child = $('div', { style: { display: 'flex', flexDirection: 'column' }},
-        $(ScalingElement, { scale: 3 },
-            $('span', null, 'Hello, world!'),
-            $('span', null, 'Hello, world!')
-        )
-    );
+    const child = $(ExternalApplication, { url: "https://wikipedia.org" });
     const sender = {
         enqueue: (identity: object, patch: any) => console.log(patch),
         ctxToPath: () => '/test'

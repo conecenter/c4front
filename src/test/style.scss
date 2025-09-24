@@ -1831,3 +1831,9 @@ button {
   justify-content: flex-end;
   justify-self: end;
 }
+
+.externalApp {
+  position: relative;
+  z-index: 200000;
+  width: 100%;
+}
