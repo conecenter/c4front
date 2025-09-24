@@ -163,6 +163,7 @@ function Calendar(props: Calendar<string>) {
                     slotMinTime: timeSlotsRange.from,
                     slotMaxTime: timeSlotsRange.to
                 }}
+                schedulerLicenseKey="0202815262-fcs-1758711158"
             />
             {isLoadingOverlay}
         </>
