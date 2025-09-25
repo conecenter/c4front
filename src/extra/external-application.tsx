@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { ScrollInfoContext } from "./scroll-info-context";
 import { useAddEventListener } from "./custom-hooks";
 
@@ -26,7 +26,10 @@ function useFrameHeight(hidden?: boolean) {
     const { totalSpaceUsed } = useContext(ScrollInfoContext);
 
     function calcHeight() {
-        if (win && !hidden) setHeight(win.innerHeight - totalSpaceUsed);
+        if (win && !hidden) {
+            const newHeight = win.innerHeight - totalSpaceUsed;
+            setHeight(newHeight > 0 ? newHeight : 0);
+        }
     }
 
     useEffect(calcHeight, [totalSpaceUsed, hidden, win]);
