@@ -4,6 +4,11 @@ import useSWR from 'swr';
 
 const ADAPTIVE_COLOR = "adaptive";
 
+const SWR_OPTIONS = {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false
+}
+
 const clear = (url) => url.replace(/#.*$/, "")
 const isDataUrl = (src) => src.startsWith("data:image/svg");
 const replaceSvgTag = (str) => str.replace(/<\/svg>|<svg>|<svg\s[^>]*>/g, "")
@@ -16,7 +21,7 @@ const fetcher = async (url) => {
 
 const SVGElement = ({ url, color = ADAPTIVE_COLOR, ...props }) => {
     const toDecode = isDataUrl(url)
-    const { data: fetched } = useSWR(toDecode ? null : url, fetcher)
+    const { data: fetched } = useSWR(toDecode ? null : url, fetcher, SWR_OPTIONS)
     const decodedContent = fetched || toDecode && decodeBase64String(url.replace(/data:.+?,/, ""));
     if (!decodedContent) return null;
     const viewBox = getViewBox(decodedContent)
