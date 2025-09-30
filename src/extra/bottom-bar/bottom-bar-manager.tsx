@@ -1,5 +1,5 @@
 import React, { createContext, ReactNode, useCallback, useMemo, useState } from "react";
-import { NoCaptionContext } from "../../main/vdom-hooks";
+import { HorizontalCaptionContext } from "../../main/vdom-hooks";
 import { useAddEventListener } from "../custom-hooks";
 
 const ALIGN_VALS = ['l', 'c', 'r'] as const;
@@ -62,7 +62,7 @@ function BottomBarManager({ children }: { children?: ReactNode }) {
         <BottomBarContext.Provider value={contextValue}>
             {children}
             {items.length > 0 &&
-                <NoCaptionContext.Provider value={true}>
+                <HorizontalCaptionContext.Provider value={true}>
                     <div
                         ref={setBottomBarElem}
                         className="bottomBar bottom-row"
@@ -70,7 +70,7 @@ function BottomBarManager({ children }: { children?: ReactNode }) {
                     >
                         {getBottomBarElems()}
                     </div>
-                </NoCaptionContext.Provider>}
+                </HorizontalCaptionContext.Provider>}
         </BottomBarContext.Provider>
     );
 }
