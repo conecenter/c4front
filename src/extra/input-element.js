@@ -29,7 +29,9 @@ const validateInput = (inputStr, regexStr, skipInvalidSymbols, upperCase) => {
 }
 
 class InputElementBase extends StatefulComponent {
-    // getInitialState() { return { visibility: "" } }
+    getInitialState() {
+        return { isFocused: false };
+    }
     setFocus(focus) {
         if(!focus) return
         this.inp.focus()
@@ -237,7 +239,12 @@ class InputElementBase extends StatefulComponent {
         if (this.props.uctext) value = value.toUpperCase();
         this.props.onChange({ target: { ...HEADERS_CHANGE, value }, inp: e.inp });
     }
+    onFocus(e) {
+        this.setState({ isFocused: true });
+        this.props.onFocus?.(e);
+    }
     onBlur() {
+        this.setState({ isFocused: false });
         this.props.onBlur?.({
             target: { ...HEADERS_CHANGE, value: this.inp.value },
             replaceLastPatch: true
@@ -255,6 +262,7 @@ class InputElementBase extends StatefulComponent {
         const errorChildren = this.getChildrenByClass("sideContent")
         const errors = errorChildren?.length > 0 ? errorChildren : []
         const alignRight = !!this.props.alignRight
+        const value = this.state.isFocused ? this.props.value : this.getDecoratedValue()
         return $("div", { style: inpContStyle, ref: (ref) => this.cont = ref, className, ...focusHtml },
             this.props.shadowElement?.(),
             alignRight && errors,
@@ -265,7 +273,7 @@ class InputElementBase extends StatefulComponent {
                     name, content, size, readOnly,
                     style: alignRight ? {textAlign: "end"} : undefined,
                     type: this.props.type,
-                    value: this.props.value,
+                    value,
                     rows: this.props.rows,
                     placeholder: this.props.placeholder,
                     ...this.props.uctext && {className: "uppercase"},
@@ -274,7 +282,7 @@ class InputElementBase extends StatefulComponent {
                     "data-type": this.props.dataType,
                     "data-changing": this.props.changing,
                     onChange: this.onChange, onKeyDown: this.onKeyDown,
-                    onBlur: this.onBlur, onFocus: this.props.onFocus
+                    onBlur: this.onBlur, onFocus: this.onFocus
                 }, content))
             ),
             this.props.uploadedFileElement?.(),
@@ -283,6 +291,12 @@ class InputElementBase extends StatefulComponent {
             !alignRight && errors,
             this.props.popupElement?.()
         );
+    }
+    getDecoratedValue() {
+        const { value, decorators } = this.props;
+        if (!decorators || !value) return value;
+        const { before, after } = decorators;
+        return `${before}${value}${after}`;
     }
     getChildrenByClass(cl) {
         if (!Array.isArray(this.props.children)) return
