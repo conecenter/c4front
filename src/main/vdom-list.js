@@ -326,11 +326,14 @@ export function GridRoot({
     }),[children,rows,cols,hasHiddenCols,alwaysShowExpander,hideElementsForHiddenCols,dragRowKey,printMode])
 
     const headerRowKeys = rows.filter(row => row.isHeader).map(row => row.rowKey).join(' ')
+    const fullListWidth = Math.ceil(cols.reduce((sum, col) => sum + col.width.min, 0))
+
     const dragBGEl = $("div", { key: "gridBG", className: "gridBG", style: { gridColumn: spanAll, gridRow: spanAll }})
     const style = {
         display: "grid",
         gridTemplateRows,
         gridTemplateColumns,
+        '--full-list-width': `${fullListWidth}em`,
         '--row-height-multiplier': rowHeightMultiplier
     }
     const res = $("div", {
