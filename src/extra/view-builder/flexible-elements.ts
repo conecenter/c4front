@@ -9,7 +9,8 @@ import {
   FLEXIBLE_LABELED_CLASSNAME,
   FLEXIBLE_LABELED_LABEL_CLASSNAME,
   FLEXIBLE_ROOT_CLASSNAME,
-  FLEXIBLE_ROW_CLASSNAME
+  FLEXIBLE_ROW_CLASSNAME,
+  ANCHORED_CLASSNAME
 } from "./css-classes";
 import clsx from "clsx";
 import { NoCaptionContext } from '../../main/vdom-hooks';
@@ -37,10 +38,11 @@ interface FlexibleColumn {
 }
 
 function FlexibleColumn({sizes, className, align, children}: FlexibleColumn) {
+  const anchored = align && !sizes?.max;
   return el("div", {
-    className: clsx(FLEXIBLE_COLUMN_CLASSNAME, className),
+    className: clsx(FLEXIBLE_COLUMN_CLASSNAME, className, anchored && ANCHORED_CLASSNAME),
     style: {
-      ...align && !sizes?.max && { flexGrow: 0 },
+      ...anchored && { flexGrow: 0 },
       ...sizes && {
         minWidth: `${sizes.min}em`,
         maxWidth: sizes.max ? `${sizes.max}em` : undefined
@@ -138,10 +140,11 @@ function wrapInRow(key: string, props: HTMLAttributes<HTMLDivElement>, children:
 }
 
 function FlexibleRow({sizes, className, align, children}: FlexibleRow) {
+  const anchored = align && !sizes?.max;
   const props: HTMLAttributes<HTMLDivElement> = {
-    className: clsx(FLEXIBLE_ROW_CLASSNAME, className),
+    className: clsx(FLEXIBLE_ROW_CLASSNAME, className, anchored && ANCHORED_CLASSNAME),
     style: {
-      ...align && !sizes?.max && { flexGrow: 0 },
+      ...anchored && { flexGrow: 0 },
       ...sizes && {
         minWidth: `${sizes.min}em`,
         maxWidth: sizes.max ? `${sizes.max}em` : undefined
@@ -170,10 +173,11 @@ interface FlexibleCell {
 
 function FlexibleCell({align, sizes, className, children}: FlexibleCell) {
   const hasMaxSize = !!sizes && typeof sizes.max === 'number';
+  const anchored = align && !hasMaxSize;
   return el("div", {
-    className: clsx(FLEXIBLE_CELL_CLASSNAME, className),
+    className: clsx(FLEXIBLE_CELL_CLASSNAME, className, anchored && ANCHORED_CLASSNAME),
     style: {
-      ...align && !hasMaxSize && { flexGrow: 0 },
+      ...anchored && { flexGrow: 0 },
       ...sizes && {
         minWidth: `${sizes.min}em`,
         ...hasMaxSize && { maxWidth: `${sizes.max}em` }
