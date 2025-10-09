@@ -3,7 +3,6 @@ import clsx from 'clsx';
 import { ColorDef } from '../view-builder/common-api';
 import { usePatchSync } from '../exchange/patch-sync';
 import { patchSyncTransformers, POSITIONING_STYLES } from './vk-utils';
-import { ScrollInfoContext } from '../scroll-info-context';
 import { VKKey } from './vk-key';
 import { usePath } from '../../main/vdom-hooks';
 import { VkInfoContext } from '../ui-info-provider';
@@ -100,7 +99,6 @@ function VirtualKeyboard({ identity, hash, position, setupType, setupMode, switc
     // Bottom position logic
     const isBottomPos = position === 'bottom';
     const path = usePath(identity);
-    const scrollInfo = useContext(ScrollInfoContext);
 
     // Positioning logic
     const [ rowsTotal, colsTotal ] = useMemo(() => (currentKeys
@@ -155,8 +153,7 @@ function VirtualKeyboard({ identity, hash, position, setupType, setupMode, switc
                 '--vk-row-height': `calc((var(--vk-height) - ${2 * VK_OFFSET}em) / ${rowsTotal})`,
                 height: 'var(--vk-height)',
                 width: `${VK_COL_WIDTH * colsTotal}em`,
-                ...POSITIONING_STYLES[position],
-                ...isBottomPos && { bottom: scrollInfo.elementsStyles.get(path) }
+                ...POSITIONING_STYLES[position]
             } as CSSProperties} >
             {keys}
         </div>
