@@ -1,4 +1,4 @@
-import { Children, ReactNode, isValidElement, useEffect, useRef } from "react";
+import { Children, ReactNode, isValidElement, useEffect, useLayoutEffect, useRef } from "react";
 import { FlexibleSizes } from "./view-builder/flexible-api";
 import { flexibleComponents } from "./view-builder/flexible-elements";
 
@@ -40,6 +40,15 @@ function useInterval(callback: () => void, delay: number | null) {
     }, [delay]);
 }
 
+function useIsMounted() {
+    const isMountedRef = useRef(true);
+    useLayoutEffect(() => {
+        isMountedRef.current = true;
+        return () => { isMountedRef.current = false; }
+    });
+    return isMountedRef;
+}
+
 // element width shouldn't depend on content if not explicitly sized from server
 const useFlexBasisFromSizes = (children: ReactNode, sizes?: FlexibleSizes) => {
     const flexBasis = sizes?.min || calcChildrenSize(children);
@@ -61,4 +70,4 @@ function calcChildrenSize(children: ReactNode): number {
     }, 0);
 }
 
-export { useAddEventListener, useLatest, useInterval, useFlexBasisFromSizes };
+export { useAddEventListener, useLatest, useInterval, useIsMounted, useFlexBasisFromSizes };
