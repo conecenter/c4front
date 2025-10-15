@@ -5,6 +5,7 @@ import { HorizontalCaptionContext } from "../../main/vdom-hooks";
 import { useRegistry } from "../hooks/use-registry";
 import { PageTitleBlock } from "./page-title-block";
 import { Align, ALIGN_VALS, filterByAlign, LayoutBarContext, LayoutItem, sortByPriority } from "../aligned-bars-api";
+import { PAGE_TITLE_CLASS } from "../css-selectors";
 
 const TitleBarContext = createContext<LayoutBarContext>({});
 TitleBarContext.displayName = "TitleBarContext";
@@ -15,7 +16,7 @@ function PageTitle({ children }: { children?: ReactNode }) {
     const contextValue = useMemo(() => ({ register, unregister }), [register, unregister]);
 
     const scrollPos = useContext(ScrollInfoContext);
-    const className = clsx('topRow', 'pageTitle', scrollPos.compactUiHeader && ' hideOnScroll');
+    const className = clsx('topRow', PAGE_TITLE_CLASS, scrollPos.compactUiHeader && ' hideOnScroll');
 
     const sortedItems = sortByPriority(items);
 
