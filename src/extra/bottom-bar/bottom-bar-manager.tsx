@@ -1,67 +1,32 @@
-import React, { createContext, ReactNode, useCallback, useMemo, useState } from "react";
+import React, { createContext, ReactNode, useMemo, useState } from "react";
 import { HorizontalCaptionContext } from "../../main/vdom-hooks";
 import { useAddEventListener } from "../custom-hooks";
+import { useRegistry } from "../hooks/use-registry";
+import { ALIGN_VALS, filterByAlign, sortByPriority } from "../aligned-bars-api";
+import type { LayoutBarContext, LayoutItem } from "../aligned-bars-api";
 
-const ALIGN_VALS = ['l', 'c', 'r'] as const;
-
-type Align = 'l' | 'c' | 'r';
-type Id = string;
-
-interface BottomBarItem {
-    id: Id,
-    align: Align,
-    priority: number,
-    render: () => ReactNode
-}
-
-interface BottomBarContext {
-    register?: (item: BottomBarItem) => void,
-    unregister?: (item: BottomBarItem) => void
-}
-
-const BottomBarContext = createContext<BottomBarContext>({});
+const BottomBarContext = createContext<LayoutBarContext>({});
 BottomBarContext.displayName = "BottomBarContext";
 
 
-const sortDesc = (a: BottomBarItem, b: BottomBarItem) => b.priority - a.priority;
-
 function BottomBarManager({ children }: { children?: ReactNode }) {
-    const [registry, setRegistry]  = useState(new Map<Id, BottomBarItem>());
-
-    const register = useCallback((item: BottomBarItem) => {
-        setRegistry(prev => {
-            const next = new Map(prev);
-            next.set(item.id, item);
-            return next;
-        });
-    }, []);
-
-    const unregister = useCallback((item: BottomBarItem) => {
-        setRegistry(prev => {
-            const next = new Map(prev);
-            next.delete(item.id);
-            return next;
-        });
-    }, []);
-
+    const { register, unregister, items } = useRegistry<LayoutItem>();
     const contextValue = useMemo(() => ({ register, unregister }), [register, unregister]);
 
     const { setBottomBarElem, offset } = useSystemVkOffset();
 
-    const items = Array.from(registry.values()).sort(sortDesc);
+    const sortedItems = sortByPriority(items);
 
-    const getFilteredJsx = (align: Align) => items
-        .filter(i => i.align === align)
-        .map(i => i.render());
-
-    const getBottomBarElems = () => ALIGN_VALS.map(
-        (align) => <div key={align} className={`${align}Align`}>{getFilteredJsx(align)}</div>
+    const getBottomBarElems = () => ALIGN_VALS.map((align) =>
+        <div key={align} className={`${align}Align`}>
+            {filterByAlign(sortedItems, align).map(i => i.render())}
+        </div>
     );
 
     return (
         <BottomBarContext.Provider value={contextValue}>
             {children}
-            {items.length > 0 &&
+            {sortedItems.length > 0 &&
                 <HorizontalCaptionContext.Provider value={true}>
                     <div
                         ref={setBottomBarElem}
@@ -97,5 +62,4 @@ function useSystemVkOffset() {
     return { setBottomBarElem, offset };
 }
 
-export type { Align, Id, BottomBarItem }
 export { BottomBarManager, BottomBarContext }
