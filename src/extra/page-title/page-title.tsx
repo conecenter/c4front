@@ -19,11 +19,11 @@ function PageTitle({ children }: { children?: ReactNode }) {
 
     const sortedItems = sortByPriority(items);
 
-    const getAlignedTitleBlocks = (align: Align) => (
-        <div key={align} className={`${align}Align pageTitleItem`}>
-            {filterByAlign(sortedItems, align).map(i => i.render())}
-        </div>
-    );
+    const getAlignedTitleBlocks = (align: Align) => {
+        const alignedItems = filterByAlign(sortedItems, align);
+        const jsx = alignedItems.length > 0 ? alignedItems.map(i => i.render()) : null;
+        return jsx && <div key={align} className={`${align}Align pageTitleItem`}>{jsx}</div>;
+    }
 
     return (
         <TitleBarContext.Provider value={contextValue}>
