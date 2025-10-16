@@ -37,7 +37,7 @@ function PrintManager({ identity, children, printMode: state, printChildren, pri
     usePrintTitle(printMode, printTitle);
 
     useEffect(function customPrintFromServer() {
-        if (printMode) window?.print();
+        if (printMode) requestAnimationFrame(() => window?.print());
     }, [printMode]);
 
     // Make changes for print
