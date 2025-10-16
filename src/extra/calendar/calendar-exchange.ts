@@ -17,8 +17,9 @@ const HEADERS = {
     end: 'x-r-event-end',
     viewType: 'x-r-view-type',
     from: 'x-r-from',
-    to: 'x-r-to'
-}
+    to: 'x-r-to',
+    resourceIds: 'x-r-resource-ids'
+} as const
 
 const changeEventSyncTransformers = {
     serverToState: serverStateToState(transformColor),
@@ -39,12 +40,14 @@ function serverStateToState(transform: (serverState: CalendarEvent[]) => EventIn
 function changeToPatch(ch: EventImpl): Patch {
     const start = ch.start?.getTime();
     const end = ch.end?.getTime();
+    const resourceIds = ch.getResources().map(res => res.id).join('|');
     return {
         value: 'changeEvent',
         headers: {
             [HEADERS.id]: ch.id!,
             ...start && {[HEADERS.start]: String(start)},
-            ...end && {[HEADERS.end]: String(end)}
+            ...end && {[HEADERS.end]: String(end)},
+            ...resourceIds && {[HEADERS.resourceIds]: resourceIds}
         }
     }
 }
@@ -53,10 +56,12 @@ function patchToChange(patch: Patch): EventImpl {
     const headers = patch.headers as PatchHeaders;
     const start = +headers[HEADERS.start];
     const end = +headers[HEADERS.end];
+    const resourceIds: string[] | undefined = headers[HEADERS.resourceIds]?.split('|');
     return {
         id: headers[HEADERS.id],
         ...start && {start},
-        ...end && {end}
+        ...end && {end},
+        ...resourceIds && {resourceIds}
     } as unknown as EventImpl;
 }
 
