@@ -28,12 +28,13 @@ function PageTitle({ children }: { children?: ReactNode }) {
 
     return (
         <TitleBarContext.Provider value={contextValue}>
-            <HorizontalCaptionContext.Provider value={true}>
-                <div className={className} data-path="page-title" >
-                    {children}
-                    {ALIGN_VALS.map(getAlignedTitleBlocks)}
-                </div>
-            </HorizontalCaptionContext.Provider>
+            {sortedItems.length > 0 &&
+                <HorizontalCaptionContext.Provider value={true}>
+                    <div className={className} data-path="page-title" >
+                        {ALIGN_VALS.map(getAlignedTitleBlocks)}
+                    </div>
+                </HorizontalCaptionContext.Provider>}
+            {children}
         </TitleBarContext.Provider>
     );
 }
