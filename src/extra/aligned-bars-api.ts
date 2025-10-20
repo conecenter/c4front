@@ -15,7 +15,8 @@ interface LayoutItem extends WithId {
 
 interface LayoutBarContext {
     register?: (item: LayoutItem) => void,
-    unregister?: (item: LayoutItem) => void
+    unregister?: (item: LayoutItem) => void,
+    items?: LayoutItem[]
 }
 
 const ALIGN_VALS = ['l', 'c', 'r'] as const;

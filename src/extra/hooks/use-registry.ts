@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Id, WithId } from "../aligned-bars-api";
 
 function useRegistry<Item extends WithId>() {
@@ -20,7 +20,7 @@ function useRegistry<Item extends WithId>() {
         });
     }, []);
 
-    const items = Array.from(registry.values());
+    const items = useMemo(() => Array.from(registry.values()), [registry]);
 
     return { register, unregister, items };
 }

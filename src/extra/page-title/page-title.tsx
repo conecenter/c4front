@@ -1,22 +1,17 @@
-import React, { createContext, ReactNode, useContext, useMemo } from "react";
+import React, { ReactNode, useContext } from "react";
 import clsx from 'clsx';
 import { ScrollInfoContext } from "../scroll-info-context";
 import { HorizontalCaptionContext } from "../../main/vdom-hooks";
-import { useRegistry } from "../hooks/use-registry";
 import { PageTitleBlock } from "./page-title-block";
-import { Align, ALIGN_VALS, filterByAlign, LayoutBarContext, LayoutItem, sortByPriority } from "../aligned-bars-api";
+import { Align, ALIGN_VALS, filterByAlign, sortByPriority } from "../aligned-bars-api";
 import { PAGE_TITLE_CLASS } from "../css-selectors";
-
-const TitleBarContext = createContext<LayoutBarContext>({});
-TitleBarContext.displayName = "TitleBarContext";
-
+import { PageTitleContext } from "./page-title-provider";
 
 function PageTitle({ children }: { children?: ReactNode }) {
-    const { register, unregister, items } = useRegistry<LayoutItem>();
-    const contextValue = useMemo(() => ({ register, unregister }), [register, unregister]);
+    const { items = [] } = useContext(PageTitleContext);
 
     const scrollPos = useContext(ScrollInfoContext);
-    const className = clsx('topRow', PAGE_TITLE_CLASS, scrollPos.compactUiHeader && ' hideOnScroll');
+    const className = clsx('topRow', PAGE_TITLE_CLASS, scrollPos.compactUiHeader && 'hideOnScroll');
 
     const sortedItems = sortByPriority(items);
 
@@ -27,16 +22,14 @@ function PageTitle({ children }: { children?: ReactNode }) {
     }
 
     return (
-        <TitleBarContext.Provider value={contextValue}>
-            
-                <HorizontalCaptionContext.Provider value={true}>
-                    <div className={className} data-path="page-title" >
-                        {sortedItems.length > 0 && ALIGN_VALS.map(getAlignedTitleBlocks)}
-                    </div>
-                </HorizontalCaptionContext.Provider>
+        <HorizontalCaptionContext.Provider value={true} >
+            {sortedItems.length > 0 &&
+                <div className={className} data-path="page-title" >
+                    {ALIGN_VALS.map(getAlignedTitleBlocks)}
+                </div>}
             {children}
-        </TitleBarContext.Provider>
+        </HorizontalCaptionContext.Provider>
     );
 }
 
-export { PageTitle, TitleBarContext, PageTitleBlock }
+export { PageTitle, PageTitleBlock }
