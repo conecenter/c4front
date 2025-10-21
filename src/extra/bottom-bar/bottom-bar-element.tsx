@@ -1,5 +1,6 @@
 import { ReactNode, useContext, useLayoutEffect, useMemo } from "react";
-import { Align, BottomBarContext, BottomBarItem, Id } from "./bottom-bar-manager";
+import { BottomBarContext } from "./bottom-bar-manager";
+import type { Align, Id, LayoutItem } from "../aligned-bars-api";
 
 interface BottomBarElement {
     id: Id,
@@ -11,7 +12,7 @@ interface BottomBarElement {
 function BottomBarElement({ id, align = 'l', priority = 0, children }: BottomBarElement) {
     const { register, unregister } = useContext(BottomBarContext);
 
-    const bottomBarItem: BottomBarItem = useMemo(
+    const bottomBarItem: LayoutItem = useMemo(
         () => ({ id, align, priority, render: () => children }),
         [id, align, priority, children]
     );

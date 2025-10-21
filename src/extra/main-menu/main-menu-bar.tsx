@@ -3,7 +3,6 @@ import clsx from 'clsx';
 import {Expander, ExpanderArea} from '../../main/expander-area';
 import {handleArrowUpDown, handleMenuBlur, patchToState, stateToPatch} from './main-menu-utils';
 import {MainMenuClock} from './main-menu-clock';
-import {ScrollInfoContext} from '../scroll-info-context';
 import {useFocusControl} from "../focus-control";
 import {ARROW_DOWN_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY, M_KEY} from "../../main/keyboard-keys";
 import {MenuCustomItem, MenuExecutableItem, MenuItemsGroup, MenuPopupElement, MenuUserItem} from './main-menu-items';
@@ -70,8 +69,6 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
 
   const currentPath = useContext(PathContext);
   const prevFocusedPath = useRef<string | null>(null);
-
-  const scrollPos = useContext(ScrollInfoContext);
 
   // Left part of menu
   const leftMenuWithLogo = !icon ? undefined : (
@@ -189,7 +186,6 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
                         maxLineCount={1}
                         props={{ 
                           className: clsx('mainMenuBar topRow', !isFocused && 'hideOnScroll'),
-                          style: { top: scrollPos.elementsStyles.get(MENU_BAR_PATH) },
                           'data-path': MENU_BAR_PATH,
                           onKeyDown: handleKeyDown,
                           onFocus: () => setIsFocused(true),
