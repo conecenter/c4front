@@ -75,6 +75,7 @@ function Calendar(props: Calendar<string>) {
         useMemo(() => transformDateFormatProps(props), [props]);
 
     const isResourceView = !!resources && resources.length > 0;
+    const orderedResourses = resources?.map((res, i) => ({ ...res, index: i }));
 
     const calendarRef = useRef<FullCalendar>(null);
     const locale = useUserLocale();
@@ -129,7 +130,8 @@ function Calendar(props: Calendar<string>) {
                 ref={calendarRef}
                 plugins={[dayGridPlugin, timeGridPlugin, luxon3Plugin, interactionPlugin, resourceTimeGridPlugin]}
                 initialView={isResourceView ? "resourceTimeGridDay" : "dayGridMonth"}
-                resources={resources}
+                resources={orderedResourses}
+                resourceOrder={'index'}
                 firstDay={1}
                 slotDuration={slotDuration || '00:15'}
                 slotLabelFormat={TIME_FORMAT}
