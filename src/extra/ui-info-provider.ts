@@ -3,7 +3,6 @@ import { usePatchSync, Patch, PatchSyncTransformers } from "./exchange/patch-syn
 import { useAddEventListener } from "./custom-hooks";
 import { RootBranchContext } from '../main/vdom-hooks';
 import { identityAt } from '../main/vdom-util';
-import { Identity } from './utils';
 
 const DEFAULT_UI_TYPE = 'pointer';
 
@@ -42,7 +41,7 @@ const patchSyncTransformers: PatchSyncTransformers<UiType | undefined, UiType | 
 
 interface UiInfoProvider {
     key: string,
-    identity: Identity,
+    identity: object,
     uiType?: UiType,
     children: ReactNode
 }

@@ -5,7 +5,6 @@ import {isInstanceOfNode} from "./dom-utils";
 import {ENTER_KEY} from "../main/keyboard-keys";
 import {identityAt} from "../main/vdom-util";
 import { usePatchSync, Patch } from "./exchange/patch-sync";
-import {Identity} from "./utils";
 
 const receiverIdOf = identityAt('receiver');
 
@@ -16,9 +15,8 @@ const patchSyncTransformers = {
 	applyChange: (prev: string, ch: string) => ch
 };
 
-
 interface ColorPickerProps {
-	identity: Identity,
+	identity: object,
 	value: string,
 	ro: boolean
 }

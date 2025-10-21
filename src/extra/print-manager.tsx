@@ -2,7 +2,6 @@ import React, { ReactNode, createContext, useEffect, useRef, useState } from "re
 import { useAddEventListener } from "./custom-hooks";
 import { PatchSyncTransformers, usePatchSync } from "./exchange/patch-sync";
 import { identityAt } from "../main/vdom-util";
-import { Identity } from "./utils";
 
 const PrintContext = createContext(false);
 PrintContext.displayName = 'PrintContext';
@@ -21,7 +20,7 @@ const patchSyncTransformers: PatchSyncTransformers<boolean, boolean, boolean> = 
 
 interface PrintManager {
     key: string,
-    identity: Identity,
+    identity: object,
     children: ReactNode,
     printChildren: ReactNode,
     printMode: boolean,

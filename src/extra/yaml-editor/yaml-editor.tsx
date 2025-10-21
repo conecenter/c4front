@@ -7,7 +7,6 @@ import { JSONSchema7 } from "json-schema";
 import { linter, lintGutter, Diagnostic } from "@codemirror/lint";
 import { load, YAMLException } from 'js-yaml';
 import { identityAt } from '../../main/vdom-util';
-import { Identity } from '../utils';
 
 const receiverIdOf = identityAt('receiver');
 
@@ -19,7 +18,7 @@ const patchSyncTransformers = {
 };
 
 interface YamlEditorProps {
-    identity: Identity,
+    identity: object,
     value: string,
     jsonSchema?: string
 }
