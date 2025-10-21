@@ -3,20 +3,20 @@ import {createElement,useState,useContext,createContext,useCallback,useEffect,us
 
 /********* sync ***************************************************************/
 
-const NoContext = createContext()
-const AckContext = createContext()
+const NoContext = createContext(0)
+export const AckContext = createContext(0)
 AckContext.displayName = "AckContext"
 
-/** @typedef {{ enqueue: Function, ctxToPath: (ctx?: Object) => string, busyFor: (qKey: string) => number }} Sender */
+/** @typedef {{ enqueue: Function, ctxToPath: (ctx?: Object) => string, busyFor: () => number }} Sender */
 /** @type {React.Context<Sender>} */
-const SenderContext = createContext()
+const SenderContext = createContext({ enqueue: () => {}, ctxToPath: () => '', busyFor: () => 0 })
 SenderContext.displayName = "SenderContext"
 
 /** @type {React.Context<{isRoot: boolean, branchKey: string}>} */
 export const RootBranchContext = createContext({isRoot: true, branchKey: ''})
 RootBranchContext.displayName = 'RootBranchContext'
 
-const nonMerged = ack => aPatch => !(aPatch && ack && aPatch.sentIndex <= ack.index)
+const nonMerged = ack => aPatch => !(aPatch && ack && aPatch.sentIndex <= ack)
 export const useSender = () => useContext(SenderContext)
 
 /**
@@ -27,7 +27,8 @@ export const useSync = identity => {
     const [patches,setPatches] = useState([])
     const sender = useSender()
     const enqueuePatch = useCallback(({onAck,...aPatch})=>{
-        setPatches(aPatches=>[...aPatches,{onAck, ...aPatch, sentIndex: sender.enqueue(identity,aPatch)}])
+        const index = sender.enqueue(identity,aPatch)
+        setPatches(aPatches=>[...aPatches,{onAck, ...aPatch, sentIndex: index }])
     },[sender,identity])
     const ack = useContext(patches.length>0 ? AckContext : NoContext)
     useEffect(()=>{

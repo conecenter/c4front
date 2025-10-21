@@ -13,7 +13,7 @@ import { LoadingIndicator } from '../loading-indicator';
 import { ColorDef } from '../view-builder/common-api';
 import { transformDateFormatProps } from './calendar-utils';
 import { EventContent } from './event-content';
-import { escapeRegex } from '../utils';
+import { escapeRegex, Identity } from '../utils';
 
 import type { DatesSetArg, EventContentArg, FormatterInput, SlotLabelContentArg, ViewApi } from '@fullcalendar/core';
 
@@ -25,7 +25,7 @@ const TIME_FORMAT: FormatterInput = {
 }
 
 interface Calendar<DateFormat = number> {
-    identity: object,
+    identity: Identity,
     events: CalendarEvent<DateFormat>[],
     currentView?: ViewInfo<DateFormat>,
     slotDuration?: DateFormat,
