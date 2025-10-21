@@ -14,6 +14,8 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
 
 @c4tagSwitch("FrontApp") trait TimeRange extends ToJson
 
+@c4tagSwitch("FrontApp") trait Resource extends ToJson
+
 @c4tagSwitch("FrontApp") trait ViewInfoType extends ToJson
 @c4tags("FrontApp") trait CalendarTags[C] {
   @c4el("Calendar") def calendar(
@@ -25,6 +27,7 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
     allDaySlot: Option[Boolean] = None,
     timeSlotsRange: Option[TimeRange] = None,
     eventsChildren: ViewRes,
+    resources: List[Resource] = Nil,
     changeView: Receiver[C] = NoReceiver[C],
     changeEvent: Receiver[C] = NoReceiver[C],
     clickAction: Receiver[C] = NoReceiver[C],
@@ -38,11 +41,14 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
     allDay: Option[Boolean] = None,
     color: Option[ColorDef] = None,
     editable: Option[Boolean] = None,
+    resourceIds: List[String] = Nil,
+    resourceEditable: Option[Boolean] = None,
   ): CalendarEvent
 
   @c4val("dayGridMonth") def dayGridMonth: ViewInfoType
   @c4val("timeGridWeek") def timeGridWeek: ViewInfoType
   @c4val("timeGridDay") def timeGridDay: ViewInfoType
+  @c4val("resourceTimeGridDay") def resourceTimeGridDay: ViewInfoType
 
   @c4val def viewInfo(
     viewType: ViewInfoType,
@@ -60,4 +66,9 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
     from: String,
     to: String,
   ): TimeRange
+
+  @c4val def resource(
+    id: String,
+    title: String
+  ): Resource
 }
