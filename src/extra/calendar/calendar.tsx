@@ -67,7 +67,8 @@ interface BusinessHours<DateFormat = number> {
 
 interface Resource {
     id: string,
-    title: string
+    title: string,
+    color?: ColorDef
 }
 
 function Calendar(props: Calendar<string>) {
@@ -132,6 +133,7 @@ function Calendar(props: Calendar<string>) {
                 initialView={isResourceView ? "resourceTimeGridDay" : "dayGridMonth"}
                 resources={orderedResourses}
                 resourceOrder={'index'}
+                resourceLabelClassNames={(res) => res.resource.extendedProps?.color?.cssClass || ''}
                 firstDay={1}
                 slotDuration={slotDuration || '00:15'}
                 slotLabelFormat={TIME_FORMAT}
