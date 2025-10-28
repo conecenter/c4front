@@ -1,7 +1,7 @@
 import React, {createContext, ReactElement, useCallback, useContext, useEffect, useRef, useState} from "react";
 import clsx from 'clsx';
 import {Expander, ExpanderArea} from '../../main/expander-area';
-import {handleArrowUpDown, handleMenuBlur, patchToState, stateToPatch} from './main-menu-utils';
+import {handleArrowUpDown, patchToState, stateToPatch} from './main-menu-utils';
 import {MainMenuClock} from './main-menu-clock';
 import {useFocusControl} from "../focus-control";
 import {ARROW_DOWN_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY, M_KEY} from "../../main/keyboard-keys";
@@ -243,6 +243,8 @@ function BurgerMenu({ identity, opened, domRef, setFinalState, children}: Burger
 
   const currentPath = useContext(PathContext);
 
+  const closePopup = () => setFinalState({ opened: false });
+
   // Keyboard controls logic
   const keyboardOperation = useRef(false);
   
@@ -278,8 +280,7 @@ function BurgerMenu({ identity, opened, domRef, setFinalState, children}: Burger
   };
 
   return (
-    <div className={clsx(focusClass, 'menuBurgerBox')} 
-         onBlur={(e) => handleMenuBlur(e, setFinalState)}
+    <div className={clsx(focusClass, 'menuBurgerBox')}
          onKeyDown={handleKeyDown}
          {...focusHtml}
          ref={domRef} >
@@ -302,7 +303,9 @@ function BurgerMenu({ identity, opened, domRef, setFinalState, children}: Burger
       </button>
 
       {opened &&
-          <MenuPopupElement popupLrMode={false} keyboardOperation={keyboardOperation}>{children}</MenuPopupElement>}
+        <MenuPopupElement popupLrMode={false} keyboardOperation={keyboardOperation} closePopup={closePopup} >
+          {children}
+        </MenuPopupElement>}
     </div>
   )
 }

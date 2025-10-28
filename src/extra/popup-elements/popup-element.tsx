@@ -146,4 +146,4 @@ function findFocusableAncestor(elem?: HTMLElement | null) {
     return elem?.closest<HTMLElement>(SEL_FOCUS_FRAME) || null;
 }
 
-export { PopupElement }
+export { PopupElement, elementsContainTarget }

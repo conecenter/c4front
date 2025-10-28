@@ -3,13 +3,13 @@ import clsx from 'clsx';
 import { useFocusControl } from '../focus-control';
 import { MenuItemState, MenuControlsContext } from './main-menu-bar';
 import { MenuItem, MenuItemsGroup, MenuPopupElement } from './main-menu-items';
-import { handleArrowUpDown, handleMenuBlur, patchToState, stateToPatch } from './main-menu-utils';
+import { handleArrowUpDown, patchToState, stateToPatch } from './main-menu-utils';
 import {
     ARROW_DOWN_KEY,
     ARROW_LEFT_KEY,
-    ARROW_RIGHT_KEY, 
-    ARROW_UP_KEY, 
-    ENTER_KEY, 
+    ARROW_RIGHT_KEY,
+    ARROW_UP_KEY,
+    ENTER_KEY,
     ESCAPE_KEY
 } from '../../main/keyboard-keys';
 import { BindGroupElement } from '../binds/binds-elements';
@@ -56,6 +56,9 @@ function MenuFolderItem(props: MenuFolderItem) {
         sendFinalChange: setFinalState
     } = usePatchSync(receiverIdOf(identity), state, false, patchSyncTransformers);
 
+    const openPopup = () => setFinalState({ opened: true });
+    const closePopup = () => setFinalState({ opened: false });
+
     const menuFolderRef = useRef<HTMLDivElement>(null);
     const menuFolder = menuFolderRef.current;
 
@@ -90,7 +93,7 @@ function MenuFolderItem(props: MenuFolderItem) {
                 if (!opened && menuFolder) {
                     keyboardOperation.current = true;
                     e.stopPropagation();
-                    setFinalState({ opened: true });
+                    openPopup();
                 }
                 break;
             case ARROW_LEFT_KEY:
@@ -105,7 +108,7 @@ function MenuFolderItem(props: MenuFolderItem) {
                     keyboardOperation.current = true;
                     e.stopPropagation();
                     e.currentTarget.focus();
-                    setFinalState({ opened: false });
+                    closePopup();
                 }
                 break;
             case ARROW_DOWN_KEY:
@@ -114,7 +117,7 @@ function MenuFolderItem(props: MenuFolderItem) {
                 handleArrowUpDown(e, menuFolder, currentPath, children);
         }
     };
-    
+
     // Binds mode logic
     const { isBindMode, activeBindGroup } = useBinds();
     useEffect(() => {
@@ -122,10 +125,10 @@ function MenuFolderItem(props: MenuFolderItem) {
         const isActiveFolder = menuFolder.querySelector(`[groupid="${activeBindGroup}"]`);
         if (isActiveFolder && !opened) {
             menuFolder.focus();
-            setFinalState({ opened: true });
+            openPopup();
         } else if (!isActiveFolder && opened) {
             menuFolder.focus();
-            setFinalState({ opened: false });
+            closePopup();
         }
     }, [activeBindGroup]);
 
@@ -133,7 +136,6 @@ function MenuFolderItem(props: MenuFolderItem) {
         <div ref={menuFolderRef}
             className={clsx('menuItem', opened && 'menuFolderOpened', current && 'isCurrent', focusClass)}
             {...focusHtml}
-            onBlur={(e) => handleMenuBlur(e, setFinalState)}
             onClick={() => !isBindMode && setFinalState({ opened: !opened })}
             onKeyDown={handleKeyDown} >
 
@@ -144,9 +146,9 @@ function MenuFolderItem(props: MenuFolderItem) {
                 {shortName &&
                     <span className='shortName'>{shortName}</span>}
                 {ARROW_DOWN_ICON}
-        
+
                 {opened &&
-                    <MenuPopupElement popupLrMode={popupLrMode} keyboardOperation={keyboardOperation} >
+                    <MenuPopupElement popupLrMode={popupLrMode} keyboardOperation={keyboardOperation} closePopup={closePopup} >
                         {children}
                     </MenuPopupElement>}
             </BindGroupElement>

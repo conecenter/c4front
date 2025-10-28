@@ -3,7 +3,7 @@ import { KEY_TO_DIRECTION } from '../../main/keyboard-keys';
 import { Patch, PatchHeaders } from '../exchange/patch-sync';
 import { MenuItemState } from './main-menu-bar';
 import { MenuItem, MenuItemsGroup } from './main-menu-items';
-import { isInstanceOfNode } from '../dom-utils';
+import { VISIBLE_CHILD_SELECTOR } from '../css-selectors';
 
 // Server sync functionality
 function patchToState(patch: Patch): MenuItemState {
@@ -17,12 +17,6 @@ function stateToPatch({ opened }: MenuItemState): Patch {
 }
 
 // Helper functions
-
-function handleMenuBlur(e: React.FocusEvent, setFinalState: (s: MenuItemState) => void) {
-    if (isInstanceOfNode(e.relatedTarget) && e.currentTarget.contains(e.relatedTarget)) return;
-    setFinalState({ opened: false });
-}
-
 function handleArrowUpDown(
     event: React.KeyboardEvent, 
     elem: HTMLElement, 
@@ -38,7 +32,7 @@ function handleArrowUpDown(
     );
     if (nextFocusedIndex === undefined) return;
     const pathToFocus = flatChildren[nextFocusedIndex].props.path;
-    const itemToFocus: HTMLElement | null = elem.querySelector(`[data-path='${pathToFocus}']`);
+    const itemToFocus: HTMLElement | null = elem.ownerDocument.querySelector(`[data-path='${pathToFocus}']${VISIBLE_CHILD_SELECTOR}`);
     if (itemToFocus) {
         itemToFocus.focus();
         event.preventDefault();
@@ -84,4 +78,4 @@ function flattenMenuChildren(children?: ReactElement<MenuItem | MenuItemsGroup>[
     }, [])
 }
 
-export { patchToState, stateToPatch, handleMenuBlur, getNextArrayIndex, handleArrowUpDown, focusFirstMenuItem };
+export { patchToState, stateToPatch, getNextArrayIndex, handleArrowUpDown, focusFirstMenuItem };
