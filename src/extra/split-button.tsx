@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useRef } from "react";
 import clsx from "clsx";
 import { ButtonElement } from "./button-element";
 import { SVGElement } from "../main/image";
@@ -7,6 +7,8 @@ import { NoCaptionContext, usePath } from "../main/vdom-hooks";
 import { usePopupState } from "./popup-elements/popup-manager";
 import { PopupElement } from "./popup-elements/popup-element";
 import { useFocusControl } from "./focus-control";
+import { useAddEventListener } from "./custom-hooks";
+import { OPEN_POPUP } from "./custom-events";
 
 const ARROW_DOWN_URL = '/mod/main/ee/cone/core/ui/c4view/arrow-down.svg';
 
@@ -18,6 +20,8 @@ interface SplitButtonProps {
 }
 
 function SplitButton({ identity, mainButton, color, optionalGroup = [] }: SplitButtonProps) {
+    const domRef = useRef<HTMLDivElement | null>(null);
+
     const { style: colorStyle, className: colorClass }: ColorProps = colorToProps(color);
 
     const path = usePath(identity);
@@ -26,8 +30,10 @@ function SplitButton({ identity, mainButton, color, optionalGroup = [] }: SplitB
 
     const { isOpened, toggle } = usePopupState(path);
 
+    useAddEventListener(domRef, OPEN_POPUP, () => toggle(!isOpened));
+
     return (
-        <div className={clsx("splitButton", colorClass, focusClass)} style={colorStyle} {...focusHtml} >
+        <div ref={domRef} className={clsx("splitButton", colorClass, focusClass)} style={colorStyle} {...focusHtml} >
             <NoCaptionContext.Provider value={true} >
                 {mainButton}
 
