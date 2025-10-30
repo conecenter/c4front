@@ -78,5 +78,6 @@ import ee.cone.c4vdom.{ToChildPair, ToJson, c4el, c4tagSwitch, c4tags, c4val}
     mainButton: ViewRes,  // ButtonElement
     color: ColorDef,
     optionalGroup: ViewRes,
+    arrowButtonHint: String = "",
   ): ToChildPair
 }

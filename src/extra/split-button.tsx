@@ -16,10 +16,11 @@ interface SplitButtonProps {
     identity: object,
     mainButton: ReactNode[],
     color: ColorDef,
-    optionalGroup?: ReactNode[]
+    optionalGroup?: ReactNode[],
+    arrowButtonHint?: string
 }
 
-function SplitButton({ identity, mainButton, color, optionalGroup = [] }: SplitButtonProps) {
+function SplitButton({ identity, mainButton, color, optionalGroup = [], arrowButtonHint }: SplitButtonProps) {
     const domRef = useRef<HTMLDivElement | null>(null);
 
     const { style: colorStyle, className: colorClass }: ColorProps = colorToProps(color);
@@ -44,7 +45,7 @@ function SplitButton({ identity, mainButton, color, optionalGroup = [] }: SplitB
                         <ButtonElement
                             className={clsx("arrowButton", isOpened && 'rotate180deg')}
                             onClick={() => toggle(!isOpened)}
-                            value=''
+                            value='' hint={arrowButtonHint}
                         >
                             <SVGElement url={ARROW_DOWN_URL} color="adaptive" />
                         </ButtonElement>
