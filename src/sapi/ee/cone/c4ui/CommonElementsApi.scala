@@ -72,4 +72,11 @@ import ee.cone.c4vdom.{ToChildPair, ToJson, c4el, c4tagSwitch, c4tags, c4val}
     url: String,
     hidden: Boolean = false,
   ): ToChildPair
+
+  @c4el("SplitButton") def splitButton(
+    key: String,
+    mainButton: ViewRes,  // ButtonElement
+    color: ColorDef,
+    optionalGroup: ViewRes,
+  ): ToChildPair
 }
