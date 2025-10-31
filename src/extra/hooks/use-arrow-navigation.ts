@@ -17,8 +17,10 @@ function useArrowNavigation(
         const root = (rootRefOrElem && 'current' in rootRefOrElem) ? rootRefOrElem.current : rootRefOrElem;
         if (!root) return;
         switch (e.key) {
-            case "ArrowUp":
             case "ArrowDown":
+                if (e.altKey) break;
+                // fallthrough
+            case "ArrowUp":
             case "ArrowLeft":
             case "ArrowRight":
                 e.stopPropagation();
