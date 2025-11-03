@@ -154,7 +154,7 @@ function Calendar(props: Calendar<string>) {
                 headerToolbar={{
                     left: 'prev today next',
                     center: 'title',
-                    right: isResourceView ? '' : 'dayGridMonth,timeGridWeek,timeGridDay'
+                    right: `dayGridMonth,timeGridWeek,${isResourceView ? 'resourceTimeGridDay' : 'timeGridDay'}`
                 }}
                 events={eventsState}
                 eventTimeFormat={TIME_FORMAT}
