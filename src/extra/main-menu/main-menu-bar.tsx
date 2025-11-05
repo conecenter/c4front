@@ -8,13 +8,14 @@ import {ARROW_DOWN_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY, M_
 import {MenuCustomItem, MenuExecutableItem, MenuItemsGroup, MenuPopupElement, MenuUserItem} from './main-menu-items';
 import {MenuFolderItem} from "./menu-folder-item";
 import {BindGroupElement} from "../binds/binds-elements";
-import {NoCaptionContext, usePath} from "../../main/vdom-hooks";
+import {NoCaptionContext, usePath, useSender} from "../../main/vdom-hooks";
 import {isInstanceOfNode} from "../dom-utils";
 import {VISIBLE_CHILD_SELECTOR} from "../css-selectors";
 import {identityAt} from "../../main/vdom-util";
 import {usePatchSync} from "../exchange/patch-sync";
 import {PathContext} from "../focus-announcer";
 import { SVGElement } from "../../main/image";
+import {Identity} from "../utils";
 
 const MENU_BAR_PATH = 'main-menu-bar';
 const KEY_MODIFICATOR = { ArrowLeft: -1, ArrowRight: 1 };
@@ -37,13 +38,15 @@ interface MenuControlsContext {
 
 const MenuControlsContext = createContext<MenuControlsContext>({});
 
-const isMenuFolderType = (item: ReactElement) => item.type === MenuFolderItem || item.type === MenuUserItem;
+const isMenuFolderType = (item: ReactElement) => [MenuFolderItem, MenuUserItem].some(
+  (elem) => [item.type, item.props.constr].includes(elem)
+);
 const isMenuOpenCombo = (e: KeyboardEvent) => (e.ctrlKey || e.altKey) && e.key === M_KEY;
 
 
 interface MainMenuBar {
   key: string,
-  identity: object,
+  identity: Identity,
   state: MenuItemState,
   icon?: string
   leftChildren: ReactElement<MenuItem>[],
@@ -107,6 +110,7 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
   );
 
   // Open menu by keyboard combination
+  const { ctxToPath } = useSender();
   useEffect(() => {
     const doc =  domRef.current?.ownerDocument;
     const window = doc?.defaultView;
@@ -117,12 +121,12 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
         const isBurgerMenu = domRef.current?.matches(VISIBLE_CHILD_SELECTOR);
         if (isBurgerMenu) setFinalState({ opened: true });
         window!.scrollTo({top: 0});
-        const firstFocusablePath = leftChildren[0].props.path;
+        const firstFocusablePath = ctxToPath(leftChildren[0].props.identity);
         const pathSelector = `[data-path='${firstFocusablePath}']`;
-        const firstFocusableItem: HTMLElement | null = isBurgerMenu 
+        setTimeout(() => {
+          const firstFocusableItem: HTMLElement | null = isBurgerMenu 
             ? domRef.current!.querySelector(pathSelector)
             : doc!.querySelector(`${pathSelector}${VISIBLE_CHILD_SELECTOR}`);
-        setTimeout(() => {
           firstFocusableItem?.focus();
           if (!isBurgerMenu) firstFocusableItem?.click();
         }, 10); // timeout until menu bar appears on screen
@@ -159,14 +163,14 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
     ready.current = false;
     const menuItems = [...leftChildren, ...(rightChildren || [])];
     const doc =  elem.ownerDocument;
-    const openedMenuFolderIndex = menuItems.findIndex(child => child.props.path === path);
+    const openedMenuFolderIndex = menuItems.findIndex(child => ctxToPath(child.props.identity) === path);
     if (openedMenuFolderIndex === -1 || !doc) return;
     const nextMenuItemIndex = openedMenuFolderIndex + KEY_MODIFICATOR[key];
     if (nextMenuItemIndex < 0 || nextMenuItemIndex >= menuItems.length) {
       ready.current = true;
       return;
     }
-    const nextFocusablePath = menuItems[nextMenuItemIndex].props.path;
+    const nextFocusablePath = ctxToPath(menuItems[nextMenuItemIndex].props.identity);
     const selector = `[data-path='${nextFocusablePath}']${VISIBLE_CHILD_SELECTOR}`;
     const nextFocusableItem: HTMLElement | null = doc.querySelector(selector);
     nextFocusableItem?.focus();
@@ -230,7 +234,7 @@ function getRightMenuCompressed(rightChildren: ReactElement<MenuItem>[]) {
 
 
 interface BurgerMenu {
-  identity: object,
+  identity: Identity,
   opened: boolean,
   domRef: React.RefObject<HTMLDivElement>,
   setFinalState: (s: MenuItemState) => void,
@@ -242,6 +246,8 @@ function BurgerMenu({ identity, opened, domRef, setFinalState, children}: Burger
   const { focusClass, focusHtml } = useFocusControl(path);
 
   const currentPath = useContext(PathContext);
+
+  const { ctxToPath } = useSender();
 
   const closePopup = () => setFinalState({ opened: false });
 
@@ -275,7 +281,7 @@ function BurgerMenu({ identity, opened, domRef, setFinalState, children}: Burger
           break;
         }
         if (!opened || !domRef.current) break;
-        handleArrowUpDown(e, domRef.current, currentPath, children);
+        handleArrowUpDown(e, domRef.current, currentPath, ctxToPath, children);
     }
   };
 

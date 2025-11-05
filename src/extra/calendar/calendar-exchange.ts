@@ -2,6 +2,7 @@ import { usePatchSync } from "../exchange/patch-sync";
 import { transformColor } from "./calendar-utils";
 import { useSync } from "../../main/vdom-hooks";
 import { identityAt } from "../../main/vdom-util";
+import { Identity } from "../utils";
 
 import type { Patch, PatchHeaders } from '../exchange/patch-sync';
 import type { CalendarEvent, ViewInfo, ViewType } from "./calendar";
@@ -28,7 +29,7 @@ const changeEventSyncTransformers = {
     applyChange
 };
 
-const useEventsSync = (identity: object, events: CalendarEvent[]) => {
+const useEventsSync = (identity: Identity, events: CalendarEvent[]) => {
     const { currentState, sendFinalChange } = usePatchSync(changeEventIdOf(identity), events, false, changeEventSyncTransformers);
     return { eventsState: currentState, sendEventsChange: sendFinalChange };
 }
@@ -75,7 +76,7 @@ function applyChange(prevState: EventInput[], ch: EventImpl): EventInput[] {
 /////
 const clickActionIdOf = identityAt('clickAction');
 
-const useEventClickAction = (identity: object) => {
+const useEventClickAction = (identity: Identity) => {
     const [_, enqueueClickActionPatch] = useSync(clickActionIdOf(identity))
     return (clickedEventId: string) => enqueueClickActionPatch({
         value: 'clickAction',
@@ -91,7 +92,7 @@ const changeViewSyncTransformers = {
     applyChange: (_prev: ViewInfo | undefined, ch: ViewInfo) => ch
 };
 
-function useViewSync(identity: object, serverView: ViewInfo | undefined) {
+function useViewSync(identity: Identity, serverView: ViewInfo | undefined) {
     const { currentState, sendTempChange } = usePatchSync(
         changeViewIdOf(identity), serverView, false, changeViewSyncTransformers
     );

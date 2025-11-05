@@ -13,7 +13,10 @@ export const weakCache = f => {
     }
 }
 
-export const identityAt = key => weakCache(parent => ({ parent, key }))
+export const identityAt = key => {
+    const cache = weakCache(parent => ({ parent, key }))
+    return parent => typeof parent === "string" ? parent+'/'+key : cache(parent)
+}
 
 export const receiverOf = identityAt('receiver')
 

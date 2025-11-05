@@ -1,14 +1,15 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import clsx from 'clsx';
 import { formatInTimeZone } from 'date-fns-tz'
 import { identityAt } from '../../main/vdom-util';
 import { useSync } from '../../main/vdom-hooks';
-import { useUserLocale } from '../locale';
-import { bg, de, da, et, enGB, lt, pl, ro, ru, uk, it } from 'date-fns/locale';
-import { useFocusControl } from '../focus-control';
-import { VISIBLE_CHILD_SELECTOR } from '../css-selectors';
+import { useUserLocale} from '../locale';
+import {bg, de, da, et, enGB, lt, pl, ro, ru, uk, it} from 'date-fns/locale';
+import {useFocusControl} from '../focus-control';
+import {VISIBLE_CHILD_SELECTOR} from '../css-selectors';
 import type { Locale } from 'date-fns'
 import type { SendPatch } from '../exchange/patch-sync';
+import {Identity} from '../utils';
 
 interface IntlLocales {
 	[name: string]: Locale
@@ -17,7 +18,7 @@ const INTL_LOCALES: IntlLocales = { bg, de, daDK: da, et, en: enGB, lt, pl, rmRO
 
 interface MainMenuClock {
 	key: string,
-	identity: object,
+	identity: Identity,
 	serverTime: string,
 	timestampFormatId: number,
 	path: string
@@ -51,20 +52,21 @@ function MainMenuClock({ identity, serverTime, timestampFormatId, path }: MainMe
 
 	// Time sync with server
 	const ref = useRef<HTMLDivElement>(null);
-	
+
 	const [_, enqueueTimeSyncPatch] = useSync(timeSyncIdOf(identity)) as [SendPatch[], (patch: SendPatch) => void];
 
-	const syncWithServer = () => setTimeout(() => {
-		// menu have multiple copies of elements - hidden & visible
-		const isVisible = ref.current?.matches(VISIBLE_CHILD_SELECTOR);
-		if (isVisible && !document.hidden) enqueueTimeSyncPatch({value: '1'});	// condition document.hidden can be removed after transition to WebSockets
-	});
+  const syncWithServer = useCallback(() => setTimeout(() => {
+      // menu have multiple copies of elements - hidden & visible
+      const isVisible = ref.current?.matches(VISIBLE_CHILD_SELECTOR);
+      isVisible && enqueueTimeSyncPatch({value: '1'});
+    }), [enqueueTimeSyncPatch]
+  );
 
 	useEffect(() => {
 		syncWithServer();
 		const id = setInterval(syncWithServer, SYNC_INTERVAL);
 		return () => clearInterval(id);
-	}, []);
+	}, [syncWithServer]);
 
 	// Offset correction after server sync
 	useEffect(() => {
@@ -83,17 +85,17 @@ function MainMenuClock({ identity, serverTime, timestampFormatId, path }: MainMe
 
 	const { focusClass, focusHtml } = useFocusControl(path);
 
-	return (
-		<div
-			ref={ref}
-			style={isSynced ? undefined : { visibility: 'hidden' }}
-			className={clsx('menuCustomItem dateTimeClock', focusClass)}
-			{...focusHtml}
-		>
-			<span className='dateDisplay'>{date}</span>
-			<span>{time}</span>
-		</div>
-	);
+  return (
+    <div
+      ref={ref}
+      style={isSynced ? undefined : {visibility: 'hidden'}} 
+      className={clsx('menuCustomItem dateTimeClock', focusClass)}
+      {...focusHtml}
+    >
+      <span className='dateDisplay'>{date}</span>
+      <span>{time}</span>
+    </div>
+  );
 }
 
 export { MainMenuClock }

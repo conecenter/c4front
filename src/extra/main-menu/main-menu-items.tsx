@@ -12,6 +12,8 @@ import { useBinds } from '../binds/key-binding';
 import { focusFirstMenuItem } from './main-menu-utils';
 import { SVGElement } from '../../main/image';
 import { identityAt } from '../../main/vdom-util';
+import { Identity } from '../utils';
+import { useSender } from '../../main/vdom-hooks';
 import { VISIBLE_CHILD_SELECTOR } from '../css-selectors';
 import { PopupDrawerContext } from '../popup-elements/popup-contexts';
 import { useAddEventListener } from '../custom-hooks';
@@ -21,7 +23,7 @@ const receiverIdOf = identityAt('receiver');
 
 interface MenuExecutableItem {
     key: string,
-	identity: object,
+	identity: Identity,
     name: string,
     current: boolean,
     path?: string,
@@ -64,7 +66,7 @@ function MenuExecutableItem({identity, name, current, path, icon, bindSrcId}: Me
 
 interface MenuCustomItem {
     key: string,
-	identity: object,
+	identity: Identity,
     path?: string,
     children?: ReactNode
 }
@@ -98,11 +100,13 @@ function MenuPopupElement({popupLrMode, keyboardOperation, closePopup, children}
 
     const isVisible = parent?.matches(VISIBLE_CHILD_SELECTOR);
 
+    const { ctxToPath } = useSender();
+
     const hasIcon = children ? children.some(hasIconProp) : false;
 
     useEffect(() => {
         if (popupPos.visibility !== 'hidden' && keyboardOperation.current) {
-            focusFirstMenuItem(popupElement, children);
+            focusFirstMenuItem(popupElement, ctxToPath, children);
             keyboardOperation.current = false;
         }
         return () => {
@@ -143,7 +147,7 @@ function hasIconProp(child: JSX.Element): string | undefined {
 
 interface MenuItemsGroup {
     key: string,
-	identity?: object,
+	identity?: Identity,
     children: ReactElement<MenuItem>[]
 }
 
@@ -158,7 +162,7 @@ function MenuItemsGroup({children}: MenuItemsGroup) {
 
 interface MenuUserItem {
     key: string,
-	identity: object,
+	identity: Identity,
     shortName: string,
     longName: string,
     current: boolean,

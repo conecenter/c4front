@@ -8,13 +8,13 @@ interface BreakpointsDisplay {
     currentBp: string | null
 }
 
-function BreakpointsDisplay({ breakpoints, currentBp }: BreakpointsDisplay) {
+function BreakpointsDisplay({ breakpoints, currentBp }: BreakpointsDisplay) { // may be pass parent identity here
     const bpChips = Object.entries(breakpoints)
         .sort((a, b) => a[1] - b[1])
         .map((bp, i) => (
             <ChipElement
                 key={`chip-${i}`}
-                identity={{}}
+                identity={''}
                 text={`${bp[0]}: ${bp[1]}`}
                 color={{
                     tp: 'p',
@@ -24,7 +24,7 @@ function BreakpointsDisplay({ breakpoints, currentBp }: BreakpointsDisplay) {
         <>
             <LabeledElement label='Breakpoints:' className='masonryBps' sizes={{ min: 3, max: 10 }}>
                 <SegmentedChip
-                    identity={{ key: "segmented-chip" }}
+                    identity={"segmented-chip"}
                     compact={true}
                     routeParts={bpChips} />
             </LabeledElement>
