@@ -69,6 +69,7 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
 
   @c4val def resource(
     id: String,
-    title: String
+    title: String,
+    color: Option[ColorDef] = None
   ): Resource
 }

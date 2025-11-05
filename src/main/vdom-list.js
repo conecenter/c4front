@@ -192,7 +192,7 @@ const useSyncGridDrag = ({ identity, rows, cols, gridKey }) => {
                     "x-r-drop-zone": dropZone,
                 }
                 console.log(headers)
-                enqueuePatch({ onAck: reset, value: '', headers, retry: true })
+                enqueuePatch({ onAck: reset, headers, retry: true })
             } else reset()
         }
         return canDrop
@@ -250,7 +250,7 @@ const useGridClickAction = identity => {
                 "x-r-ctrl-key": ev.ctrlKey ? "1" : "0",
                 "x-r-shift-key": ev.shiftKey ? "1" : "0",
             }
-            enqueueClickActionPatch({value: '',headers})
+            enqueueClickActionPatch({headers})
         }
     }, [enqueueClickActionPatch])
 }
@@ -260,7 +260,7 @@ const useGridKeyboardAction = identity => {
     return useCallback(ev => {
         if (ev.key === ESCAPE_KEY) {
             const headers = {"x-r-escape-key": "1"}
-            enqueueKeyboardActionPatch({value: '', headers})
+            enqueueKeyboardActionPatch({headers})
         }
     }, [enqueueKeyboardActionPatch])
 }

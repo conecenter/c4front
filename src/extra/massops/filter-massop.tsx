@@ -10,12 +10,11 @@ import { useClickSyncOpt } from "../exchange/click-sync";
 import { LabeledElement } from "../labeled-element";
 import { FilterButtonExpanderContext } from "./filter-button-expander";
 import { identityAt } from "../../main/vdom-util";
-import { Identity } from "../utils";
 
 const receiverIdOf = identityAt('receiver');
 
 interface MassOp {
-    identity: Identity,
+    identity: object,
     area: string,
     name?: string,
     nameFolded?: string,

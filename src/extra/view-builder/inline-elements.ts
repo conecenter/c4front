@@ -4,13 +4,12 @@ import {useClickSyncOpt} from "../exchange/click-sync";
 import clsx from "clsx";
 import {CLICKED_CLASSNAME, INLINE_BUTTON_CLASSNAME, INLINE_CHIP_CLASSNAME} from "./css-classes";
 import {identityAt} from "../../main/vdom-util";
-import { Identity } from "../utils";
 
 const receiverIdOf = identityAt('receiver');
 
 interface InlineButton {
   key: string,
-  identity: Identity
+  identity: object
   receiver: boolean
   color: ColorDef
   children: ReactNode[]
@@ -29,7 +28,7 @@ function InlineButton({identity, receiver, color, children}: InlineButton) {
 
 interface InlineChip {
   key: string
-  identity: Identity
+  identity: object
   receiver: boolean
   color: ColorDef
   children: ReactNode[]

@@ -3,7 +3,7 @@ import { InputElement } from "../input-element";
 import { usePatchSync, Patch } from "../exchange/patch-sync";
 import { patchSyncTransformers, InputStateChange } from "./number-formatting-input-exchange";
 import { useUserLocale } from "../locale";
-import { escapeRegex, Identity } from "../utils";
+import { escapeRegex } from "../utils";
 import { usePath } from "../../main/vdom-hooks";
 import { identityAt } from "../../main/vdom-util";
 
@@ -11,7 +11,7 @@ const receiverIdOf = identityAt('receiver');
 
 interface NumberFormattingInput {
     key?: string,
-    identity: Identity,
+    identity: object,
     state: NumberFormattingInputState,
     showThousandSeparator: boolean,
     scale: number,    // round decimal part to this many numbers RoundingMode.HALF_UP

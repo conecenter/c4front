@@ -35,7 +35,6 @@ import {
 	onTimestampChangeAction,
 	getOnInputBoxBlur
 } from "./datepicker-actions";
-import { Identity } from "../utils";
 
 
 type DatePickerServerState = TimestampServerState | InputServerState
@@ -57,7 +56,7 @@ interface PopupServerState {
 
 interface DatePickerProps {
 	key: string
-	identity: Identity
+	identity: object
 	state: DatePickerServerState
 	timestampFormatId: number
 	userTimezoneId?: string

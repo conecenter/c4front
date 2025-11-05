@@ -13,7 +13,6 @@ import { Thumbnail, thumbnailsProps } from "./image-viewer-thumbnails";
 import { ZipButton } from "./zip-button";
 import { LazyImageSlide } from "./lazy-image-slide";
 import { identityAt } from "../../main/vdom-util";
-import { Identity } from "../utils";
 
 interface Slide {
     srcId: string,
@@ -36,7 +35,7 @@ interface CustomSlide extends SlideImage {
 }
 
 interface ImageViewer {
-    identity: Identity,
+    identity: object,
     current?: string,
     slides?: Slide[],
     position?: 'fullscreen' | 'inline',

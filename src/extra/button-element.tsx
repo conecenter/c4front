@@ -56,7 +56,7 @@ const ButtonElement = (props: ButtonElement) => {
 		e.stopPropagation();
 		elem.current?.click();
 	}
-	useAddEventListener(elem.current, "enter", onEnter);
+	useAddEventListener(elem, "enter", onEnter);
 
 	const textContent = props.content && $('span', { className: 'text' }, props.content)
 	const children = props.children !== props.content && props.children

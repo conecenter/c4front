@@ -340,20 +340,20 @@ div.grid {
 
 .chipItem {
   font-size: 1em;
-  text-align: center;
   border-radius: 0.28em;
-  cursor: pointer;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   vertical-align: middle;
   padding: 0.25em 0.55em;
   white-space: nowrap;
   align-self: center;
   user-select: none;
   line-height: 1em;
-  margin: 0.2em;
-  min-width: 0.5em;
+  min-width: min-content;
   min-height: 1em;
   font-weight: normal !important;
+  cursor: pointer;
+  gap: 0.3em;
 }
 
 //ICONS
@@ -858,51 +858,90 @@ div.grid {
 
 /************** SegmentedChip **************/
 .segmentedChip {
-  display: flex;
-  min-height: 1em;
-  max-height: 100%;
-  max-width: 100%;
-  background-color: var(--color-grayColor);
-  color: var(--textColor-grayColor);
-  min-width: min-content;
-  white-space: nowrap;
-  border-radius: 0.28em;
+    @extend .inputBox;
+    min-width: min-content;
+    width: auto;
+    white-space: nowrap;
 
-  > div {
-      display: flex;
-      flex-grow: 1;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-      padding: 0.25em 0;
-      border-right: 1px solid var(--color-dark-grayColor);
+    .chipItem {
+        border-right: 1px solid var(--color-dark-grayColor);
+        min-width: 0.6em;
 
-      &:first-child {
-        padding-left: 0.55em;
-        border-top-left-radius: 0.28em;
-        border-bottom-left-radius: 0.28em;
-      }
+        &:last-of-type {
+            border-right: none;
+        }
+    }
 
-      &:last-child {
-        padding-right: 0.55em;
-        border-radius: 0 0.28em 0.28em 0;
-        border-right: none;
-      }
+    &.compact {
+        padding: 0 0.2em;
+        height: 1.75em;
 
-      &.routePartDone {
-          @extend .darkPrimaryColorCss;
-      }
-  }
+        .chipItem {
+            padding: 0.25em 0;
+            border-radius: 0;
 
-  &:not(.compact) > div {
-      padding: 0.25em 0.55em;
-      border-top-right-radius: 0.28em;
-      border-bottom-right-radius: 0.28em;
+            &:first-child {
+                border-top-left-radius: 0.28em;
+                border-bottom-left-radius: 0.28em;
+                padding-left: 0.2em;
+            }
 
-      &.routePartDone:not(.isLastDone) {
-          box-shadow: 0.3em 0 0 0 var(--color-dark-primaryColor);  
-      }
-  }
+            &:last-of-type {
+                border-top-right-radius: 0.28em;
+                border-bottom-right-radius: 0.28em;
+                padding-right: 0.2em;
+            }
+        }
+
+        &.fingerSized  .chipItem:not(.noAction) {
+            min-width: 7mm;
+            justify-content: center;
+        }
+    }
+
+    &:not(.compact) {
+        @extend .grayColorCss;
+        border-radius: 0.28em;
+
+        .chipItem {
+          padding: 0.25em 0.5em;
+        }
+
+        > .chipItem {
+            @extend .darkPrimaryColorCss;
+            position: relative;
+
+            &:last-of-type {
+              border-radius: 0.28em 0 0 0.28em;
+
+              &::after {
+                content: "";
+                width: 0.4em;
+                height: 100%;
+                clip-path: polygon(0 0, 100% 50%, 0 100%);
+                position: absolute;
+                right: -0.4em;
+                background: var(--color-dark-primaryColor);
+              }
+          }
+
+            &:not(:last-of-type) {
+                box-shadow: 0.3em 0 0 0 var(--color-dark-primaryColor);
+            }
+        }
+
+        .extraParts .chipItem {
+            @extend .transparentColorCss;
+
+            &:not(:last-of-type) {
+                box-shadow: 0.3em 0 0 0 var(--color-grayColor);
+            }
+        }
+    }
+
+    .extraParts {
+        display: contents;
+    }
 }
 
 /***********************Menu**************************/
@@ -1530,6 +1569,23 @@ button {
       + .text {
           vertical-align: text-top;
       }
+  }
+}
+
+.splitButton {
+  display: inline-flex;
+  align-items: center;
+
+  .btnSeparator {
+    width: 1px;
+    height: 1em;
+    background-color: currentColor;
+  }
+
+  .arrowButton {
+    display: flex;
+    align-items: center;
+    transition: all 200ms ease 0s;
   }
 }
 

@@ -1,5 +1,6 @@
 import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import clsx from 'clsx';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -7,13 +8,14 @@ import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid';
 import luxon3Plugin from '@fullcalendar/luxon3';
 import interactionPlugin from '@fullcalendar/interaction';
 import allLocales from '@fullcalendar/core/locales-all';
+import { ResourceLabelContentArg } from '@fullcalendar/resource/index.js';
 import { useUserLocale } from '../locale';
 import { useEventClickAction, useEventsSync, useViewSync } from './calendar-exchange';
 import { LoadingIndicator } from '../loading-indicator';
-import { ColorDef } from '../view-builder/common-api';
+import { ColorDef, colorToProps } from '../view-builder/common-api';
 import { transformDateFormatProps } from './calendar-utils';
 import { EventContent } from './event-content';
-import { escapeRegex, Identity } from '../utils';
+import { escapeRegex } from '../utils';
 
 import type { DatesSetArg, EventContentArg, FormatterInput, SlotLabelContentArg, ViewApi } from '@fullcalendar/core';
 
@@ -25,7 +27,7 @@ const TIME_FORMAT: FormatterInput = {
 }
 
 interface Calendar<DateFormat = number> {
-    identity: Identity,
+    identity: object,
     events: CalendarEvent<DateFormat>[],
     currentView?: ViewInfo<DateFormat>,
     slotDuration?: DateFormat,
@@ -67,7 +69,8 @@ interface BusinessHours<DateFormat = number> {
 
 interface Resource {
     id: string,
-    title: string
+    title: string,
+    color?: ColorDef
 }
 
 function Calendar(props: Calendar<string>) {
@@ -132,6 +135,7 @@ function Calendar(props: Calendar<string>) {
                 initialView={isResourceView ? "resourceTimeGridDay" : "dayGridMonth"}
                 resources={orderedResourses}
                 resourceOrder={'index'}
+                resourceLabelContent={renderResourceLabelContent}
                 firstDay={1}
                 slotDuration={slotDuration || '00:15'}
                 slotLabelFormat={TIME_FORMAT}
@@ -181,6 +185,16 @@ function isViewCurrent(view: ViewApi, currentView: ViewInfo) {
 
 function fixMidnightPresentation(info: SlotLabelContentArg) {
     return info.text.replace(/^24/, '00');
+}
+
+function renderResourceLabelContent(res: ResourceLabelContentArg) {
+    const { className, style } = colorToProps(res.resource.extendedProps.color);
+    return (
+        <>
+            <div className={clsx("resourceBg", className)} style={style} />
+            <span className={className} style={style}>{res.resource.title}</span>
+        </>
+    );
 }
 
 export type { CalendarEvent, ViewInfo, ViewType }

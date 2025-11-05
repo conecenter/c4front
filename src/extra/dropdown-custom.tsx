@@ -6,7 +6,6 @@ import { useSync } from '../main/vdom-hooks';
 import { identityAt } from '../main/vdom-util';
 import { usePatchSync, Patch } from './exchange/patch-sync';
 import { isInstanceOfNode } from './dom-utils';
-import { Identity } from "./utils";
 import { 
 	BACKSPACE_EVENT, 
 	COPY_EVENT, 
@@ -20,7 +19,7 @@ import {
 
 interface DropdownProps {
 	key: string,
-	identity: Identity,
+	identity: object,
 	state: DropdownState,
 	content: Content[],
 	popupChildren: ReactNode[],

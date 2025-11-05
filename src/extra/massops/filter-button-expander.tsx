@@ -11,7 +11,6 @@ import { useLatest } from "../custom-hooks";
 import { Patch, usePatchSync } from '../exchange/patch-sync';
 import { LabeledElement } from "../labeled-element";
 import { identityAt } from "../../main/vdom-util";
-import { Identity } from "../utils";
 
 const FilterButtonExpanderContext = createContext<MutableRefObject<() => void> | null>(null);
 FilterButtonExpanderContext.displayName = 'FilterButtonExpanderContext';
@@ -28,7 +27,7 @@ const applyChange = (prev: string, ch: string) => ch;
 const patchSyncTransformers = { serverToState, changeToPatch, patchToChange, applyChange };
 
 interface FilterButtonExpander {
-    identity: Identity,
+    identity: object,
     area: string,
     name?: string,
     icon?: string,

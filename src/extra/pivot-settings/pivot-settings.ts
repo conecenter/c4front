@@ -15,7 +15,6 @@ import {HTML5Backend} from "react-dnd-html5-backend";
 import type {XYCoord} from "react-dnd/dist";
 import {usePatchSync} from "../exchange/patch-sync";
 import { identityAt } from "../../main/vdom-util";
-import {Identity} from "../utils";
 import { DragScroller } from "./drag-scroller";
 
 const receiverIdOf = identityAt('receiver');
@@ -47,7 +46,7 @@ export type PivotSettingsPartClass = 'pivotFilters' | 'pivotBreaks' | 'pivotRows
 
 export interface PivotSettingsProps extends PivotSettingsState {
     // @ts-ignore
-    identity: Identity
+    identity: object
 }
 
 export function PivotSettings(props: PivotSettingsProps) {
