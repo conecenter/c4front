@@ -48,8 +48,8 @@ function EventProgressBar({ eventParts, eventInfo }: EventProgressBar) {
 
     const tooltipSide = eventInfo.view.type === 'dayGridMonth' ? 'bottom' : 'right';
 
-    const overflowClass = eventParts[0].endTime <= eventStart ? 'overflowStart'
-        : eventParts[eventParts.length - 1].endTime > eventEnd ? 'overflowEnd' : '';
+    const isOverflowStart = eventParts[0].endTime <= eventStart;
+    const isOverflowEnd = eventParts[eventParts.length - 1].endTime > eventEnd;
 
     function getEventPart(part: EventPart<number>, ind: number) {
         if (!eventStart || !eventEnd) return null;
@@ -75,7 +75,7 @@ function EventProgressBar({ eventParts, eventInfo }: EventProgressBar) {
     }
 
     return (
-        <div className={clsx('fc-progress-bar', overflowClass)}>
+        <div className={clsx('fc-progress-bar', isOverflowStart && 'overflowStart', isOverflowEnd && 'overflowEnd')}>
             {eventParts.map(getEventPart)}
         </div>
     );
