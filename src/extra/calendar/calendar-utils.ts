@@ -8,7 +8,8 @@ function transformDateFormatProps(props: Calendar<string>): Calendar<number> {
     const events = props.events.map(event => ({
         ...event,
         start: event.start ? +event.start : undefined,
-        end: event.end ? +event.end : undefined
+        end: event.end ? +event.end : undefined,
+        eventParts: event.eventParts?.map((part) => ({ ...part, endTime: +part.endTime }))
     }));
     const currentView = props.currentView && {
         ...props.currentView,

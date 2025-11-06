@@ -47,7 +47,8 @@ interface CalendarEvent<DateFormat = number> {
     color?: ColorDef,
     editable?: boolean,
     resourceIds?: string[],
-    resourceEditable?: boolean
+    resourceEditable?: boolean,
+    eventParts?: EventPart[]
 }
 
 interface TimeRange<DateFormat = number> {
@@ -71,6 +72,12 @@ interface Resource {
     id: string,
     title: string,
     color?: ColorDef
+}
+
+interface EventPart<DateFormat = number> {
+    endTime: DateFormat,
+    color: ColorDef,
+    hint?: string
 }
 
 function Calendar(props: Calendar<string>) {
@@ -197,5 +204,5 @@ function renderResourceLabelContent(res: ResourceLabelContentArg) {
     );
 }
 
-export type { CalendarEvent, ViewInfo, ViewType }
+export type { CalendarEvent, ViewInfo, ViewType, EventPart }
 export { Calendar }

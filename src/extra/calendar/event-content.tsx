@@ -2,6 +2,9 @@ import React, { ReactElement } from 'react';
 import clsx from 'clsx';
 import { EventContentArg } from '@fullcalendar/core';
 import { useFocusControl } from '../focus-control';
+import { EventPart } from './calendar';
+import { colorToProps } from '../view-builder/common-api';
+import { Tooltip } from '../tooltip';
 
 interface EventContent {
     eventInfo: EventContentArg,
@@ -11,10 +14,14 @@ interface EventContent {
 
 function EventContent({ eventInfo, customContent, onEventClick }: EventContent) {
     const { focusClass, focusHtml } = useFocusControl(eventInfo.event.id);
+
+    const eventParts = eventInfo.event.extendedProps.eventParts as EventPart[] | undefined;
+    const hasEventParts = eventParts && eventParts.length > 0;
+
     return (
         <div
             onClick={() => onEventClick(eventInfo.event.id)}
-            className={clsx("fc-event-main-frame", focusClass)}
+            className={clsx("fc-event-main-frame", focusClass, hasEventParts && 'fc-event-parts')}
             {...focusHtml}
         >
             <div className="fc-event-time">{eventInfo.timeText}</div>
@@ -22,6 +29,54 @@ function EventContent({ eventInfo, customContent, onEventClick }: EventContent) 
                 <div className="fc-event-title fc-sticky">{eventInfo.event.title}</div>
             </div>
             {customContent}
+            {hasEventParts &&
+                <EventProgressBar eventParts={eventParts} eventInfo={eventInfo} />}
+        </div>
+    );
+}
+
+interface EventProgressBar {
+    eventParts: EventPart[],
+    eventInfo: EventContentArg
+}
+
+function EventProgressBar({ eventParts, eventInfo }: EventProgressBar) {
+    const eventStart = eventInfo.event.start?.getTime();
+    const eventEnd = eventInfo.event.end?.getTime();
+
+    if (!eventStart || !eventEnd) return null;
+
+    const tooltipSide = eventInfo.view.type === 'dayGridMonth' ? 'bottom' : 'right';
+
+    const overflowClass = eventParts[0].endTime <= eventStart ? 'overflowStart'
+        : eventParts[eventParts.length - 1].endTime > eventEnd ? 'overflowEnd' : '';
+
+    function getEventPart(part: EventPart<number>, ind: number) {
+        if (!eventStart || !eventEnd) return null;
+        const startTime = ind === 0 ? eventStart : eventParts[ind - 1].endTime;
+        const endTime = part.endTime;
+        if (startTime >= eventEnd || endTime <= eventStart) return null;
+
+        const partStart = Math.max(startTime, eventStart);
+        const partEnd = Math.min(endTime, eventEnd);
+        const percentage = ((partEnd - partStart) * 100 / (eventEnd - eventStart)).toFixed(2);
+
+        const { className, style } = colorToProps(part.color);
+
+        return (
+            <Tooltip key={part.endTime} side={tooltipSide} content={part.hint}>
+                <div
+                    style={{ flexBasis: `${percentage}%`, ...style }}
+                    className={className}
+                    onClick={(e) => e.stopPropagation()}
+                />
+            </Tooltip>
+        );
+    }
+
+    return (
+        <div className={clsx('fc-progress-bar', overflowClass)}>
+            {eventParts.map(getEventPart)}
         </div>
     );
 }
