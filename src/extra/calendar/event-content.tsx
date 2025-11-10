@@ -27,7 +27,7 @@ function EventContent({ eventInfo, customContent, onEventClick }: EventContent) 
             <div className="fc-event-time">{eventInfo.timeText}</div>
             <div className="fc-event-title-container">
                 <div className="fc-event-title fc-sticky">{eventInfo.event.title}</div>
-                {customContent}
+                {eventInfo.isStart && customContent}
             </div>
             {hasEventParts &&
                 <EventProgressBar eventParts={eventParts} eventInfo={eventInfo} />}
