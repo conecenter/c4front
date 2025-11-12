@@ -18,6 +18,7 @@ import { EventContent } from './event-content';
 import { escapeRegex } from '../utils';
 
 import type { DatesSetArg, EventContentArg, FormatterInput, SlotLabelContentArg, ViewApi } from '@fullcalendar/core';
+import { useLatest } from '../custom-hooks';
 
 const TIME_FORMAT: FormatterInput = {
     hour12: false,
@@ -60,7 +61,7 @@ interface ViewInfo<DateFormat = number> extends TimeRange<DateFormat> {
     viewType: ViewType
 }
 
-type ViewType = 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay';
+type ViewType = 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'resourceTimeGridDay';
 
 interface BusinessHours<DateFormat = number> {
     daysOfWeek: number[],   // 0 = Sunday
@@ -94,11 +95,13 @@ function Calendar(props: Calendar<string>) {
 
     const { currentView, sendViewChange } = useViewSync(identity, serverView);
     const { viewType, from = 0, to = 0 } = currentView || {};
-
+    const prevServerView = useLatest(serverView);
+    
     const onEventClick = useEventClickAction(identity);
 
     const onDatesSet = (viewInfo: DatesSetArg) => {
-        if (currentView && isViewCurrent(viewInfo.view, currentView)) return;
+        if ((currentView && isViewCurrent(viewInfo.view, currentView))
+            || prevServerView.current !== serverView) return;
         sendViewChange({
             viewType: viewInfo.view.type as ViewType,
             from: viewInfo.start.getTime(),
