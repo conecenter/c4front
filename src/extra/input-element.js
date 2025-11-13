@@ -230,6 +230,11 @@ class InputElementBase extends StatefulComponent {
             this.k = null
         }
         if (this.inp) this.inp.changing = this.props.changing
+        if (this.state.setCursorPosition !== null) {
+            this.inp.selectionStart = this.state.setCursorPosition;
+            this.inp.selectionEnd = this.state.setCursorPosition;
+            this.state.setCursorPosition = null;
+        }
     }
     onChange(e) {
         if (!this.props.onChange) return;
@@ -240,8 +245,11 @@ class InputElementBase extends StatefulComponent {
         this.props.onChange({ target: { ...HEADERS_CHANGE, value }, inp: e.inp });
     }
     onFocus(e) {
-        this.setState({ isFocused: true });
-        this.props.onFocus?.(e);
+        setTimeout(() => {
+            const correctPos = this.correctCursorPosition();
+            this.setState({ isFocused: true, setCursorPosition: correctPos });
+            this.props.onFocus?.(e);
+        })
     }
     onBlur() {
         this.setState({ isFocused: false });
@@ -291,6 +299,14 @@ class InputElementBase extends StatefulComponent {
             !alignRight && errors,
             this.props.popupElement?.()
         );
+    }
+    correctCursorPosition() {
+        const {decorators} = this.props;
+        if (!decorators || !this.inp) return null;
+        const {before = ''} = decorators;
+        const beforeLength = before.length;
+        const cursorPosition = this.inp.selectionStart - beforeLength;
+        return Math.max(cursorPosition, 0)
     }
     getDecoratedValue() {
         const { value, decorators } = this.props;
