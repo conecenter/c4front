@@ -310,7 +310,7 @@ class InputElementBase extends StatefulComponent {
     }
     getDecoratedValue() {
         const { value, decorators } = this.props;
-        if (!decorators || !value) return value;
+        if (!decorators) return value;
         const { before = '', after = '' } = decorators;
         return `${before}${value}${after}`;
     }
