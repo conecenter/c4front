@@ -13,7 +13,7 @@ function Tooltip({ content, children }: TooltipProps) {
 				{children}
 			</Trigger>
 			<Portal>
-				<Content className="tooltipContent" side="bottom" align="center">
+				<Content className="tooltipContent" side="bottom" align="center" sideOffset={3}>
 					{content}
 					<Arrow className='tooltipArrow' width={11} height={5} />
 				</Content>
