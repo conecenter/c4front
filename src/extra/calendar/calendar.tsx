@@ -16,9 +16,10 @@ import { ColorDef, colorToProps } from '../view-builder/common-api';
 import { transformDateFormatProps } from './calendar-utils';
 import { EventContent } from './event-content';
 import { escapeRegex } from '../utils';
+import { useLatest } from '../custom-hooks';
+import { useScrollCorrection } from './useScrollCorrection';
 
 import type { DatesSetArg, EventContentArg, FormatterInput, SlotLabelContentArg, ViewApi } from '@fullcalendar/core';
-import { useLatest } from '../custom-hooks';
 
 const TIME_FORMAT: FormatterInput = {
     hour12: false,
@@ -96,7 +97,7 @@ function Calendar(props: Calendar<string>) {
     const { currentView, sendViewChange } = useViewSync(identity, serverView);
     const { viewType, from = 0, to = 0 } = currentView || {};
     const prevServerView = useLatest(serverView);
-    
+
     const onEventClick = useEventClickAction(identity);
 
     const onDatesSet = (viewInfo: DatesSetArg) => {
@@ -137,6 +138,8 @@ function Calendar(props: Calendar<string>) {
         return <EventContent eventInfo={eventInfo} customContent={customContent} onEventClick={onEventClick} />;
     }, [eventsChildren]);
 
+    const onViewWillUnmount = useScrollCorrection(viewRoot, viewType, timeSlotsRange);
+
     return (
         <>
             <FullCalendar
@@ -173,6 +176,7 @@ function Calendar(props: Calendar<string>) {
                 eventChange={(changedEvent) => sendEventsChange(changedEvent.event)}
                 datesSet={onDatesSet}
                 viewDidMount={(viewMount) => viewRoot.current = viewMount.el}
+                viewWillUnmount={onViewWillUnmount}
                 height='auto'
                 weekNumbers={true}
                 {...timeSlotsRange && {
@@ -207,5 +211,5 @@ function renderResourceLabelContent(res: ResourceLabelContentArg) {
     );
 }
 
-export type { CalendarEvent, ViewInfo, ViewType, EventPart }
+export type { CalendarEvent, ViewInfo, ViewType, EventPart, TimeRange }
 export { Calendar }
