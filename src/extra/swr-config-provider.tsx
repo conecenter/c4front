@@ -16,17 +16,21 @@ const SWR_OPTIONS = {
     revalidateOnReconnect: false
 }
 
-const SwrCacheProvider = ({ children }: SwrCacheProvider) => (
-	<SWRConfig value={SWR_OPTIONS}>
-		{children}
-	</SWRConfig>
-);
+const SwrCacheProvider = ({ children }: SwrCacheProvider) => {
+	console.log('RENDER SWR CACHE PROVIDER')
+	return (
+		<SWRConfig value={SWR_OPTIONS}>
+			{children}
+		</SWRConfig>
+	)
+};
 
 let cacheMap: SwrCacheMap | null = null;
 
 function cacheProvider() {
 	if (!cacheMap) {
 		cacheMap = loadFromLocalStorage();
+		console.log('INIT CACHE:', cacheMap);
 		window.addEventListener('pagehide', saveSvgCacheToStorage);
 	}
 	return cacheMap;

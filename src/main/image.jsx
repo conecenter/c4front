@@ -10,13 +10,17 @@ const replaceSvgTag = (str) => str.replace(/<\/svg>|<svg>|<svg\s[^>]*>/g, "")
 
 const fetcher = async (url) => {
     const res = await fetch(url);
-    if (!res.ok) throw new Error('Network response was not OK');
+    if (!res.ok) {
+        console.log('SVG ELEMENT FETCHER ERROR')
+        throw new Error('Network response was not OK');
+    }
     return res.text();
 }
 
 const SVGElement = ({ url, color = ADAPTIVE_COLOR, ...props }) => {
     const toDecode = isDataUrl(url)
     const { data: fetched } = useSWR(toDecode ? null : url, fetcher)
+    console.log('RENDER SVGElement:', url)
     const decodedContent = fetched || toDecode && decodeBase64String(url.replace(/data:.+?,/, ""));
     if (!decodedContent) return null;
     const viewBox = getViewBox(decodedContent)
