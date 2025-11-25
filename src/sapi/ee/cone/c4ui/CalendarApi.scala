@@ -46,6 +46,7 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
     resourceIds: List[String] = Nil,
     resourceEditable: Option[Boolean] = None,
     eventParts: List[EventPart] = Nil,
+    hint: String = "",
   ): CalendarEvent
 
   @c4val("dayGridMonth") def dayGridMonth: ViewInfoType

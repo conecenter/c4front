@@ -50,7 +50,8 @@ interface CalendarEvent<DateFormat = number> {
     editable?: boolean,
     resourceIds?: string[],
     resourceEditable?: boolean,
-    eventParts?: EventPart[]
+    eventParts?: EventPart[],
+    hint?: string
 }
 
 interface TimeRange<DateFormat = number> {

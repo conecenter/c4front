@@ -19,19 +19,21 @@ function EventContent({ eventInfo, customContent, onEventClick }: EventContent) 
     const hasEventParts = eventParts && eventParts.length > 0;
 
     return (
-        <div
-            onClick={() => onEventClick(eventInfo.event.id)}
-            className={clsx("fc-event-main-frame", focusClass, hasEventParts && 'fc-event-parts')}
-            {...focusHtml}
-        >
-            <div className="fc-event-time">{eventInfo.timeText}</div>
-            <div className="fc-event-title-container">
-                <div className="fc-event-title fc-sticky">{eventInfo.event.title}</div>
-                {eventInfo.isStart && customContent}
+        <Tooltip key={eventInfo.event.id} content={eventInfo.event.extendedProps.hint}>
+            <div
+                onClick={() => onEventClick(eventInfo.event.id)}
+                className={clsx("fc-event-main-frame", focusClass, hasEventParts && 'fc-event-parts')}
+                {...focusHtml}
+            >
+                <div className="fc-event-time">{eventInfo.timeText}</div>
+                <div className="fc-event-title-container">
+                    <div className="fc-event-title fc-sticky">{eventInfo.event.title}</div>
+                    {eventInfo.isStart && customContent}
+                </div>
+                {hasEventParts &&
+                    <EventProgressBar eventParts={eventParts} eventInfo={eventInfo} />}
             </div>
-            {hasEventParts &&
-                <EventProgressBar eventParts={eventParts} eventInfo={eventInfo} />}
-        </div>
+        </Tooltip>
     );
 }
 
