@@ -16,6 +16,8 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
 
 @c4tagSwitch("FrontApp") trait Resource extends ToJson
 
+@c4tagSwitch("FrontApp") trait EventPart extends ToJson
+
 @c4tagSwitch("FrontApp") trait ViewInfoType extends ToJson
 @c4tags("FrontApp") trait CalendarTags[C] {
   @c4el("Calendar") def calendar(
@@ -43,6 +45,8 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
     editable: Option[Boolean] = None,
     resourceIds: List[String] = Nil,
     resourceEditable: Option[Boolean] = None,
+    eventParts: List[EventPart] = Nil,
+    hint: String = "",
   ): CalendarEvent
 
   @c4val("dayGridMonth") def dayGridMonth: ViewInfoType
@@ -72,4 +76,10 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
     title: String,
     color: Option[ColorDef] = None
   ): Resource
+
+  @c4val def eventPart(
+    endTime: String,
+    color: ColorDef,
+    hint: String = ""
+  ): EventPart
 }

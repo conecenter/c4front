@@ -2,12 +2,14 @@ import { createContext } from 'react';
 
 interface ScrollInfo {
     totalSpaceUsed: number,
-    compactUiHeader: boolean
+    compactUiHeader: boolean,
+    setScrollLock: (on: boolean) => void
 }
 
 const defaultReducedValue: ScrollInfo = {
     totalSpaceUsed: 0,
-    compactUiHeader: true
+    compactUiHeader: true,
+    setScrollLock: () => {}
 }
 
 const ScrollInfoContext = createContext(defaultReducedValue);

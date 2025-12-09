@@ -16,6 +16,8 @@ import { ColorDef, colorToProps } from '../view-builder/common-api';
 import { transformDateFormatProps } from './calendar-utils';
 import { EventContent } from './event-content';
 import { escapeRegex } from '../utils';
+import { useLatest } from '../custom-hooks';
+import { useScrollCorrection } from './useScrollCorrection';
 
 import type { DatesSetArg, EventContentArg, FormatterInput, SlotLabelContentArg, ViewApi } from '@fullcalendar/core';
 
@@ -47,7 +49,9 @@ interface CalendarEvent<DateFormat = number> {
     color?: ColorDef,
     editable?: boolean,
     resourceIds?: string[],
-    resourceEditable?: boolean
+    resourceEditable?: boolean,
+    eventParts?: EventPart[],
+    hint?: string
 }
 
 interface TimeRange<DateFormat = number> {
@@ -59,7 +63,7 @@ interface ViewInfo<DateFormat = number> extends TimeRange<DateFormat> {
     viewType: ViewType
 }
 
-type ViewType = 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay';
+type ViewType = 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'resourceTimeGridDay';
 
 interface BusinessHours<DateFormat = number> {
     daysOfWeek: number[],   // 0 = Sunday
@@ -71,6 +75,12 @@ interface Resource {
     id: string,
     title: string,
     color?: ColorDef
+}
+
+interface EventPart<DateFormat = number> {
+    endTime: DateFormat,
+    color: ColorDef,
+    hint?: string
 }
 
 function Calendar(props: Calendar<string>) {
@@ -87,11 +97,13 @@ function Calendar(props: Calendar<string>) {
 
     const { currentView, sendViewChange } = useViewSync(identity, serverView);
     const { viewType, from = 0, to = 0 } = currentView || {};
+    const prevServerView = useLatest(serverView);
 
     const onEventClick = useEventClickAction(identity);
 
     const onDatesSet = (viewInfo: DatesSetArg) => {
-        if (currentView && isViewCurrent(viewInfo.view, currentView)) return;
+        if ((currentView && isViewCurrent(viewInfo.view, currentView))
+            || prevServerView.current !== serverView) return;
         sendViewChange({
             viewType: viewInfo.view.type as ViewType,
             from: viewInfo.start.getTime(),
@@ -127,6 +139,8 @@ function Calendar(props: Calendar<string>) {
         return <EventContent eventInfo={eventInfo} customContent={customContent} onEventClick={onEventClick} />;
     }, [eventsChildren]);
 
+    const onViewWillUnmount = useScrollCorrection(viewRoot, viewType, timeSlotsRange);
+
     return (
         <>
             <FullCalendar
@@ -154,7 +168,7 @@ function Calendar(props: Calendar<string>) {
                 headerToolbar={{
                     left: 'prev today next',
                     center: 'title',
-                    right: isResourceView ? '' : 'dayGridMonth,timeGridWeek,timeGridDay'
+                    right: `dayGridMonth,timeGridWeek,${isResourceView ? 'resourceTimeGridDay' : 'timeGridDay'}`
                 }}
                 events={eventsState}
                 eventTimeFormat={TIME_FORMAT}
@@ -163,6 +177,7 @@ function Calendar(props: Calendar<string>) {
                 eventChange={(changedEvent) => sendEventsChange(changedEvent.event)}
                 datesSet={onDatesSet}
                 viewDidMount={(viewMount) => viewRoot.current = viewMount.el}
+                viewWillUnmount={onViewWillUnmount}
                 height='auto'
                 weekNumbers={true}
                 {...timeSlotsRange && {
@@ -197,5 +212,5 @@ function renderResourceLabelContent(res: ResourceLabelContentArg) {
     );
 }
 
-export type { CalendarEvent, ViewInfo, ViewType }
+export type { CalendarEvent, ViewInfo, ViewType, EventPart, TimeRange }
 export { Calendar }
