@@ -50,7 +50,14 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
 
     const [popupStyle] = usePopupPos(popupElement, lrMode, parent);
 
-    const closePopup = () => sendClose ? sendClose() : toggle(false);
+    const closePopup = () => {
+        if (sendClose) {
+            popupElement?.focus();
+            sendClose();
+        }
+        else toggle(false);
+    }
+
     function closeOnBlur(e: FocusEvent) {
         if (!e.relatedTarget || elementsContainTarget([popupElement, parent], e.relatedTarget)) return;
         closePopup();
