@@ -6,6 +6,7 @@ import { Patch, usePatchSync } from "../exchange/patch-sync";
 import { GridItemWrapper } from "./grid-item";
 import { identityAt } from "../../main/vdom-util";
 import { BreakpointPreview } from "./breakpoint-preview";
+import { MasonryColGuides } from "./masonry-col-guides";
 
 type JSONString = string
 
@@ -127,6 +128,7 @@ function MasonryLayout({ identity, layout, breakpoints, cols, edit, children }: 
 
     return !edit ? layoutJsx : (
         <BreakpointPreview breakpoints={breakpoints} currentBp={breakpoint} >
+            <MasonryColGuides cols={breakpoint ? cols[breakpoint] : 1} />
             {layoutJsx}
         </BreakpointPreview>
     );
