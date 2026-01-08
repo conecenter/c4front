@@ -22,5 +22,6 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, c4el, c4tags}
     compact: Boolean = false,
     keyboardAction: Receiver[C] = NoReceiver[C],
     extraParts: ViewRes = Nil,
+    drawAsRoute: Boolean = false,
   ): ToChildPair
 }

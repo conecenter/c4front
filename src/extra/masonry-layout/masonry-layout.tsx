@@ -5,7 +5,8 @@ import clsx from "clsx";
 import { Patch, usePatchSync } from "../exchange/patch-sync";
 import { GridItemWrapper } from "./grid-item";
 import { identityAt } from "../../main/vdom-util";
-import { BreakpointsDisplay } from "./breakpoints-display";
+import { BreakpointPreview } from "./breakpoint-preview";
+import { MasonryColGuides } from "./masonry-col-guides";
 
 type JSONString = string
 
@@ -91,42 +92,45 @@ function MasonryLayout({ identity, layout, breakpoints, cols, edit, children }: 
         sendLayoutChange(updatedLayout);
     }
 
-    return (
-        <>
-            {edit && <BreakpointsDisplay breakpoints={breakpoints} currentBp={breakpoint} />}
+    const layoutJsx = (
+        <ResponsiveGridLayout
+            layouts={localLayout}
+            autoSize={true}
+            className={clsx('layout', isDragging && 'isDragging', edit && 'editMode')}
+            breakpoints={breakpoints}
+            cols={cols}
+            margin={[GRID_MARGIN_SIZE, GRID_MARGIN_SIZE]}
+            rowHeight={GRID_ROW_SIZE}
+            onResizeStart={() => isResizingRef.current = true}
+            onResizeStop={onResizeStop}
+            onDragStop={onDragStop}
+            onDragStart={() => setIsDragging(true)}
+            onBreakpointChange={onBreakpointChange}
+            onWidthChange={onWidthChange}
+            isDraggable={edit ? true : false}
+            isResizable={edit ? true : false}
+        >
+            {children?.map((child) => {
+                if (!React.isValidElement(child)) return null;
+                const key = child.key;
+                if (!key) {
+                    console.error('MasonryLayout: child must have a key prop');
+                    return null;
+                }
+                return <GridItemWrapper
+                    key={key}
+                    correctHeight={correctHeight(key)}
+                    minH={edit ? getMinH(key) : null}
+                    children={child} />
+            })}
+        </ResponsiveGridLayout>
+    );
 
-            <ResponsiveGridLayout
-                layouts={localLayout}
-                autoSize={true}
-                className={clsx('layout', isDragging && 'isDragging', edit && 'editMode')}
-                breakpoints={breakpoints}
-                cols={cols}
-                margin={[GRID_MARGIN_SIZE, GRID_MARGIN_SIZE]}
-                rowHeight={GRID_ROW_SIZE}
-                onResizeStart={() => isResizingRef.current = true}
-                onResizeStop={onResizeStop}
-                onDragStop={onDragStop}
-                onDragStart={() => setIsDragging(true)}
-                onBreakpointChange={onBreakpointChange}
-                onWidthChange={onWidthChange}
-                isDraggable={edit ? true : false}
-                isResizable={edit ? true : false}
-            >
-                {children?.map((child) => {
-                    if (!React.isValidElement(child)) return null;
-                    const key = child.key;
-                    if (!key) {
-                        console.error('MasonryLayout: child must have a key prop');
-                        return null;
-                    }
-                    return <GridItemWrapper
-                        key={key}
-                        correctHeight={correctHeight(key)}
-                        minH={edit ? getMinH(key) : null}
-                        children={child} />
-                })}
-            </ResponsiveGridLayout>
-        </>    
+    return !edit ? layoutJsx : (
+        <BreakpointPreview breakpoints={breakpoints} currentBp={breakpoint} >
+            <MasonryColGuides cols={breakpoint ? cols[breakpoint] : 1} />
+            {layoutJsx}
+        </BreakpointPreview>
     );
 }
 

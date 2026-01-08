@@ -14,7 +14,7 @@ function Tooltip({ content, side = 'bottom', children }: TooltipProps) {
 				{children}
 			</Trigger>
 			<Portal>
-				<Content className="tooltipContent" side={side} align="center" onClick={(e) => e.stopPropagation()}>
+				<Content className="tooltipContent" side={side} align="center" sideOffset={3} onClick={(e) => e.stopPropagation()}>
 					{content}
 					<Arrow className='tooltipArrow' width={11} height={5} />
 				</Content>

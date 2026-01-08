@@ -22,12 +22,13 @@ interface ChipElement {
     tooltip?: string,
     iconPath?: string,
     link?: string,
+    openNewTab?: boolean,
     onClick?: () => void,
     callbackRef?: (elem: HTMLDivElement | null) => void,
     children?: ReactNode
 }
 
-const ChipElement = ({identity, receiver, delAction, text = '', color, tooltip, iconPath, link, callbackRef, children, ...props}: ChipElement) => {
+const ChipElement = ({identity, receiver, delAction, text = '', color, tooltip, iconPath, link, openNewTab, callbackRef, children, ...props}: ChipElement) => {
     const { onClick } = useClickSyncOpt(receiverIdOf(identity), receiver);
     const { onClick: onDelete } = useClickSyncOpt(delActionIdOf(identity), delAction);
 
@@ -62,7 +63,8 @@ const ChipElement = ({identity, receiver, delAction, text = '', color, tooltip, 
             if (isCopied) setCopyState(true);
             return;
         }
-        if (link) window?.open(link, "_self");
+        if (link && openNewTab) window?.open(link)
+        else if (link) window?.open(link, "_self")
         onClick?.();
         props.onClick?.();
     }

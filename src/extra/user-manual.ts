@@ -51,6 +51,7 @@ const useUserManual = (umid?: string) => {
         identity: {},
         iconPath: '/mod/main/ee/cone/core/ui/c4view/info.svg',
         link: umUrl,
+        openNewTab: true,
         tooltip: 'Go to User Manual'
     });
 

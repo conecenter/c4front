@@ -14,11 +14,12 @@ interface SegmentedChipProps {
     identity: object,
     keyboardAction?: boolean,
     compact?: boolean,
+    drawAsRoute?: boolean,
     routeParts: ReactElement[],  // ChipElements
     extraParts?: ReactElement[]
 }
 
-function SegmentedChip({identity, keyboardAction, compact, routeParts, extraParts}: SegmentedChipProps) {
+function SegmentedChip({identity, keyboardAction, compact, drawAsRoute, routeParts, extraParts}: SegmentedChipProps) {
     const routeElemRef = useRef(null);
 
     const readOnly = !keyboardAction;
@@ -30,9 +31,10 @@ function SegmentedChip({identity, keyboardAction, compact, routeParts, extraPart
     const uiType = useContext(UiInfoContext);
 
     const className = clsx(
-        'segmentedChip focusFrameProvider',
-        focusClass,
+        'focusFrameProvider',
+        drawAsRoute ? 'routeElement' : 'segmentedChip',
         compact && 'compact',
+        focusClass,
         uiType === 'touch' && 'fingerSized'
     );
     
