@@ -24,7 +24,12 @@ function EventContent({ eventInfo, customContent, onEventClick }: EventContent) 
             className={clsx("fc-event-main-frame", focusClass, hasEventParts && 'fc-event-parts')}
             {...focusHtml}
         >
-            <Tooltip side='top' key={eventInfo.event.id} content={eventInfo.event.extendedProps.hint}>
+            <Tooltip
+                side='top'
+                key={eventInfo.event.id}
+                content={eventInfo.event.extendedProps.hint}
+                disableFocusOpen
+            >
                 <div className='fc-event-main-frame' style={{ height: 'auto', width: '100%' }}>
                     <div className="fc-event-time">{eventInfo.timeText}</div>
                     <div className="fc-event-title-container">
