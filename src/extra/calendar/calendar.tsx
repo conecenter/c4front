@@ -136,7 +136,7 @@ function Calendar(props: Calendar<string>) {
         // TODO: refactor, key can have ":" added in the beginning of string, keys API can change
         const regExp = new RegExp(`^:?${escapeRegex(eventInfo.event.id)}$`);
         const customContent = eventsChildren?.find(child => regExp.test(child.key as string));
-        return <EventContent eventInfo={eventInfo} customContent={customContent} onEventClick={onEventClick} />;
+        return <EventContent eventInfo={eventInfo} customContent={customContent} />;
     }, [eventsChildren]);
 
     const onViewWillUnmount = useScrollCorrection(viewRoot, viewType, timeSlotsRange);
@@ -173,6 +173,7 @@ function Calendar(props: Calendar<string>) {
                 events={eventsState}
                 eventTimeFormat={TIME_FORMAT}
                 eventContent={renderEventContent}
+                eventClick={(e) => onEventClick(e.event.id)}
                 eventOverlap={isResourceView ? false : true}
                 eventChange={(changedEvent) => sendEventsChange(changedEvent.event)}
                 datesSet={onDatesSet}
