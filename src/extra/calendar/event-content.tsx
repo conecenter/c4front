@@ -19,21 +19,24 @@ function EventContent({ eventInfo, customContent, onEventClick }: EventContent) 
     const hasEventParts = eventParts && eventParts.length > 0;
 
     return (
-        <Tooltip key={eventInfo.event.id} content={eventInfo.event.extendedProps.hint}>
-            <div
-                onClick={() => onEventClick(eventInfo.event.id)}
-                className={clsx("fc-event-main-frame", focusClass, hasEventParts && 'fc-event-parts')}
-                {...focusHtml}
-            >
-                <div className="fc-event-time">{eventInfo.timeText}</div>
-                <div className="fc-event-title-container">
-                    <div className="fc-event-title fc-sticky">{eventInfo.event.title}</div>
-                    {eventInfo.isStart && customContent}
+        <div
+            onClick={() => onEventClick(eventInfo.event.id)}
+            className={clsx("fc-event-main-frame", focusClass, hasEventParts && 'fc-event-parts')}
+            {...focusHtml}
+        >
+            <Tooltip side='top' key={eventInfo.event.id} content={eventInfo.event.extendedProps.hint}>
+                <div className='fc-event-main-frame' style={{ height: 'auto', width: '100%' }}>
+                    <div className="fc-event-time">{eventInfo.timeText}</div>
+                    <div className="fc-event-title-container">
+                        <div className="fc-event-title fc-sticky">{eventInfo.event.title}</div>
+                        {eventInfo.isStart && customContent}
+                    </div>
                 </div>
-                {hasEventParts &&
-                    <EventProgressBar eventParts={eventParts} eventInfo={eventInfo} />}
+            </Tooltip>
+
+            {hasEventParts &&
+                <EventProgressBar eventParts={eventParts} eventInfo={eventInfo} />}
             </div>
-        </Tooltip>
     );
 }
 
