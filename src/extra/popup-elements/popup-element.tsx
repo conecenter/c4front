@@ -161,4 +161,4 @@ function suppressHoverIntents(e: React.PointerEvent) {
     }
 }
 
-export { PopupElement }
+export { PopupElement, suppressHoverIntents }
