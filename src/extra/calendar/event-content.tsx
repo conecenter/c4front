@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { EventContentArg } from '@fullcalendar/core';
 import { useFocusControl } from '../focus-control';
@@ -14,11 +14,28 @@ interface EventContent {
 function EventContent({ eventInfo, customContent }: EventContent) {
     const { focusClass, focusHtml } = useFocusControl(eventInfo.event.id);
 
+    const [showCustomContent, setShowCustomContent] = useState(eventInfo.isStart);
+    const wrapperRef = useRef<HTMLDivElement | null>(null);
+
+    const formattedViewStart = useMemo(
+        () => eventInfo.view.calendar.formatIso(eventInfo.view.activeStart, true),
+        [eventInfo.view.activeStart, eventInfo.view.calendar]
+    );
+    useLayoutEffect(() => {
+        if (eventInfo.isStart) {
+            setShowCustomContent(true);
+            return;
+        }
+        const segmentDateStr = wrapperRef.current?.closest<HTMLElement>('[data-date]')?.getAttribute('data-date');
+        setShowCustomContent(Boolean(segmentDateStr && segmentDateStr === formattedViewStart));
+    }, [eventInfo.isStart, formattedViewStart]);
+
     const eventParts = eventInfo.event.extendedProps.eventParts as EventPart[] | undefined;
     const hasEventParts = eventParts && eventParts.length > 0;
 
     return (
         <div
+            ref={wrapperRef}
             className={clsx('fcEventWrapper', focusClass, hasEventParts && 'fc-event-parts')}
             {...focusHtml}
         >
@@ -35,7 +52,7 @@ function EventContent({ eventInfo, customContent }: EventContent) {
                 </div>
             </Tooltip>
 
-            {eventInfo.isStart && customContent}
+            {(eventInfo.isStart || showCustomContent) && customContent}
 
             {hasEventParts &&
                 <EventProgressBar eventParts={eventParts} eventInfo={eventInfo} />}
