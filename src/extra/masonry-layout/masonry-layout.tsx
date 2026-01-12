@@ -12,6 +12,7 @@ type JSONString = string
 
 const GRID_ROW_SIZE = 10;
 const GRID_MARGIN_SIZE = 10;
+export const MASONRY_BOX_CLASS = "masonryBox";
 
 const receiverIdOf = identityAt('receiver');
 
@@ -96,7 +97,7 @@ function MasonryLayout({ identity, layout, breakpoints, cols, edit, children }: 
         <ResponsiveGridLayout
             layouts={localLayout}
             autoSize={true}
-            className={clsx('layout', isDragging && 'isDragging', edit && 'editMode')}
+            className={clsx(MASONRY_BOX_CLASS, isDragging && 'isDragging', edit && 'editMode')}
             breakpoints={breakpoints}
             cols={cols}
             margin={[GRID_MARGIN_SIZE, GRID_MARGIN_SIZE]}
