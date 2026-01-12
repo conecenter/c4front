@@ -174,10 +174,11 @@ interface PivotFieldProps {
     type: string
     field: PivotField
     dropAction: PivotDropAction
-    clickAction?: PivotClickAction
+    clickAction?: PivotClickAction,
+    prefix?: string
 }
 
-export function PivotField({origin, type, field, dropAction, clickAction}: PivotFieldProps) {
+export function PivotField({origin, type, field, dropAction, clickAction, prefix}: PivotFieldProps) {
     const accepts = origin !== PartNames.FIELDS ? [type] : []
     const [_, drop] = useDrop({
         accept: accepts,
@@ -206,7 +207,10 @@ export function PivotField({origin, type, field, dropAction, clickAction}: Pivot
         ref: (ref) => drag(drop(ref)),
         onClick: onClick,
         className
-    }, field.name)
+    },
+        prefix && el('span', { className: 'pivotPrefix' }, prefix),
+        field.name
+    )
 }
 
 
