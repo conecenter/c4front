@@ -18,6 +18,7 @@ import { EventContent } from './event-content';
 import { escapeRegex } from '../utils';
 import { useLatest } from '../custom-hooks';
 import { useScrollCorrection } from './useScrollCorrection';
+import { useTimeOffsetKey } from './useTimeOffsetKey';
 
 import type { DatesSetArg, EventContentArg, FormatterInput, SlotLabelContentArg, ViewApi } from '@fullcalendar/core';
 
@@ -141,12 +142,15 @@ function Calendar(props: Calendar<string>) {
 
     const onViewWillUnmount = useScrollCorrection(viewRoot, viewType, timeSlotsRange);
 
+    const next = useTimeOffsetKey();
+
     return (
         <>
             <FullCalendar
+                key={next}
                 ref={calendarRef}
                 plugins={[dayGridPlugin, timeGridPlugin, luxon3Plugin, interactionPlugin, resourceTimeGridPlugin]}
-                initialView={isResourceView ? "resourceTimeGridDay" : "dayGridMonth"}
+                initialView={viewType || (isResourceView ? "resourceTimeGridDay" : "dayGridMonth")}
                 resources={orderedResourses}
                 resourceOrder={'index'}
                 resourceLabelContent={renderResourceLabelContent}
@@ -162,6 +166,7 @@ function Calendar(props: Calendar<string>) {
                 eventConstraint='businessHours'
                 navLinks={true}
                 nowIndicator={true}
+                now={() => Date.now() + (next ?? 0)}
                 longPressDelay={500}
                 locales={allLocales}
                 locale={locale.lang}
