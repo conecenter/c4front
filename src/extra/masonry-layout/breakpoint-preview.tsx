@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 import { clamp } from "../utils";
 import useResizeObserver from "@react-hook/resize-observer";
 import { BreakpointsDisplay } from "./breakpoints-display";
+import { MASONRY_BOX_CLASS } from "./masonry-layout";
 
 const MIN_SCALE = 0.7;
 const MAX_PREVIEW_WIDTH = 2000;
@@ -44,7 +45,7 @@ export function BreakpointPreview({ breakpoints, currentBp, children }: Breakpoi
     };
 
     return (
-        <div ref={boxRef}>
+        <div ref={boxRef} className={MASONRY_BOX_CLASS}>
             <BreakpointsDisplay
                 breakpoints={breakpoints}
                 currentBp={currentBp}

@@ -24,7 +24,8 @@ export interface PivotField {
     name: string,
     selected: boolean,
     fieldType?: string,
-    invalid?: boolean
+    invalid?: boolean,
+    prefix?: string,
 }
 
 export interface PivotFieldsGroup {
@@ -206,7 +207,10 @@ export function PivotField({origin, type, field, dropAction, clickAction}: Pivot
         ref: (ref) => drag(drop(ref)),
         onClick: onClick,
         className
-    }, field.name)
+    },
+        field.prefix && el('span', { className: 'pivotPrefix' }, field.prefix),
+        field.name
+    )
 }
 
 
