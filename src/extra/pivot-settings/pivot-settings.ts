@@ -24,7 +24,8 @@ export interface PivotField {
     name: string,
     selected: boolean,
     fieldType?: string,
-    invalid?: boolean
+    invalid?: boolean,
+    prefix?: string,
 }
 
 export interface PivotFieldsGroup {
@@ -174,11 +175,10 @@ interface PivotFieldProps {
     type: string
     field: PivotField
     dropAction: PivotDropAction
-    clickAction?: PivotClickAction,
-    prefix?: string
+    clickAction?: PivotClickAction
 }
 
-export function PivotField({origin, type, field, dropAction, clickAction, prefix}: PivotFieldProps) {
+export function PivotField({origin, type, field, dropAction, clickAction}: PivotFieldProps) {
     const accepts = origin !== PartNames.FIELDS ? [type] : []
     const [_, drop] = useDrop({
         accept: accepts,
@@ -208,7 +208,7 @@ export function PivotField({origin, type, field, dropAction, clickAction, prefix
         onClick: onClick,
         className
     },
-        prefix && el('span', { className: 'pivotPrefix' }, prefix),
+        field.prefix && el('span', { className: 'pivotPrefix' }, field.prefix),
         field.name
     )
 }
