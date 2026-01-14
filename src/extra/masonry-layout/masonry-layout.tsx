@@ -64,7 +64,7 @@ function MasonryLayout({ identity, layout, breakpoints, cols, edit, children }: 
         const { clientHeight, scrollHeight } = element;
         if (scrollHeight > clientHeight) {
             const newRowHeight = Math.ceil((scrollHeight + GRID_MARGIN_SIZE) / (GRID_ROW_SIZE + GRID_MARGIN_SIZE));
-            setLocalLayout(updateLocalLayout(itemKey, breakpoint, newRowHeight));
+            setLocalLayout(updateLocalLayout(itemKey, breakpoint, newRowHeight, layoutState));
         }
     }
 
@@ -170,12 +170,12 @@ export function getAlignedLayout(
     return alignedLayout;
 }
 
-const updateLocalLayout = (itemKey: Key, currentBp: string, newRowHeight: number) => (prev: GridLayout.Layouts) => {
+const updateLocalLayout = (itemKey: Key, currentBp: string, newRowHeight: number, layoutState: GridLayout.Layouts) => (prev: GridLayout.Layouts) => {
     const currentLayout = prev[currentBp];
     const currentGridItem = currentLayout?.find((item) => item.i === itemKey);
     if (!currentGridItem || currentGridItem.h === newRowHeight) return prev;
     const updatedLayout = currentLayout.map((item) => item.i === itemKey ? { ...item, h: newRowHeight } : item);
-    return { ...prev, [currentBp]: updatedLayout };
+    return { ...layoutState, [currentBp]: updatedLayout };
 }
 
 export { MasonryLayout };
