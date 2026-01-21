@@ -5,6 +5,7 @@ import { Focusable } from './focus-control';
 import { InputsSizeContext } from "./dom-utils";
 import { VkInfoContext } from './ui-info-provider';
 import { Tooltip } from './tooltip';
+import { clamp } from './utils';
 
 const HEADERS_CHANGE = { headers: { "x-r-action": "change" } };
 
@@ -264,9 +265,11 @@ class InputElementBase extends StatefulComponent {
                 $(inputType, {
                     key: "input",
                     ref: ref => this.inp = ref,
-                    name, content, readOnly,
-                    size: this.props.decorators ? 7 : size,
-                    style: alignRight ? {textAlign: "end"} : undefined,
+                    name, content, readOnly, size,
+                    style: {
+                        ...alignRight && {textAlign: "end"},
+                        ...this.props.decorators && {width: `${clamp((this.props.value ?? '').length + 1.5, 0, 15)}ch`}
+                    },
                     type: this.props.type,
                     value: this.props.value,
                     rows: this.props.rows,
