@@ -13,6 +13,7 @@ trait MenuListItem extends ToChildPair
 
   @c4el("MenuListItem") def menuListItem(
     key: String,
+    id: String,
     name: String,
     iconPath: String = "",
     tooltip: String = "",
