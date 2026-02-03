@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ReactNode } from 'react'
+import React, { useState, useEffect, ReactNode, useRef } from 'react'
 import clsx from 'clsx'
 import closeImg from './close.svg'
 import { ImageElement, SVGElement } from '../../main/image'
@@ -9,6 +9,7 @@ import { useClickSyncOpt } from '../exchange/click-sync'
 import { usePath } from '../../main/vdom-hooks'
 import { identityAt } from '../../main/vdom-util'
 import { Tooltip } from '../tooltip'
+import { useAddEventListener } from '../custom-hooks'
 
 const receiverIdOf = identityAt('receiver');
 const delActionIdOf = identityAt('delAction');
@@ -24,11 +25,11 @@ interface ChipElement {
     link?: string,
     openNewTab?: boolean,
     onClick?: () => void,
-    callbackRef?: (elem: HTMLDivElement | null) => void,
+    callbackRef?: (elem: HTMLDivElement | null) => void,    // used for new unfinished MultiDropdown, TBD if still needed
     children?: ReactNode
 }
 
-const ChipElement = ({identity, receiver, delAction, text = '', color, tooltip, iconPath, link, openNewTab, callbackRef, children, ...props}: ChipElement) => {
+const ChipElement = ({identity, receiver, delAction, text = '', color, tooltip, iconPath, link, openNewTab, children, ...props}: ChipElement) => {
     const { onClick } = useClickSyncOpt(receiverIdOf(identity), receiver);
     const { onClick: onDelete } = useClickSyncOpt(delActionIdOf(identity), delAction);
 
@@ -74,10 +75,12 @@ const ChipElement = ({identity, receiver, delAction, text = '', color, tooltip, 
         onDelete?.();
     }
 
+    const ref = useOnEnter();
+
     return (
         <Tooltip content={tooltip}>
             <div
-                ref={callbackRef}
+                ref={ref}
                 style={inlineStyle}
                 className={className}
                 onClick={handleClick}
@@ -93,6 +96,16 @@ const ChipElement = ({identity, receiver, delAction, text = '', color, tooltip, 
             </div>
         </Tooltip>
     );
+}
+
+function useOnEnter() {
+    const ref = useRef<HTMLDivElement | null>(null);
+    const onEnter = (e: CustomEvent) => {
+		e.stopPropagation();
+		ref.current?.click();
+	}
+	useAddEventListener(ref.current, "enter", onEnter);
+    return ref;
 }
 
 export { ChipElement }
