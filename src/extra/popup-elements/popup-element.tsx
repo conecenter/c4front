@@ -5,7 +5,7 @@ import { PopupStateContext, PopupDrawerContext, PopupWrapperKeyContext } from '.
 import { usePopupPos } from '../../main/popup';
 import { NoCaptionContext } from '../../main/vdom-hooks';
 import { usePopupState } from './popup-manager';
-import { useAddEventListener } from '../custom-hooks';
+import { useAddEventListener, useLatest } from '../custom-hooks';
 import { isInstanceOfNode } from '../dom-utils';
 import { PopupOverlay } from './popup-overlay';
 import { SEL_FOCUS_FRAME, VISIBLE_CHILD_SELECTOR } from '../css-selectors';
@@ -14,6 +14,7 @@ import { useCloseSync } from './popup-element-sync';
 import { useAreaOverlay } from './use-area-overlay';
 import { useFocusTrap } from '../hooks/use-focus-trap';
 import { useArrowNavigation } from '../hooks/use-arrow-navigation';
+import { PathContext } from '../focus-announcer';
 
 interface PopupElement {
     identity?: object,
@@ -53,7 +54,7 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
     const closePopup = () => sendClose ? sendClose() : toggle(false);
     function closeOnBlur(e: FocusEvent) {
         if (!e.relatedTarget || elementsContainTarget([popupElement, parent], e.relatedTarget)) return;
-        closePopup();
+        setTimeout(() => closePopup());  // delay to allow focus patch first (focusin)
 	}
     useAddEventListener(popupElement?.ownerDocument, 'focusout', closeOnBlur);
 
@@ -66,19 +67,23 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
         }, [popupElement]
     );
 
-    function moveFocusToParent() {
-        if (popupElement && elementHasFocus(popupElement)) {
+    const focusPath = useContext(PathContext);
+
+    const moveFocusToParent = useLatest(() => {
+        if (popupElement && elementHasFocus(popupElement, focusPath)) {
             // run focus() after React operations finished to avoid triggering events/effects with stale state
             setTimeout(() => findFocusableAncestor(parent)?.focus());
         }
-    }
+    });
 
-    useLayoutEffect(() => moveFocusToParent, [popupElement]);
+    useLayoutEffect(() => () => {
+        if (popupElement) moveFocusToParent.current();
+    }, [popupElement]);
 
     function closeOnEsc(e: React.KeyboardEvent) {
         if (e.key === "Escape") {
             e.stopPropagation();
-            moveFocusToParent();
+            moveFocusToParent.current();
             closePopup();
         }
     }
@@ -137,10 +142,10 @@ function elementsContainTarget(elems: (HTMLElement | null)[], target: EventTarge
     }
 }
 
-function elementHasFocus(element?: HTMLElement | null) {
+function elementHasFocus(element: HTMLElement | null, focusPath: string) {
 	if (!element) return false;
-	const activeElement = element.ownerDocument.activeElement;
-	return element.contains(activeElement);
+    const focusPathElem = element.ownerDocument.querySelector<HTMLElement>(`[data-path='${focusPath}']`);
+    return element.contains(focusPathElem || element.ownerDocument.activeElement);
 }
 
 function findFocusableAncestor(elem?: HTMLElement | null) {
