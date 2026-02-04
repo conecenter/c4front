@@ -30,6 +30,31 @@ const useLatest = <T>(current: T) => {
     return storedValue;
 }
 
+/**
+ * Returns the value from the previous render.
+ * On first render returns `undefined`.
+ */
+export function usePrevious<T>(value: T): T | undefined;
+export function usePrevious<T>(value: T, initial: T): T;
+export function usePrevious<T>(value: T, initial?: T) {
+    const ref = useRef<T | undefined>(initial);
+    useEffect(() => {
+        ref.current = value;
+    }, [value]);
+    return ref.current;
+}
+
+export function useChange<T>(
+    value: T,
+    onChange: (current: T, prev: T) => void
+) {
+    const storedOnChange = useLatest(onChange);
+    const prevValue = usePrevious(value, value);
+    useEffect(() => {
+        if (value !== prevValue) storedOnChange.current(value, prevValue)
+    }, [value, prevValue, storedOnChange]);
+}
+
 function useInterval(callback: () => void, delay: number | null) {
     const savedCallback = useLatest(callback);
     useEffect(() => {

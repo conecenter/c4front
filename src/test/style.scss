@@ -1598,10 +1598,10 @@ button {
   }
 }
 
-.popupEl > .massOpBox {
+.popupEl > .menuListBox {
   margin: 0;
 
-  > .massOp {
+  > .menuListItem {
     @extend .menuItem;
     @extend .transparentColorCss;
     position: relative;

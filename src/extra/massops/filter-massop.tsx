@@ -52,10 +52,10 @@ function MassOp({ identity, name, nameFolded, color, icon, umid, receiver, folde
 
     return (
         <NoCaptionContext.Provider value={true}>
-            <LabeledElement className='massOpBox' umid={umid} >
+            <LabeledElement className='menuListBox' umid={umid} >
                 <ButtonElement
                     value={clicked} path={path} color={color} onClick={onClick}
-                    className={clsx('massOp', isFolder && 'isFolder', isOpened && 'isOpened')}
+                    className={clsx('massOp menuListItem', isFolder && 'isFolder', isOpened && 'isOpened')}
                 >
                     {icon &&
                         <ImageElement src={icon} className='textLineSize' color='adaptive' />}
