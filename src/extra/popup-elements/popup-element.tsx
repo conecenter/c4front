@@ -31,7 +31,7 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
     const popupAncestorKey = useContext(PopupWrapperKeyContext);
     const popupDrawer = useContext(PopupDrawerContext);
 
-    const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
+    const [popupElement, setPopupElement] = useState<HTMLDivElement | null>(null);
 
     const { isOpened, toggle } = usePopupState(popupKey);
 
@@ -89,12 +89,14 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
     }
 
     useEffect(
-        function moveFocusIfModal() {
-            if (isModalMode && popupElement && popupStyle.visibility !== "hidden") {
+        function focusOnOpen() {
+            if (popupElement && popupStyle.visibility !== "hidden") {
                 const activeElem = popupElement.ownerDocument.activeElement;
                 if (!popupElement.contains(activeElem)) {
-                    const focusTo = popupElement.querySelector<HTMLElement>('input, button');
-                    (focusTo || popupElement).focus();
+                    const focusTo = popupElement.querySelector<HTMLElement>('input')
+                        || popupElement.querySelector<HTMLElement>(SEL_FOCUS_FRAME)
+                        || (isModalMode ? popupElement : null);
+                    focusTo?.focus();
                 }
             }
         },
