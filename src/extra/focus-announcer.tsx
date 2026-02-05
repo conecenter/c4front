@@ -1,10 +1,23 @@
-import React, { useRef, ReactNode, useEffect, useState } from 'react';
-import { Patch } from './exchange/patch-sync';
+import React, { useRef, ReactNode, useEffect, useState, useCallback } from 'react';
+import { PatchSyncTransformers, usePatchSync } from './exchange/patch-sync';
 import { useAddEventListener, useIsMounted } from './custom-hooks';
 import { SEL_FOCUS_FRAME, VISIBLE_CHILD_SELECTOR, FOCUS_BLOCKER_CLASS } from './css-selectors';
+import { identityAt } from '../main/vdom-util';
 
 const PathContext = React.createContext("path");
 PathContext.displayName = "PathContext";
+
+const receiverIdOf = identityAt('receiver');
+
+const patchSyncTransformers: PatchSyncTransformers<string, string, string> = {
+    serverToState: s => s,
+    changeToPatch: (ch) => ({
+        headers: {"x-r-action": "change"},
+        value: ch
+    }),
+    patchToChange: (p) => p.value,
+    applyChange: (_prev, ch) => ch
+};
 
 /*
 - Focus change cases:
@@ -24,22 +37,20 @@ PathContext.displayName = "PathContext";
 const getFocusFramePath = (elem?: Element | null) => elem?.closest<HTMLElement>(SEL_FOCUS_FRAME)?.dataset.path;
 
 interface FocusAnnouncerElement {
+    identity: object,
     path: string,
     value: string,
-    onChange: (change: FocusChange) => void,
     children: ReactNode
 }
 
-interface FocusChange {
-    target: Patch
-}
-
-function FocusAnnouncerElement({ path: thisPath, value, onChange, children }: FocusAnnouncerElement) {
+function FocusAnnouncerElement({ identity, path: thisPath, value: serverValue, children }: FocusAnnouncerElement) {
     const [doc, setDoc] = useState<Document | undefined>(undefined);
+    const setupDoc = useCallback((elem: HTMLDivElement) => setDoc(elem?.ownerDocument), []);
 
-    const sendChange = (path: string) => {
-        if (path !== value) onChange({ target: { headers: { "x-r-action": "change" }, value: path } });
-    }
+    const { currentState: value, sendFinalChange } =
+        usePatchSync(receiverIdOf(identity), serverValue, true, patchSyncTransformers);
+
+    const sendChange = (path: string) => path !== value && sendFinalChange(path);
 
     function focusElementOrBackup(elem: HTMLElement | null | undefined) {
         const focusTo = elem || findAutofocusCandidate(doc);
@@ -62,7 +73,7 @@ function FocusAnnouncerElement({ path: thisPath, value, onChange, children }: Fo
 
     return (
         <div
-            ref={elem => setDoc(elem?.ownerDocument)}
+            ref={setupDoc}
             className='focusAnnouncer'
             tabIndex={-1}
             data-path={thisPath}
