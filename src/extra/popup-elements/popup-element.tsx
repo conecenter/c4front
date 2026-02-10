@@ -14,7 +14,7 @@ import { useCloseSync } from './popup-element-sync';
 import { useAreaOverlay } from './use-area-overlay';
 import { useFocusTrap } from '../hooks/use-focus-trap';
 import { useArrowNavigation } from '../hooks/use-arrow-navigation';
-import { PathContext } from '../focus-announcer';
+import { FocusRestoreCandidateCtx } from '../focus-announcer';
 
 interface PopupElement {
     identity?: object,
@@ -54,7 +54,7 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
     const closePopup = () => sendClose ? sendClose() : toggle(false);
     function closeOnBlur(e: FocusEvent) {
         if (!e.relatedTarget || elementsContainTarget([popupElement, parent], e.relatedTarget)) return;
-        setTimeout(() => closePopup());  // delay to allow focus patch first (focusin)
+        closePopup();
 	}
     useAddEventListener(popupElement?.ownerDocument, 'focusout', closeOnBlur);
 
@@ -67,23 +67,10 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
         }, [popupElement]
     );
 
-    const focusPath = useContext(PathContext);
-
-    const moveFocusToParent = useLatest(() => {
-        if (popupElement && elementHasFocus(popupElement, focusPath)) {
-            // run focus() after React operations finished to avoid triggering events/effects with stale state
-            setTimeout(() => findFocusableAncestor(parent)?.focus());
-        }
-    });
-
-    useLayoutEffect(() => () => {
-        if (popupElement) moveFocusToParent.current();
-    }, [popupElement]);
-
     function closeOnEsc(e: React.KeyboardEvent) {
         if (e.key === "Escape") {
             e.stopPropagation();
-            moveFocusToParent.current();
+            findFocusableAncestor(parent)?.focus();
             closePopup();
         }
     }
@@ -102,6 +89,8 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
         },
         [isModalMode, popupElement, popupStyle.visibility]
     );
+
+    useFocusRestoration(popupElement, parent);
 
     useFocusTrap(popupElement);
     useArrowNavigation(popupElement, !isModalMode);
@@ -137,6 +126,17 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
     );
 }
 
+function useFocusRestoration(popupElement: HTMLElement | null, parent: HTMLElement | null) {
+    const registerFocusCandidate = useContext(FocusRestoreCandidateCtx);
+    const restoreFocusToParent = useLatest(() => {
+        if (elementHasFocus(popupElement)) registerFocusCandidate(findFocusableAncestor(parent));
+    });
+
+    useLayoutEffect(() => () => {
+        if (popupElement && elementHasFocus(popupElement)) restoreFocusToParent.current();
+    }, [popupElement]);
+}
+
 function elementsContainTarget(elems: (HTMLElement | null)[], target: EventTarget | null) {
     if (!isInstanceOfNode(target)) return;
     for (const elem of elems) {
@@ -144,10 +144,10 @@ function elementsContainTarget(elems: (HTMLElement | null)[], target: EventTarge
     }
 }
 
-function elementHasFocus(element: HTMLElement | null, focusPath: string) {
+function elementHasFocus(element?: HTMLElement | null) {
 	if (!element) return false;
-    const focusPathElem = element.ownerDocument.querySelector<HTMLElement>(`[data-path='${focusPath}']`);
-    return element.contains(focusPathElem || element.ownerDocument.activeElement);
+	const activeElement = element.ownerDocument.activeElement;
+	return element.contains(activeElement);
 }
 
 function findFocusableAncestor(elem?: HTMLElement | null) {
