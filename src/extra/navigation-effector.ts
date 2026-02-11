@@ -1,7 +1,7 @@
 import { useContext, useEffect } from "react";
 import { RootBranchContext } from "../main/vdom-hooks";
 import { useAddEventListener } from "./custom-hooks";
-import { PathContext } from "./focus-announcer";
+import { focusAuto, PathContext } from "./focus-announcer";
 
 /*
 - the order of navigation flow: hashchange -> server calculations -> new view (new branch key) -> remount whole tree
@@ -69,7 +69,7 @@ function useSaveVisitState() {
 function applyNavEffects(visitState: { focus: string, scroll: number }) {
     const { focus, scroll } = visitState;
     const focusToSelector = focus ? `[data-path="${focus}"]` : null;
-    focusToSelector && document.querySelector<HTMLElement>(focusToSelector)?.focus();
+    focusToSelector && focusAuto(document.querySelector<HTMLElement>(focusToSelector));
     window.scrollTo(0, scroll);
 }
 

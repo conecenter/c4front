@@ -9,6 +9,7 @@ import { ARROW_DOWN_KEY, ARROW_LEFT_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY, ENTER_KE
 import { PopupWrapperKeyContext } from "./popup-elements/popup-contexts";
 import { usePopupState } from "./popup-elements/popup-manager";
 import { useChange } from "./custom-hooks";
+import { focusAuto } from "./focus-announcer";
 
 const receiverIdOf = identityAt('receiver');
 
@@ -51,7 +52,7 @@ function MenuList({ identity, children }: MenuListProps) {
     const ref = useRef<HTMLDivElement | null>(null);
     useEffect(() => {
         // timeout to let popup become visible
-        const timeoutId = setTimeout(() => ref.current?.focus());
+        const timeoutId = setTimeout(() => focusAuto(ref.current));
         return () => clearTimeout(timeoutId);
     }, []);
 
