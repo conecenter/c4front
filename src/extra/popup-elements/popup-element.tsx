@@ -14,7 +14,7 @@ import { useCloseSync } from './popup-element-sync';
 import { useAreaOverlay } from './use-area-overlay';
 import { useFocusTrap } from '../hooks/use-focus-trap';
 import { useArrowNavigation } from '../hooks/use-arrow-navigation';
-import { FocusRestoreCandidateCtx } from '../focus-announcer';
+import { focusAuto, FocusRestoreCandidateCtx } from '../focus-announcer';
 
 interface PopupElement {
     identity?: object,
@@ -54,7 +54,7 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
     const closePopup = () => sendClose ? sendClose() : toggle(false);
     function closeOnBlur(e: FocusEvent) {
         if (!e.relatedTarget || elementsContainTarget([popupElement, parent], e.relatedTarget)) return;
-        closePopup();
+        queueMicrotask(closePopup); // focus patch is best to go first (focusin)
 	}
     useAddEventListener(popupElement?.ownerDocument, 'focusout', closeOnBlur);
 
@@ -83,7 +83,7 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
                     const focusTo = popupElement.querySelector<HTMLElement>('input')
                         || popupElement.querySelector<HTMLElement>(SEL_FOCUS_FRAME)
                         || (isModalMode ? popupElement : null);
-                    focusTo?.focus();
+                    focusAuto(focusTo);
                 }
             }
         },
@@ -128,10 +128,7 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
 
 function useFocusRestoration(popupElement: HTMLElement | null, parent: HTMLElement | null) {
     const registerFocusCandidate = useContext(FocusRestoreCandidateCtx);
-    const restoreFocusToParent = useLatest(() => {
-        if (elementHasFocus(popupElement)) registerFocusCandidate(findFocusableAncestor(parent));
-    });
-
+    const restoreFocusToParent = useLatest(() => registerFocusCandidate(findFocusableAncestor(parent)));
     useLayoutEffect(() => () => {
         if (popupElement && elementHasFocus(popupElement)) restoreFocusToParent.current();
     }, [popupElement]);

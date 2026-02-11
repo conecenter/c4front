@@ -1,4 +1,4 @@
-import { createElement as $, ReactElement, useEffect, useRef } from 'react';
+import { createElement as $ } from 'react';
 import { InputElement } from '../input-element';
 import { SVGElement } from '../../main/image';
 import SearchSvg from './search.svg';
