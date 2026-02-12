@@ -9,7 +9,11 @@ interface TooltipProps {
 function Tooltip({ content, children }: TooltipProps) {
 	return !content ? children : (
 		<Root>
-			<Trigger asChild>
+			<Trigger
+				asChild
+				onFocus={onFocus}
+				onPointerMove={onPointerMove}
+			>
 				{children}
 			</Trigger>
 			<Portal>
@@ -20,6 +24,17 @@ function Tooltip({ content, children }: TooltipProps) {
 			</Portal>
 		</Root>
 	);
+}
+
+function onFocus(e: React.FocusEvent<HTMLButtonElement>) {
+	// focus-visible allows tooltip if focus comes from keyboard
+	if (!e.currentTarget.contains(e.target) || !e.currentTarget.matches(':focus-visible')) {
+		e.preventDefault();
+	}
+}
+
+function onPointerMove(e: React.PointerEvent<HTMLButtonElement>) {
+	if (!e.currentTarget.contains(e.target as Node)) e.preventDefault();
 }
 
 export { Tooltip }
