@@ -80,7 +80,7 @@ function FocusAnnouncerElement({ identity, path: thisPath, value: serverValue, c
         else setLocalFocus('');
     }, [doc, setLocalFocus]);
 
-    useReportPathOnFocus(doc, thisPath, sendChange);
+    useReportPathOnFocus(doc, thisPath, sendChange, localFocusRef);
 
     const registerFocusCandidate = usePreventFocusLoss(doc, value, focusBackupElement);
 
@@ -178,10 +178,12 @@ function shouldRestoreFocus(doc: Document | undefined, target: HTMLElement | nul
 function useReportPathOnFocus(
     doc: Document | undefined,
     thisPath: string,
-    sendChange: (path: string) => void
+    sendChange: (path: string) => void,
+    localFocusRef: React.MutableRefObject<string | null>
 ) {
     function onFocus(e: FocusEvent) {
         const newPath = getFocusFramePath(e.target as Element) || thisPath;
+        localFocusRef.current = null;
         if (newPath) sendChange(newPath);
     }
     useAddEventListener(doc, 'focusin', onFocus, true);
@@ -193,6 +195,7 @@ function useAlignFocusWithServerValue(
     focusBackupElement: () => void
 ) {
     const isFocusedViewRef = useIsFocusedView(doc);
+    // effect should have no deps due to gradual render of most views
     useEffect(() => {
         if (!isFocusedViewRef.current || isNavTransition()) return;
         if (!value) return focusBackupElement();
@@ -202,7 +205,7 @@ function useAlignFocusWithServerValue(
             if (elemToFocus) elemToFocus.focus();
             else focusBackupElement();
         }
-    }, [value, doc, isFocusedViewRef, focusBackupElement]);
+    });
 }
 
 function isRootBranch(doc: Document | undefined) {
