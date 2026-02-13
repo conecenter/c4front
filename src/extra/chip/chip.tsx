@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ReactNode, useRef } from 'react'
+import React, { useState, useEffect, ReactNode } from 'react'
 import clsx from 'clsx'
 import closeImg from './close.svg'
 import { ImageElement, SVGElement } from '../../main/image'
@@ -75,12 +75,12 @@ const ChipElement = ({identity, receiver, delAction, text = '', color, tooltip, 
         onDelete?.();
     }
 
-    const ref = useOnEnter();
+    const setElem = useOnEnter();
 
     return (
         <Tooltip content={tooltip}>
             <div
-                ref={ref}
+                ref={setElem}
                 style={inlineStyle}
                 className={className}
                 onClick={handleClick}
@@ -99,13 +99,13 @@ const ChipElement = ({identity, receiver, delAction, text = '', color, tooltip, 
 }
 
 function useOnEnter() {
-    const ref = useRef<HTMLDivElement | null>(null);
+    const [elem, setElem] = useState<HTMLDivElement | null>(null);
     const onEnter = (e: CustomEvent) => {
 		e.stopPropagation();
-		ref.current?.click();
+		elem?.click();
 	}
-	useAddEventListener(ref.current, "enter", onEnter);
-    return ref;
+	useAddEventListener(elem, "enter", onEnter);
+    return setElem;
 }
 
 export { ChipElement }
