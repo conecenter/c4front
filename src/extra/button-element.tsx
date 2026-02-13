@@ -1,4 +1,4 @@
-import React, { createElement as $, useEffect, ReactNode, MutableRefObject } from 'react';
+import React, { createElement as $, useState, useEffect, ReactNode, MutableRefObject } from 'react';
 import clsx from 'clsx';
 import { useFocusControl } from './focus-control';
 import { Patch } from './exchange/patch-sync';
@@ -23,7 +23,7 @@ interface ButtonElement {
 }
 
 const ButtonElement = ({ onClick, onChange, content, ...props}: ButtonElement) => {
-	const elem = React.useRef<HTMLButtonElement | null>(null)
+	const [elem, setElem] = useState<HTMLButtonElement | null>(null);
 
 	const changing = !!props.value
 	const disabled = props.disabled || !(onClick || onChange)
@@ -35,7 +35,7 @@ const ButtonElement = ({ onClick, onChange, content, ...props}: ButtonElement) =
 	const markerClass = props.marker && `marker-${props.marker}`
 
 	useEffect(() => {
-		if (props.forwardRef) props.forwardRef.current = elem.current
+		if (props.forwardRef) props.forwardRef.current = elem
 	}, [changing])
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -53,16 +53,16 @@ const ButtonElement = ({ onClick, onChange, content, ...props}: ButtonElement) =
 
 	const onEnter = (e: CustomEvent) => {
 		e.stopPropagation();
-		elem.current?.click();
+		elem?.click();
 	}
-	useAddEventListener(elem.current, "enter", onEnter);
+	useAddEventListener(elem, "enter", onEnter);
 
 	const textContent = content && $('span', { className: 'text' }, content)
 	const children = props.children !== content && props.children
 
 	return $(Tooltip, { content: props.hint, children:
 		$("button", {
-			ref: elem, onClick: handleClick, ...focusHtml, "data-title": props.hint,
+			ref: setElem, onClick: handleClick, ...focusHtml, "data-title": props.hint,
 			className: clsx(props.className, focusClass, colorClass, disabled && 'disabled', markerClass),
 			style: {
 				...changing && { opacity: "0.4", cursor: 'default' },
