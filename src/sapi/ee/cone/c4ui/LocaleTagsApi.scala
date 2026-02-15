@@ -34,6 +34,7 @@ trait TimePickerProps extends ToChildPair
     state: PopupServerState,
     timestampFormatId: Int,
     receiver: Receiver[C],
+    placeHolder: Option[String] = None,
     userTimezoneId: String = "",
     deferredSend: Boolean = false,
     children: ViewRes = Nil,

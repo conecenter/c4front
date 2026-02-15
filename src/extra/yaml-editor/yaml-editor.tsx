@@ -7,6 +7,8 @@ import { JSONSchema7 } from "json-schema";
 import { linter, lintGutter, Diagnostic } from "@codemirror/lint";
 import { load, YAMLException } from 'js-yaml';
 import { identityAt } from '../../main/vdom-util';
+import { useFocusControl } from '../focus-control';
+import { usePath } from '../../main/vdom-hooks';
 
 const receiverIdOf = identityAt('receiver');
 
@@ -24,6 +26,9 @@ interface YamlEditorProps {
 }
 
 function YamlEditor({ identity, value, jsonSchema }: YamlEditorProps) {
+    const path = usePath(identity);
+    const { focusClass, focusHtml } = useFocusControl(path);
+
     const yamlSupport = useMemo(() => yaml(), []);
 
     const schemaExtension = jsonSchema ? yamlSchema(parseJsonSchema(jsonSchema)) : [];
@@ -43,12 +48,17 @@ function YamlEditor({ identity, value, jsonSchema }: YamlEditorProps) {
         return diagnostics;
     }
 
-    return <CodeMirror
-        value={currentState}
-        extensions={[yamlSupport, schemaExtension, linter(lintErrors), lintGutter()]}
-        onBlur={() => wasChanged && sendFinalChange(currentState)}
-        onChange={(value) => sendTempChange(value)}
-        onKeyDown={(e) => e.stopPropagation()} />
+    return (
+        <CodeMirror
+            value={currentState}
+            extensions={[yamlSupport, schemaExtension, linter(lintErrors), lintGutter()]}
+            onBlur={() => wasChanged && sendFinalChange(currentState)}
+            onChange={(value) => sendTempChange(value)}
+            onKeyDown={(e) => e.stopPropagation()}
+            className={focusClass}
+            {...focusHtml}
+        />
+    );
 }
 
 function parseJsonSchema(jsonSchema: string) {

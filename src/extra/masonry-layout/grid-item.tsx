@@ -1,4 +1,4 @@
-import React, { forwardRef, MutableRefObject, ReactNode, useEffect } from 'react';
+import React, { forwardRef, MutableRefObject, ReactNode, useLayoutEffect } from 'react';
 
 const MIN_H_LINE_HEIGHT = 1;
 
@@ -12,7 +12,10 @@ const GridItemWrapper = forwardRef<HTMLDivElement, GridItemWrapper>(
     ({ minH, correctHeight, children, ...props }, ref) => {
         const domRef = ref as MutableRefObject<HTMLDivElement | null>;
 
-        useEffect(() => { correctHeight(domRef.current) });
+        useLayoutEffect(() => {
+            const raf = requestAnimationFrame(() => correctHeight(domRef.current));
+            return () => cancelAnimationFrame(raf);
+        }); 
 
         return children ? (
             <div ref={ref} {...props} >
