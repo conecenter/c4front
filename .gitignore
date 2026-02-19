@@ -6,3 +6,5 @@ c4gen.*
 c4gen-*
 
 node_modules
+CLAUDE.md
+.claudeignore
