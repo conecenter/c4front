@@ -2,7 +2,12 @@ import { Children, ReactNode, isValidElement, useEffect, useLayoutEffect, useRef
 import { FlexibleSizes } from "./view-builder/flexible-api";
 import { flexibleComponents } from "./view-builder/flexible-elements";
 
-// if element is ref object and changes during component lifecycle, it will not be updated in effect
+/**
+ * @unsafe Prefer `useDomListener` instead.
+ * If element is a ref, changes to ref.current won't re-trigger the effect.
+ * Do not pass ref.current directly.
+ * Unsafe if ref setting is delayed by conditional render or wrapper like Tooltip.
+ */
 function useAddEventListener<T extends Event>(
     element: React.RefObject<EventTarget | null> | EventTarget | null | undefined,
     eventName: string,

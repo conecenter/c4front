@@ -1,4 +1,3 @@
-import { MutableRefObject } from "react";
 import { getActiveFocusWrapper, getFocusableNodes } from "../focus-control";
 import { useAddEventListener } from "../custom-hooks";
 import { findClosestNode } from "../dom-utils";
@@ -10,23 +9,22 @@ const nestedFocusable = `:scope ${SEL_FOCUS_FRAME} ${SEL_FOCUS_FRAME}`;
 const labelDescendant = `:scope .labelBox *`;
 
 function useArrowNavigation(
-    rootRefOrElem: MutableRefObject<Document | Element | null> | Element | null,
+    rootElem: Element | Document | null,
     disable?: boolean
 ) {
     function onKeyDown(e: KeyboardEvent) {
-        const root = (rootRefOrElem && 'current' in rootRefOrElem) ? rootRefOrElem.current : rootRefOrElem;
-        if (!root) return;
+        if (!rootElem) return;
         switch (e.key) {
             case "ArrowUp":
             case "ArrowDown":
             case "ArrowLeft":
             case "ArrowRight":
                 e.stopPropagation();
-                findNestedFocusable(findClosestFocusable(e.key, root))?.focus();
+                findNestedFocusable(findClosestFocusable(e.key, rootElem))?.focus();
         }
     }
 
-    useAddEventListener(disable ? null : rootRefOrElem, 'keydown', onKeyDown);
+    useAddEventListener(disable ? null : rootElem, 'keydown', onKeyDown);
 }
 
 function findClosestFocusable(eventKey: "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight", root: Element | Document) {

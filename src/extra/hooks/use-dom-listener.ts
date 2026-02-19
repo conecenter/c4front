@@ -1,29 +1,35 @@
 import { useCallback, useRef } from "react";
 
+interface DomListenerOptions extends AddEventListenerOptions {
+    target?: 'self' | 'document' | 'window';
+}
+
 export function useDomListener<T extends Event>(
-  type: string,
-  handler: (e: T) => void,
-  options?: AddEventListenerOptions | boolean
+    type: string,
+    handler: (e: T) => void,
+    options?: DomListenerOptions | boolean
 ) {
     const handlerRef = useRef(handler);
     handlerRef.current = handler;
 
-    const nodeRef = useRef<EventTarget | null>(null);
+    const listener = useCallback((e: T) => handlerRef.current(e), []);
 
-    return useCallback((node: EventTarget | null) => {
+    const target = (typeof options === 'object' ? options?.target : undefined) ?? 'self';
+
+    const nodeRef = useRef<EventTarget | null | undefined>(null);
+
+    return useCallback((node: HTMLElement | null) => {
         // detach from previous node
         if (nodeRef.current) {
-            nodeRef.current.removeEventListener(type, listener, options);
+            nodeRef.current.removeEventListener(type, listener as EventListener, options);
         }
 
-        nodeRef.current = node;
+        nodeRef.current = target === 'self' ? node
+            : target === 'document' ? node?.ownerDocument
+            : node?.ownerDocument.defaultView;
 
-        if (!node) return;
+        if (!nodeRef.current) return;
 
-        node.addEventListener(type, listener, options);
-
-        function listener(e: Event) {
-            handlerRef.current(e as T);
-        }
-    }, [type, options]);
+        nodeRef.current.addEventListener(type, listener as EventListener, options);
+    }, [target, type, options, listener]);
 }

@@ -64,8 +64,8 @@ function SegmentedChip({identity, keyboardAction, compact, drawAsRoute, routePar
         if (!readOnly) sendPatch({value: e.detail.key, headers: {'x-r-input': '1'}});
     }
 
-	useExternalKeyboardControls(routeElemRef.current, customEventHandlers);
-    useAddEventListener(routeElemRef.current, DELETE_EVENT, sendKeyToServer, true);
+	useExternalKeyboardControls(routeElemRef, customEventHandlers);
+    useAddEventListener(routeElemRef, DELETE_EVENT, sendKeyToServer, true);
 
     return (
         <div ref={routeElemRef}

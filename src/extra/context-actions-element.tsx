@@ -17,7 +17,7 @@ function ContextActionsElement({ umid, goToChip, refLE }: ContextActionsElement)
     const isFocused = useIsFocused(refLE);
 
     const { button: umButton, onKeyDown } = useUserManual(umid);
-    useAddEventListener(refLE.current, 'keydown', onKeyDown);
+    useAddEventListener(refLE, 'keydown', onKeyDown);
  
     const isTouch = useContext(UiInfoContext) === 'touch';
 

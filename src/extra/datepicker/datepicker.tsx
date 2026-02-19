@@ -197,7 +197,7 @@ export function DatePickerInputElement({
 		memoInputValue.current = inputVal;
 	}
 
-	useExternalKeyboardControls(inputRef.current, keyboardEventHandlers);
+	useExternalKeyboardControls(inputRef, keyboardEventHandlers);
 
 	const setSelection: (from: number, to: number) => void = useSelectionEditableInput(inputRef)
 	const onTimestampChange: (timestamp: number) => void = onTimestampChangeAction(currentState, dateSettings, sendTempChange)

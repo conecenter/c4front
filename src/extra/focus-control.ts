@@ -32,8 +32,8 @@ function getFocusableNodes(root: Element | Document | null | undefined) {
     return Array.from(focusWrappers);
 }
 
-function getActiveFocusWrapper(doc: Document) {
-    return doc.activeElement?.closest<HTMLElement>(SEL_FOCUS_FRAME);
+function getActiveFocusWrapper(doc: Document | null) {
+    return doc?.activeElement?.closest<HTMLElement>(SEL_FOCUS_FRAME);
 }
 
 export { useFocusControl, Focusable, getFocusableNodes, getActiveFocusWrapper };

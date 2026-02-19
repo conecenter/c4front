@@ -104,7 +104,7 @@ export function DropdownCustom({ identity, state, content, popupChildren, ro, po
 		[CUT_EVENT]: handleClipboardWrite
 	};
 
-	useExternalKeyboardControls(dropdownBoxRef.current, customEventHandlers);
+	useExternalKeyboardControls(dropdownBoxRef, customEventHandlers);
 
 	// Event handlers
 	function handleBlur(e: React.FocusEvent) {
