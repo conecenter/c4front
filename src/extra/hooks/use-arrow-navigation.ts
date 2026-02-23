@@ -10,7 +10,7 @@ const labelDescendant = `:scope .labelBox *`;
 
 function useArrowNavigation(
     rootElem: Element | Document | null,
-    disable?: boolean
+    softBoundary?: boolean
 ) {
     function onKeyDown(e: KeyboardEvent) {
         if (!rootElem) return;
@@ -18,13 +18,15 @@ function useArrowNavigation(
             case "ArrowUp":
             case "ArrowDown":
             case "ArrowLeft":
-            case "ArrowRight":
-                e.stopPropagation();
-                findNestedFocusable(findClosestFocusable(e.key, rootElem))?.focus();
+            case "ArrowRight": {
+                const target = findNestedFocusable(findClosestFocusable(e.key, rootElem));
+                if (target || !softBoundary) e.stopPropagation();
+                target?.focus();
+            }
         }
     }
 
-    useAddEventListener(disable ? null : rootElem, 'keydown', onKeyDown);
+    useAddEventListener(rootElem, 'keydown', onKeyDown);
 }
 
 function findClosestFocusable(eventKey: "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight", root: Element | Document) {
