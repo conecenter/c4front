@@ -80,9 +80,10 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
             if (popupElement && popupStyle.visibility !== "hidden") {
                 const activeElem = popupElement.ownerDocument.activeElement;
                 if (!popupElement.contains(activeElem)) {
+                    const SEL_INTERACTIVE = `:is(button:not(.disabled), .chipItem:not(.noAction), .checkBox)${SEL_FOCUS_FRAME}`;
                     const focusTo = popupElement.querySelector<HTMLElement>('input')
-                        || popupElement.querySelector<HTMLElement>(SEL_FOCUS_FRAME)
-                        || (isModalMode ? popupElement : null);
+                        || popupElement.querySelector<HTMLElement>(SEL_INTERACTIVE)
+                        || (isModalMode ? popupElement.querySelector<HTMLElement>(SEL_FOCUS_FRAME) || popupElement : null);
                     focusAuto(focusTo);
                 }
             }
