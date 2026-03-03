@@ -1,5 +1,6 @@
 import {cloneElement, createElement as $, useCallback, useEffect, useMemo, useState, useRef, useContext} from "react"
 import clsx from 'clsx'
+import { Tooltip } from '../extra/tooltip';
 
 import {findFirstParent, identityAt, never, sortedWith} from "./vdom-util.js"
 import {NoCaptionContext, RootBranchContext, useEventListener, useSync, usePath} from "./vdom-hooks.js"
@@ -127,7 +128,7 @@ function useOverflowObserver(parentRef, children) {
 
 const spanAll = "1 / -1"
 
-export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, spanRight, spanRightTo, expanding, expander, dragHandle, noDefCellClass, classNames: argClassNames, gridRow: argGridRow, gridColumn: argGridColumn, needsHoverExpander=true, ...props }) {
+export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, spanRight, spanRightTo, expanding, expander, dragHandle, noDefCellClass, classNames: argClassNames, gridRow: argGridRow, gridColumn: argGridColumn, needsHoverExpander=true, tooltip, ...props }) {
     const ref = useRef(null)
     const path = usePath(identity)
     const gridRow = argGridRow || getGridRow({ rowKey, rowKeyMod })
@@ -149,9 +150,9 @@ export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, spanRi
         dragHandle && 'gridDragCell',
         isOverflow && 'overflownCell'
     );
-    return $("div", {ref, ...props, ...expanderProps, 'data-col-key': colKey, 'data-row-key': rowKey, "data-drag-handle": dragHandle, ...focusHtml, style, className, ...hoverProps},
-        gridColumn === spanAll ? $(NoCaptionContext.Provider, {value: false}, children) : children
-    )
+    const cell = $("div", {ref, ...props, ...expanderProps, 'data-col-key': colKey, 'data-row-key': rowKey, "data-drag-handle": dragHandle, ...focusHtml, style, className, ...hoverProps},
+        gridColumn === spanAll ? $(NoCaptionContext.Provider, {value: false}, children) : children)
+    return tooltip ? $(Tooltip, {content: tooltip}, cell) : cell;
 }
 
 const colKeysOf = children => children.map(c => c.colKey)
