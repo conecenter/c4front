@@ -16,8 +16,7 @@ const ESC_CHAR = '\x1b';
 const barcodeActionIdOf = identityAt('barcodeAction');
 
 interface ScannerSerialElement {
-    key: string,
-    identity: Object,
+    identity: object,
     barcodeReader: boolean,
     children?: ReactNode
 }
@@ -34,7 +33,7 @@ function ScannerSerialElement({ identity, barcodeReader, children=null }: Scanne
     // Server sync functionality
     const [_, enqueueBarcodePatch] = useSync(barcodeActionIdOf(identity));
     const sendBarcode = (data: string) => {
-        let barcode = data.trim();
+        const barcode = data.trim();
         enqueueBarcodePatch({ value: barcode, headers: { 'x-r-action': 'barcode' } });
         console.log(`barcode -> ${barcode}`);
     }
@@ -117,14 +116,13 @@ function ScannerSerialElement({ identity, barcodeReader, children=null }: Scanne
     
     return (
         <>
-            <button 
-                title='Connect to device'
-                className='btnConnectScanner'
-                style={{ opacity: port ? 0 : 0.2 }}
-                onClick={() => initializePort()}
-            >
-                <img src='/mod/main/ee/cone/core/ui/c4view/connection.svg' />
-            </button>
+            {!port &&
+                <button 
+                    title='Connect to device'
+                    onClick={() => initializePort()}
+                >
+                    <img className='insideButtonSize' src='/mod/main/ee/cone/core/ui/c4view/connection.svg' />
+                </button>}
             {children}
         </>
     );
@@ -174,7 +172,7 @@ async function executeCommands(port: SerialPort, commands: string[]) {
         writableStreamClosed = textEncoder.readable.pipeTo(port.writable)
             .catch((err) => { console.log(err) });
         for (const str of commands) {
-            let command = toCommand(str);
+            const command = toCommand(str);
             await writer.write(command);
             console.log('command:' + str);
         }
