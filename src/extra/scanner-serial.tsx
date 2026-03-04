@@ -2,6 +2,7 @@ import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { useSync } from "../main/vdom-hooks";
 import { identityAt } from "../main/vdom-util";
 import { useLatest } from "./custom-hooks";
+import { LabeledElement } from "./labeled-element";
 
 /*
  * Reference for scanner interface - OPTICON Universal menu book
@@ -117,12 +118,15 @@ function ScannerSerialElement({ identity, barcodeReader, children=null }: Scanne
     return (
         <>
             {!port &&
-                <button 
-                    title='Connect to device'
-                    onClick={() => initializePort()}
-                >
-                    <img className='insideButtonSize' src='/mod/main/ee/cone/core/ui/c4view/connection.svg' />
-                </button>}
+                <LabeledElement key="scan-le" identity={{parent: "scanner-elem"}} path="/scanner-elem" label="">
+                    <button
+                        title='Connect to device'
+                        className="grayColorCss"
+                        onClick={() => initializePort()}
+                    >
+                        <img className='insideButtonSize' src='/mod/main/ee/cone/core/ui/c4view/connection.svg' />
+                    </button>
+                </LabeledElement>}
             {children}
         </>
     );

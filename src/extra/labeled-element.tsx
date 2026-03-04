@@ -18,7 +18,7 @@ interface LabeledElement {
     sizes?: FlexibleSizes,
     accented?: boolean,
     clickable?: boolean,
-    labelChildren: ReactNode,
+    labelChildren?: ReactNode,
     umid?: string,
     children: ReactNode
 }
