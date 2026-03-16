@@ -9,6 +9,7 @@ import { load, YAMLException } from 'js-yaml';
 import { identityAt } from '../../main/vdom-util';
 import { useFocusControl } from '../focus-control';
 import { usePath } from '../../main/vdom-hooks';
+import clsx from 'clsx';
 
 const receiverIdOf = identityAt('receiver');
 
@@ -55,7 +56,7 @@ function YamlEditor({ identity, value, jsonSchema }: YamlEditorProps) {
             onBlur={() => wasChanged && sendFinalChange(currentState)}
             onChange={(value) => sendTempChange(value)}
             onKeyDown={(e) => e.stopPropagation()}
-            className={focusClass}
+            className={clsx('codeEditor', focusClass)}
             {...focusHtml}
         />
     );
