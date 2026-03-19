@@ -27,15 +27,17 @@ function ContextActionsElement({ umid, goToChip, refLE }: ContextActionsElement)
         ? cloneElement(goToChip[0], { text: goToChip[0].props.tooltip })
         : goToChip;
 
-    const contextActionsElems = (umButton || goToElement) ?
+    if (!(umButton || goToElement)) return null;
+
+    const contextActionsElems = (
         <div className='contextActionsBox' onMouseDown={preventFocusin}>
             {umButton}
             {goToElement}
         </div>
-        : null
+    );
 
     return isTouch
-        ? <BottomBarElement id={`umid-${umid}`}>{contextActionsElems}</BottomBarElement>
+        ? <BottomBarElement id={`umid-${umid ?? ''}`}>{contextActionsElems}</BottomBarElement>
         : contextActionsElems;
 }
 
