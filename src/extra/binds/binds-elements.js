@@ -1,6 +1,5 @@
 import { createElement as $, useContext, useState, useEffect, useCallback } from 'react'
 import clsx from 'clsx'
-
 import { useBinds, BindKeyData, useProvideBinds, OnPageBindContext } from './key-binding'
 import { KeyBinder } from './key-binder'
 import { firstChild } from './binds-utils'
@@ -8,7 +7,6 @@ import { useFocusControl } from '../focus-control'
 import { TAB_EVENT } from '../focus-module-interface'
 import { useAddEventListener } from '../custom-hooks'
 import { SEL_FOCUS_FRAME, VISIBLE_CHILD_SELECTOR } from '../css-selectors'
-
 
 const GetButtonCaption = (keyData, buttonCaption) => {
 	const getLabel = (label) => {
@@ -27,7 +25,7 @@ const NVL = (data, def) => {
 }
 
 const BindingElement = (props) => {
-	const { children, buttonCaption, bindSrcId, onChange, onClick, prioritized/*, elemType*/ } = props
+	const { children, buttonCaption, bindSrcId, onChange, onClick, prioritized, disabled } = props
 	// const actionElemType = elemType || 'button'
 	const [isValid, setIsValid] = useState(false)
 	const groupContext = useContext(OnPageBindContext)
@@ -37,6 +35,9 @@ const BindingElement = (props) => {
 	const [keyCode, setKeyCode] = useState(null)
 
 	const { focusClass, focusHtml } = useFocusControl(props.path)
+
+	const action = onClick || onChange
+	const isDisabled = disabled || !action
 
 	useEffect(() => {
 		setIsValid(keyCode !== null && (keyCode.startsWith("F") || keyCode === "Enter" || keyCode === "Esc" || groupContext))
@@ -50,7 +51,7 @@ const BindingElement = (props) => {
 		setKeyCode((keyData !== null) ? keyData.keyCode : null)
 	}, [keyData])
 
-	const callBack = () => onChange?.({
+	const callBack = () => !isDisabled && onChange?.({
 		target: {
 			headers: { "x-r-action": "change" },
 			value: "1"
@@ -68,9 +69,16 @@ const BindingElement = (props) => {
 
 	const checkedChildren = NVL(children, [])
 	const drawNormal = !isValid && checkedChildren.length === 0
-	const noAction = !(onClick || onChange)
-	const className = clsx(props.className, focusClass, !drawNormal && 'shortButton', noAction && 'noAction')
-	return $('button', { ref: setElem, className, ...focusHtml, onClick: onClick || onChange }, ...buttonText, ...checkedChildren)
+	const className = clsx(props.className, focusClass, !drawNormal && 'shortButton', isDisabled && 'disabled')
+	return $('button', {
+			ref: setElem,
+			className,
+			...focusHtml,
+			...!isDisabled && { onClick: action }
+		},
+		...buttonText,
+		...checkedChildren
+	)
 }
 
 const BindGroupElement = (props) => {

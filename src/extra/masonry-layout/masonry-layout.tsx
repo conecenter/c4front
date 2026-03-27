@@ -12,6 +12,7 @@ type JSONString = string
 
 const GRID_ROW_SIZE = 10;
 const GRID_MARGIN_SIZE = 10;
+export const MASONRY_BOX_CLASS = "masonryBox";
 
 const receiverIdOf = identityAt('receiver');
 
@@ -63,7 +64,7 @@ function MasonryLayout({ identity, layout, breakpoints, cols, edit, children }: 
         const { clientHeight, scrollHeight } = element;
         if (scrollHeight > clientHeight) {
             const newRowHeight = Math.ceil((scrollHeight + GRID_MARGIN_SIZE) / (GRID_ROW_SIZE + GRID_MARGIN_SIZE));
-            setLocalLayout(updateLocalLayout(itemKey, breakpoint, newRowHeight));
+            setLocalLayout(updateLocalLayout(itemKey, breakpoint, newRowHeight, layoutState));
         }
     }
 
@@ -96,7 +97,7 @@ function MasonryLayout({ identity, layout, breakpoints, cols, edit, children }: 
         <ResponsiveGridLayout
             layouts={localLayout}
             autoSize={true}
-            className={clsx('layout', isDragging && 'isDragging', edit && 'editMode')}
+            className={clsx(MASONRY_BOX_CLASS, isDragging && 'isDragging', edit && 'editMode')}
             breakpoints={breakpoints}
             cols={cols}
             margin={[GRID_MARGIN_SIZE, GRID_MARGIN_SIZE]}
@@ -169,12 +170,12 @@ export function getAlignedLayout(
     return alignedLayout;
 }
 
-const updateLocalLayout = (itemKey: Key, currentBp: string, newRowHeight: number) => (prev: GridLayout.Layouts) => {
+const updateLocalLayout = (itemKey: Key, currentBp: string, newRowHeight: number, layoutState: GridLayout.Layouts) => (prev: GridLayout.Layouts) => {
     const currentLayout = prev[currentBp];
     const currentGridItem = currentLayout?.find((item) => item.i === itemKey);
     if (!currentGridItem || currentGridItem.h === newRowHeight) return prev;
     const updatedLayout = currentLayout.map((item) => item.i === itemKey ? { ...item, h: newRowHeight } : item);
-    return { ...prev, [currentBp]: updatedLayout };
+    return { ...layoutState, [currentBp]: updatedLayout };
 }
 
 export { MasonryLayout };

@@ -1,4 +1,4 @@
-import React, { createElement as $, useEffect, ReactNode, MutableRefObject } from 'react';
+import React, { createElement as $, useState, useEffect, ReactNode, MutableRefObject } from 'react';
 import clsx from 'clsx';
 import { useFocusControl } from './focus-control';
 import { Patch } from './exchange/patch-sync';
@@ -22,12 +22,11 @@ interface ButtonElement {
     forwardRef?: MutableRefObject<HTMLButtonElement | null>
 }
 
-const ButtonElement = (props: ButtonElement) => {
-	const elem = React.useRef<HTMLButtonElement | null>(null)
+const ButtonElement = ({ onClick, onChange, content, ...props}: ButtonElement) => {
+	const [elem, setElem] = useState<HTMLButtonElement | null>(null);
 
 	const changing = !!props.value
-	const disabled = props.disabled || changing
-	const noAction = !(props.onClick || props.onChange)
+	const disabled = props.disabled || !(onClick || onChange)
 
 	const { focusClass, focusHtml } = useFocusControl(props.path)
 
@@ -36,14 +35,14 @@ const ButtonElement = (props: ButtonElement) => {
 	const markerClass = props.marker && `marker-${props.marker}`
 
 	useEffect(() => {
-		if (props.forwardRef) props.forwardRef.current = elem.current
+		if (props.forwardRef) props.forwardRef.current = elem
 	}, [changing])
 
-    const onClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-        if (!disabled && !noAction) {
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        if (!disabled) {
             e.stopPropagation()
-			if (props.onClick) props.onClick(e)
-			else props.onChange?.({ target: { headers: { "x-r-action": "change" }, value: "1" } })
+			if (onClick) onClick(e)
+			else onChange?.({ target: { headers: { "x-r-action": "change" }, value: "1" } })
         }
         if (props.url) {
             e.stopPropagation()
@@ -54,19 +53,19 @@ const ButtonElement = (props: ButtonElement) => {
 
 	const onEnter = (e: CustomEvent) => {
 		e.stopPropagation();
-		elem.current?.click();
+		elem?.click();
 	}
 	useAddEventListener(elem, "enter", onEnter);
 
-	const textContent = props.content && $('span', { className: 'text' }, props.content)
-	const children = props.children !== props.content && props.children
+	const textContent = content && $('span', { className: 'text' }, content)
+	const children = props.children !== content && props.children
 
 	return $(Tooltip, { content: props.hint, children:
 		$("button", {
-			ref: elem, onClick, ...focusHtml, "data-title": props.hint,
-			className: clsx(props.className, focusClass, colorClass, noAction && 'noAction', markerClass),
+			ref: setElem, onClick: handleClick, ...focusHtml, "data-title": props.hint,
+			className: clsx(props.className, focusClass, colorClass, disabled && 'disabled', markerClass),
 			style: {
-				...disabled && { opacity: "0.4", cursor: 'default' },
+				...changing && { opacity: "0.4", cursor: 'default' },
 				...colorStyle
 			}
 		},

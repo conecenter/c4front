@@ -4,6 +4,8 @@ import clsx from 'clsx';
 import { Focusable } from './focus-control';
 import { InputsSizeContext } from "./dom-utils";
 import { VkInfoContext } from './ui-info-provider';
+import { Tooltip } from './tooltip';
+import { clamp } from './utils';
 
 const HEADERS_CHANGE = { headers: { "x-r-action": "change" } };
 
@@ -29,9 +31,6 @@ const validateInput = (inputStr, regexStr, skipInvalidSymbols, upperCase) => {
 }
 
 class InputElementBase extends StatefulComponent {
-    getInitialState() {
-        return { isFocused: false };
-    }
     setFocus(focus) {
         if(!focus) return
         this.inp.focus()
@@ -230,11 +229,6 @@ class InputElementBase extends StatefulComponent {
             this.k = null
         }
         if (this.inp) this.inp.changing = this.props.changing
-        if (this.state.setCursorPosition !== null) {
-            this.inp.selectionStart = this.state.setCursorPosition;
-            this.inp.selectionEnd = this.state.setCursorPosition;
-            this.state.setCursorPosition = null;
-        }
     }
     onChange(e) {
         if (!this.props.onChange) return;
@@ -244,15 +238,7 @@ class InputElementBase extends StatefulComponent {
         if (this.props.uctext) value = value.toUpperCase();
         this.props.onChange({ target: { ...HEADERS_CHANGE, value }, inp: e.inp });
     }
-    onFocus(e) {
-        setTimeout(() => {
-            const correctPos = this.correctCursorPosition();
-            this.setState({ isFocused: true, setCursorPosition: correctPos });
-            this.props.onFocus?.(e);
-        })
-    }
     onBlur() {
-        this.setState({ isFocused: false });
         this.props.onBlur?.({
             target: { ...HEADERS_CHANGE, value: this.inp.value },
             replaceLastPatch: true
@@ -263,25 +249,29 @@ class InputElementBase extends StatefulComponent {
         const readOnly = !this.props.onChange && !this.props.onBlur
         const inpContStyle = readOnly ? {borderColor: "transparent"} : undefined;
         const {focusClass, focusHtml} = this.props.focusProps || {};
-        const className = clsx("inputBox", this.props.className, focusClass);
+        const className = clsx("inputBox", this.props.className, focusClass, this.props.decorators && 'decorated');
         const inputType = !this.props.inputType ? "input" : this.props.inputType
         const name = this.props.typeKey || null
         const content = this.props.content
         const errorChildren = this.getChildrenByClass("sideContent")
         const errors = errorChildren?.length > 0 ? errorChildren : []
         const alignRight = !!this.props.alignRight
-        const value = this.state.isFocused ? this.props.value : this.getDecoratedValue()
+        const { before, after } = this.props.decorators || {};
         return $("div", { style: inpContStyle, ref: (ref) => this.cont = ref, className, ...focusHtml },
             this.props.shadowElement?.(),
             alignRight && errors,
+            before && this.getDecoratedElem(before),
             $(InputsSizeContext.Consumer, null, size => this.props.drawFunc(
                 $(inputType, {
                     key: "input",
                     ref: ref => this.inp = ref,
-                    name, content, size, readOnly,
-                    style: alignRight ? {textAlign: "end"} : undefined,
+                    name, content, readOnly, size,
+                    style: {
+                        ...alignRight && {textAlign: "end"},
+                        ...this.props.decorators && {width: `${clamp((this.props.value ?? '').length + 1.5, 0, 15)}ch`}
+                    },
                     type: this.props.type,
-                    value,
+                    value: this.props.value,
                     rows: this.props.rows,
                     placeholder: this.props.placeholder,
                     ...this.props.uctext && {className: "uppercase"},
@@ -290,9 +280,10 @@ class InputElementBase extends StatefulComponent {
                     "data-type": this.props.dataType,
                     "data-changing": this.props.changing,
                     onChange: this.onChange, onKeyDown: this.onKeyDown,
-                    onBlur: this.onBlur, onFocus: this.onFocus
+                    onBlur: this.onBlur, onFocus: this.props.onFocus
                 }, content))
             ),
+            after && this.getDecoratedElem(after),
             this.props.uploadedFileElement?.(),
             this.props.deleteButtonElement?.(),
             this.props.buttonElement?.(),
@@ -300,23 +291,14 @@ class InputElementBase extends StatefulComponent {
             this.props.popupElement?.()
         );
     }
-    correctCursorPosition() {
-        const {decorators} = this.props;
-        if (!decorators || !this.inp) return null;
-        const {before = ''} = decorators;
-        const beforeLength = before.length;
-        const cursorPosition = this.inp.selectionStart - beforeLength;
-        return Math.max(cursorPosition, 0)
-    }
-    getDecoratedValue() {
-        const { value, decorators } = this.props;
-        if (!decorators) return value;
-        const { before = '', after = '' } = decorators;
-        return `${before}${value}${after}`;
-    }
     getChildrenByClass(cl) {
         if (!Array.isArray(this.props.children)) return
         return this.props.children.filter(c => c.props.className.split(' ').includes(cl))
+    }
+    getDecoratedElem(text) {
+        return $(Tooltip, { content: text, children:
+            $('span', { className: 'decorator', onClick: () => this.inp?.focus() }, text)
+        })
     }
 }
 

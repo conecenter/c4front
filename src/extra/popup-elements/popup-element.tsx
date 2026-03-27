@@ -5,7 +5,7 @@ import { PopupStateContext, PopupDrawerContext, PopupWrapperKeyContext } from '.
 import { usePopupPos } from '../../main/popup';
 import { NoCaptionContext } from '../../main/vdom-hooks';
 import { usePopupState } from './popup-manager';
-import { useAddEventListener } from '../custom-hooks';
+import { useAddEventListener, useLatest } from '../custom-hooks';
 import { isInstanceOfNode } from '../dom-utils';
 import { PopupOverlay } from './popup-overlay';
 import { SEL_FOCUS_FRAME, VISIBLE_CHILD_SELECTOR } from '../css-selectors';
@@ -14,6 +14,7 @@ import { useCloseSync } from './popup-element-sync';
 import { useAreaOverlay } from './use-area-overlay';
 import { useFocusTrap } from '../hooks/use-focus-trap';
 import { useArrowNavigation } from '../hooks/use-arrow-navigation';
+import { focusAuto, FocusRestoreCandidateCtx } from '../focus-announcer';
 
 interface PopupElement {
     identity?: object,
@@ -30,7 +31,7 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
     const popupAncestorKey = useContext(PopupWrapperKeyContext);
     const popupDrawer = useContext(PopupDrawerContext);
 
-    const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
+    const [popupElement, setPopupElement] = useState<HTMLDivElement | null>(null);
 
     const { isOpened, toggle } = usePopupState(popupKey);
 
@@ -60,7 +61,7 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
 
     function closeOnBlur(e: FocusEvent) {
         if (!e.relatedTarget || elementsContainTarget([popupElement, parent], e.relatedTarget)) return;
-        closePopup();
+        queueMicrotask(closePopup); // focus patch is best to go first (focusin)
 	}
     useAddEventListener(popupElement?.ownerDocument, 'focusout', closeOnBlur);
 
@@ -73,35 +74,31 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
         }, [popupElement]
     );
 
-    function moveFocusToParent() {
-        if (popupElement && elementHasFocus(popupElement)) {
-            // run focus() after React operations finished to avoid triggering events/effects with stale state
-            setTimeout(() => findFocusableAncestor(parent)?.focus());
-        }
-    }
-
-    useLayoutEffect(() => moveFocusToParent, [popupElement]);
-
     function closeOnEsc(e: React.KeyboardEvent) {
         if (e.key === "Escape") {
             e.stopPropagation();
-            moveFocusToParent();
+            findFocusableAncestor(parent)?.focus();
             closePopup();
         }
     }
 
     useEffect(
-        function moveFocusIfModal() {
-            if (isModalMode && popupElement && popupStyle.visibility !== "hidden") {
+        function focusOnOpen() {
+            if (popupElement && popupStyle.visibility !== "hidden") {
                 const activeElem = popupElement.ownerDocument.activeElement;
                 if (!popupElement.contains(activeElem)) {
-                    const focusTo = popupElement.querySelector<HTMLElement>('input, button');
-                    (focusTo || popupElement).focus();
+                    const SEL_INTERACTIVE = `:is(button:not(.disabled), .chipItem:not(.noAction), .checkBox)${SEL_FOCUS_FRAME}`;
+                    const focusTo = popupElement.querySelector<HTMLElement>('input')
+                        || popupElement.querySelector<HTMLElement>(SEL_INTERACTIVE)
+                        || (isModalMode ? popupElement.querySelector<HTMLElement>(SEL_FOCUS_FRAME) || popupElement : null);
+                    focusAuto(focusTo);
                 }
             }
         },
         [isModalMode, popupElement, popupStyle.visibility]
     );
+
+    useFocusRestoration(popupElement, parent);
 
     useFocusTrap(popupElement);
     useArrowNavigation(popupElement, !isModalMode);
@@ -112,7 +109,6 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
                 className={clsx('popupEl', focusClass, className)}
                 style={popupStyle}
                 onClick={(e) => e.stopPropagation()}
-                onPointerMove={suppressHoverIntents}
                 onKeyDown={closeOnEsc}
                 {...focusHtml}
                 tabIndex={-1}
@@ -137,6 +133,14 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
     );
 }
 
+function useFocusRestoration(popupElement: HTMLElement | null, parent: HTMLElement | null) {
+    const registerFocusCandidate = useContext(FocusRestoreCandidateCtx);
+    const restoreFocusToParent = useLatest(() => registerFocusCandidate(findFocusableAncestor(parent)));
+    useLayoutEffect(() => () => {
+        if (popupElement && elementHasFocus(popupElement)) restoreFocusToParent.current();
+    }, [popupElement]);
+}
+
 function elementsContainTarget(elems: (HTMLElement | null)[], target: EventTarget | null) {
     if (!isInstanceOfNode(target)) return;
     for (const elem of elems) {
@@ -152,13 +156,6 @@ function elementHasFocus(element?: HTMLElement | null) {
 
 function findFocusableAncestor(elem?: HTMLElement | null) {
     return elem?.closest<HTMLElement>(SEL_FOCUS_FRAME) || null;
-}
-
-// Prevents parent hover affordances (e.g. tooltips) while popup is active
-function suppressHoverIntents(e: React.PointerEvent) {
-    if (e.pointerType === "mouse" && e.buttons === 0) {
-        e.preventDefault();
-    }
 }
 
 export { PopupElement, elementsContainTarget }

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 const ENTER_EVENT = 'enter';
 const DELETE_EVENT = 'delete';
@@ -27,25 +27,32 @@ type KeyboardEventNames = 'enter' | 'delete' | 'backspace' | 'cpaste' | 'ccopy' 
 
 type CustomEventHandler = (e: CustomEvent) => void
 
+/**
+ * @unsafe
+ * If element is a ref, changes to ref.current won't re-trigger the effect.
+ * Do not pass ref.current directly.
+ * Unsafe if ref setting is delayed by conditional render or wrapper like Tooltip.
+ */
 function useExternalKeyboardControls(
-	element: HTMLElement | null,
+	element: React.RefObject<HTMLElement | null> | HTMLElement | null,
 	keyboardEventHandlers: KeyboardEventHandlers,
 	options?: { capture?: boolean }
 ) {
 	const savedHandlers = useRef(keyboardEventHandlers);
-	
+
     useEffect(() => {
 		savedHandlers.current = keyboardEventHandlers;
 	}, [keyboardEventHandlers]);
 
 	useEffect(() => {
-		if (!element) return;
+		const targetEl = element && 'current' in element ? element.current : element;
+		if (!targetEl) return;
 		const cEventNames = Object.keys(savedHandlers.current) as KeyboardEventNames[];
 		cEventNames.forEach(event => {
-			element.addEventListener(event, (e) => savedHandlers.current[event](e), options?.capture)
+			targetEl.addEventListener(event, (e) => savedHandlers.current[event](e), options?.capture)
 		});
 		return () => cEventNames.forEach(event => {
-			element.removeEventListener(event, (e) => savedHandlers.current[event](e), options?.capture)
+			targetEl.removeEventListener(event, (e) => savedHandlers.current[event](e), options?.capture)
 		});
 	}, [element]);
 }

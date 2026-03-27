@@ -15,7 +15,7 @@ interface SegmentedChipProps {
     keyboardAction?: boolean,
     compact?: boolean,
     drawAsRoute?: boolean,
-    routeParts: ReactElement[],  // ChipElements
+    routeParts?: ReactElement[],  // ChipElements
     extraParts?: ReactElement[]
 }
 
@@ -55,7 +55,7 @@ function SegmentedChip({identity, keyboardAction, compact, drawAsRoute, routePar
 
     function copyRouteToClipboard(e: CustomEvent) {
         e.stopPropagation();
-        const allParts = [...routeParts, ...(extraParts ?? [])];
+        const allParts = [...(routeParts ?? []), ...(extraParts ?? [])];
         const wholeCode = allParts.reduce((accum, elem) => accum + (elem.props?.text ?? ''), '');
 		copyToClipboard(wholeCode);
 	}
@@ -64,8 +64,8 @@ function SegmentedChip({identity, keyboardAction, compact, drawAsRoute, routePar
         if (!readOnly) sendPatch({value: e.detail.key, headers: {'x-r-input': '1'}});
     }
 
-	useExternalKeyboardControls(routeElemRef.current, customEventHandlers);
-    useAddEventListener(routeElemRef.current, DELETE_EVENT, sendKeyToServer, true);
+	useExternalKeyboardControls(routeElemRef, customEventHandlers);
+    useAddEventListener(routeElemRef, DELETE_EVENT, sendKeyToServer, true);
 
     return (
         <div ref={routeElemRef}

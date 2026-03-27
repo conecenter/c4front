@@ -1,13 +1,11 @@
-import React, { useRef, ReactNode, useEffect, useState } from 'react';
-import { Patch } from './exchange/patch-sync';
+import React, { useRef, ReactNode, useEffect, useState, useCallback, createContext, useReducer, useMemo } from 'react';
+import { PatchSyncTransformers, usePatchSync } from './exchange/patch-sync';
 import { useAddEventListener, useIsMounted } from './custom-hooks';
 import { SEL_FOCUS_FRAME, VISIBLE_CHILD_SELECTOR, FOCUS_BLOCKER_CLASS } from './css-selectors';
-
-const PathContext = React.createContext("path");
-PathContext.displayName = "PathContext";
+import { identityAt } from '../main/vdom-util';
 
 /*
-- Focus change cases:
+    Focus change cases:
     1) to element with ancestor having 'data-path'
         -- focus REPORT NEW PATH
     2) to element without ancestor having 'data-path' - FocusAnnouncerElement wraps UI
@@ -19,39 +17,74 @@ PathContext.displayName = "PathContext";
        - focus goes from iframe to top window
        - focus goes to browser tools
         -- blur: to == null, from exists -- do nothing
+
+    Global autoFocusFlag because focus events fire synchronously.
+    We keep the flag true for the entire event-loop turn so every focus event caused by this programmatic focus
+    (including chained or delegated ones) is treated as local restoration, not user intent.
 */
+
+let autoFocusFlag = false;
+
+function focusAuto(elem?: HTMLElement | null) {
+    if (!elem) return;
+    autoFocusFlag = true;
+    elem.focus();
+    queueMicrotask(() => { autoFocusFlag = false });
+}
 
 const getFocusFramePath = (elem?: Element | null) => elem?.closest<HTMLElement>(SEL_FOCUS_FRAME)?.dataset.path;
 
+const PathContext = createContext("path");
+PathContext.displayName = "PathContext";
+
+const FocusRestoreCandidateCtx = createContext<(node: HTMLElement | null) => void>(() => undefined);
+FocusRestoreCandidateCtx.displayName = "FocusRestoreCandidateCtx";
+
+const receiverIdOf = identityAt('receiver');
+
+const patchSyncTransformers: PatchSyncTransformers<string, string, string> = {
+    serverToState: s => s,
+    changeToPatch: (ch) => ({ headers: {"x-r-action": "change"}, value: ch }),
+    patchToChange: (p) => p.value,
+    applyChange: (_prev, ch) => ch
+};
+
 interface FocusAnnouncerElement {
+    identity: object,
     path: string,
     value: string,
-    onChange: (change: FocusChange) => void,
     children: ReactNode
 }
 
-interface FocusChange {
-    target: Patch
-}
-
-function FocusAnnouncerElement({ path: thisPath, value, onChange, children }: FocusAnnouncerElement) {
+function FocusAnnouncerElement({ identity, path: thisPath, value: serverValue, children }: FocusAnnouncerElement) {
     const [doc, setDoc] = useState<Document | undefined>(undefined);
+    const setupDoc = useCallback((elem: HTMLDivElement) => setDoc(elem?.ownerDocument), []);
+
+    const { currentState, sendFinalChange } =
+        usePatchSync(receiverIdOf(identity), serverValue, false, patchSyncTransformers);
+
+    const { localFocusRef, setLocalFocus } = useLocalFocus(currentState);
+
+    const value = localFocusRef.current ?? currentState;
 
     const sendChange = (path: string) => {
-        if (path !== value) onChange({ target: { headers: { "x-r-action": "change" }, value: path } });
+        if (path !== value) {
+            const setFocus = autoFocusFlag ? setLocalFocus : sendFinalChange;
+            setFocus(path);
+        }
     }
 
-    function focusElementOrBackup(elem: HTMLElement | null | undefined) {
-        const focusTo = elem || findAutofocusCandidate(doc);
-        if (focusTo) focusTo.focus();
-        else sendChange('');
-    }
+    const focusBackupElement = useCallback(() => {
+        const backupElement = findAutofocusCandidate(doc);
+        if (backupElement) focusAuto(backupElement);
+        else setLocalFocus('');
+    }, [doc, setLocalFocus]);
 
-    useReportPathOnFocus(doc, thisPath, sendChange);
+    useReportPathOnFocus(doc, thisPath, sendChange, localFocusRef);
 
-    usePreventFocusLoss(doc, focusElementOrBackup);
+    const registerFocusCandidate = usePreventFocusLoss(doc, value, focusBackupElement);
 
-    useAlignFocusWithServerValue(doc, value, focusElementOrBackup);
+    useAlignFocusWithServerValue(doc, value, focusBackupElement);
 
     const focusFrameStyle = `
         .focusWrapper[data-path='${value}'],
@@ -62,14 +95,16 @@ function FocusAnnouncerElement({ path: thisPath, value, onChange, children }: Fo
 
     return (
         <div
-            ref={elem => setDoc(elem?.ownerDocument)}
+            ref={setupDoc}
             className='focusAnnouncer'
             tabIndex={-1}
             data-path={thisPath}
         >
             <style>{focusFrameStyle}</style>
             <PathContext.Provider value={value}>
-                {children}
+                <FocusRestoreCandidateCtx.Provider value={registerFocusCandidate}>
+                    {children}
+                </FocusRestoreCandidateCtx.Provider>
             </PathContext.Provider>
         </div>
     );
@@ -85,37 +120,70 @@ function useIsFocusedView(doc: Document | undefined) {
     return isFocusedViewRef;
 }
 
+function useLocalFocus(currentState: string) {
+    const localFocusRef = useRef<string | null>(null);
+    const [, rerender] = useReducer(x => x + 1, 0);
+
+    const setLocalFocus = useCallback((path: string | null) => {
+        if (localFocusRef.current !== path) {
+            localFocusRef.current = path;
+            rerender();
+        }
+    }, []);
+    useMemo(() => { localFocusRef.current = null }, [currentState]);
+    return { localFocusRef, setLocalFocus };
+}
+
 function usePreventFocusLoss(
     doc: Document | undefined,
-    focusElementOrBackup: (elem: HTMLElement | null | undefined) => void
+    focusPath: string,
+    focusBackupElement: () => void
 ) {
     const isMountedRef = useIsMounted();
+    const focusCandidateRef = useRef<HTMLElement | null>(null);
+
+    useMemo(() => { focusCandidateRef.current = null }, [focusPath]);
+
+    const registerFocusCandidate = useCallback((node: HTMLElement | null) => {
+        focusCandidateRef.current = node;
+    }, []);
 
     function onBlur(e: FocusEvent) {
-        if (e.relatedTarget === null) preventFocusLoss(e.target as HTMLElement | null);
-    }
-    function preventFocusLoss(target: HTMLElement | null) {
-        if (isNavTransition()) return;
+        if (e.relatedTarget !== null || isNavTransition()) return;
+        const target = e.target as HTMLElement | null;
         const focusableAncestors = getFocusableAncestors(target);
-        setTimeout(() => {  // without setTimeout target still exists in doc
-            // hasNoFocusedElement gives other routines (e.g. popup) chance to do its own focus loss prevention
-            const isFocusLost = doc && !doc.contains(target) && hasNoFocusedElement(doc);
-            if (isFocusLost && isMountedRef.current) {
-                const aliveFocusableAncestor = focusableAncestors.find((elem) => doc?.contains(elem));
-                focusElementOrBackup(aliveFocusableAncestor);
+        queueMicrotask(() => {  // microtask to let react finish commit and remove DOM node
+            if (shouldRestoreFocus(doc, target, focusPath) && isMountedRef.current) {
+                const focusTo = focusCandidateRef.current || focusableAncestors.find((elem) => elem.isConnected);
+                if (focusTo) focusAuto(focusTo);
+                else focusBackupElement();
             }
         });
     }
     useAddEventListener(doc, 'focusout', onBlur);
+
+    return registerFocusCandidate;
+}
+
+function shouldRestoreFocus(doc: Document | undefined, target: HTMLElement | null, focusPath: string) {
+    const hasNoFocusedElement = () => doc?.activeElement?.tagName === 'BODY';
+    const hasValidPendingFocus = () => Boolean(doc?.querySelector<HTMLElement>(`[data-path='${focusPath}']`));
+    if (!doc?.hasFocus()) return false;
+    if (target?.isConnected) return false;
+    if (!hasNoFocusedElement()) return false;
+    if (hasValidPendingFocus()) return false;
+    return true;
 }
 
 function useReportPathOnFocus(
     doc: Document | undefined,
     thisPath: string,
-    sendChange: (path: string) => void
+    sendChange: (path: string) => void,
+    localFocusRef: React.MutableRefObject<string | null>
 ) {
     function onFocus(e: FocusEvent) {
         const newPath = getFocusFramePath(e.target as Element) || thisPath;
+        localFocusRef.current = null;
         if (newPath) sendChange(newPath);
     }
     useAddEventListener(doc, 'focusin', onFocus, true);
@@ -124,17 +192,18 @@ function useReportPathOnFocus(
 function useAlignFocusWithServerValue(
     doc: Document | undefined,
     value: string,
-    focusElementOrBackup: (elem: HTMLElement | null | undefined) => void
+    focusBackupElement: () => void
 ) {
     const isFocusedViewRef = useIsFocusedView(doc);
+    // effect should have no deps due to gradual render of most views
     useEffect(() => {
         if (!isFocusedViewRef.current || isNavTransition()) return;
-        if (!value) return findAutofocusCandidate(doc)?.focus();
-        const activeElem = doc?.activeElement;
-        const activeElemPath = getFocusFramePath(activeElem);
+        if (!value) return focusBackupElement();
+        const activeElemPath = getFocusFramePath(doc?.activeElement);
         if (activeElemPath !== value) {
             const elemToFocus = doc?.querySelector<HTMLElement>(`[data-path='${value}']${VISIBLE_CHILD_SELECTOR}`);
-            focusElementOrBackup(elemToFocus);
+            if (elemToFocus) elemToFocus.focus();
+            else focusBackupElement();
         }
     });
 }
@@ -160,10 +229,6 @@ function findFirstElementInViewport(doc: Document | undefined, selector: string)
         });
 }
 
-function hasNoFocusedElement(doc: Document) {
-    return !doc.activeElement || doc.activeElement.tagName === 'BODY';
-}
-
 function getFocusableAncestors(elem: HTMLElement | null) {
     let currentElem = elem;
     const focusableAncestors = [];
@@ -181,4 +246,4 @@ function isNavTransition() {
     return Boolean(history.state?.navTransition);
 }
 
-export { FocusAnnouncerElement, PathContext }
+export { FocusAnnouncerElement, PathContext, FocusRestoreCandidateCtx, focusAuto }

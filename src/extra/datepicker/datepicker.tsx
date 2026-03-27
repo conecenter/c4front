@@ -61,6 +61,7 @@ interface DatePickerProps {
 	timestampFormatId: number
 	userTimezoneId?: string
 	deferredSend?: boolean,
+	placeHolder?: string,
 	path: string,
 	children?: ReactNode[]
 }
@@ -73,6 +74,7 @@ export function DatePickerInputElement({
 		timestampFormatId,
 		userTimezoneId,
 		deferredSend,
+		placeHolder,
 		path,
 		children
 }: DatePickerProps) {
@@ -195,7 +197,7 @@ export function DatePickerInputElement({
 		memoInputValue.current = inputVal;
 	}
 
-	useExternalKeyboardControls(inputRef.current, keyboardEventHandlers);
+	useExternalKeyboardControls(inputRef, keyboardEventHandlers);
 
 	const setSelection: (from: number, to: number) => void = useSelectionEditableInput(inputRef)
 	const onTimestampChange: (timestamp: number) => void = onTimestampChangeAction(currentState, dateSettings, sendTempChange)
@@ -233,6 +235,7 @@ export function DatePickerInputElement({
 				onKeyDown={onKeyDown}
 				onBlur={onInputBlur}
 				inputMode={haveVk ? 'none' : undefined}
+				placeholder={placeHolder}
 			/>
 
 			<button

@@ -16,7 +16,11 @@ const fetcher = async (url) => {
 
 const SVGElement = ({ url, color = ADAPTIVE_COLOR, ...props }) => {
     const toDecode = isDataUrl(url)
-    const { data: fetched } = useSWR(toDecode ? null : url, fetcher)
+    const { data: fetched, error } = useSWR(toDecode ? null : url, fetcher)
+    if (error) {
+        console.warn(`SVG load failed: ${url}`, error);
+        return <svg className={props.className} style={props.style} />;
+    }
     const decodedContent = fetched || toDecode && decodeBase64String(url.replace(/data:.+?,/, ""));
     if (!decodedContent) return null;
     const viewBox = getViewBox(decodedContent)

@@ -1,4 +1,4 @@
-import React, { createElement as $ } from 'react'
+import { createElement as $, useState } from 'react'
 import clsx from 'clsx'
 import { useFocusControl } from './focus-control'
 import { useExternalKeyboardControls } from './focus-module-interface'
@@ -16,15 +16,15 @@ const CheckboxElement = (props) => {
         e.nativeEvent?.stopImmediatePropagation()
     }
 
-    const checkBoxRef = React.useRef(null)
+    const [checkboxElem, setCheckboxElem] = useState(null)
     const onKeyboardAction = e => {
-        if(e.detail) onClick(e)
+        if (e.detail) onClick(e)
     }
     const keyboardEventHandlers = {
 		enter: onKeyboardAction,
 		delete: onKeyboardAction,
 	};
-    useExternalKeyboardControls(checkBoxRef.current, keyboardEventHandlers)
+    useExternalKeyboardControls(checkboxElem, keyboardEventHandlers)
 
     const readOnly = !(props.onChange || props.onBlur);
 
@@ -35,7 +35,7 @@ const CheckboxElement = (props) => {
 
     const {focusClass, focusHtml} = useFocusControl(props.path);
 
-    return $("div", {ref: checkBoxRef, className: clsx("checkBox", focusClass), ...focusHtml},
+    return $("div", {ref: setCheckboxElem, className: clsx("checkBox", focusClass), ...focusHtml},
         $(Tooltip, { content: props.tooltip },
             $("div", {
                 ...props.changing && { style: { opacity: "0.4" }},

@@ -161,7 +161,7 @@ function TimePicker({identity, state, offset, timestampFormatId, readonly, child
 		[CUT_EVENT]: handleClipboardWrite
 	};
 
-	useExternalKeyboardControls(!readonly ? inputRef.current : null, keyboardEventHandlers);
+	useExternalKeyboardControls(!readonly ? inputRef : null, keyboardEventHandlers);
 
     return (
         <div ref={inputBoxRef}

@@ -2,7 +2,12 @@ import { Children, ReactNode, isValidElement, useEffect, useLayoutEffect, useRef
 import { FlexibleSizes } from "./view-builder/flexible-api";
 import { flexibleComponents } from "./view-builder/flexible-elements";
 
-// if element is ref object and changes during component lifecycle, it will not be updated in effect
+/**
+ * @unsafe Prefer `useDomListener` instead.
+ * If element is a ref, changes to ref.current won't re-trigger the effect.
+ * Do not pass ref.current directly.
+ * Unsafe if ref setting is delayed by conditional render or wrapper like Tooltip.
+ */
 function useAddEventListener<T extends Event>(
     element: React.RefObject<EventTarget | null> | EventTarget | null | undefined,
     eventName: string,
@@ -28,6 +33,31 @@ const useLatest = <T>(current: T) => {
         storedValue.current = current;
     });
     return storedValue;
+}
+
+/**
+ * Returns the value from the previous render.
+ * On first render returns `undefined`.
+ */
+export function usePrevious<T>(value: T): T | undefined;
+export function usePrevious<T>(value: T, initial: T): T;
+export function usePrevious<T>(value: T, initial?: T) {
+    const ref = useRef<T | undefined>(initial);
+    useEffect(() => {
+        ref.current = value;
+    }, [value]);
+    return ref.current;
+}
+
+export function useChange<T>(
+    value: T,
+    onChange: (current: T, prev: T) => void
+) {
+    const storedOnChange = useLatest(onChange);
+    const prevValue = usePrevious(value, value);
+    useEffect(() => {
+        if (value !== prevValue) storedOnChange.current(value, prevValue)
+    }, [value, prevValue, storedOnChange]);
 }
 
 function useInterval(callback: () => void, delay: number | null) {
