@@ -1,8 +1,9 @@
 import {CSSProperties} from "react";
 
 export interface FlexibleSizes {
-  min: number,
-  max?: number
+  min?: number,
+  max?: number,
+  basis?: number
 }
 
 

@@ -15,6 +15,12 @@ import {
 import clsx from "clsx";
 import { NoCaptionContext } from '../../main/vdom-hooks';
 
+const getCssFromSizes = (sizes?: FlexibleSizes) => sizes && {
+  ...(typeof sizes.min === 'number') && { minWidth: `${sizes.min}em` },
+  ...(typeof sizes.max === 'number') && { maxWidth: `${sizes.max}em` },
+  ...(typeof sizes.basis === 'number') && { flexBasis: `${sizes.basis}em` }
+}
+
 interface FlexibleColumnRoot {
   key: string,
   children: ReactNode[]
@@ -43,10 +49,7 @@ function FlexibleColumn({sizes, className, align, children}: FlexibleColumn) {
     className: clsx(FLEXIBLE_COLUMN_CLASSNAME, className),
     style: {
       ...anchored && { flexGrow: 0 },
-      ...sizes && {
-        minWidth: `${sizes.min}em`,
-        maxWidth: sizes.max ? `${sizes.max}em` : undefined
-      }
+      ...getCssFromSizes(sizes)
     }
   }, children)
 }
@@ -145,10 +148,7 @@ function FlexibleRow({sizes, className, align, children}: FlexibleRow) {
     className: clsx(FLEXIBLE_ROW_CLASSNAME, className, !sizes?.max && UNBOUNDED_CLASSNAME),
     style: {
       ...anchored && { flexGrow: 0 },
-      ...sizes && {
-        minWidth: `${sizes.min}em`,
-        maxWidth: sizes.max ? `${sizes.max}em` : undefined
-      }
+      ...getCssFromSizes(sizes)
     }
   }
   const separated = separateChildren(children).map((list, ind) => wrapInRow(`row-${ind}`, props, list)) 
@@ -178,10 +178,7 @@ function FlexibleCell({align, sizes, className, children}: FlexibleCell) {
     className: clsx(FLEXIBLE_CELL_CLASSNAME, className, !sizes?.max && UNBOUNDED_CLASSNAME),
     style: {
       ...anchored && { flexGrow: 0 },
-      ...sizes && {
-        minWidth: `${sizes.min}em`,
-        ...hasMaxSize && { maxWidth: `${sizes.max}em` }
-      }
+      ...getCssFromSizes(sizes)
     }
   }, children)
 }
