@@ -10,6 +10,12 @@ import ee.cone.c4vdom._
   def max: Option[Em]
 }
 
+@c4tagSwitch("FrontApp") trait FlexSize extends ToJson {
+  def min: Option[Em]
+  def max: Option[Em]
+  def basis: Option[Em]
+}
+
 @c4tagSwitch("FrontApp") trait Align extends ToJson
 
 @c4tagSwitch("FrontApp") trait GroupboxDisplay extends ToJson
@@ -24,6 +30,12 @@ trait UIElement extends ToChildPair
     max: Option[Em],
   ): Size
 
+  @c4val def flexSize(
+    min: Option[Em],
+    max: Option[Em],
+    basis: Option[Em] = None,
+  ): FlexSize
+
   @c4val("l") def left: Align
   @c4val("c") def center: Align
   @c4val("r") def right: Align
@@ -36,7 +48,7 @@ trait UIElement extends ToChildPair
 
   @c4el("FlexibleColumn") def column(
     key: String,
-    sizes: Option[Size] = None,
+    sizes: Option[FlexSize] = None,
     align: Option[Align] = None,
     children: ViewRes,
     className: Option[String] = None,
@@ -64,7 +76,7 @@ trait UIElement extends ToChildPair
 
   @c4el("FlexibleRow") def row(
     key: String,
-    sizes: Option[Size] = None,
+    sizes: Option[FlexSize] = None,
     align: Option[Align] = None,
     children: ViewRes,
     className: Option[String] = None,
@@ -72,7 +84,7 @@ trait UIElement extends ToChildPair
 
   @c4el("ThinFlexibleRow") def thinRow(
     key: String,
-    sizes: Option[Size] = None,
+    sizes: Option[FlexSize] = None,
     align: Option[Align] = None,
     children: ViewRes,
     className: Option[String] = None,
@@ -84,7 +96,7 @@ trait UIElement extends ToChildPair
 
   @c4el("FlexibleCell") def cell(
     key: String,
-    sizes: Option[Size] = None,
+    sizes: Option[FlexSize] = None,
     align: Option[Align] = None,
     children: ViewRes,
     className: Option[String] = None,
