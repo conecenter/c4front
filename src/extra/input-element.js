@@ -288,7 +288,7 @@ class InputElementBase extends StatefulComponent {
             this.props.deleteButtonElement?.(),
             this.props.buttonElement?.(),
             !alignRight && errors,
-            this.props.popupElement?.()
+            this.props.popupElement
         );
     }
     getChildrenByClass(cl) {
@@ -308,7 +308,7 @@ InputElementBase.contextType = VkInfoContext;
 
 const InputElement = (props) =>
         $(Focusable, {path: props.path}, focusProps =>
-            $(InputElementBase, { ...props, ref: props._ref, focusProps }))
+            $(InputElementBase, { ...props, focusProps }))
 
 
 export { InputElement, InputElementBase }
