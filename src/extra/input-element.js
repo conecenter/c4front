@@ -6,6 +6,7 @@ import { InputsSizeContext } from "./dom-utils";
 import { VkInfoContext } from './ui-info-provider';
 import { Tooltip } from './tooltip';
 import { clamp } from './utils';
+import { SEL_FOCUS_FRAME } from './css-selectors';
 
 const HEADERS_CHANGE = { headers: { "x-r-action": "change" } };
 
@@ -43,7 +44,7 @@ class InputElementBase extends StatefulComponent {
                 if (this.prevval != undefined && this.inp.value !== this.prevval) {
                     this.onChange?.({ target: { value: this.prevval } });
                 }
-                this.cont.focus();
+                this.inp?.closest(SEL_FOCUS_FRAME)?.focus();
                 e.stopPropagation();
                 break;
             case "Enter":
@@ -86,7 +87,7 @@ class InputElementBase extends StatefulComponent {
             else if (!this.props.lockedFocus) {
                 cEvent = new window.CustomEvent("cTab", { bubbles: true })
             }
-            cEvent && this.cont.dispatchEvent(cEvent)
+            cEvent && this.inp.dispatchEvent(cEvent)
         }
         event.stopPropagation()
     }
@@ -257,7 +258,7 @@ class InputElementBase extends StatefulComponent {
         const errors = errorChildren?.length > 0 ? errorChildren : []
         const alignRight = !!this.props.alignRight
         const { before, after } = this.props.decorators || {};
-        return $("div", { style: inpContStyle, ref: (ref) => this.cont = ref, className, ...focusHtml },
+        return $("div", { style: inpContStyle, className, ...focusHtml },
             this.props.shadowElement?.(),
             alignRight && errors,
             before && this.getDecoratedElem(before),
