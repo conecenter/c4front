@@ -251,13 +251,10 @@ class InputElementBase extends StatefulComponent {
         const inputType = !this.props.inputType ? "input" : this.props.inputType
         const name = this.props.typeKey || null
         const content = this.props.content
-        const errorChildren = this.getChildrenByClass("sideContent")
-        const errors = errorChildren?.length > 0 ? errorChildren : []
         const alignRight = !!this.props.alignRight
         const { before, after } = this.props.decorators || {};
         return $(React.Fragment, null,
             this.props.shadowElement?.(),
-            alignRight && errors,
             before && this.getDecoratedElem(before),
             $(InputsSizeContext.Consumer, null, size => this.props.drawFunc(
                 $(inputType, {
@@ -284,13 +281,8 @@ class InputElementBase extends StatefulComponent {
             after && this.getDecoratedElem(after),
             this.props.uploadedFileElement?.(),
             this.props.deleteButtonElement?.(),
-            this.props.buttonElement?.(),
-            !alignRight && errors
+            this.props.buttonElement?.()
         );
-    }
-    getChildrenByClass(cl) {
-        if (!Array.isArray(this.props.children)) return
-        return this.props.children.filter(c => c.props.className.split(' ').includes(cl))
     }
     getDecoratedElem(text) {
         return $(Tooltip, { content: text, children:
@@ -302,16 +294,30 @@ class InputElementBase extends StatefulComponent {
 InputElementBase.defaultProps = { drawFunc: _ => _, rows: "2", type: "text", placeholder: "" };
 InputElementBase.contextType = VkInfoContext;
 
-function InputWrapper({ className: classProp, path, readOnly, children }) {
+function InputWrapper({ className, path, readOnly, alignRight, content, children }) {
     const { focusClass, focusHtml } = useFocusControl(path);
-    const className = clsx("inputBox", focusClass, classProp);
+    const classes = clsx("inputBox", focusClass, className);
     const style = readOnly ? { borderColor: "transparent" } : undefined;
-    return $("div", { style, className, ...focusHtml }, children);
+
+    const sideContent = Array.isArray(content)
+        ? content.filter(c => c.props.className.split(' ').includes("sideContent"))
+        : null;
+
+    return $("div", { style, className: classes, ...focusHtml },
+        alignRight && sideContent,
+        children,
+        !alignRight && sideContent
+    );
 }
 
-const InputElement = ({ className, path, ...props}) => {
-    const readOnly = !props.onChange && !props.onBlur;
-    return $(InputWrapper, { readOnly, path, className: clsx(className, props.decorators && 'decorated') },
+const InputElement = ({ className, path, children, ...props}) => {
+    return $(InputWrapper, {
+        className: clsx(className, props.decorators && 'decorated'),
+        path,
+        readOnly: !props.onChange && !props.onBlur,
+        alignRight: props.alignRight,
+        content: children
+    },
         $(InputElementBase, props)
     );
 }
