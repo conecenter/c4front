@@ -256,7 +256,7 @@ class InputElementBase extends StatefulComponent {
         return $(React.Fragment, null,
             this.props.shadowElement?.(),
             before && this.getDecoratedElem(before),
-            $(InputsSizeContext.Consumer, null, size => this.props.drawFunc(
+            $(InputsSizeContext.Consumer, null, size =>
                 $(inputType, {
                     key: "input",
                     ref: ref => this.inp = ref,
@@ -276,7 +276,7 @@ class InputElementBase extends StatefulComponent {
                     "data-changing": this.props.changing,
                     onChange: this.onChange, onKeyDown: this.onKeyDown,
                     onBlur: this.onBlur, onFocus: this.props.onFocus
-                }, content))
+                }, content)
             ),
             after && this.getDecoratedElem(after),
             this.props.uploadedFileElement?.(),
@@ -291,7 +291,7 @@ class InputElementBase extends StatefulComponent {
     }
 }
 
-InputElementBase.defaultProps = { drawFunc: _ => _, rows: "2", type: "text", placeholder: "" };
+InputElementBase.defaultProps = { rows: "2", type: "text", placeholder: "" };
 InputElementBase.contextType = VkInfoContext;
 
 function InputWrapper({ className, path, readOnly, alignRight, content, children }) {
