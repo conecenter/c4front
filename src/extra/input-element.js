@@ -285,8 +285,7 @@ class InputElementBase extends StatefulComponent {
             this.props.uploadedFileElement?.(),
             this.props.deleteButtonElement?.(),
             this.props.buttonElement?.(),
-            !alignRight && errors,
-            this.props.popupElement
+            !alignRight && errors
         );
     }
     getChildrenByClass(cl) {
@@ -317,5 +316,4 @@ const InputElement = ({ className, path, ...props}) => {
     );
 }
 
-
-export { InputElement, InputElementBase }
+export { InputElement, InputElementBase, InputWrapper }
