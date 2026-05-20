@@ -1,7 +1,7 @@
 import React, { createElement as $ } from 'react';
 import autoBind from 'react-autobind';
 import clsx from 'clsx';
-import { Focusable } from './focus-control';
+import { useFocusControl } from './focus-control';
 import { InputsSizeContext } from "./dom-utils";
 import { VkInfoContext } from './ui-info-provider';
 import { Tooltip } from './tooltip';
@@ -248,9 +248,6 @@ class InputElementBase extends StatefulComponent {
     }
     render() {
         const readOnly = !this.props.onChange && !this.props.onBlur
-        const inpContStyle = readOnly ? {borderColor: "transparent"} : undefined;
-        const {focusClass, focusHtml} = this.props.focusProps || {};
-        const className = clsx("inputBox", this.props.className, focusClass, this.props.decorators && 'decorated');
         const inputType = !this.props.inputType ? "input" : this.props.inputType
         const name = this.props.typeKey || null
         const content = this.props.content
@@ -258,7 +255,7 @@ class InputElementBase extends StatefulComponent {
         const errors = errorChildren?.length > 0 ? errorChildren : []
         const alignRight = !!this.props.alignRight
         const { before, after } = this.props.decorators || {};
-        return $("div", { style: inpContStyle, className, ...focusHtml },
+        return $(React.Fragment, null,
             this.props.shadowElement?.(),
             alignRight && errors,
             before && this.getDecoratedElem(before),
@@ -306,10 +303,19 @@ class InputElementBase extends StatefulComponent {
 InputElementBase.defaultProps = { drawFunc: _ => _, rows: "2", type: "text", placeholder: "" };
 InputElementBase.contextType = VkInfoContext;
 
+function InputWrapper({ className: classProp, path, readOnly, children }) {
+    const { focusClass, focusHtml } = useFocusControl(path);
+    const className = clsx("inputBox", focusClass, classProp);
+    const style = readOnly ? { borderColor: "transparent" } : undefined;
+    return $("div", { style, className, ...focusHtml }, children);
+}
 
-const InputElement = (props) =>
-        $(Focusable, {path: props.path}, focusProps =>
-            $(InputElementBase, { ...props, focusProps }))
+const InputElement = ({ className, path, ...props}) => {
+    const readOnly = !props.onChange && !props.onBlur;
+    return $(InputWrapper, { readOnly, path, className: clsx(className, props.decorators && 'decorated') },
+        $(InputElementBase, props)
+    );
+}
 
 
 export { InputElement, InputElementBase }
