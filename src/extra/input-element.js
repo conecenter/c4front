@@ -254,7 +254,6 @@ class InputElementBase extends StatefulComponent {
         const alignRight = !!this.props.alignRight
         const { before, after } = this.props.decorators || {};
         return $(React.Fragment, null,
-            this.props.shadowElement?.(),
             before && this.getDecoratedElem(before),
             $(InputsSizeContext.Consumer, null, size =>
                 $(inputType, {
@@ -278,10 +277,7 @@ class InputElementBase extends StatefulComponent {
                     onBlur: this.onBlur, onFocus: this.props.onFocus
                 }, content)
             ),
-            after && this.getDecoratedElem(after),
-            this.props.uploadedFileElement?.(),
-            this.props.deleteButtonElement?.(),
-            this.props.buttonElement?.()
+            after && this.getDecoratedElem(after)
         );
     }
     getDecoratedElem(text) {
@@ -294,32 +290,27 @@ class InputElementBase extends StatefulComponent {
 InputElementBase.defaultProps = { rows: "2", type: "text", placeholder: "" };
 InputElementBase.contextType = VkInfoContext;
 
-function InputWrapper({ className, path, readOnly, alignRight, content, children }) {
+const InputElement = ({
+    className, path, children,
+    buttonElement,
+    alignRight, ...props
+}) => {
     const { focusClass, focusHtml } = useFocusControl(path);
-    const classes = clsx("inputBox", focusClass, className);
-    const style = readOnly ? { borderColor: "transparent" } : undefined;
+    const readOnly = !props.onChange && !props.onBlur;
 
-    const sideContent = Array.isArray(content)
-        ? content.filter(c => c.props.className.split(' ').includes("sideContent"))
+    const sideContent = Array.isArray(children)
+        ? children.filter(c => c.props.className.split(' ').includes("sideContent"))
         : null;
+
+    const classes = clsx("inputBox", focusClass, className, props.decorators && 'decorated');
+    const style = readOnly ? { borderColor: 'transparent' } : undefined;
 
     return $("div", { style, className: classes, ...focusHtml },
         alignRight && sideContent,
-        children,
+        $(InputElementBase, { ...props, alignRight }),
+        buttonElement,
         !alignRight && sideContent
     );
 }
 
-const InputElement = ({ className, path, children, ...props}) => {
-    return $(InputWrapper, {
-        className: clsx(className, props.decorators && 'decorated'),
-        path,
-        readOnly: !props.onChange && !props.onBlur,
-        alignRight: props.alignRight,
-        content: children
-    },
-        $(InputElementBase, props)
-    );
-}
-
-export { InputElement, InputElementBase, InputWrapper }
+export { InputElement, InputElementBase }
