@@ -1,5 +1,4 @@
-import React, { createElement as $ } from 'react';
-import autoBind from 'react-autobind';
+import React, { createElement as $, useContext, useRef, useLayoutEffect } from 'react';
 import clsx from 'clsx';
 import { useFocusControl } from './focus-control';
 import { InputsSizeContext } from "./dom-utils";
@@ -7,18 +6,10 @@ import { VkInfoContext } from './ui-info-provider';
 import { Tooltip } from './tooltip';
 import { clamp } from './utils';
 import { SEL_FOCUS_FRAME } from './css-selectors';
+import { useAddEventListener } from './custom-hooks';
 
 const HEADERS_CHANGE = { headers: { "x-r-action": "change" } };
 
-class StatefulComponent extends React.Component {
-	constructor(props) {
-	  super(props)
-	  this.state = this.getInitialState?.() || {}
-	  autoBind(this)
-	}
-}
-
-const activeElement = (e) => e&&e.ownerDocument.activeElement
 const execCopy = (e) =>  e&&e.ownerDocument.execCommand('copy')
 const execCut = (e) =>  e&&e.ownerDocument.execCommand('cut')
 
@@ -31,25 +22,80 @@ const validateInput = (inputStr, regexStr, skipInvalidSymbols, upperCase) => {
     return validatedStr || '';
 }
 
-class InputElementBase extends StatefulComponent {
-    setFocus(focus) {
-        if(!focus) return
-        this.inp.focus()
+// Extract cursor pos logic into a hook
+// Return removed inp from onChange calls
+// TODO: Esc doesn't work properly
+function InputElementBase({
+    value, type, inputType, typeKey: name, placeholder, alignRight, decorators, rows, uctext, dataType, changing, inputRegex, skipInvalidSymbols,
+    onChange, onBlur, onFocus, onKeyDown, ...props
+}) {
+    const inputSize = useContext(InputsSizeContext);
+    const { haveVk } = useContext(VkInfoContext);
+
+    const inputRef = useRef(null);
+
+    const readOnly = !onChange && !onBlur;
+
+    const { before, after } = decorators || {};
+    function getDecoratedElem(text) {
+        return $(Tooltip, { content: text, children:
+            $('span', { className: 'decorator', onClick: () => inputRef.current?.focus() }, text)
+        })
     }
-    onKeyDown(e) {
-        if(!this.inp) return;
-        if (this.props.onKeyDown?.(e)) return;
+
+    const kRef = useRef(null);
+    const sRef = useRef(null);
+
+    const prevVal = useRef(null);
+
+    function handleChange(e) {
+        if (!onChange) return;
+        kRef.current = inputRef.current.selectionStart;
+        if (sRef.current !== null && sRef.current !== undefined) {
+            kRef.current = sRef.current;
+            sRef.current = null
+        }
+        const value = uctext ? e.target.value.toUpperCase() : e.target.value;
+        onChange({ target: { ...HEADERS_CHANGE, value }, inp: inputRef.current });
+    }
+
+    function handleBlur() {
+        const value = inputRef.current.value;
+        prevVal.current = value;
+        onBlur?.({
+            target: { ...HEADERS_CHANGE, value },
+            replaceLastPatch: true
+        });
+    }
+
+    function onBeforeInput(e) {
+        if (e.data && inputRegex) {
+            const validatedStr = validateInput(e.data, inputRegex, skipInvalidSymbols, uctext);
+            if (validatedStr === e.data) return;
+            e.preventDefault();
+            if (validatedStr && e.defaultPrevented)
+                inputRef.current?.ownerDocument.execCommand("insertText", false, validatedStr);
+        }
+    }
+
+    function onClick(e){
+        if (!readOnly) e.stopPropagation()
+    }
+
+    function handleKeyDown(e) {
+        if(!inputRef.current) return;
+        if (onKeyDown?.(e)) return;
         switch (e.key) {
             case "Escape":
-                if (this.prevval != undefined && this.inp.value !== this.prevval) {
-                    this.onChange?.({ target: { value: this.prevval } });
+                if (prevVal.current !== undefined && inputRef.current.value !== prevVal.current) {
+                    handleChange({ target: { value: prevVal.current } });
                 }
-                this.inp?.closest(SEL_FOCUS_FRAME)?.focus();
+                inputRef.current.closest(SEL_FOCUS_FRAME)?.focus();
                 e.stopPropagation();
                 break;
             case "Enter":
                 e.preventDefault();
-                this.onEnter(e);
+                onEnter(e);
                 // fall through
             case "Tab":
             case "F2":
@@ -59,236 +105,173 @@ class InputElementBase extends StatefulComponent {
                 e.stopPropagation();
         }
     }
-    doIfNotFocused(what) {
-        if (this.inp != activeElement(this.inp)) {
-            this.setFocus(true)
-            what(this.inp)
-            return true
+
+    const isInputFocused = () =>
+        inputRef.current && inputRef.current === inputRef.current?.ownerDocument?.activeElement;
+
+    function onDelete(event) {
+        event.stopPropagation();
+        const inp = inputRef.current;
+        sRef.current = null;
+        if (!isInputFocused()) {
+            inp.focus();
+            prevVal.current = inp.value;
+            let nValue;
+            if (isVkEvent(event)) {
+                const validatedStr = validateInput(event.detail?.key, inputRegex, skipInvalidSymbols, uctext);
+                nValue = validatedStr
+                sRef.current = validatedStr.length
+            } else nValue = ""
+            handleChange({ target: { ...HEADERS_CHANGE, value: nValue } })
         }
-        return false
+        else if (isVkEvent(event)) {
+            const validatedStr = validateInput(event.detail?.key, inputRegex, skipInvalidSymbols, uctext);
+            let nValue = inp.value
+            if (!event.detail.key) {    // delete key case
+                const newSelectionStart = inp.selectionStart === inp.selectionEnd
+                    ? inp.selectionStart - 1
+                    : inp.selectionStart
+                nValue = nValue.substring(0, newSelectionStart) + nValue.substring(inp.selectionEnd)
+                sRef.current = newSelectionStart < 0 ? 0 : newSelectionStart
+            } else {
+                const value1 = nValue.substring(0, inp.selectionStart)
+                const value2 = nValue.substring(inp.selectionEnd)
+                nValue = value1 + validatedStr + value2
+                sRef.current = inp.selectionStart + 1
+            }
+            handleChange({ target: { ...HEADERS_CHANGE, value: nValue } })
+        }
     }
-    isVkEvent(event) {
-        return event.detail && typeof event.detail == "object" ? event.detail.vk : false
+
+    function onBackspace(event){
+        event.stopPropagation();
+        const inp = inputRef.current;
+        if (!isInputFocused()) {
+            inp.focus();
+            prevVal.current = inp.value;
+            const nValue = isVkEvent(event) ? inp.value.slice(0, -1) : inp.value
+            sRef.current = nValue.length;
+            handleChange({ target: { ...HEADERS_CHANGE, value: nValue } });
+        }
+        else if (isVkEvent(event)) {
+            let nValue = inp.value
+            const value1 = nValue.substring(0, inp.selectionStart - 1)
+            const value2 = nValue.substring(inp.selectionEnd)
+            nValue = value1 + value2
+            sRef.current = inp.selectionStart - 1
+            handleChange({ target: { ...HEADERS_CHANGE, value: nValue } })
+        }
     }
-    onEnter(event) {
-        if (this.isVkEvent(event) || !this.doIfNotFocused(inp => {
-            this.prevval = inp.value
-            inp.selectionEnd = inp.value.length
-            inp.selectionStart = inp.value.length
-        })) {
-            const markerButton = this.props.mButtonEnter
+
+    function onEnter(event) {
+        const inp = inputRef.current;
+        if (isVkEvent(event) || isInputFocused()) {
+            const markerButton = props.mButtonEnter
             const window = event.target.ownerDocument.defaultView
             let cEvent
             if (markerButton) {
                 cEvent = new window.CustomEvent("cEnter", { bubbles: true, detail: markerButton })
-                if (this.props.onBlur) this.props.onBlur()
-                else this.props.onChange?.({ target: { headers: { "x-r-action": "change" }, value: this.inp.value } })
+                if (onBlur) onBlur()
+                else onChange?.({ target: { ...HEADERS_CHANGE, value: inp.value } })
             }
-            else if (!this.props.lockedFocus) {
+            else if (!props.lockedFocus) {
                 cEvent = new window.CustomEvent("cTab", { bubbles: true })
             }
-            cEvent && this.inp.dispatchEvent(cEvent)
+            cEvent && inp.dispatchEvent(cEvent)
+        }
+        else {
+            inp.focus();
+            prevVal.current = inp.value
+            inp.selectionEnd = inp.value.length
+            inp.selectionStart = inp.value.length
         }
         event.stopPropagation()
     }
-    onDelete(event){
-        event.stopPropagation()
-        this.s = null
-        const { inputRegex, uctext, skipInvalidSymbols } = this.props;
-        if (!this.doIfNotFocused(inp => {
-            this.prevval = inp.value
-            let nValue;
-            if (this.isVkEvent(event)) {
-                const validatedStr = validateInput(event.detail?.key, inputRegex, skipInvalidSymbols, uctext);
-                nValue = validatedStr
-                this.s = validatedStr.length
-            } else nValue = ""
-            this.onChange({ target: { headers: { "x-r-action": "change" }, value: nValue } }, inp)
-        })) {
-            if (this.isVkEvent(event)) {
-                const validatedStr = validateInput(event.detail?.key, inputRegex, skipInvalidSymbols, uctext);
-                let nValue = this.inp.value
-                if (!event.detail.key) {    // delete key case
-                    const newSelectionStart = this.inp.selectionStart === this.inp.selectionEnd
-                        ? this.inp.selectionStart - 1
-                        : this.inp.selectionStart
-                    nValue = nValue.substring(0, newSelectionStart) + nValue.substring(this.inp.selectionEnd)
-                    this.s = newSelectionStart < 0 ? 0 : newSelectionStart
-                } else {
-                    const value1 = nValue.substring(0, this.inp.selectionStart)
-                    const value2 = nValue.substring(this.inp.selectionEnd)
-                    nValue = value1 + validatedStr + value2
-                    this.s = this.inp.selectionStart + 1
-                }
-                this.onChange({ target: { headers: { "x-r-action": "change" }, value: nValue }, inp: this.inp })
-            }
+
+    function onClear() {
+        const inp = inputRef.current;
+        inp.value = "";
+        if (onChange) onChange({ target: { ...HEADERS_CHANGE, value: inp.value }, inp })
+        if (!isInputFocused()) onBlur?.();  // TODO: code smell
+    }
+
+    function onCPaste(e) {
+        if (!isInputFocused()) {
+            const inp = inputRef.current;
+            inp?.focus();
+            inp?.setSelectionRange(0, inp.value.length);
         }
-    }
-    onClear(){
-        this.inp.value = ""
-        if (this.props.onChange) this.props.onChange({ target: { headers: { "x-r-action": "change" }, value: this.inp.value }, inp: this.inp })
-        if (this.inp != activeElement(this.inp)) this.props.onBlur?.()
-    }
-    onErase(){
-        this.onClear()
-        if (this.props.onBlur) this.props.onBlur()
-    }
-    onBackspace(event){
-        event.stopPropagation()
-        if (!this.doIfNotFocused(inp => {
-            this.prevval = inp.value
-            const nValue = this.isVkEvent(event) ? inp.value.slice(0, -1) : inp.value
-            this.s = nValue.length;
-            this.onChange({ target: { headers: { "x-r-action": "change" }, value: nValue }, inp })
-        })) {
-            if (this.isVkEvent(event)) {
-                let nValue = this.inp.value
-                const value1 = nValue.substring(0, this.inp.selectionStart - 1)
-                const value2 = nValue.substring(this.inp.selectionEnd)
-                nValue = value1 + value2
-                this.s = this.inp.selectionStart - 1
-                this.onChange({ target: { headers: { "x-r-action": "change" }, value: nValue }, inp: this.inp })
-            }
-        }
-    }
-    onCPaste(e){
-        this.doIfNotFocused(inp=>inp.setSelectionRange(0,inp.value.length));
         e.stopPropagation();
     }
-    onCopy(event){
-        this.doIfNotFocused(inp=>{
+
+    function onCopy(event){
+         if (!isInputFocused()) {
+            const inp = inputRef.current;
+            inp?.focus();
+            inp?.setSelectionRange(0, inp.value.length);
+            execCopy(inp);
+        }
+        event.stopPropagation();
+    }
+
+    function onCut(event){
+         if (!isInputFocused()) {
+            const inp = inputRef.current;
+            inp?.focus();
             inp.setSelectionRange(0, inp.value.length)
-            execCopy(this.inp)
-        })
-        event.stopPropagation()
-    }
-    onCut(event){
-        this.doIfNotFocused(inp=>{
-            inp.setSelectionRange(0,inp.value.length)
-            execCut(inp)
-            this.inp.blur()
-        })
-        event.stopPropagation()
-    }
-    onClick(event){
-        const readOnly = (!this.props.onChange && !this.props.onBlur)
-        if (!readOnly /*&& !this.props.clickThrough*/) event.stopPropagation()
-    }
-    onBeforeInput(e) {
-        const { inputRegex, uctext, skipInvalidSymbols } = this.props;
-        if (e.data && inputRegex) {
-            const validatedStr = validateInput(e.data, inputRegex, skipInvalidSymbols, uctext);
-            if (validatedStr === e.data) return;
-            e.preventDefault();
-            if (validatedStr && e.defaultPrevented) this.inp.ownerDocument.execCommand("insertText", false, validatedStr);
+            execCut(inp);
+            inp.blur();
         }
+        event.stopPropagation();
     }
-    addListeners(inp){
-        if(!inp) return
-        inp.addEventListener('beforeinput',this.onBeforeInput)
-        inp.addEventListener('enter',this.onEnter)
-        inp.addEventListener('click',this.onClick)
-        inp.addEventListener('delete',this.onDelete)
-        inp.addEventListener('erase',this.onErase)
-        inp.addEventListener('clear',this.onClear)
-        inp.addEventListener('backspace',this.onBackspace)
-        inp.addEventListener('cpaste',this.onCPaste)
-        inp.addEventListener('ccopy',this.onCopy)
-        inp.addEventListener('ccut',this.onCut)
-    }
-    remListeners(inp){
-        if(!inp) return
-        inp.removeEventListener('beforeinput',this.onBeforeInput)
-        inp.removeEventListener('enter',this.onEnter)
-        inp.removeEventListener('click',this.onClick)
-        inp.removeEventListener('delete',this.onDelete)
-        inp.removeEventListener('erase',this.onErase)
-        inp.removeEventListener('clear',this.onClear)
-        inp.removeEventListener('backspace',this.onBackspace)
-        inp.removeEventListener('cpaste',this.onCPaste)
-        inp.removeEventListener('ccopy',this.onCopy)
-        inp.removeEventListener('ccut',this.onCut)
-    }
-    componentDidMount() {
-        //this.setFocus(this.props.focus)
-        if (this.inp) this.inp.changing = this.props.changing
-        this.addListeners(this.inp)
-    }
-    componentWillUnmount() {
-        if (this.dragBinding) this.dragBinding.releaseDD()
-        this.remListeners(this.inp)
-    }
-    componentDidUpdate() {
-        if (this.props.cursorPos) {
-            const pos = this.props.cursorPos()
-            if (pos.ss) this.inp.selectionStart = pos.ss
-            if (pos.se) this.inp.selectionEnd = pos.se
+
+    useLayoutEffect(() => {
+        if (kRef.current !== null) {
+            inputRef.current.selectionStart = kRef.current;
+            inputRef.current.selectionEnd = kRef.current;
+            kRef.current = null;
         }
-        if (this.k !== null && this.k !== undefined) {
-            this.inp.selectionStart = this.k
-            this.inp.selectionEnd = this.k
-            this.k = null
-        }
-        if (this.inp) this.inp.changing = this.props.changing
-    }
-    onChange(e) {
-        if (!this.props.onChange) return;
-        this.k = this.inp.selectionStart;
-        if (this.s !== null && this.s !== undefined) { this.k = this.s; this.s = null }
-        let value = e.target.value
-        if (this.props.uctext) value = value.toUpperCase();
-        this.props.onChange({ target: { ...HEADERS_CHANGE, value }, inp: e.inp });
-    }
-    onBlur() {
-        this.props.onBlur?.({
-            target: { ...HEADERS_CHANGE, value: this.inp.value },
-            replaceLastPatch: true
-        });
-        this.prevval = this.inp.value
-    }
-    render() {
-        const readOnly = !this.props.onChange && !this.props.onBlur
-        const inputType = !this.props.inputType ? "input" : this.props.inputType
-        const name = this.props.typeKey || null
-        const content = this.props.content
-        const alignRight = !!this.props.alignRight
-        const { before, after } = this.props.decorators || {};
-        return $(React.Fragment, null,
-            before && this.getDecoratedElem(before),
-            $(InputsSizeContext.Consumer, null, size =>
-                $(inputType, {
-                    key: "input",
-                    ref: ref => this.inp = ref,
-                    name, content, readOnly, size,
-                    style: {
-                        ...alignRight && {textAlign: "end"},
-                        ...this.props.decorators && {width: `${clamp((this.props.value ?? '').length + 1.5, 0, 15)}ch`}
-                    },
-                    type: this.props.type,
-                    value: this.props.value,
-                    rows: this.props.rows,
-                    placeholder: this.props.placeholder,
-                    ...this.props.uctext && {className: "uppercase"},
-                    ...this.context.haveVk && {inputMode: 'none'},
-                    ...name && {autoComplete: "new-password"},
-                    "data-type": this.props.dataType,
-                    "data-changing": this.props.changing,
-                    onChange: this.onChange, onKeyDown: this.onKeyDown,
-                    onBlur: this.onBlur, onFocus: this.props.onFocus
-                }, content)
-            ),
-            after && this.getDecoratedElem(after)
-        );
-    }
-    getDecoratedElem(text) {
-        return $(Tooltip, { content: text, children:
-            $('span', { className: 'decorator', onClick: () => this.inp?.focus() }, text)
-        })
-    }
+    });
+
+    useAddEventListener(inputRef, 'enter', onEnter);
+    useAddEventListener(inputRef, 'delete', onDelete);
+    useAddEventListener(inputRef, 'erase', onClear);
+    useAddEventListener(inputRef, 'clear', onClear);
+    useAddEventListener(inputRef, 'backspace', onBackspace);
+    useAddEventListener(inputRef, 'cpaste', onCPaste);
+    useAddEventListener(inputRef, 'ccopy', onCopy);
+    useAddEventListener(inputRef, 'ccut', onCut);
+
+    return $(React.Fragment, null,
+        before && getDecoratedElem(before),
+        $(inputType || "input", {
+            value, name, readOnly,
+            ref: inputRef,
+            size: inputSize,
+            style: {
+                ...alignRight && { textAlign: "end" },
+                ...decorators && { width: `${clamp((value ?? '').length + 1.5, 0, 15)}ch` }
+            },
+            type: type || "text",
+            rows: rows || '2',
+            placeholder: placeholder || "",
+            ...uctext && { className: "uppercase" },
+            ...haveVk && { inputMode: 'none' },
+            ...name && { autoComplete: "new-password" },
+            "data-type": dataType,   // VK reads it
+            "data-changing": changing,  // for tests
+            onChange: handleChange,
+            onKeyDown: handleKeyDown,
+            onBlur: handleBlur, onFocus,
+            onBeforeInput, onClick
+        }),
+        after && getDecoratedElem(after)
+    );
 }
 
-InputElementBase.defaultProps = { rows: "2", type: "text", placeholder: "" };
-InputElementBase.contextType = VkInfoContext;
+function isVkEvent(event) {
+    return event.detail && typeof event.detail == "object" ? event.detail.vk : false;
+}
 
 const InputElement = ({
     className, path, children,
