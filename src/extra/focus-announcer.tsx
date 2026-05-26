@@ -68,7 +68,7 @@ function FocusAnnouncerElement({ identity, path: thisPath, value: serverValue, c
     const value = localFocusRef.current ?? currentState;
 
     const sendChange = (path: string) => {
-        if (path !== value) {
+        if (path !== currentState) {    // sendChange captures stale value of value
             const setFocus = autoFocusFlag ? setLocalFocus : sendFinalChange;
             setFocus(path);
         }
