@@ -76,6 +76,26 @@ describe('basic functionality', () => {
     });
 });
 
+describe('input validation', () => {
+    it("inputRegex blocks non-matching character", async () => {
+        const user = userEvent.setup();
+        renderWithProps({ value: "12", inputRegex: "[0-9]" });
+        const input = screen.getByRole('textbox');
+        await user.click(input);
+        await user.type(input, "a");
+        expect(input).toHaveValue("12");
+    });
+
+    it("inputRegex allows matching character", async () => {
+        const user = userEvent.setup();
+        renderWithProps({ value: "12", inputRegex: "[0-9]" });
+        const input = screen.getByRole('textbox');
+        await user.click(input);
+        await user.type(input, "3");
+        expect(input).toHaveValue("123");
+    });
+});
+
 describe('keyboard input from outside', () => {
     it("typing printable character replaces previous value", async () => {
         const user = userEvent.setup();
@@ -90,6 +110,19 @@ describe('keyboard input from outside', () => {
         await user.click(screen.getByText("Input label"));
         await user.keyboard("{Enter}{d}");
         expect(screen.getByRole('textbox')).toHaveValue("abcd");
+    });
+
+    it("Escape reverts to value at the time input was focused and removes focus", async () => {
+        const user = userEvent.setup();
+        renderWithProps({ value: "abc" });
+        // Enter from outside focuses input and records prevval = "abc"
+        await user.click(screen.getByText("Input label"));
+        await user.keyboard("{Enter}");
+        await user.type(screen.getByRole('textbox'), "d");
+        expect(screen.getByRole('textbox')).toHaveValue("abcd");
+        await user.keyboard("{Escape}");
+        expect(screen.getByRole('textbox')).toHaveValue("abc");
+        expect(screen.getByRole('textbox')).not.toHaveFocus();
     });
 
     it("Clear removes input without focusing input", async () => {
