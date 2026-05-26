@@ -90,7 +90,7 @@ function InputElementBase({
                 if (prevVal.current !== undefined && inputRef.current.value !== prevVal.current) {
                     handleChange({ target: { value: prevVal.current } });
                 }
-                inputRef.current.closest(SEL_FOCUS_FRAME)?.focus();
+                queueMicrotask(() => inputRef.current.closest(SEL_FOCUS_FRAME)?.focus());
                 e.stopPropagation();
                 break;
             case "Enter":
