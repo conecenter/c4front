@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { createSyncProviders } from "../../main/vdom-hooks";
 import { useSyncInput } from '../helpers/sync-input';
 import { InputElement } from '../../extra/input-element';
+import { VkInfoContext } from '../../extra/ui-info-provider';
 import { KeyboardController } from '../../extra/keyboard-controller';
 import { LabeledElement } from '../../extra/labeled-element';
 
@@ -19,9 +20,9 @@ function App({ enqueue, children }) {
     return createSyncProviders({sender, ack: null, isRoot: true, branchKey: 'abc', children});
 }
 
-const renderMinimal = ({ value, enqueue } = {}) => render(
+const renderMinimal = ({ value, enqueue, ...props } = {}) => render(
     <App enqueue={enqueue}>
-        <InputWithSync value={value} />
+        <InputWithSync value={value} {...props} />
     </App>
 );
 
@@ -79,20 +80,26 @@ describe('basic functionality', () => {
 describe('input validation', () => {
     it("inputRegex blocks non-matching character", async () => {
         const user = userEvent.setup();
-        renderWithProps({ value: "12", inputRegex: "[0-9]" });
+        renderMinimal({ value: "12", inputRegex: "[0-9]" });
         const input = screen.getByRole('textbox');
-        await user.click(input);
         await user.type(input, "a");
         expect(input).toHaveValue("12");
     });
 
     it("inputRegex allows matching character", async () => {
         const user = userEvent.setup();
-        renderWithProps({ value: "12", inputRegex: "[0-9]" });
+        renderMinimal({ value: "12", inputRegex: "[0-9]" });
         const input = screen.getByRole('textbox');
-        await user.click(input);
         await user.type(input, "3");
         expect(input).toHaveValue("123");
+    });
+
+    it("uctext uppercases typed value", async () => {
+        const user = userEvent.setup();
+        renderMinimal({ value: "", uctext: true });
+        const input = screen.getByRole('textbox');
+        await user.type(input, "hello");
+        expect(input).toHaveValue("HELLO");
     });
 });
 
@@ -135,7 +142,20 @@ describe('keyboard input from outside', () => {
         expect(input).not.toHaveFocus();
     });
 
-    // backspace, delete, cPaste rely on browser continuing native events on the newly focused element, which JSDOM/userEvent doesn't support
+    it("cPaste focuses input and selects all text", async () => {
+        const user = userEvent.setup();
+        renderWithProps({ value: "abc" });
+        await user.click(screen.getByText("Input label"));
+        await act(async () => {
+            fireEvent(screen.getByRole('textbox'), new CustomEvent('cpaste', { bubbles: true }));
+        });
+        const input = screen.getByRole('textbox');
+        expect(input).toHaveFocus();
+        expect(input.selectionStart).toBe(0);
+        expect(input.selectionEnd).toBe(3);
+    });
+
+    // backspace, delete rely on browser continuing native events on the newly focused element, which JSDOM/userEvent doesn't support
     // this functionality will be partly checked in VK section
 
     it("cCopy focuses input and copies value", async () => {
@@ -282,5 +302,34 @@ describe('VK input', () => {
             fireEvent.keyDown(window, { key: 'd', code: 'vk' });
         });
         expect(input).toHaveValue("ad");
+    });
+});
+
+describe("additional functinality", () => {
+    it("blocks native VK when C4 VK context is active", () => {
+        render(
+            <App>
+                <VkInfoContext.Provider value={{ haveVk: true }}>
+                    <InputElement path="/input-element" value="test" onChange={() => {}} />
+                </VkInfoContext.Provider>
+            </App>
+        );
+        expect(screen.getByRole('textbox')).toHaveAttribute('inputmode', 'none');
+    });
+
+    it("Enter with mButtonEnter dispatches cEnter with marker detail", async () => {
+        const user = userEvent.setup();
+        renderWithProps({ value: "abc", mButtonEnter: "save" });
+        const input = screen.getByRole('textbox');
+        await user.click(input);
+
+        const cEnterHandler = jest.fn();
+        window.addEventListener('cEnter', cEnterHandler);
+        await user.keyboard("{Enter}");
+        window.removeEventListener('cEnter', cEnterHandler);
+
+        expect(cEnterHandler).toHaveBeenCalledWith(
+            expect.objectContaining({ detail: "save" })
+        );
     });
 });
