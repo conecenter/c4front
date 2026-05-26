@@ -43,7 +43,7 @@ class InputElementBase extends StatefulComponent {
                 if (this.prevval != undefined && this.inp.value !== this.prevval) {
                     this.onChange?.({ target: { value: this.prevval } });
                 }
-                this.cont.focus();
+                queueMicrotask(() => this.cont.focus());
                 e.stopPropagation();
                 break;
             case "Enter":
