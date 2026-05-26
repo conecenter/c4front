@@ -9,9 +9,9 @@ import { LabeledElement } from '../../extra/labeled-element';
 
 const IDENTITY = { key: "input-element" };
 
-function InputWithSync({ value = "" }) {
+function InputWithSync({ value = "", ...props }) {
     const patch = useSyncInput(IDENTITY, value, () => false);
-    return <InputElement path="/input-element" {...patch} />
+    return <InputElement path="/input-element" {...props} {...patch} />
 }
 
 function App({ enqueue, children }) {
@@ -125,5 +125,129 @@ describe('keyboard input from outside', () => {
         act(() => { fireEvent.cut(document.activeElement); });
         expect(screen.getByRole('textbox')).not.toHaveFocus();
         expect(document.execCommand).toHaveBeenCalledWith('cut');
+    });
+});
+
+describe('VK input', () => {
+    it("printable character replaces previous value and focuses input", async () => {
+        const user = userEvent.setup();
+        renderWithProps({ value: "abc" });
+        await user.click(screen.getByText("Input label"));
+        await act(async () => {
+            fireEvent.keyDown(window, { key: 'a', code: 'vk' });
+        });
+        expect(screen.getByRole('textbox')).toHaveValue("a");
+        expect(screen.getByRole('textbox')).toHaveFocus();
+    });
+
+    it("printable character inserts at cursor when input is already focused", async () => {
+        const user = userEvent.setup();
+        renderWithProps({ value: "abc" });
+        const input = screen.getByRole('textbox');
+        await user.click(input);
+        input.setSelectionRange(2, 2);
+        await act(async () => {
+            fireEvent.keyDown(window, { key: 'd', code: 'vk' });
+        });
+        expect(input).toHaveValue("abdc");
+        expect(input).toHaveFocus();
+    });
+
+    it("cursor lands after inserted character, not at end of input", async () => {
+        const user = userEvent.setup();
+        renderWithProps({ value: "abc" });
+        const input = screen.getByRole('textbox');
+        await user.click(input);
+        input.setSelectionRange(1, 1); // cursor after 'a'
+        await act(async () => {
+            fireEvent.keyDown(window, { key: 'x', code: 'vk' });
+        });
+        expect(input).toHaveValue("axbc");
+        expect(input.selectionStart).toBe(2); // after 'x', not at end (4)
+    });
+
+    it("Delete from outside clears value and focuses input", async () => {
+        const user = userEvent.setup();
+        renderWithProps({ value: "abc" });
+        await user.click(screen.getByText("Input label"));
+        await act(async () => {
+            fireEvent.keyDown(window, { key: 'Delete', code: 'vk' });
+        });
+        expect(screen.getByRole('textbox')).toHaveValue("");
+        expect(screen.getByRole('textbox')).toHaveFocus();
+    });
+
+    it("Delete in focused input removes character before cursor", async () => {
+        const user = userEvent.setup();
+        renderWithProps({ value: "abc" });
+        const input = screen.getByRole('textbox');
+        await user.click(input);
+        input.setSelectionRange(2, 2);
+        await act(async () => {
+            fireEvent.keyDown(window, { key: 'Delete', code: 'vk' });
+        });
+        expect(input).toHaveValue("ac");
+        expect(input.selectionStart).toBe(1); // cursor at deletion point, not at end (2)
+    });
+
+    it("Backspace from outside removes last character and focuses input", async () => {
+        const user = userEvent.setup();
+        renderWithProps({ value: "abc" });
+        await user.click(screen.getByText("Input label"));
+        await act(async () => {
+            fireEvent.keyDown(window, { key: 'Backspace', code: 'vk' });
+        });
+        expect(screen.getByRole('textbox')).toHaveValue("ab");
+        expect(screen.getByRole('textbox')).toHaveFocus();
+    });
+
+    it("Backspace in focused input removes character before cursor", async () => {
+        const user = userEvent.setup();
+        renderWithProps({ value: "abc" });
+        const input = screen.getByRole('textbox');
+        await user.click(input);
+        input.setSelectionRange(2, 2);
+        await act(async () => {
+            fireEvent.keyDown(window, { key: 'Backspace', code: 'vk' });
+        });
+        expect(input).toHaveValue("ac");
+        expect(input.selectionStart).toBe(1); // cursor at deletion point, not at end (2)
+    });
+
+    it("cursor lands after inserted character when replacing a selection", async () => {
+        const user = userEvent.setup();
+        renderWithProps({ value: "abc" });
+        const input = screen.getByRole('textbox');
+        await user.click(input);
+        input.setSelectionRange(1, 3); // select "bc"
+        await act(async () => {
+            fireEvent.keyDown(window, { key: 'x', code: 'vk' });
+        });
+        expect(input).toHaveValue("ax");
+        expect(input.selectionStart).toBe(2); // after 'x', not at end (still 2 here but explicit)
+    });
+
+    it("VK ignores character not matching inputRegex", async () => {
+        const user = userEvent.setup();
+        renderWithProps({ value: "12", inputRegex: "[0-9]" });
+        await user.click(screen.getByText("Input label"));
+        await act(async () => {
+            fireEvent.keyDown(window, { key: 'a', code: 'vk' });
+        });
+        // 'a' fails regex → validateInput returns '' → focused but value unchanged
+        expect(screen.getByRole('textbox')).toHaveValue("");
+        expect(screen.getByRole('textbox')).toHaveFocus();
+    });
+
+    it("VK printable character replaces selected text", async () => {
+        const user = userEvent.setup();
+        renderWithProps({ value: "abc" });
+        const input = screen.getByRole('textbox');
+        await user.click(input);
+        input.setSelectionRange(1, 3); // select "bc"
+        await act(async () => {
+            fireEvent.keyDown(window, { key: 'd', code: 'vk' });
+        });
+        expect(input).toHaveValue("ad");
     });
 });
