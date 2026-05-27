@@ -42,7 +42,7 @@ function NumberFormattingInput(
     );
 
     const [isFocused, setIsFocused] = useState(false);
-    const inputRef = useRef<{ inp: HTMLInputElement } | null>(null);
+    const inputRef = useRef<HTMLInputElement | null>(null);
     const correctedCaretPos = useRef<number | null>(null);
 
     const onChange = (ch: { target: Patch }) => sendTempChange(createInputStateChange(ch.target.value, decimalSeparator));
@@ -54,7 +54,7 @@ function NumberFormattingInput(
 
     const onFocus = () => {
         setTimeout(() => {
-            correctedCaretPos.current = calcCorrectedCaretPosition(inputRef.current!.inp, thousandSeparator);
+            correctedCaretPos.current = calcCorrectedCaretPosition(inputRef.current!, thousandSeparator);
             setIsFocused(true);
         });
     }
@@ -63,7 +63,7 @@ function NumberFormattingInput(
         function correctCaretPosition() {
             if (isFocused) {
                 const newCaretPos = correctedCaretPos.current;
-                if (newCaretPos) inputRef.current?.inp.setSelectionRange(newCaretPos, newCaretPos);
+                if (newCaretPos) inputRef.current?.setSelectionRange(newCaretPos, newCaretPos);
             }
         },
         [isFocused]

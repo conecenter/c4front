@@ -7,6 +7,7 @@ import { Tooltip } from './tooltip';
 import { clamp } from './utils';
 import { SEL_FOCUS_FRAME } from './css-selectors';
 import { useAddEventListener } from './custom-hooks';
+import { mergeRefs } from './utils-react';
 
 const HEADERS_CHANGE = { headers: { "x-r-action": "change" } };
 
@@ -38,12 +39,13 @@ interface InputElementBaseProps {
     onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => boolean | void
     mButtonEnter?: string
     lockedFocus?: boolean
+    _ref?: React.Ref<HTMLInputElement>
 }
 
 // TODO: extract cursor pos logic into a hook
 function InputElementBase({
     value, type, inputType, typeKey: name, placeholder, alignRight, decorators, rows, uctext, dataType, changing, inputRegex, skipInvalidSymbols,
-    onChange, onBlur, onFocus, onKeyDown, mButtonEnter, lockedFocus
+    onChange, onBlur, onFocus, onKeyDown, mButtonEnter, lockedFocus, _ref = null
 }: InputElementBaseProps): React.ReactElement {
     const inputSize = useContext(InputsSizeContext);
     const { haveVk } = useContext(VkInfoContext);
@@ -258,8 +260,8 @@ function InputElementBase({
     return $(React.Fragment, null,
         before && getDecoratedElem(before),
         $((inputType || 'input'), {
-            value, name, readOnly,
-            ref: inputRef,
+            value, name, readOnly, placeholder,
+            ref: mergeRefs(inputRef, _ref),
             size: inputSize,
             style: {
                 ...alignRight && { textAlign: "end" },
@@ -267,7 +269,6 @@ function InputElementBase({
             },
             type: type || "text",
             rows: rows || '2',
-            placeholder: placeholder || "",
             ...uctext && { className: "uppercase" },
             ...haveVk && { inputMode: 'none' },
             ...name && { autoComplete: "new-password" },
