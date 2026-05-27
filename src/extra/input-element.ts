@@ -49,19 +49,14 @@ function InputElementBase({
     const { haveVk } = useContext(VkInfoContext);
 
     const inputRef = useRef<HTMLInputElement | null>(null);
-    const kRef = useRef<number | null>(null);
-    const sRef = useRef<number | null>(null);
+    const nextCursorPos = useRef<number | null>(null);
     const prevVal = useRef<string | null>(null);
 
     const readOnly = !onChange && !onBlur;
 
-    function handleChange(e: { target: { value: string } }) {
+    function handleChange(e: { target: { value: string } }, cursorPos?: number) {
         if (!onChange) return;
-        kRef.current = inputRef.current!.selectionStart;
-        if (sRef.current !== null) {
-            kRef.current = sRef.current;
-            sRef.current = null;
-        }
+        nextCursorPos.current = cursorPos ?? inputRef.current!.selectionStart;
         const value = uctext ? e.target.value.toUpperCase() : e.target.value;
         onChange({ target: { ...HEADERS_CHANGE, value }, inp: inputRef.current });
     }
@@ -116,34 +111,33 @@ function InputElementBase({
     function onDelete(event: CustomEvent) {
         event.stopPropagation();
         const inp = inputRef.current!;
-        sRef.current = null;
         if (!isInputFocused()) {
             inp.focus();
             prevVal.current = inp.value;
-            let nValue: string;
             if (isVkEvent(event)) {
                 const validatedStr = validateInput(event.detail?.key, inputRegex, skipInvalidSymbols, uctext);
-                nValue = validatedStr;
-                sRef.current = validatedStr.length;
-            } else nValue = "";
-            handleChange({ target: { ...HEADERS_CHANGE, value: nValue } });
+                handleChange({ target: { ...HEADERS_CHANGE, value: validatedStr } }, validatedStr.length);
+            } else {
+                handleChange({ target: { ...HEADERS_CHANGE, value: "" } });
+            }
         }
         else if (isVkEvent(event)) {
             const validatedStr = validateInput(event.detail?.key, inputRegex, skipInvalidSymbols, uctext);
             let nValue = inp.value;
+            let cursorPos;
             if (!event.detail.key) {    // delete key case
                 const newSelectionStart = inp.selectionStart === inp.selectionEnd
                     ? inp.selectionStart! - 1
                     : inp.selectionStart!;
                 nValue = nValue.substring(0, newSelectionStart) + nValue.substring(inp.selectionEnd!);
-                sRef.current = newSelectionStart < 0 ? 0 : newSelectionStart;
+                cursorPos = Math.max(0, newSelectionStart);
             } else {
                 const value1 = nValue.substring(0, inp.selectionStart!);
                 const value2 = nValue.substring(inp.selectionEnd!);
                 nValue = value1 + validatedStr + value2;
-                sRef.current = inp.selectionStart! + 1;
+                cursorPos = inp.selectionStart! + 1;
             }
-            handleChange({ target: { ...HEADERS_CHANGE, value: nValue } });
+            handleChange({ target: { ...HEADERS_CHANGE, value: nValue } }, cursorPos);
         }
     }
 
@@ -154,16 +148,14 @@ function InputElementBase({
             inp.focus();
             prevVal.current = inp.value;
             const nValue = isVkEvent(event) ? inp.value.slice(0, -1) : inp.value;
-            sRef.current = nValue.length;
-            handleChange({ target: { ...HEADERS_CHANGE, value: nValue } });
+            handleChange({ target: { ...HEADERS_CHANGE, value: nValue } }, nValue.length);
         }
         else if (isVkEvent(event)) {
             let nValue = inp.value;
             const value1 = nValue.substring(0, inp.selectionStart! - 1);
             const value2 = nValue.substring(inp.selectionEnd!);
             nValue = value1 + value2;
-            sRef.current = inp.selectionStart! - 1;
-            handleChange({ target: { ...HEADERS_CHANGE, value: nValue } });
+            handleChange({ target: { ...HEADERS_CHANGE, value: nValue } }, inp.selectionStart! - 1);
         }
     }
 
@@ -231,10 +223,9 @@ function InputElementBase({
     }
 
     useLayoutEffect(() => {
-        if (kRef.current !== null) {
-            inputRef.current!.selectionStart = kRef.current;
-            inputRef.current!.selectionEnd = kRef.current;
-            kRef.current = null;
+        if (nextCursorPos.current !== null) {
+            inputRef.current!.setSelectionRange(nextCursorPos.current, nextCursorPos.current);
+            nextCursorPos.current = null;
         }
     });
 
