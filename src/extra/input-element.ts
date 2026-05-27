@@ -25,8 +25,7 @@ interface InputElementBaseProps {
     inputType?: "input" | "textarea"
     typeKey?: string
     placeholder?: string
-    alignRight?: boolean
-    decorators?: { before?: string, after?: string }
+    style?: React.CSSProperties
     rows?: string
     uctext?: boolean
     dataType?: string
@@ -42,9 +41,8 @@ interface InputElementBaseProps {
     _ref?: React.Ref<HTMLInputElement>
 }
 
-// TODO: extract cursor pos logic into a hook
 function InputElementBase({
-    value, type, inputType, typeKey: name, placeholder, alignRight, decorators, rows, uctext, dataType, changing, inputRegex, skipInvalidSymbols,
+    value, type, inputType, typeKey: name, placeholder, style, rows, uctext, dataType, changing, inputRegex, skipInvalidSymbols,
     onChange, onBlur, onFocus, onKeyDown, mButtonEnter, lockedFocus, _ref = null
 }: InputElementBaseProps): React.ReactElement {
     const inputSize = useContext(InputsSizeContext);
@@ -56,13 +54,6 @@ function InputElementBase({
     const prevVal = useRef<string | null>(null);
 
     const readOnly = !onChange && !onBlur;
-
-    const { before, after } = decorators || {};
-    function getDecoratedElem(text: string) {
-        return $(Tooltip, { content: text, children:
-            $('span', { className: 'decorator', onClick: () => inputRef.current?.focus() }, text)
-        })
-    }
 
     function handleChange(e: { target: { value: string } }) {
         if (!onChange) return;
@@ -247,8 +238,8 @@ function InputElementBase({
         }
     });
 
-    useAddEventListener(inputRef, 'beforeinput', onBeforeInput);
     useAddEventListener<CustomEvent>(inputRef, 'enter', onEnter);
+    useAddEventListener(inputRef, 'beforeinput', onBeforeInput);
     useAddEventListener(inputRef, 'delete', onDelete);
     useAddEventListener(inputRef, 'erase', onClear);
     useAddEventListener(inputRef, 'clear', onClear);
@@ -257,30 +248,23 @@ function InputElementBase({
     useAddEventListener(inputRef, 'ccopy', onCopy);
     useAddEventListener(inputRef, 'ccut', onCut);
 
-    return $(React.Fragment, null,
-        before && getDecoratedElem(before),
-        $((inputType || 'input'), {
-            value, name, readOnly, placeholder,
-            ref: mergeRefs(inputRef, _ref),
-            size: inputSize,
-            style: {
-                ...alignRight && { textAlign: "end" },
-                ...decorators && { width: `${clamp((value ?? '').length + 1.5, 0, 15)}ch` }
-            },
-            type: type || "text",
-            rows: rows || '2',
-            ...uctext && { className: "uppercase" },
-            ...haveVk && { inputMode: 'none' },
-            ...name && { autoComplete: "new-password" },
-            "data-type": dataType,   // VK reads it
-            "data-changing": changing,  // for tests
-            onChange: handleChange,
-            onKeyDown: handleKeyDown,
-            onBlur: handleBlur, onFocus,
-            onClick
-        }),
-        after && getDecoratedElem(after)
-    );
+    return $((inputType || 'input'), {
+        value, name, readOnly, placeholder,
+        ref: mergeRefs(inputRef, _ref),
+        size: inputSize,
+        style,
+        type: type || "text",
+        rows: rows || '2',
+        ...uctext && { className: "uppercase" },
+        ...haveVk && { inputMode: 'none' },
+        ...name && { autoComplete: "new-password" },
+        "data-type": dataType,   // VK reads it
+        "data-changing": changing,  // for tests
+        onChange: handleChange,
+        onKeyDown: handleKeyDown,
+        onBlur: handleBlur, onFocus,
+        onClick
+    });
 }
 
 function validateInput(inputStr?: string, regexStr?: string, skipInvalidSymbols?: boolean, upperCase?: boolean): string {
@@ -303,29 +287,48 @@ interface InputElementProps extends InputElementBaseProps {
     className?: string
     children?: React.ReactNode
     buttonElement?: React.ReactNode
+    alignRight?: boolean
+    decorators?: { before?: string, after?: string }
 }
 
 const InputElement = ({
     className, path, children,
-    buttonElement,
-    alignRight, ...props
+    buttonElement, _ref: externalRef = null,
+    decorators, alignRight, ...props
 }: InputElementProps): React.ReactElement => {
+    const internalRef = useRef<HTMLInputElement | null>(null);
+
     const { focusClass, focusHtml } = useFocusControl(path);
     const readOnly = !props.onChange && !props.onBlur;
+
+    const { before, after } = decorators || {};
+    const onClick = () => internalRef.current?.focus();
 
     const sideContent = Array.isArray(children)
         ? (children as React.ReactElement[]).filter(c => c.props.className?.split(' ').includes("sideContent"))
         : null;
 
-    const classes = clsx("inputBox", focusClass, className, props.decorators && 'decorated');
-    const style = readOnly ? { borderColor: 'transparent' } : undefined;
+    const classes = clsx("inputBox", focusClass, className, decorators && 'decorated');
+    const divStyle = readOnly ? { borderColor: 'transparent' } : undefined;
+    const inputStyle: React.CSSProperties = {
+        ...alignRight && { textAlign: "end" },
+        ...decorators && { width: `${clamp((props.value ?? '').length + 1.5, 0, 15)}ch` }
+    };
 
-    return $("div", { style, className: classes, ...focusHtml },
+    return $("div", { style: divStyle, className: classes, ...focusHtml },
         alignRight && sideContent,
-        $(InputElementBase, { ...props, alignRight }),
+        before && $(Decorator, { text: before, onClick }),
+        $(InputElementBase, { ...props, style: inputStyle, _ref: mergeRefs(internalRef, externalRef) }),
+        after && $(Decorator, { text: after, onClick }),
         buttonElement,
         !alignRight && sideContent
     );
+}
+
+function Decorator({ text, onClick }: { text: string, onClick: () => void }) {
+    return $(Tooltip, { content: text, children:
+        $('span', { className: 'decorator', onClick }, text)
+    });
 }
 
 export type { InputChangeEvent }
