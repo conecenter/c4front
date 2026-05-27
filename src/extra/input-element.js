@@ -233,6 +233,7 @@ function InputElementBase({
         }
     });
 
+    useAddEventListener (inputRef, 'beforeinput', onBeforeInput);
     useAddEventListener(inputRef, 'enter', onEnter);
     useAddEventListener(inputRef, 'delete', onDelete);
     useAddEventListener(inputRef, 'erase', onClear);
@@ -263,7 +264,7 @@ function InputElementBase({
             onChange: handleChange,
             onKeyDown: handleKeyDown,
             onBlur: handleBlur, onFocus,
-            onBeforeInput, onClick
+            onClick
         }),
         after && getDecoratedElem(after)
     );
