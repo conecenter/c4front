@@ -16,7 +16,7 @@ function TextElement({ path, content, className, highlight, fontSize, onClickCop
     const el = useRef<HTMLElement | null>(null);
 
     const { focusClass, focusHtml } = useFocusControl(path);
-    const classes = clsx(className, focusClass);
+    const classes = clsx(className, 'text', focusClass);
     const style = fontSize ? { fontSize: `${fontSize}em` } : undefined;
 
     function selectC() {
