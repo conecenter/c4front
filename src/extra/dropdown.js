@@ -9,11 +9,7 @@ import { ARROW_DOWN_SVG } from './arrow-down-svg';
 import { usePopupPos } from "../main/popup";
 import { PopupDrawerContext } from './popup-elements/popup-contexts';
 
-function DropDownElement({ open, onClick, path, className, ...props }) {
-    function onChange(e) {
-        props.onChange?.({target:{headers:{"x-r-action":"change"},value:e.target.value}});
-    }
-
+function DropDownElement({ open, onClick, onClickValue, path, className, ...props }) {
     function onKeyDown(e) {
         let call = "";
         let opt = null;
@@ -41,7 +37,7 @@ function DropDownElement({ open, onClick, path, className, ...props }) {
                 e.preventDefault();
                 break;
         }
-        if (call.length > 0) props.onClickValue?.("key", call, opt);
+        if (call.length > 0) onClickValue?.("key", call, opt);
         return true;    // bail out of InputElementBase keydown handling
     }
 
@@ -59,7 +55,7 @@ function DropDownElement({ open, onClick, path, className, ...props }) {
 
     const isMultiDropdown = chosenOptions?.length > 0;
 
-    const inputBase = $(InputElementBase, { ...props, lockedFocus: open, onChange, onKeyDown });
+    const inputBase = $(InputElementBase, { ...props, lockedFocus: open, onKeyDown });
 
     return $("div", {
         className: clsx("inputBox", focusClass, className),
