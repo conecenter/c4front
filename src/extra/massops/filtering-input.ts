@@ -1,14 +1,7 @@
 import { createElement as $ } from 'react';
-import { InputElement } from '../input-element';
+import { InputChangeEvent, InputElement } from '../input-element';
 import { SVGElement } from '../../main/image';
 import SearchSvg from './search.svg';
-
-interface InputChangeEvent {
-    target: {
-        value: string,
-        headers: { "x-r-action": "change" }
-    }
-}
 
 interface FilteringInput {
     filterValue: string,
@@ -30,5 +23,4 @@ function FilteringInput({ filterValue, path, sendChange }: FilteringInput) {
     });
 }
 
-export type { InputChangeEvent }
 export { FilteringInput }
