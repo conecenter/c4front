@@ -13,5 +13,8 @@ module.exports = {
 	},
 	setupFilesAfterEnv: ["<rootDir>/src/test/config/setup-jest.ts"],
 	extensionsToTreatAsEsm: [".ts", ".tsx"],
-	resetMocks: true, 
+	resetMocks: true,
+	testEnvironmentOptions: {
+		customExportConditions: ['require', 'default'],
+	},
 }
