@@ -20,7 +20,7 @@ type InputBlurEvent = { target: InputChangeTarget, replaceLastPatch?: boolean }
 type VkDetail = { vk: boolean, key?: string }
 
 interface InputElementBaseProps {
-    value?: string
+    value: string
     type?: string
     inputType?: "input" | "textarea"
     typeKey?: string
@@ -50,7 +50,7 @@ function InputElementBase({
 
     const inputRef = useRef<HTMLInputElement | null>(null);
     const nextCursorPos = useRef<number | null>(null);
-    const prevVal = useRef<string | null>(null);
+    const prevVal = useRef<string>(value);
 
     const readOnly = !onChange && !onBlur;
 

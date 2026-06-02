@@ -122,9 +122,6 @@ describe('keyboard input from outside', () => {
     it("Escape reverts to value at the time input was focused and removes focus", async () => {
         const user = userEvent.setup();
         renderWithProps({ value: "abc" });
-        // Enter from outside focuses input and records prevval = "abc"
-        await user.click(screen.getByText("Input label"));
-        await user.keyboard("{Enter}");
         await user.type(screen.getByRole('textbox'), "d");
         expect(screen.getByRole('textbox')).toHaveValue("abcd");
         await user.keyboard("{Escape}");
