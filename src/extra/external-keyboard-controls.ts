@@ -15,15 +15,21 @@ declare global {
 		[BACKSPACE_EVENT]: CustomEvent,
 		[PASTE_EVENT]: CustomEvent,
 		[COPY_EVENT]: CustomEvent,
-		[CUT_EVENT]: CustomEvent
+		[CUT_EVENT]: CustomEvent,
+		[TAB_EVENT]: CustomEvent
 	}
 }
 
-interface KeyboardEventHandlers {
-	[index: string]: CustomEventHandler
-}
+type KeyboardEventHandlers = Partial<Record<KeyboardEventNames, CustomEventHandler>>
 
-type KeyboardEventNames = 'enter' | 'delete' | 'backspace' | 'cpaste' | 'ccopy' | 'ccut';
+type KeyboardEventNames =
+    | typeof ENTER_EVENT
+    | typeof DELETE_EVENT
+    | typeof BACKSPACE_EVENT
+    | typeof PASTE_EVENT
+    | typeof COPY_EVENT
+    | typeof CUT_EVENT
+	| typeof TAB_EVENT
 
 type CustomEventHandler = (e: CustomEvent) => void
 
@@ -33,38 +39,37 @@ type CustomEventHandler = (e: CustomEvent) => void
  * Do not pass ref.current directly.
  * Unsafe if ref setting is delayed by conditional render or wrapper like Tooltip.
  */
-function useExternalKeyboardControls(
+function useExternalKeyboardControls<T extends KeyboardEventHandlers>(
 	element: React.RefObject<HTMLElement | null> | HTMLElement | null,
-	keyboardEventHandlers: KeyboardEventHandlers,
+	keyboardEventHandlers: keyof T extends KeyboardEventNames ? T : never,
 	options?: { capture?: boolean }
 ) {
-	const savedHandlers = useRef(keyboardEventHandlers);
-
-    useEffect(() => {
-		savedHandlers.current = keyboardEventHandlers;
-	}, [keyboardEventHandlers]);
+	const savedHandlers = useRef<KeyboardEventHandlers>(keyboardEventHandlers);
+	savedHandlers.current = keyboardEventHandlers;
 
 	useEffect(() => {
 		const targetEl = element && 'current' in element ? element.current : element;
 		if (!targetEl) return;
 		const cEventNames = Object.keys(savedHandlers.current) as KeyboardEventNames[];
-		cEventNames.forEach(event => {
-			targetEl.addEventListener(event, (e) => savedHandlers.current[event](e), options?.capture)
+		const listeners = cEventNames.map(event => {
+			const handler = (e: CustomEvent) => savedHandlers.current[event]?.(e);
+			targetEl.addEventListener(event, handler, options?.capture);
+			return { event, handler };
 		});
-		return () => cEventNames.forEach(event => {
-			targetEl.removeEventListener(event, (e) => savedHandlers.current[event](e), options?.capture)
+		return () => listeners.forEach(({ event, handler }) => {
+			targetEl.removeEventListener(event, handler, options?.capture)
 		});
-	}, [element]);
+	}, [element, options?.capture]);
 }
 
 export {
 	useExternalKeyboardControls,
-	ENTER_EVENT, 
-	DELETE_EVENT, 
-	BACKSPACE_EVENT, 
-	PASTE_EVENT, 
-	COPY_EVENT, 
-	CUT_EVENT, 
+	ENTER_EVENT,
+	DELETE_EVENT,
+	BACKSPACE_EVENT,
+	PASTE_EVENT,
+	COPY_EVENT,
+	CUT_EVENT,
 	TAB_EVENT
 };
 

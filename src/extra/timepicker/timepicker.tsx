@@ -13,7 +13,7 @@ import { TimeSliderBlock, TIME_ITEM_HEIGHT } from "./time-slider";
 import { copyToClipboard } from "../utils";
 import { identityAt } from "../../main/vdom-util";
 import { BACKSPACE_EVENT, COPY_EVENT, CUT_EVENT, DELETE_EVENT, ENTER_EVENT, PASTE_EVENT, useExternalKeyboardControls }
-    from "../focus-module-interface";
+    from "../external-keyboard-controls";
 import { createInputChange, createTimestampChange, parseStringToTime, isInputState, formatTimestamp, getCurrentFMTChar,
     getCurrentTokenValue, getAdjustedTime, isNumber, TIME_TOKENS, TOKEN_DATA } from "./time-utils";
 

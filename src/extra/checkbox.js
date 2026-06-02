@@ -1,7 +1,7 @@
 import { createElement as $, useState } from 'react'
 import clsx from 'clsx'
 import { useFocusControl } from './focus-control'
-import { useExternalKeyboardControls } from './focus-module-interface'
+import { useExternalKeyboardControls } from './external-keyboard-controls'
 import { Tooltip } from './tooltip'
 
 const CheckboxElement = (props) => {

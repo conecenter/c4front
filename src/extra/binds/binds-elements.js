@@ -4,7 +4,7 @@ import { useBinds, BindKeyData, useProvideBinds, OnPageBindContext } from './key
 import { KeyBinder } from './key-binder'
 import { firstChild } from './binds-utils'
 import { useFocusControl } from '../focus-control'
-import { TAB_EVENT } from '../focus-module-interface'
+import { TAB_EVENT } from '../external-keyboard-controls'
 import { useAddEventListener } from '../custom-hooks'
 import { SEL_FOCUS_FRAME, VISIBLE_CHILD_SELECTOR } from '../css-selectors'
 

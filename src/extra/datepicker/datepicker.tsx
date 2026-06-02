@@ -19,7 +19,7 @@ import {
 	ENTER_EVENT,
 	PASTE_EVENT,
 	useExternalKeyboardControls
-} from '../focus-module-interface';
+} from '../external-keyboard-controls';
 import {
 	patchSyncTransformers,
 	createInputChange,
