@@ -12,6 +12,8 @@ import ee.cone.c4vdom.{ToChildPair, ToJson, c4el, c4tagSwitch, c4tags, c4val}
 
 @c4tagSwitch("FrontApp") trait FontStyle extends ToJson
 
+@c4tagSwitch("FrontApp") trait Align extends ToJson
+
 @c4tags("FrontApp") trait CommonElementsTags {
   @c4val("p") def paletteColor(
     cssClass: String,
@@ -25,6 +27,11 @@ import ee.cone.c4vdom.{ToChildPair, ToJson, c4el, c4tagSwitch, c4tags, c4val}
   @c4val("b") def bold: FontStyle
   @c4val("i") def italic: FontStyle
   @c4val("m") def monospace: FontStyle
+
+  @c4val("l") def left: Align
+  @c4val("c") def center: Align
+  @c4val("r") def right: Align
+  @c4val("f") def fill: Align
 
   @c4val("text") def textElement(
     text: String,

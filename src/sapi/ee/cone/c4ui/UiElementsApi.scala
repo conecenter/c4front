@@ -1,6 +1,5 @@
 package ee.cone.c4ui
 
-import ee.cone.c4di._
 import ee.cone.c4ui.FrontTypes.Em
 import ee.cone.c4vdom.Types._
 import ee.cone.c4vdom._
@@ -15,8 +14,6 @@ import ee.cone.c4vdom._
   def max: Option[Em]
   def basis: Option[Em]
 }
-
-@c4tagSwitch("FrontApp") trait Align extends ToJson
 
 @c4tagSwitch("FrontApp") trait GroupboxDisplay extends ToJson
 
@@ -35,11 +32,6 @@ trait UIElement extends ToChildPair
     max: Option[Em],
     basis: Option[Em] = None,
   ): FlexSize
-
-  @c4val("l") def left: Align
-  @c4val("c") def center: Align
-  @c4val("r") def right: Align
-  @c4val("f") def fill: Align
 
   @c4el("FlexibleColumnRoot") def columnRoot(
     key: String,
