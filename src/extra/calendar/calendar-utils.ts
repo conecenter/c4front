@@ -1,9 +1,10 @@
+import { CalendarProps } from "../../sapi/ee/cone/c4ui/c4gen.CalendarApi";
 import { ColorProps, colorToProps } from "../view-builder/common-api";
-import { Calendar, CalendarEvent } from "./calendar";
+import { CalendarEvent, CalendarInternal } from "./calendar";
 import { EventInput } from "@fullcalendar/core";
 
 // Server sends timestamps as strings due to Scala Long type may give error in transition to JS number in big numbers
-function transformDateFormatProps(props: Calendar<string>): Calendar<number> {
+function transformDateFormatProps(props: CalendarProps): CalendarInternal {
     const { identity, allDaySlot, eventsChildren } = props;
     const events = props.events.map(event => ({
         ...event,

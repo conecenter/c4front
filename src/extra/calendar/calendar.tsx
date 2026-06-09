@@ -14,6 +14,7 @@ import { transformDateFormatProps } from './calendar-utils';
 import { EventContent } from './event-content';
 import { escapeRegex } from '../utils';
 
+import type { CalendarProps } from '../../sapi/ee/cone/c4ui/c4gen.CalendarApi';
 import type { DatesSetArg, EventContentArg, FormatterInput, SlotLabelContentArg, ViewApi } from '@fullcalendar/core';
 
 const TIME_FORMAT: FormatterInput = {
@@ -23,45 +24,45 @@ const TIME_FORMAT: FormatterInput = {
     meridiem: false
 }
 
-interface Calendar<DateFormat = number> {
+interface CalendarInternal {
     identity: object,
-    events: CalendarEvent<DateFormat>[],
-    currentView?: ViewInfo<DateFormat>,
-    slotDuration?: DateFormat,
-    businessHours?: BusinessHours<DateFormat>,
+    events: CalendarEvent[],
+    currentView?: ViewInfo,
+    slotDuration?: number,
+    businessHours?: BusinessHours,
     allDaySlot?: boolean,
-    timeSlotsRange?: TimeRange<DateFormat>,
+    timeSlotsRange?: TimeRange,
     eventsChildren?: ReactElement[]
 }
 
-interface CalendarEvent<DateFormat = number> {
+interface CalendarEvent {
     id: string,
-    start?: DateFormat,
-    end?: DateFormat,
+    start?: number,
+    end?: number,
     title?: string,
     allDay?: boolean,
     color?: ColorDef,
     editable?: boolean
 }
 
-interface TimeRange<DateFormat = number> {
-    from: DateFormat,
-    to: DateFormat
+interface TimeRange {
+    from: number,
+    to: number
 }
 
-interface ViewInfo<DateFormat = number> extends TimeRange<DateFormat> {
+interface ViewInfo extends TimeRange {
     viewType: ViewType
 }
 
 type ViewType = 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay';
 
-interface BusinessHours<DateFormat = number> {
+interface BusinessHours {
     daysOfWeek: number[],   // 0 = Sunday
-    startTime: DateFormat,
-    endTime: DateFormat
+    startTime: number,
+    endTime: number
 }
 
-function Calendar(props: Calendar<string>) {
+function Calendar(props: CalendarProps) {
     const { identity, events, currentView: serverView, slotDuration, businessHours, allDaySlot, timeSlotsRange, eventsChildren } =
         useMemo(() => transformDateFormatProps(props), [props]);
 
@@ -167,5 +168,5 @@ function fixMidnightPresentation(info: SlotLabelContentArg) {
     return info.text.replace(/^24/, '00');
 }
 
-export type { CalendarEvent, ViewInfo, ViewType }
+export type { CalendarInternal, CalendarEvent, ViewInfo, ViewType }
 export { Calendar }
