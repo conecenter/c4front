@@ -1,10 +1,10 @@
-import React, { ReactElement, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import React, { ReactElement, useCallback, useContext, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import clsx from 'clsx';
 import { usePopupPos } from '../../main/popup';
 import { useClickSync } from '../exchange/click-sync';
 import { useFocusControl } from '../focus-control';
-import { MenuItem, MenuItemState } from './main-menu-bar';
+import { MenuItem } from './main-menu-bar';
 import { ENTER_KEY } from '../../main/keyboard-keys';
 import { MenuFolderItem } from './menu-folder-item';
 import { BindingElement } from '../binds/binds-elements';
@@ -16,20 +16,11 @@ import { VISIBLE_CHILD_SELECTOR } from '../css-selectors';
 import { PopupDrawerContext } from '../popup-elements/popup-contexts';
 import { useAddEventListener } from '../custom-hooks';
 import { elementsContainTarget } from '../popup-elements/popup-element';
+import { MenuCustomItemProps, MenuExecutableItemProps, MenuItemsGroupProps, MenuUserItemProps } from 'c4f/sapi/ee/cone/c4ui/c4gen.MainMenuApi';
 
 const receiverIdOf = identityAt('receiver');
 
-interface MenuExecutableItem {
-    key: string,
-	identity: object,
-    name: string,
-    current: boolean,
-    path?: string,
-    icon?: string,
-    bindSrcId?: string
-}
-
-function MenuExecutableItem({identity, name, current, path, icon, bindSrcId}: MenuExecutableItem) {
+function MenuExecutableItem({identity, name, current, path, icon, bindSrcId}: MenuExecutableItemProps) {
     const { clicked, onClick } = useClickSync(receiverIdOf(identity));
 
     const { focusClass, focusHtml } = useFocusControl(path);
@@ -61,15 +52,7 @@ function MenuExecutableItem({identity, name, current, path, icon, bindSrcId}: Me
     );
 }
 
-
-interface MenuCustomItem {
-    key: string,
-	identity: object,
-    path?: string,
-    children?: ReactNode
-}
-
-function MenuCustomItem({path, children}: MenuCustomItem) {
+function MenuCustomItem({path, children}: MenuCustomItemProps) {
     const { focusClass, focusHtml } = useFocusControl(path);
 
     return (
@@ -84,7 +67,7 @@ interface MenuPopupElement {
     popupLrMode: boolean,
     keyboardOperation: React.MutableRefObject<boolean>,
     closePopup: () => void,
-    children?: ReactElement<MenuItem | MenuItemsGroup>[]
+    children?: ReactElement<MenuItem | MenuItemsGroupProps>[]
 }
 
 function MenuPopupElement({popupLrMode, keyboardOperation, closePopup, children}: MenuPopupElement) {
@@ -141,13 +124,7 @@ function hasIconProp(child: JSX.Element): string | undefined {
 }
 
 
-interface MenuItemsGroup {
-    key: string,
-	identity?: object,
-    children: ReactElement<MenuItem>[]
-}
-
-function MenuItemsGroup({children}: MenuItemsGroup) {
+function MenuItemsGroup({children}: Omit<MenuItemsGroupProps, 'identity'>) {
     return (
         <>
             <hr/>{children}<hr/>
@@ -156,21 +133,7 @@ function MenuItemsGroup({children}: MenuItemsGroup) {
 }
 
 
-interface MenuUserItem {
-    key: string,
-	identity: object,
-    shortName: string,
-    longName: string,
-    current: boolean,
-    state: MenuItemState,
-    path: string,
-    icon?: string,
-    bindSrcId?: string,
-    groupId?: string,
-    children: ReactElement<MenuItem | MenuItemsGroup>[]
-}
-
-const MenuUserItem = (props: MenuUserItem) => (
+const MenuUserItem = (props: MenuUserItemProps) => (
     <MenuFolderItem {...props} key={'mi-user-item'} shortName={props.shortName} name={props.longName} />
 );
 

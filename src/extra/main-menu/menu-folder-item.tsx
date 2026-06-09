@@ -1,8 +1,8 @@
-import React, { ReactElement, useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { useFocusControl } from '../focus-control';
-import { MenuItemState, MenuControlsContext } from './main-menu-bar';
-import { MenuItem, MenuItemsGroup, MenuPopupElement } from './main-menu-items';
+import { MenuControlsContext } from './main-menu-bar';
+import { MenuPopupElement } from './main-menu-items';
 import { handleArrowUpDown, patchToState, stateToPatch } from './main-menu-utils';
 import {
     ARROW_DOWN_KEY,
@@ -18,6 +18,7 @@ import { SVGElement } from '../../main/image';
 import { identityAt } from '../../main/vdom-util';
 import { usePatchSync } from '../exchange/patch-sync';
 import { PathContext } from "../focus-announcer";
+import { MenuFolderItemProps, MenuItemState } from 'c4f/sapi/ee/cone/c4ui/c4gen.MainMenuApi';
 
 const receiverIdOf = identityAt('receiver');
 
@@ -34,21 +35,7 @@ const ARROW_DOWN_ICON = (
     </svg>
 );
 
-interface MenuFolderItem {
-    key: string,
-	identity: object,
-    name: string,
-    shortName?: string,
-    current: boolean,
-    state: MenuItemState,
-    path: string,
-    bindSrcId?: string,
-    groupId?: string,
-    icon?: string,
-    children?: ReactElement<MenuItem | MenuItemsGroup>[]
-}
-
-function MenuFolderItem(props: MenuFolderItem) {
+function MenuFolderItem(props: MenuFolderItemProps & { shortName?: string }) {
     const {identity, name, shortName, current, state, icon, path, bindSrcId, groupId, children} = props;
 
     const {

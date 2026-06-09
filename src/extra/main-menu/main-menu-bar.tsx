@@ -14,7 +14,8 @@ import {VISIBLE_CHILD_SELECTOR} from "../css-selectors";
 import {identityAt} from "../../main/vdom-util";
 import {usePatchSync} from "../exchange/patch-sync";
 import {PathContext} from "../focus-announcer";
-import { SVGElement } from "../../main/image";
+import {SVGElement} from "../../main/image";
+import {MainMenuBarProps, MenuCustomItemProps, MenuExecutableItemProps, MenuFolderItemProps, MenuItemState, MenuUserItemProps} from "c4f/sapi/ee/cone/c4ui/c4gen.MainMenuApi";
 
 const MENU_BAR_PATH = 'main-menu-bar';
 const KEY_MODIFICATOR = { ArrowLeft: -1, ArrowRight: 1 };
@@ -41,22 +42,9 @@ const isMenuFolderType = (item: ReactElement) => item.type === MenuFolderItem ||
 const isMenuOpenCombo = (e: KeyboardEvent) => (e.ctrlKey || e.altKey) && e.key === M_KEY;
 
 
-interface MainMenuBar {
-  key: string,
-  identity: object,
-  state: MenuItemState,
-  icon?: string
-  leftChildren: ReactElement<MenuItem>[],
-  rightChildren?: ReactElement<MenuItem | MainMenuClock>[]
-}
+type MenuItem = MenuFolderItemProps | MenuExecutableItemProps | MenuCustomItemProps | MenuUserItemProps;
 
-type MenuItem = MenuFolderItem | MenuExecutableItem | MenuCustomItem | MenuUserItem;
-
-interface MenuItemState {
-  opened: boolean
-}
-
-function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainMenuBar) {
+function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainMenuBarProps) {
   const {
     currentState: {opened},
     sendFinalChange: setFinalState
@@ -78,7 +66,7 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
   );
 
   const leftMenuWithIcons = (
-    <Expander key='left-menu-with-icons' className='leftMenuBox' area="lt" expandTo={leftMenuWithLogo}>
+    <Expander key='left-menu-with-icons' className='leftMenuBox' area="lt" expandTo={leftMenuWithLogo ? [leftMenuWithLogo] : undefined}>
       {leftChildren}
     </Expander>
   );
@@ -88,7 +76,7 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
               className='leftMenuBox hiddenIcons'
               area="lt"
               expandOrder={3}
-              expandTo={leftMenuWithIcons}>
+              expandTo={[leftMenuWithIcons]}>
       {leftChildren}
     </Expander>
   );
@@ -98,9 +86,9 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
 
   const rightMenuExpanded = (
     <Expander key='right-menu-reduced' className='rightMenuBox rightMenuCompressed' expandOrder={2} area='rt' expandTo={
-      <Expander key='right-menu-expanded' className='rightMenuBox' area='rt'>
+      [<Expander key='right-menu-expanded' className='rightMenuBox' area='rt'>
         {rightChildren}
-      </Expander>
+      </Expander>]
     }>
       {rightChildren}
     </Expander>
@@ -117,7 +105,7 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
         const isBurgerMenu = domRef.current?.matches(VISIBLE_CHILD_SELECTOR);
         if (isBurgerMenu) setFinalState({ opened: true });
         window!.scrollTo({top: 0});
-        const firstFocusablePath = leftChildren[0].props.path;
+        const firstFocusablePath = leftChildren?.[0].props.path;
         const pathSelector = `[data-path='${firstFocusablePath}']`;
         const firstFocusableItem: HTMLElement | null = isBurgerMenu 
             ? domRef.current!.querySelector(pathSelector)
@@ -157,7 +145,7 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
   const onArrowLeftRight: OnArrowLeftRight = useCallback((path, elem, key, isOpened) => {
     if (!ready.current) return;
     ready.current = false;
-    const menuItems = [...leftChildren, ...(rightChildren || [])];
+    const menuItems = [...(leftChildren || []), ...(rightChildren || [])];
     const doc =  elem.ownerDocument;
     const openedMenuFolderIndex = menuItems.findIndex(child => child.props.path === path);
     if (openedMenuFolderIndex === -1 || !doc) return;
@@ -188,9 +176,9 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
                           onBlur: handleMenuBarBlur
                         }}
                         expandTo={[
-            <Expander key='left-menu-compressed' area="lt" expandOrder={1} expandTo={leftMenuExpanded}>
+            <Expander key='left-menu-compressed' area="lt" expandOrder={1} expandTo={[leftMenuExpanded]}>
               <BurgerMenu identity={identity} opened={opened} setFinalState={setFinalState} domRef={domRef}>
-                {leftChildren}
+                {leftChildren || []}
               </BurgerMenu>
             </Expander>,
 
@@ -198,7 +186,7 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
                       className='rightMenuBox rightMenuCompressed'
                       area="rt"
                       expandOrder={0}
-                      expandTo={rightMenuExpanded}>
+                      expandTo={[rightMenuExpanded]}>
               {rightMenuCompressed}
             </Expander>
           ]}/>
@@ -209,7 +197,7 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
 }
 
 function getRightMenuCompressed(rightChildren: ReactElement<MenuItem>[]) {
-  const menuUserItem = rightChildren.find(child => child.type === MenuUserItem) as ReactElement<MenuUserItem> | undefined;
+  const menuUserItem = rightChildren.find(child => child.type === MenuUserItem) as ReactElement<MenuUserItemProps> | undefined;
   if (!menuUserItem) return null;
 
   const rightChildrenFiltered = rightChildren
@@ -321,4 +309,4 @@ export const mainMenuComponents = {
 };
 
 export { MenuControlsContext };
-export type { MenuItemState, MenuItem };
+export type { MenuItem };

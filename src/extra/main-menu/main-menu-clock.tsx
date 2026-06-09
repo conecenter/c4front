@@ -9,19 +9,12 @@ import { useFocusControl } from '../focus-control';
 import { VISIBLE_CHILD_SELECTOR } from '../css-selectors';
 import type { Locale } from 'date-fns'
 import type { SendPatch } from '../exchange/patch-sync';
+import { MainMenuClockProps } from 'c4f/sapi/ee/cone/c4ui/c4gen.MainMenuApi';
 
 interface IntlLocales {
 	[name: string]: Locale
 }
 const INTL_LOCALES: IntlLocales = { bg, de, daDK: da, et, en: enGB, lt, pl, rmRO: ro, ru, ukUA: uk, it };
-
-interface MainMenuClock {
-	key: string,
-	identity: object,
-	serverTime: string,
-	timestampFormatId: number,
-	path: string
-}
 
 const SYNC_INTERVAL = 600000;
 
@@ -29,7 +22,7 @@ const timeSyncIdOf = identityAt('timeSync');
 
 const calcOffset = (timestamp: number) => timestamp - Date.now();
 
-function MainMenuClock({ identity, serverTime, timestampFormatId, path }: MainMenuClock) {
+function MainMenuClock({ identity, serverTime, timestampFormatId, path }: MainMenuClockProps) {
 	const localOffsetRef = useRef(calcOffset(Number(serverTime)));
 	const [isSynced, setIsSynced] = useState(Math.abs(localOffsetRef.current) < 1000);
 	const [timestamp, setTimestamp] = useState(isSynced ? (Date.now() + localOffsetRef.current) : 0);

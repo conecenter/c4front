@@ -1,35 +1,27 @@
-import React, { useState, useEffect, ReactNode } from 'react'
+import React, { useState, useEffect } from 'react'
 import clsx from 'clsx'
 import closeImg from './close.svg'
 import { ImageElement, SVGElement } from '../../main/image'
 import { useFocusControl } from '../focus-control'
 import { copyToClipboard } from '../utils'
-import { ColorDef, colorToProps } from '../view-builder/common-api'
+import { colorToProps } from '../view-builder/common-api'
 import { useClickSyncOpt } from '../exchange/click-sync'
 import { usePath } from '../../main/vdom-hooks'
 import { identityAt } from '../../main/vdom-util'
 import { Tooltip } from '../tooltip'
 import { useAddEventListener } from '../custom-hooks'
 
+import type { ChipElementProps } from 'c4f/sapi/ee/cone/c4ui/c4gen.ChipElementApi'
+
 const receiverIdOf = identityAt('receiver');
 const delActionIdOf = identityAt('delAction');
 
-interface ChipElement {
-    identity: object,
-    receiver?: boolean,
-    delAction?: boolean,
-    text?: string,
-    color?: ColorDef,
-    tooltip?: string,
-    iconPath?: string,
-    link?: string,
-    openNewTab?: boolean,
-    onClick?: () => void,
-    callbackRef?: (elem: HTMLDivElement | null) => void,    // used for new unfinished MultiDropdown, TBD if still needed
-    children?: ReactNode
+interface ChipElementClientProps extends ChipElementProps {
+    openNewTab?: boolean
+    onClick?: () => void
 }
 
-const ChipElement = ({identity, receiver, delAction, text = '', color, tooltip, iconPath, link, openNewTab, children, ...props}: ChipElement) => {
+const ChipElement = ({identity, receiver, delAction, text, color, tooltip, iconPath, link, openNewTab, children, ...props}: ChipElementClientProps) => {
     const { onClick } = useClickSyncOpt(receiverIdOf(identity), receiver);
     const { onClick: onDelete } = useClickSyncOpt(delActionIdOf(identity), delAction);
 
@@ -108,4 +100,5 @@ function useOnEnter() {
     return setElem;
 }
 
+export type { ChipElementClientProps }
 export { ChipElement }
