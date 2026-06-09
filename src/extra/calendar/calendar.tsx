@@ -9,12 +9,12 @@ import allLocales from '@fullcalendar/core/locales-all';
 import { useUserLocale } from '../locale';
 import { useEventClickAction, useEventsSync, useViewSync } from './calendar-exchange';
 import { LoadingIndicator } from '../loading-indicator';
-import { ColorDef } from '../view-builder/common-api';
 import { transformDateFormatProps } from './calendar-utils';
 import { EventContent } from './event-content';
 import { escapeRegex } from '../utils';
 
 import type { CalendarProps } from '../../sapi/ee/cone/c4ui/c4gen.CalendarApi';
+import type { ColorDef } from 'c4f/sapi/ee/cone/c4ui/c4gen.CommonElementsApi';
 import type { DatesSetArg, EventContentArg, FormatterInput, SlotLabelContentArg, ViewApi } from '@fullcalendar/core';
 
 const TIME_FORMAT: FormatterInput = {

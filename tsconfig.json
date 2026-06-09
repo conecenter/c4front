@@ -19,7 +19,10 @@
     "jsx": "react",
     "noImplicitAny": true,
     "removeComments": true,
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "c4f/*": ["./src/*"]
+    },
   },
   "include": [
     "./src"
