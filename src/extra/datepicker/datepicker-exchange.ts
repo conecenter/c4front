@@ -1,4 +1,4 @@
-import { DatePickerServerState } from "./datepicker";
+import { DatePickerServerState } from 'c4f/sapi/ee/cone/c4ui/c4gen.LocaleTagsApi';
 import { Patch, PatchHeaders } from '../exchange/patch-sync';
 
 type DatePickerState = (TimestampState | InputState) & PopupState

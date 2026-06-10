@@ -1,38 +1,20 @@
-import React, { useRef, useState, useLayoutEffect, ReactNode } from "react";
+import React, { useRef, useState, useLayoutEffect } from "react";
 import { InputElement } from "../input-element";
 import { usePatchSync, Patch } from "../exchange/patch-sync";
-import { patchSyncTransformers, InputStateChange } from "./number-formatting-input-exchange";
+import { patchSyncTransformers } from "./number-formatting-input-exchange";
 import { useUserLocale } from "../locale";
 import { escapeRegex } from "../utils";
 import { usePath } from "../../main/vdom-hooks";
 import { identityAt } from "../../main/vdom-util";
+import { InputNumberServerState, NumberFormattingInputProps, NumberNumberServerState } from "c4f/sapi/ee/cone/c4ui/c4gen.LocaleTagsApi";
 
 const receiverIdOf = identityAt('receiver');
 
-interface NumberFormattingInput {
-    key?: string,
-    identity: object,
-    state: NumberFormattingInputState,
-    showThousandSeparator: boolean,
-    scale: number,    // round decimal part to this many numbers RoundingMode.HALF_UP
-    minFraction: number,    // min this many symbols after decimal separator
-    placeholder?: string,
-    children?: ReactNode
-}
-
-type NumberFormattingInputState = InputState | NumberState;
-
-interface InputState {
-    inputValue: string,
-    tempNumber?: number
-}
-
-interface NumberState {
-    number: number
-}
+// scale - round decimal part to this many numbers RoundingMode.HALF_UP
+// minFraction - min this many symbols after decimal separator
 
 function NumberFormattingInput(
-    {identity, state, showThousandSeparator, scale, minFraction, placeholder, children}: NumberFormattingInput
+    {identity, state, showThousandSeparator, scale, minFraction, placeholder, children}: NumberFormattingInputProps
 ) {
     const { thousandSeparator, decimalSeparator } = useUserLocale().numberFormat;
     const path = usePath(identity);
@@ -69,7 +51,7 @@ function NumberFormattingInput(
         [isFocused]
     );
 
-    function formatNumber(number: number | ''): string {
+    function formatNumber(number: string): string {
         if (number === '') return '';
         const roundedNumber = roundToScale(number, scale);
         const [wholePart, decimalPart] = roundedNumber.toString().split('.');
@@ -97,28 +79,28 @@ function NumberFormattingInput(
     );
 }
 
-function isInputState(state: InputState | NumberState): state is InputState {
-    return (state as InputState).inputValue !== undefined;
+function isInputState(state: InputNumberServerState | NumberNumberServerState): state is InputNumberServerState {
+    return (state as InputNumberServerState).inputValue !== undefined;
 }
 
-function createInputStateChange(inputValue: string, decimalSeparator: string): InputStateChange {
-    return { tp: 'inputState', inputValue, tempNumber: parseInputValue(inputValue, decimalSeparator) };
+function createInputStateChange(inputValue: string, decimalSeparator: string): InputNumberServerState {
+    return { tp: 'input-state', inputValue, tempNumber: parseInputValue(inputValue, decimalSeparator)?.toString() };
 }
 
-function createFinalChange(state: InputState) {
+function createFinalChange(state: InputNumberServerState) {
     const { inputValue, tempNumber } = state;
     return tempNumber !== undefined
-        ? { tp: 'numberState' as const, number: tempNumber } : { tp: 'inputState' as const, inputValue };
+        ? { tp: 'number-state' as const, number: tempNumber } : { tp: 'input-state' as const, inputValue };
 }
 
-function parseInputValue(value: string, decimalSeparator: string): number | undefined {
+function parseInputValue(value: string, decimalSeparator: string) {
     const escapedSeparator = escapeRegex(decimalSeparator);
     const regex = new RegExp(`(^\\s*-)|\\d|(?<!(${escapedSeparator}.*))${escapedSeparator}`, 'g');
     const parsedString = value.match(regex)?.join('').replace(`${decimalSeparator}`, '.');
     return parsedString ? Number(parsedString) : undefined;
 }
 
-function roundToScale(num: number, scale: number) {
+function roundToScale(num: string, scale: number) {
     return Number(Math.round(+`${num}e${scale}`) + `e-${scale}`);
 }
 
@@ -141,5 +123,4 @@ function calcCorrectedCaretPosition(input: HTMLInputElement, separator: string) 
     return separatorsBeforeCaret ? caretPos - separatorsBeforeCaret : caretPos;
 }
 
-export type { NumberFormattingInputState, InputState, NumberState };
 export { NumberFormattingInput, parseInputValue };

@@ -1,22 +1,13 @@
+import { NumberInputServerState } from "c4f/sapi/ee/cone/c4ui/c4gen.LocaleTagsApi";
 import { Patch } from "../exchange/patch-sync";
-import type { InputState, NumberFormattingInputState, NumberState } from "./number-formatting-input";
 
-type StateChange = InputStateChange | NumberStateChange;
 
-interface InputStateChange extends InputState {
-    tp: 'inputState'
-}
+const serverToState = (s: NumberInputServerState) => s
 
-interface NumberStateChange extends NumberState {
-    tp: 'numberState'
-}
-
-const serverToState = (s: NumberFormattingInputState) => s
-
-function changeToPatch(ch: StateChange): Patch {
-    const getTpHeader = (tp: 'inputState' | 'numberState') => ({ 'x-r-change-tp': tp });
+function changeToPatch(ch: NumberInputServerState): Patch {
+    const getTpHeader = (tp: 'input-state' | 'number-state') => ({ 'x-r-change-tp': tp });
     switch (ch.tp) {
-        case 'inputState':
+        case 'input-state':
             return {
                 value: ch.inputValue,
                 headers: {
@@ -24,7 +15,7 @@ function changeToPatch(ch: StateChange): Patch {
                     ...ch.tempNumber !== undefined && { 'x-r-temp-number': String(ch.tempNumber) }
                 }
             };
-        case 'numberState':
+        case 'number-state':
             return {
                 value: '',
                 headers: {
@@ -35,27 +26,26 @@ function changeToPatch(ch: StateChange): Patch {
     }
 }
 
-function patchToChange({ value, headers }: Patch): StateChange {
-    const tp = headers!['x-r-change-tp'] as 'inputState' | 'numberState';
+function patchToChange({ value, headers }: Patch): NumberInputServerState {
+    const tp = headers!['x-r-change-tp'] as 'input-state' | 'number-state';
     switch (tp) {
-        case 'inputState': {
+        case 'input-state': {
             const tempNumber = headers!['x-r-temp-number'];
             return {
                 tp,
                 inputValue: value,
-                ...tempNumber !== undefined && { tempNumber: +tempNumber }
+                ...tempNumber !== undefined && { tempNumber }
             }
         }
-        case 'numberState':
+        case 'number-state':
             return {
                 tp,
-                number: +headers!['x-r-number'] };
+                number: headers!['x-r-number'] };
     }
 }
 
-const applyChange = (_prev: NumberFormattingInputState, ch: StateChange) => ch;
+const applyChange = (_prev: NumberInputServerState, ch: NumberInputServerState) => ch;
 
 const patchSyncTransformers = { serverToState, changeToPatch, patchToChange, applyChange };
 
-export type { InputStateChange };
 export { patchSyncTransformers };

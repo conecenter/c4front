@@ -13,13 +13,12 @@ import ee.cone.c4vdom._
 @c4tagSwitch("FrontApp") trait NumberFormat extends ToJson
 
 trait DatePickerProps extends ToChildPair
-sealed trait DatePickerServerState extends ToJson
-@c4tagSwitch("FrontApp") trait PopupServerState extends DatePickerServerState
-@c4tagSwitch("FrontApp") trait TimestampServerState extends PopupServerState
-@c4tagSwitch("FrontApp") trait InputServerState extends PopupServerState
+@c4tagSwitch("FrontApp") trait DatePickerServerState extends ToJson
+@c4tagSwitch("FrontApp") trait TimestampServerState extends DatePickerServerState
+@c4tagSwitch("FrontApp") trait InputServerState extends DatePickerServerState
 
 trait NumberInputProps extends ToChildPair
-@c4tagSwitch("FrontApp")  trait NumberInputServerState extends ToJson
+@c4tagSwitch("FrontApp") trait NumberInputServerState extends ToJson
 @c4tagSwitch("FrontApp") trait InputNumberServerState extends NumberInputServerState
 @c4tagSwitch("FrontApp") trait NumberNumberServerState extends NumberInputServerState
 
@@ -31,7 +30,7 @@ trait TimePickerProps extends ToChildPair
 @c4tags("FrontApp") trait LocaleInputTags[C] {
   @c4elPath("DatePickerInputElement") def datePicker(
     key: String,
-    state: PopupServerState,
+    state: DatePickerServerState,
     timestampFormatId: Int,
     receiver: Receiver[C],
     placeHolder: Option[String] = None,
@@ -51,7 +50,7 @@ trait TimePickerProps extends ToChildPair
     popupDate: String = "",
   ): InputServerState
 
-  @c4elPath("NumberFormattingInput") def numberInput(
+  @c4el("NumberFormattingInput") def numberInput(
     key: String,
     state: NumberInputServerState,
     showThousandSeparator: Boolean,

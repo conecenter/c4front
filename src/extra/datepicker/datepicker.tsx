@@ -1,4 +1,4 @@
-import React, {ReactNode, useContext, useEffect, useRef} from "react";
+import React, {useContext, useEffect, useRef} from "react";
 import clsx from 'clsx';
 import {getDateTimeFormat, useUserLocale} from "../locale";
 import {DateSettings, formatDate, getDate, getPopupDate, parseStringToDate} from "./date-utils";
@@ -35,36 +35,7 @@ import {
 	onTimestampChangeAction,
 	getOnInputBoxBlur
 } from "./datepicker-actions";
-
-
-type DatePickerServerState = TimestampServerState | InputServerState
-
-interface InputServerState extends PopupServerState {
-	tp: 'input-state',
-	inputValue: string,
-	tempTimestamp?: string
-}
-
-interface TimestampServerState extends PopupServerState {
-	tp: 'timestamp-state',
-	timestamp: string
-}
-
-interface PopupServerState {
-	popupDate?: string
-}
-
-interface DatePickerProps {
-	key: string
-	identity: object
-	state: DatePickerServerState
-	timestampFormatId: number
-	userTimezoneId?: string
-	deferredSend?: boolean,
-	placeHolder?: string,
-	path: string,
-	children?: ReactNode[]
-}
+import { DatePickerInputElementProps } from "c4f/sapi/ee/cone/c4ui/c4gen.LocaleTagsApi";
 
 const receiverIdOf = identityAt('receiver');
 
@@ -77,7 +48,7 @@ export function DatePickerInputElement({
 		placeHolder,
 		path,
 		children
-}: DatePickerProps) {
+}: DatePickerInputElementProps) {
 	const locale = useUserLocale()
 	const timezoneId = userTimezoneId ? userTimezoneId : locale.timezoneId
 	const timestampFormat = getDateTimeFormat(timestampFormatId, locale)
@@ -297,4 +268,3 @@ function isVkEvent(e: CustomEvent<{key: string, vk: boolean}>) {
 }
 
 export const components = {DatePickerInputElement}
-export type {DatePickerServerState}
