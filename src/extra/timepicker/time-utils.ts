@@ -1,5 +1,5 @@
+import { InputTimePickerState, TimePickerState, TimestampTimePickerState } from "c4f/sapi/ee/cone/c4ui/c4gen.LocaleTagsApi";
 import { NumberToken, TimeToken, Token, tokenizeString } from "../datepicker/date-utils";
-import { InputState, TimePickerState, TimestampState } from "./timepicker";
 
 // Time calculations helpers
 const MAX_TIMESTAMP = 24 * 60 * 60 * 1000;
@@ -55,20 +55,20 @@ const TOKEN_DATA: TokenInfo = {
 }
 
 const getCurrentTokenValue = (state: TimePickerState, token: string) => TOKEN_DATA[token].get(
-    (state as TimestampState).timestamp ?? (state as InputState).tempTimestamp ?? 0
+    (state as TimestampTimePickerState).timestamp ?? (state as InputTimePickerState).tempTimestamp ?? 0
 );
 
 
 // Timepicker state helpers
-const isInputState = (state: TimestampState | InputState): state is InputState => state.tp === 'input-state';
+const isInputState = (state: TimePickerState): state is InputTimePickerState => state.tp === 'input-state';
 
-const createInputChange = (inputValue: string, tempTimestamp?: number): InputState => ({
+const createInputChange = (inputValue: string, tempTimestamp?: number): InputTimePickerState => ({
     tp: 'input-state',
 	inputValue,
     tempTimestamp
 });
 
-const createTimestampChange = (timestamp: number): TimestampState => ({
+const createTimestampChange = (timestamp: number): TimestampTimePickerState => ({
     tp: 'timestamp-state',
     timestamp
 });

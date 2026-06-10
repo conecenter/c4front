@@ -1,4 +1,4 @@
-import React, { ReactNode, useRef } from "react";
+import React, { useRef } from "react";
 import clsx from "clsx";
 import { usePatchSync } from "../exchange/patch-sync";
 import { patchSyncTransformers } from "./timepicker-exchange";
@@ -16,40 +16,18 @@ import { BACKSPACE_EVENT, COPY_EVENT, CUT_EVENT, DELETE_EVENT, ENTER_EVENT, PAST
     from "../external-keyboard-controls";
 import { createInputChange, createTimestampChange, parseStringToTime, isInputState, formatTimestamp, getCurrentFMTChar,
     getCurrentTokenValue, getAdjustedTime, isNumber, TIME_TOKENS, TOKEN_DATA } from "./time-utils";
+import { InputTimePickerState, TimePickerProps, TimePickerState } from "c4f/sapi/ee/cone/c4ui/c4gen.LocaleTagsApi";
 
 const receiverIdOf = identityAt('receiver');
 
-interface TimePickerProps {
-	key: string,
-	identity: object,
-	state: TimePickerState,
-    offset?: number,
-    timestampFormatId: number,
-    readonly?: boolean,
-	children?: ReactNode[]
-}
-
-type TimePickerState = InputState | TimestampState;
-
-interface InputState {
-	tp: 'input-state',
-	inputValue: string,
-    tempTimestamp?: number
-}
-
-interface TimestampState {
-	tp: 'timestamp-state',
-	timestamp: number
-}
-
-function TimePicker({identity, state, offset, timestampFormatId, readonly, children}: TimePickerProps) {
+function TimePicker({identity, state, offset, timestampFormatId, deferredSend = false, receiver, children}: TimePickerProps) {
     const inputRef = useRef<HTMLInputElement>(null);
     const inputBoxRef = useRef<HTMLInputElement>(null);
     const lastFinalState = useRef(state);  // return last final state on Esc
 
     // Server exchange initialization
     const { currentState, sendTempChange, sendFinalChange: onFinalChange, wasChanged } =
-        usePatchSync(receiverIdOf(identity), state, true, patchSyncTransformers);
+        usePatchSync(receiverIdOf(identity), state, deferredSend, patchSyncTransformers);
 
     const sendFinalChange = (change: TimePickerState) => {
         if (wasChanged) {
@@ -89,7 +67,7 @@ function TimePicker({identity, state, offset, timestampFormatId, readonly, child
         const timestamp = isInputState(state) ? parseStringToTime(state.inputValue, usedTokens) : state.timestamp;
         return isNumber(timestamp)
             ? createTimestampChange(timestamp)
-            : createInputChange((state as InputState).inputValue);
+            : createInputChange((state as InputTimePickerState).inputValue);
     }
 
     // Event handlers
@@ -161,6 +139,8 @@ function TimePicker({identity, state, offset, timestampFormatId, readonly, child
 		[CUT_EVENT]: handleClipboardWrite
 	};
 
+    const readonly = !receiver;
+
 	useExternalKeyboardControls(!readonly ? inputRef : null, keyboardEventHandlers);
 
     return (
@@ -205,6 +185,4 @@ function TimePicker({identity, state, offset, timestampFormatId, readonly, child
     );
 }
 
-
-export type { TimePickerState, TimestampState, InputState };
 export { TimePicker };

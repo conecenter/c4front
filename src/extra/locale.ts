@@ -1,42 +1,7 @@
-import {createContext, createElement, ReactNode, useContext, useMemo} from "react";
+import {createContext, createElement, useContext, useMemo} from "react";
 import {getOrElse, None, Option, toOption} from "../main/option";
 import TrieSearch from "trie-search";
-
-interface WeekDay {
-    id: number
-    shortName: string
-    fullName: string
-}
-
-interface Month {
-    id: number
-    shortName: string
-    fullName: string
-}
-
-interface DateTimeFormat {
-    id: number
-    pattern: string
-}
-
-interface NumberFormat {
-    thousandSeparator: string
-    decimalSeparator: string
-}
-
-interface Locale {
-    timezoneId: string
-    shortName: string
-    lang: string
-    weekDays: WeekDay[]
-    months: Month[]
-    dateTimeFormats: DateTimeFormat[]
-    timeFormats: DateTimeFormat[]
-    defaultDateTimeFormatId: number
-    btnNowText: string,
-    btnCloseText: string,
-    numberFormat: NumberFormat
-}
+import { Locale, WeekDay, Month, DateTimeFormat, NumberFormat, UserLocaleProviderProps } from "c4f/sapi/ee/cone/c4ui/c4gen.LocaleTagsApi";
 
 interface TextFormatToken {
     type: "text"
@@ -129,6 +94,9 @@ interface ExtendedLocale extends Locale {
     getMonthNameFull(id: number): string
 
     getMonthByPrefix(prefix: string): Option<Month>
+
+    btnNowText: string
+    btnCloseText: string
 }
 
 function getExtendedLocale(locale: Locale): ExtendedLocale {
@@ -214,8 +182,6 @@ class DefaultLocale implements Locale {
         }
     ]
     defaultDateTimeFormatId = 0
-    btnNowText = 'Now'
-    btnCloseText = 'Close'
     numberFormat: NumberFormat = {
         thousandSeparator: ',',
         decimalSeparator: '.'
@@ -226,11 +192,6 @@ const UserLocaleContext = createContext<ExtendedLocale>(getExtendedLocale(new De
 UserLocaleContext.displayName = 'UserLocaleContext'
 const useUserLocale = () => useContext(UserLocaleContext)
 
-interface UserLocaleProviderProps {
-    key: string,
-    locale: Locale,
-    children: ReactNode[]
-}
 
 function UserLocaleProvider({children, locale}: UserLocaleProviderProps) {
     const extendedLocale = useMemo(() => getExtendedLocale(locale), [locale])
