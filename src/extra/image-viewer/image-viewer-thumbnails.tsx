@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import useResizeObserver from '@react-hook/resize-observer';
 import { ImageSlide, RenderThumbnailProps } from "yet-another-react-lightbox";
-import { Slide } from "./image-viewer";
+import { Slide } from "../../sapi/ee/cone/c4ui/c4gen.ImageViewerApi";
 
 const THUMBNAILS_GAP = 8;
 const THUMBNAILS_WIDTH = 120;

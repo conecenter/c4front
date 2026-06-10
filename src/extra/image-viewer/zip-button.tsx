@@ -1,8 +1,8 @@
 import React from "react";
 import JSZip from "jszip";
 import ZipIcon from "./zip.svg";
-import { Slide } from "./image-viewer";
 import { SVGElement } from "../../main/image";
+import { Slide } from "../../sapi/ee/cone/c4ui/c4gen.ImageViewerApi";
 
 interface ZipButton {
     slides: Slide[]
