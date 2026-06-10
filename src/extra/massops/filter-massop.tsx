@@ -1,32 +1,23 @@
-import React, { ReactElement, useContext, useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import clsx from "clsx";
 import { ButtonElement } from "../button-element";
 import { NoCaptionContext, usePath } from "../../main/vdom-hooks";
 import { ImageElement } from "../../main/image";
-import { ColorDef } from "../view-builder/common-api";
 import { usePopupState } from "../popup-elements/popup-manager";
 import { PopupElement } from "../popup-elements/popup-element";
 import { useClickSyncOpt } from "../exchange/click-sync";
 import { LabeledElement } from "../labeled-element";
 import { FilterButtonExpanderContext } from "./filter-button-expander";
 import { identityAt } from "../../main/vdom-util";
+import { MassOpProps } from "c4f/sapi/ee/cone/c4ui/c4gen.ListApi";
 
 const receiverIdOf = identityAt('receiver');
 
-interface MassOp {
-    identity: object,
-    area: string,
-    name?: string,
-    nameFolded?: string,
-    color?: ColorDef,
-    icon?: string,
-    umid?: string,
-    receiver: boolean,
-    folderPath?: string,  // front only
-    children?: ReactElement[]
+interface MassOpClientProps extends MassOpProps {
+    folderPath?: string
 }
 
-function MassOp({ identity, name, nameFolded, color, icon, umid, receiver, folderPath, children }: MassOp) {
+function MassOp({ identity, name, nameFolded, color, icon, umid, receiver, folderPath, children }: MassOpClientProps) {
     const path = usePath(identity);
 
     const closeExpanderRef = useContext(FilterButtonExpanderContext);
@@ -73,4 +64,5 @@ function MassOp({ identity, name, nameFolded, color, icon, umid, receiver, folde
     );
 }
 
+export type { MassOpClientProps }
 export { MassOp }

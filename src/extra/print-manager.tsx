@@ -1,7 +1,8 @@
-import React, { ReactNode, createContext, useEffect, useRef, useState } from "react";
+import React, { createContext, useEffect, useRef, useState } from "react";
 import { useAddEventListener } from "./custom-hooks";
 import { PatchSyncTransformers, usePatchSync } from "./exchange/patch-sync";
 import { identityAt } from "../main/vdom-util";
+import { PrintManagerProps } from "c4f/sapi/ee/cone/c4ui/c4gen.ListApi";
 
 const PrintContext = createContext(false);
 PrintContext.displayName = 'PrintContext';
@@ -18,16 +19,7 @@ const patchSyncTransformers: PatchSyncTransformers<boolean, boolean, boolean> = 
     applyChange: (_prev, ch) => ch
 };
 
-interface PrintManager {
-    key: string,
-    identity: object,
-    children: ReactNode,
-    printChildren: ReactNode,
-    printMode: boolean,
-    printTitle?: string
-}
-
-function PrintManager({ identity, children, printMode: state, printChildren, printTitle }: PrintManager) {
+function PrintManager({ identity, children, printMode: state = false, printChildren, printTitle }: PrintManagerProps) {
     const [elem, setElem] = useState<HTMLDivElement | null>(null);
     const window = elem?.ownerDocument.defaultView;
 

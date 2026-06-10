@@ -1,8 +1,9 @@
-import { createElement as $, useMemo, useContext, ReactNode, useState } from "react";
+import { createElement as $, useMemo, useContext, useState } from "react";
 import { PopupElement } from "./popup-element";
 import { Patch, usePatchSync } from "../exchange/patch-sync";
 import { PopupStateContext, PopupDrawerContext, PopupStack } from "./popup-contexts";
 import { identityAt } from "../../main/vdom-util";
+import { PopupManagerProps } from "c4f/sapi/ee/cone/c4ui/c4gen.ListApi";
 
 // Server sync functions
 const receiverIdOf = identityAt('receiver');
@@ -12,13 +13,7 @@ const patchToChange = (p: Patch): PopupStack => p.value.split('|').filter(Boolea
 const applyChange = (_prevState: PopupStack, ch: PopupStack) => ch;
 const patchSyncTransformers = { serverToState, changeToPatch, patchToChange, applyChange };
 
-interface PopupManager {
-    identity: object,
-    openedPopups: PopupStack,
-    children: ReactNode
-}
-
-function PopupManager({identity, openedPopups=[], children}: PopupManager) {
+function PopupManager({identity, openedPopups=[], children}: PopupManagerProps) {
     const { currentState, sendFinalChange } =
         usePatchSync(receiverIdOf(identity), openedPopups, false, patchSyncTransformers);
 

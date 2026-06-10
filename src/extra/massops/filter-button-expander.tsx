@@ -2,15 +2,15 @@ import React, { cloneElement, createContext, MutableRefObject, ReactElement, use
 import { ButtonElement } from "../button-element";
 import { NoCaptionContext, usePath } from "../../main/vdom-hooks";
 import { ImageElement } from "../../main/image";
-import { ColorDef } from "../view-builder/common-api";
 import { usePopupState } from "../popup-elements/popup-manager";
 import { PopupElement } from "../popup-elements/popup-element";
 import { FilteringInput } from "./filtering-input";
-import { MassOp } from "./filter-massop";
+import { MassOp, MassOpClientProps } from "./filter-massop";
 import { useLatest } from "../custom-hooks";
 import { Patch, usePatchSync } from '../exchange/patch-sync';
 import { LabeledElement } from "../labeled-element";
 import { identityAt } from "../../main/vdom-util";
+import { FilterButtonExpanderProps } from "c4f/sapi/ee/cone/c4ui/c4gen.ListApi";
 
 const FilterButtonExpanderContext = createContext<MutableRefObject<() => void> | null>(null);
 FilterButtonExpanderContext.displayName = 'FilterButtonExpanderContext';
@@ -26,17 +26,7 @@ const patchToChange = (p: Patch) => p.value;
 const applyChange = (prev: string, ch: string) => ch;
 const patchSyncTransformers = { serverToState, changeToPatch, patchToChange, applyChange };
 
-interface FilterButtonExpander {
-    identity: object,
-    area: string,
-    name?: string,
-    icon?: string,
-    color?: ColorDef,
-    filterValue?: string,
-    optButtons: ReactElement[]
-}
-
-function FilterButtonExpander({ identity, name, icon, color, optButtons = [], filterValue: sFilterValue = '' }: FilterButtonExpander) {
+function FilterButtonExpander({ identity, name, icon, color, optButtons = [], filterValue: sFilterValue = '' }: FilterButtonExpanderProps) {
     const path = usePath(identity);
 
     const { isOpened, toggle } = usePopupState(path);
@@ -53,8 +43,8 @@ function FilterButtonExpander({ identity, name, icon, color, optButtons = [], fi
         [filterValue, optButtons]
     );
 
-    function filterMassOps(massOps: ReactElement[] = [], folderPath: string = ''): ReactElement<MassOp>[] {
-        return massOps.reduce((accum: ReactElement<MassOp>[], massOp) => {
+    function filterMassOps(massOps: ReactElement[] = [], folderPath: string = ''): ReactElement<MassOpClientProps>[] {
+        return massOps.reduce((accum: ReactElement<MassOpClientProps>[], massOp) => {
             if (isMassOpType(massOp)) {
                 const { name, nameFolded, children } = massOp.props;
                 const massOpPath = (folderPath ? folderPath + ` ${FOLDER_PATH_DIVIDER} ` : '') + (nameFolded || name);
@@ -98,7 +88,7 @@ function FilterButtonExpander({ identity, name, icon, color, optButtons = [], fi
     );
 }
 
-function isMassOpType(elem: ReactElement): elem is ReactElement<MassOp> {
+function isMassOpType(elem: ReactElement): elem is ReactElement<MassOpClientProps> {
     return elem.type === MassOp;
 }
 

@@ -115,14 +115,6 @@ case class NoReceiver[C]() extends Receiver[C] {
     children: ViewRes = Nil,
   ): ToChildPair
 
-  @c4el("ExpandableTableHeader") def expTableHeader(
-    key: String,
-    title: String,
-    shortTitle: String = "",
-    hoverClassNames: List[CSSClassName] = Nil,
-    children: ViewRes = Nil,
-  ): ToChildPair
-
   //
   @c4el("FilterArea") def filterArea(
     key: String,
@@ -218,12 +210,4 @@ case class NoReceiver[C]() extends Receiver[C] {
   ): PivotTerminalSlice
   @c4val("bound") def boundPivotSliceWidth(min: Em, max: Em): PivotSliceWidth
   @c4val("unbound") def unboundPivotSliceWidth(): PivotSliceWidth
-
-  //
-  @c4el("InputLabel") def inputWrapper(
-    key: String,
-    caption: String,
-    wrapperNeeded: Boolean = true,
-    children: ViewRes = Nil,
-  ): ToChildPair
 }
