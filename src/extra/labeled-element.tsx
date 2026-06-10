@@ -4,9 +4,9 @@ import { HorizontalCaptionContext, NoCaptionContext } from '../main/vdom-hooks';
 import { useFocusControl } from './focus-control';
 import { SEL_FOCUS_FRAME } from './css-selectors';
 import { ContextActionsElement } from './context-actions-element';
-import { ChipElement } from './chip/chip';
 import { Tooltip } from './tooltip';
 import { FlexSize } from 'c4f/sapi/ee/cone/c4ui/c4gen.UiElementsApi';
+import { ChipElementProps } from 'c4f/sapi/ee/cone/c4ui/c4gen.ChipElementApi';
 
 interface LabeledElement {
     identity?: object,
@@ -19,7 +19,7 @@ interface LabeledElement {
     umid?: string,
     hint?: string,
     className?: string, // front only
-    goToChip?: [ReactElement<ChipElement>],
+    goToChip?: [ReactElement<ChipElementProps>],
     children: ReactNode
 }
 

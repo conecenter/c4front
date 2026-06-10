@@ -8,6 +8,7 @@ import { usePath } from '../../main/vdom-hooks';
 import { VkInfoContext } from '../ui-info-provider';
 import { identityAt } from '../../main/vdom-util';
 import { PathContext } from '../focus-announcer';
+import { VirtualKeyboardProps } from '../../sapi/ee/cone/c4ui/c4gen.VirtualKeyboardApi';
 
 const receiverIdOf = identityAt('receiver');
 
@@ -53,7 +54,7 @@ interface Key {
     color?: ColorDef
 }
 
-function VirtualKeyboard({ identity, hash, position, setupType, setupMode, switchedMode }: VirtualKeyboard) {
+function VirtualKeyboard({ identity, hash, position, setupType, setupMode, switchedMode }: VirtualKeyboardProps) {
     const vkRef = useRef<HTMLDivElement | null>(null);
 
     // Exchange with server

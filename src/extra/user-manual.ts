@@ -52,7 +52,9 @@ const useUserManual = (umid?: string) => {
         iconPath: '/mod/main/ee/cone/core/ui/c4view/info.svg',
         link: umUrl,
         openNewTab: true,
-        tooltip: 'Go to User Manual'
+        tooltip: 'Go to User Manual',
+        text: '',
+        color: { tp: "p", cssClass: 'transparentColorCss' }
     });
 
     const onKeyDown = (e: KeyboardEvent) => {

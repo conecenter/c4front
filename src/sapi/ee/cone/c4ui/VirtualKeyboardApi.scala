@@ -4,8 +4,6 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
 
 @c4tagSwitch("FrontApp") trait KeyboardPosition extends ToJson
 
-@c4tagSwitch("FrontApp") trait KeyboardType extends ToJson
-
 @c4tagSwitch("FrontApp") trait SwitchedMode extends ToJson
 
 @c4tags("FrontApp") trait VirtualKeyboardTags[C] {
