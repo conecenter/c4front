@@ -10,6 +10,7 @@ import { PopupWrapperKeyContext } from "./popup-elements/popup-contexts";
 import { usePopupState } from "./popup-elements/popup-manager";
 import { useChange } from "./custom-hooks";
 import { focusAuto } from "./focus-announcer";
+import { MenuListItemProps, MenuListProps } from "c4f/sapi/ee/cone/c4ui/c4gen.MenuList";
 
 const receiverIdOf = identityAt('receiver');
 
@@ -23,18 +24,13 @@ interface MenuListCtx {
 const MenuListCtx = createContext<MenuListCtx>({ setActiveId: () => undefined, rootPopupKey: '' });
 MenuListCtx.displayName = "MenuListCtx";
 
-interface MenuListProps {
-    identity: object,
-    children?: ReactElement<MenuItemProps>[]
-}
-
 interface MenuListNode {
     id: string,
     identity: object
 }
 
 function MenuList({ identity, children }: MenuListProps) {
-    const nodes: MenuListNode[] = useMemo(() => (children || []).map((chl) => (
+    const nodes: MenuListNode[] = useMemo(() => (children as ReactElement<MenuListItemProps>[] || []).map((chl) => (
         { id: chl.props.id, identity: chl.props.identity }
     )), [children]);
     const ids = useMemo(() => nodes.map(n => n.id), [nodes]);
@@ -98,14 +94,7 @@ function MenuList({ identity, children }: MenuListProps) {
     );
 }
 
-interface MenuItemProps {
-    identity: object,
-    id: string,
-    name: string,
-    iconPath?: string
-}
-
-function MenuListItem({ identity, id, name, iconPath }: MenuItemProps) {
+function MenuListItem({ identity, id, name, iconPath }: MenuListItemProps) {
     const { clicked, onClick } = useClickSync(receiverIdOf(identity));
 
     const { activeId, isActivated, setActiveId, rootPopupKey } = useContext(MenuListCtx);

@@ -15,14 +15,12 @@ import { useAreaOverlay } from './use-area-overlay';
 import { useFocusTrap } from '../hooks/use-focus-trap';
 import { useArrowNavigation } from '../hooks/use-arrow-navigation';
 import { focusAuto, FocusRestoreCandidateCtx } from '../focus-announcer';
+import { PopupElementProps } from 'c4f/sapi/ee/cone/c4ui/c4gen.PopupApi';
 
-interface PopupElement {
+interface PopupElement extends Omit<PopupElementProps, 'identity' | 'children'> {
     identity?: object,
-    popupKey: string,
     className?: string,
-    forceOverlay?: boolean,
     lrMode?: boolean,
-    closeReceiver?: boolean,
     children?: ReactNode
 }
 

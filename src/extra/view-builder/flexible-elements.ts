@@ -1,49 +1,17 @@
-import React, {createElement as el, HTMLAttributes, ReactNode} from "react";
-import {FlexibleAlign, FlexibleChildAlign, FlexibleSizes} from "./flexible-api";
-import {
-  FLEXIBLE_ACCENTED_GROUPBOX_CLASSNAME,
-  FLEXIBLE_CELL_CLASSNAME,
-  FLEXIBLE_COLUMN_CLASSNAME,
-  FLEXIBLE_GROUPBOX_CLASSNAME, FLEXIBLE_GROUPBOX_CLASSNAME_LABEL,
-  FLEXIBLE_LABELED_CHILD_CLASSNAME,
-  FLEXIBLE_LABELED_CLASSNAME,
-  FLEXIBLE_LABELED_LABEL_CLASSNAME,
-  FLEXIBLE_ROOT_CLASSNAME,
-  FLEXIBLE_ROW_CLASSNAME,
-  UNBOUNDED_CLASSNAME
-} from "./css-classes";
+import React, {createElement as el, HTMLAttributes, ReactElement, ReactNode} from "react";
 import clsx from "clsx";
 import { NoCaptionContext } from '../../main/vdom-hooks';
+import { FLEXIBLE_CELL_CLASSNAME, FLEXIBLE_COLUMN_CLASSNAME, FLEXIBLE_ROW_CLASSNAME, UNBOUNDED_CLASSNAME } from "./css-classes";
+import { FlexibleCellProps, FlexibleColumnProps, FlexibleRowProps, FlexSize, ScrollableColumnProps, ThinFlexibleRowProps } from "c4f/sapi/ee/cone/c4ui/c4gen.UiElementsApi";
+import { Align } from "c4f/sapi/ee/cone/c4ui/c4gen.CommonElementsApi";
 
-const getCssFromSizes = (sizes?: FlexibleSizes) => sizes && {
+const getCssFromSizes = (sizes?: FlexSize) => sizes && {
   ...(typeof sizes.min === 'number') && { minWidth: `${sizes.min}em` },
   ...(typeof sizes.max === 'number') && { maxWidth: `${sizes.max}em` },
   ...(typeof sizes.basis === 'number') && { flexBasis: `${sizes.basis}em` }
 }
 
-interface FlexibleColumnRoot {
-  key: string,
-  children: ReactNode[]
-}
-
-function FlexibleColumnRoot({children}: FlexibleColumnRoot) {
-  return el("div", {
-    className: FLEXIBLE_ROOT_CLASSNAME,
-    style: {
-      width: "100%",
-    }
-  }, children)
-}
-
-interface FlexibleColumn {
-  key: string
-  sizes?: FlexibleSizes
-  className?: string  // TODO: remove on the next step
-  align?: FlexibleAlign
-  children: ReactNode[]
-}
-
-function FlexibleColumn({sizes, className, align, children}: FlexibleColumn) {
+function FlexibleColumn({sizes, className, align, children}: FlexibleColumnProps) {
   const anchored = align && !sizes?.max;
   return el("div", {
     className: clsx(FLEXIBLE_COLUMN_CLASSNAME, className),
@@ -54,53 +22,11 @@ function FlexibleColumn({sizes, className, align, children}: FlexibleColumn) {
   }, children)
 }
 
-interface ScrollableColumn extends FlexibleColumn {
-  height: number
-}
-
-function ScrollableColumn({height, ...props}: ScrollableColumn) {
+function ScrollableColumn({height, ...props}: ScrollableColumnProps) {
   return el('div', { style: {maxHeight: `${height}em`, overflowY: 'auto'} }, FlexibleColumn(props));
 }
 
-type GroupboxDisplayMode = 'accent'
-
-interface FlexibleGroupbox {
-  key: string
-  label?: string
-  displayMode?: GroupboxDisplayMode
-  sizes: FlexibleSizes
-  align: FlexibleAlign
-  children: ReactNode[]
-}
-
-function createLabel(label: string | undefined, children: ReactNode[]) {
-  return label ? [
-      el("span", {className: FLEXIBLE_GROUPBOX_CLASSNAME_LABEL}, label),
-      ...React.Children.toArray(children)
-    ] :
-    children
-}
-
-function FlexibleGroupbox({label, displayMode, sizes, children}: FlexibleGroupbox) {
-  return el("div", {
-    className: clsx(FLEXIBLE_GROUPBOX_CLASSNAME, displayMode === 'accent' && FLEXIBLE_ACCENTED_GROUPBOX_CLASSNAME),
-    style: {
-      flexBasis: `${sizes.min}em`,
-      minWidth: `${sizes.min}em`,
-      maxWidth: sizes.max ? `${sizes.max}em` : undefined,
-    }
-  }, createLabel(label, children))
-}
-
-interface FlexibleRow {
-  key: string
-  sizes?: FlexibleSizes
-  align?: FlexibleAlign
-  className?: string  // TODO: remove on the next step
-  children: (ReactNode & FlexibleChildAlign)
-}
-
-function correctNext(prev: FlexibleAlign, next: FlexibleAlign): boolean {
+function correctNext(prev: Align, next: Align): boolean {
   switch (prev) {
     case "l":
       return true
@@ -115,10 +41,12 @@ function correctNext(prev: FlexibleAlign, next: FlexibleAlign): boolean {
 
 const spacer = el("div", {style: {marginLeft: "auto", marginRight: "auto"}})
 
-function separateChildren(children: (ReactNode & FlexibleChildAlign)): React.ReactNode[][] {
-  const childrenArray = React.Children.toArray(children) as (ReactNode & FlexibleChildAlign)[]
+type WithOptionalAlign = { align?: Align };
+
+function separateChildren(children?: ReactElement[]): ReactNode[][] {
+  const childrenArray = React.Children.toArray(children) as ReactElement<WithOptionalAlign>[]
   const newChildren = [[]] as ReactNode[][]
-  let currentAlign: FlexibleAlign = "l"
+  let currentAlign: Align = "l"
   let currentInd = 0
   for (const elem of childrenArray) {
     const newAlign = elem.props.align || 'f'
@@ -142,7 +70,7 @@ function wrapInRow(key: string, props: HTMLAttributes<HTMLDivElement>, children:
   return el("div", {key, ...props}, ...children)
 }
 
-function FlexibleRow({sizes, className, align, children}: FlexibleRow) {
+function FlexibleRow({sizes, className, align, children}: Omit<FlexibleRowProps, 'identity'>) {
   const anchored = align && !sizes?.max;
   const props: HTMLAttributes<HTMLDivElement> = {
     className: clsx(FLEXIBLE_ROW_CLASSNAME, className, !sizes?.max && UNBOUNDED_CLASSNAME),
@@ -155,7 +83,7 @@ function FlexibleRow({sizes, className, align, children}: FlexibleRow) {
   return el(React.Fragment, null, separated)
 }
 
-function ThinFlexibleRow(props: FlexibleRow) {
+function ThinFlexibleRow(props: Omit<ThinFlexibleRowProps, 'identity'>) {
   return el(
       NoCaptionContext.Provider,
       {value: true},
@@ -163,15 +91,7 @@ function ThinFlexibleRow(props: FlexibleRow) {
   );
 }
 
-interface FlexibleCell {
-  key: string
-  align?: FlexibleAlign
-  sizes?: FlexibleSizes
-  className?: string
-  children: ReactNode[]
-}
-
-function FlexibleCell({align, sizes, className, children}: FlexibleCell) {
+function FlexibleCell({align, sizes, className, children}: FlexibleCellProps) {
   const hasMaxSize = !!sizes && typeof sizes.max === 'number';
   const anchored = align && !hasMaxSize;
   return el("div", {
@@ -183,31 +103,4 @@ function FlexibleCell({align, sizes, className, children}: FlexibleCell) {
   }, children)
 }
 
-interface FlexibleLabeledProps {
-  key: string
-  sizes: FlexibleSizes
-  label: string
-  labelChildren: ReactNode[]
-  children: ReactNode[]
-  horizontal?: boolean
-}
-
-function FlexibleLabeled({sizes, label, labelChildren, children, horizontal}: FlexibleLabeledProps) {
-  return el("div", {
-      className: FLEXIBLE_LABELED_CLASSNAME,
-      style: {
-        flexDirection: horizontal ? "row" : "column",
-        flexBasis: `${sizes.min}em`,
-        maxWidth: sizes.max ? `${sizes.max}em` : undefined,
-      }
-    },
-    el("label", {
-      className: FLEXIBLE_LABELED_LABEL_CLASSNAME,
-    }, el("span", {}, label), labelChildren),
-    el("div", {
-      className: FLEXIBLE_LABELED_CHILD_CLASSNAME,
-    }, children)
-  )
-}
-
-export const flexibleComponents = {FlexibleColumnRoot, FlexibleColumn, ScrollableColumn, FlexibleGroupbox, FlexibleRow, ThinFlexibleRow, FlexibleCell, FlexibleLabeled}
+export const flexibleComponents = {FlexibleColumn, ScrollableColumn, FlexibleRow, ThinFlexibleRow, FlexibleCell}

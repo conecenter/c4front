@@ -1,10 +1,10 @@
 import { MutableRefObject, useMemo, useRef, useState } from "react";
 import { useAddEventListener } from "./custom-hooks";
-import { FlexibleAlign } from "./view-builder/flexible-api";
+import { Align } from "c4f/sapi/ee/cone/c4ui/c4gen.CommonElementsApi";
 
 export const useHoverExpander = (
     ref: MutableRefObject<HTMLDivElement | null>,
-    align: FlexibleAlign,
+    align: Align,
     needsHoverExpander: boolean
 ) => {
     const [hovered, setHovered] = useState<HTMLElement | null>(null);

@@ -1,14 +1,14 @@
-import React, { ReactNode } from 'react';
-import { FlexibleAlign, FlexibleChildAlign } from './view-builder/flexible-api';
+import React, { ReactElement } from 'react';
 import { flexibleComponents } from './view-builder/flexible-elements'
+import { Align } from 'c4f/sapi/ee/cone/c4ui/c4gen.CommonElementsApi';
 
 const { ThinFlexibleRow } = flexibleComponents;
 
 
 interface SystemButtonsSet {
     key: string,
-    align?: FlexibleAlign,
-    children: ReactNode & FlexibleChildAlign
+    align?: Align,
+    children: ReactElement[]
 }
 
 const SystemButtonsSet = ({align = 'l', children}: SystemButtonsSet) => (
