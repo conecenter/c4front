@@ -14,7 +14,17 @@ import ee.cone.c4vdom.{ToChildPair, ToJson, c4el, c4tagSwitch, c4tags, c4val}
 
 @c4tagSwitch("FrontApp") trait Align extends ToJson
 
+@c4tagSwitch("FrontApp") trait Size extends ToJson {
+  def min: Em
+  def max: Option[Em]
+}
+
 @c4tags("FrontApp") trait CommonElementsTags {
+  @c4val def size(
+    min: Em,
+    max: Option[Em],
+  ): Size
+
   @c4val("p") def paletteColor(
     cssClass: String,
   ): ColorDef

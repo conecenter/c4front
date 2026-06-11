@@ -4,11 +4,6 @@ import ee.cone.c4ui.FrontTypes.Em
 import ee.cone.c4vdom.Types._
 import ee.cone.c4vdom._
 
-@c4tagSwitch("FrontApp") trait Size extends ToJson {
-  def min: Em
-  def max: Option[Em]
-}
-
 @c4tagSwitch("FrontApp") trait FlexSize extends ToJson {
   def min: Option[Em]
   def max: Option[Em]
@@ -18,11 +13,6 @@ import ee.cone.c4vdom._
 trait UIElement extends ToChildPair
 
 @c4tags("FrontApp") trait UIElements {
-  @c4val def size(
-    min: Em,
-    max: Option[Em],
-  ): Size
-
   @c4val def flexSize(
     min: Option[Em] = None,
     max: Option[Em] = None,
