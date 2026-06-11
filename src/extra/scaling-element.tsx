@@ -1,11 +1,7 @@
-import React, { ReactNode } from "react";
+import React from "react";
+import { ScalingElementProps } from "c4f/sapi/ee/cone/c4ui/c4gen.FrontTags";
 
-interface ScalingElement {
-    scale: number,
-    children?: ReactNode
-}
-
-const ScalingElement = ({ scale, children }: ScalingElement) => (
+const ScalingElement = ({ scale, children }: ScalingElementProps) => (
     <div style={{ fontSize: `${scale}em`, display: 'contents' }} >
         {children}
     </div>

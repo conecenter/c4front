@@ -1,4 +1,4 @@
-import React, { ReactNode, useContext } from "react";
+import React, { useContext } from "react";
 import clsx from 'clsx';
 import { ScrollInfoContext } from "../scroll-info-context";
 import { HorizontalCaptionContext } from "../../main/vdom-hooks";
@@ -6,8 +6,9 @@ import { PageTitleBlock } from "./page-title-block";
 import { Align, ALIGN_VALS, filterByAlign, sortByPriority } from "../aligned-bars-api";
 import { PAGE_TITLE_CLASS } from "../css-selectors";
 import { PageTitleContext } from "./page-title-provider";
+import { PageTitleProps } from "c4f/sapi/ee/cone/c4ui/c4gen.FrontTags";
 
-function PageTitle({ children }: { children?: ReactNode }) {
+function PageTitle({ children }: PageTitleProps) {
     const { items = [] } = useContext(PageTitleContext);
 
     const scrollPos = useContext(ScrollInfoContext);

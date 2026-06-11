@@ -39,13 +39,6 @@ trait PageTitleBlock extends ToChildPair with ToJson
 @c4tagSwitch("FrontApp") trait ExternalLoginOption extends ToJson
 
 @c4tags("FrontApp") trait FrontTags {
-  @c4el("ElementSizer") def elementSizer(
-    key: String,
-    base: Em,
-    max: Em,
-    children: ViewRes
-  ): ToChildPair
-
   @c4el("ColoredDiv") def coloredDiv(
     key: String,
     color: Option[ColorDef],
@@ -77,7 +70,7 @@ trait PageTitleBlock extends ToChildPair with ToJson
 
   @c4val("l") def leftPageTitleArea(): PageTitleArea
 
-  @c4val("m") def middlePageTitleArea(): PageTitleArea
+  @c4val("c") def middlePageTitleArea(): PageTitleArea
 
   @c4val("r") def rightPageTitleArea(): PageTitleArea
 

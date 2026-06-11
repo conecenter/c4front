@@ -1,16 +1,10 @@
-import { ReactNode, useContext, useLayoutEffect, useMemo } from "react";
+import { useContext, useLayoutEffect, useMemo } from "react";
 import { PageTitleContext } from "./page-title-provider";
 import { usePath } from "../../main/vdom-hooks";
-import type { Align, LayoutItem } from "../aligned-bars-api";
+import type { LayoutItem } from "../aligned-bars-api";
+import { PageTitleBlockProps } from "c4f/sapi/ee/cone/c4ui/c4gen.FrontTags";
 
-interface PageTitleBlock {
-    identity: object,
-    area?: Align,
-    priority?: number,
-    children?: ReactNode
-}
-
-function PageTitleBlock({ identity, area = 'l', priority = 0, children }: PageTitleBlock) {
+function PageTitleBlock({ identity, area = 'l', priority = 0, children }: PageTitleBlockProps) {
     const id = usePath(identity);
 
     const { register, unregister } = useContext(PageTitleContext);
