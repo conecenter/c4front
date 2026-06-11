@@ -1,13 +1,9 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { NoCaptionContext } from '../../main/vdom-hooks';
 import { DashboardCard } from './dashboard-card';
+import { DashboardHeaderProps } from 'c4f/sapi/ee/cone/c4ui/c4gen.FrontTags';
 
-interface DashboardHeader {
-    heading: string,
-    addButton: ReactNode
-}
-
-const DashboardHeader = ({ heading, addButton }: DashboardHeader) => (
+const DashboardHeader = ({ heading, addButton }: DashboardHeaderProps) => (
     <NoCaptionContext.Provider value={true}>
         <div className='dashboardHeader'>
             <h1>{heading}</h1>

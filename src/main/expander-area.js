@@ -3,7 +3,6 @@ import {createElement as $,useCallback,useMemo} from "react"
 import {em} from "./vdom-util.js"
 import {extractedUse} from "./vdom-hooks.js"
 import {useWidths,useViewportHeightIntEm} from "./sizes.js"
-import {ExpanderProps} from "c4f/sapi/ee/cone/c4ui/c4gen.ExpanderApi"
 
 const last = l => l && l.length>0 && l[l.length-1]
 
@@ -117,7 +116,8 @@ export function ExpanderArea({expandTo,maxLineCount,props}){
 }
 
 /**
- * @param {Omit<ExpanderProps, 'identity' | 'children'> & { className?: string, children?: import('react').ReactNode }} props
+ * @param {Omit<import('../sapi/ee/cone/c4ui/c4gen.ExpanderApi.js'.ExpanderProps), identity' | 'children'>
+ *  & { className?: string, children?: import('react').ReactNode }} props
  * @returns { ReactNode }
  */
 export function Expander({children}){ return children }

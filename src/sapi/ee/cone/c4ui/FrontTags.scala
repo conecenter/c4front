@@ -30,12 +30,6 @@ trait PageTitleBlock extends ToChildPair with ToJson
 
 @c4tagSwitch("FrontApp") trait PageTitleArea extends ToJson
 
-@c4tagSwitch("FrontApp") trait ImageProps extends ToJson
-
-@c4tagSwitch("FrontApp") trait ImageSource extends ToJson
-
-@c4tagSwitch("FrontApp") trait DashboardCard extends ToJson
-
 @c4tagSwitch("FrontApp") trait ExternalLoginOption extends ToJson
 
 @c4tags("FrontApp") trait FrontTags {
@@ -78,7 +72,6 @@ trait PageTitleBlock extends ToChildPair with ToJson
   @c4el("PageFooter") def pageFooter(
     footerKey: String,
     children: ViewRes,
-    css: List[CSSClassName] = Nil,
   ): PageFooter
 
   @c4el("ArrowContainer") def arrowContainer(
@@ -115,9 +108,9 @@ trait PageTitleBlock extends ToChildPair with ToJson
     children: ViewRes = Nil,
   ): ToChildPair
 
-  @c4elPath("LabeledElement") def labeledElement(
+  @c4el("LabeledElement") def labeledElement(
     key: String,
-    label: String,
+    label: String = "",
     children: ViewRes,
     labelChildren: ViewRes = Nil,
     sizes: Option[Size] = None,
@@ -135,7 +128,7 @@ trait PageTitleBlock extends ToChildPair with ToJson
     rightButton: ViewRes,
   ): ToChildPair
 
-  @c4elPath("Dashboard") def dashboard(
+  @c4el("Dashboard") def dashboard(
     key: String,
     minColWidth: Em,
     maxColWidth: Em,
@@ -149,7 +142,7 @@ trait PageTitleBlock extends ToChildPair with ToJson
     children: ViewRes,
   ): ToChildPair
 
-  @c4elPath("DashboardHeader") def dashboardHeader(
+  @c4el("DashboardHeader") def dashboardHeader(
     key: String,
     heading: String,
     addButton: ViewRes,

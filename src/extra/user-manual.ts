@@ -1,5 +1,6 @@
-import {createContext, createElement as $, ReactNode, useContext, useEffect, useState, useMemo} from "react"
+import {createContext, createElement as $, useContext, useEffect, useState, useMemo} from "react"
 import { ChipElement } from "./chip/chip"
+import { UserManualProviderProps } from "c4f/sapi/ee/cone/c4ui/c4gen.FrontTags"
 
 interface UserManual {
     has: (umid: string | undefined) => boolean
@@ -13,11 +14,6 @@ const defaultUserManual: UserManual = {
 
 const UserManualContext = createContext<UserManual>(defaultUserManual)
 UserManualContext.displayName = "UserManualContext"
-
-interface UserManualProviderProps {
-    url: string,
-    children: ReactNode
-}
 
 function UserManualProvider({url, children}: UserManualProviderProps) {
     const [userManualText, setUserManualText] = useState<string>("{}")

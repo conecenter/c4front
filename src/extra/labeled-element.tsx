@@ -1,34 +1,28 @@
-import React, { useContext, ReactNode, useEffect, useRef, useState, CSSProperties, ReactElement } from 'react';
+import React, { useContext, useEffect, useRef, useState, CSSProperties, ReactElement } from 'react';
 import clsx from 'clsx';
-import { HorizontalCaptionContext, NoCaptionContext } from '../main/vdom-hooks';
+import { HorizontalCaptionContext, NoCaptionContext, usePath } from '../main/vdom-hooks';
 import { useFocusControl } from './focus-control';
 import { SEL_FOCUS_FRAME } from './css-selectors';
 import { ContextActionsElement } from './context-actions-element';
 import { Tooltip } from './tooltip';
-import { FlexSize } from 'c4f/sapi/ee/cone/c4ui/c4gen.UiElementsApi';
-import { ChipElementProps } from 'c4f/sapi/ee/cone/c4ui/c4gen.ChipElementApi';
+import { LabeledElementProps } from 'c4f/sapi/ee/cone/c4ui/c4gen.FrontTags';
 
-interface LabeledElement {
-    identity?: object,
-    path?: string,
-    label?: string,
-    sizes?: FlexSize,
-    accented?: boolean,
-    clickable?: boolean,
-    labelChildren?: ReactNode,
-    umid?: string,
-    hint?: string,
-    className?: string, // front only
-    goToChip?: [ReactElement<ChipElementProps>],
-    children: ReactNode
-}
+type ClientProps<T extends { identity: object; children?: ReactElement[] }> =
+    Omit<T, 'identity' | 'children'> & {
+      identity?: object
+      children?: ReactElement | ReactElement[]
+      className?: string
+    }
 
-function LabeledElement({ path, label, sizes, accented, clickable, labelChildren, umid, goToChip, children, ...props }: LabeledElement) {
+function LabeledElement(
+    { identity, label, sizes, labelChildren, umid, goToChip, children, ...props }: ClientProps<LabeledElementProps>
+) {
     const showCaption = !useContext(NoCaptionContext);
     const isHorizontalCaption = useContext(HorizontalCaptionContext);
 
     const isEmptyLabel = !(label || labelChildren);
 
+    const path = usePath(identity);
     const { focusClass, focusHtml } = useFocusControl(isEmptyLabel ? '' : path);
 
     // Disable focusable descendants focus if LE has single childless focusable descendant
@@ -39,12 +33,10 @@ function LabeledElement({ path, label, sizes, accented, clickable, labelChildren
         else setDisableChildFocus(hasSingleChildlessFocusable(refLE.current));
     }, [isEmptyLabel, labelChildren, children]);
 
-    // const { clicked, onClick } = useClickSyncOpt(identity, 'receiver', clickable);
-
     const className = clsx(
         'labeledElement',
         focusClass,
-        accented && 'accented',
+        // accented && 'accented',
         disableChildFocus && 'focusFrameProvider',
         (!showCaption || isHorizontalCaption) && 'contentBox',
         props.className
@@ -57,7 +49,6 @@ function LabeledElement({ path, label, sizes, accented, clickable, labelChildren
             flexBasis: `${sizes.min}em`,
             maxWidth: sizes.max ? `${sizes.max}em` : undefined
         },
-        ...clickable && { cursor: 'pointer' }
     };
 
     return (
@@ -71,7 +62,7 @@ function LabeledElement({ path, label, sizes, accented, clickable, labelChildren
             >
                 {showCaption ? (
                     <NoCaptionContext.Provider value={true}>
-                        <div className='labelBox' /*style={clicked ? { opacity: 0.8 } : undefined}*/>
+                        <div className='labelBox'>
                             {label && <label>{label}</label>}
                             {labelChildren}
                         </div>

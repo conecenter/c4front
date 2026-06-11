@@ -1,15 +1,8 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { NoCaptionContext } from '../../main/vdom-hooks';
+import { DashboardCardProps } from 'c4f/sapi/ee/cone/c4ui/c4gen.FrontTags';
 
-
-interface DashboardCard {
-    iconFieldItems?: ReactNode,
-    nameFieldItems: ReactNode,
-    innerItems: ReactNode,
-    rightButton: ReactNode
-}
-
-const DashboardCard = ({iconFieldItems, nameFieldItems, innerItems, rightButton}: DashboardCard) => (
+const DashboardCard = ({iconFieldItems, nameFieldItems, innerItems, rightButton}: DashboardCardProps) => (
     <div className='dashboardCard'>
         <NoCaptionContext.Provider value={true}>
             <div className='cardMainPart'>

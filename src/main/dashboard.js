@@ -80,7 +80,7 @@ export const DashboardRoot = ({
     })
 }
 
-
+/** @param {import('../sapi/ee/cone/c4ui/c4gen.FrontTags.js').DashboardProps} props */
 export const Dashboard = ({
     minColWidth, maxColWidth, 
     minScale, maxScale, 

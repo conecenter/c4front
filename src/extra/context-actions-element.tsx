@@ -3,13 +3,12 @@ import { useUserManual } from './user-manual';
 import { UiInfoContext } from './ui-info-provider';
 import { BottomBarElement } from './bottom-bar/bottom-bar-element';
 import { useAddEventListener } from './custom-hooks';
-import { ChipElementProps } from 'c4f/sapi/ee/cone/c4ui/c4gen.ChipElementApi';
 
 const preventFocusin = (e: React.MouseEvent) => e.preventDefault();
 
 interface ContextActionsElement {
     umid?: string,
-    goToChip?: [ReactElement<ChipElementProps>],
+    goToChip?: ReactElement[],
     refLE: React.RefObject<HTMLDivElement | null>
 }
 
