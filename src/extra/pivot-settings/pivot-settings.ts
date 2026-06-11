@@ -103,9 +103,11 @@ function PivotSettingsInner(props: PivotSettingsProps) {
     )
 }
 
+export type PivotSettingsState = Omit<PivotSettingsProps, 'identity' | 'receiver'>
+
 interface PivotSettingsPartProps {
     className: PivotSettingsPartClass
-    state: Omit<PivotSettingsProps, 'identity' | 'receiver'>
+    state: PivotSettingsState
     label: string
     dropAction: PivotDropAction
     clickAction: PivotClickAction

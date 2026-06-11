@@ -1,9 +1,9 @@
-import {PivotField, PivotSettingsPartClass, PivotSettingsProps, PivotSettingsState} from "./pivot-settings";
+import { PivotSettingsPartClass, PivotSettingsState, isPivotFieldsGroup } from "./pivot-settings";
 import {DATA_ID, PartNames} from "./pivot-const";
 import update, {extend} from "immutability-helper";
 import type {XYCoord} from "react-dnd/dist/types/monitors";
 import {Patch, PatchHeaders} from "../exchange/patch-sync";
-import {isPivotFieldsGroup, PivotFieldsGroup} from "./pivot-settings";
+import { PivotSettingsProps, PivotField, PivotFieldsGroup } from "c4f/sapi/ee/cone/c4ui/c4gen.FrontContextTagsApi";
 
 type PivotChangeType = "reorder" | "move" | "add" | "remove" | "select" | "noop"
 
