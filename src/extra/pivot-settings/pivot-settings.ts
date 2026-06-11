@@ -16,39 +16,11 @@ import type {XYCoord} from "react-dnd/dist";
 import {usePatchSync} from "../exchange/patch-sync";
 import { identityAt } from "../../main/vdom-util";
 import { DragScroller } from "./drag-scroller";
+import type { PivotSettingsProps, PivotField, PivotFieldsGroup } from "c4f/sapi/ee/cone/c4ui/c4gen.FrontContextTagsApi";
 
 const receiverIdOf = identityAt('receiver');
 
-export interface PivotField {
-    id: string,
-    name: string,
-    selected: boolean,
-    fieldType?: string,
-    invalid?: boolean,
-    prefix?: string,
-}
-
-export interface PivotFieldsGroup {
-    groupName: string,
-    fields: PivotField[]
-}
-
-export interface PivotSettingsState {
-    fields: (PivotField | PivotFieldsGroup)[],
-    pivotFilters: PivotField[]
-    pivotBreaks: PivotField[]
-    pivotRows: PivotField[]
-    pivotColumns: PivotField[]
-    pivotData: PivotField[]
-    pivotCells: PivotField[]
-}
-
 export type PivotSettingsPartClass = 'pivotFilters' | 'pivotBreaks' | 'pivotRows' | 'pivotColumns' | 'pivotData' | 'pivotCells';
-
-export interface PivotSettingsProps extends PivotSettingsState {
-    // @ts-ignore
-    identity: object
-}
 
 export function PivotSettings(props: PivotSettingsProps) {
     return el(DndProvider, {backend: HTML5Backend},
@@ -133,7 +105,7 @@ function PivotSettingsInner(props: PivotSettingsProps) {
 
 interface PivotSettingsPartProps {
     className: PivotSettingsPartClass
-    state: PivotSettingsState
+    state: Omit<PivotSettingsProps, 'identity' | 'receiver'>
     label: string
     dropAction: PivotDropAction
     clickAction: PivotClickAction

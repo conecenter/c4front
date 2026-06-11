@@ -1,7 +1,8 @@
-import React, { ReactNode, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSync } from "../main/vdom-hooks";
 import { identityAt } from "../main/vdom-util";
 import { useLatest } from "./custom-hooks";
+import { ScannerSerialElementProps } from "c4f/sapi/ee/cone/c4ui/c4gen.FrontContextTagsApi";
 
 /*
  * Reference for scanner interface - OPTICON Universal menu book
@@ -15,19 +16,12 @@ const ESC_CHAR = '\x1b';
 
 const barcodeActionIdOf = identityAt('barcodeAction');
 
-interface ScannerSerialElement {
-    key: string,
-    identity: object,
-    barcodeReader: boolean,
-    children?: ReactNode
-}
-
 interface ReadingParams {
     reader: ReadableStreamDefaultReader<string>,
     readableStreamClosed: Promise<void>
 }
 
-function ScannerSerialElement({ identity, barcodeReader, children=null }: ScannerSerialElement) {
+function ScannerSerialElement({ identity, barcodeReader, children=[] }: ScannerSerialElementProps) {
     const [port, setPort] = useState<SerialPort | null>(null);
     const readingParamsRef = useRef<ReadingParams | null>(null);
 

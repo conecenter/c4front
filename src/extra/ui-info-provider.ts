@@ -1,12 +1,11 @@
-import { createElement as $, ReactNode, createContext, useContext, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createElement as $, createContext, useContext, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { usePatchSync, Patch, PatchSyncTransformers } from "./exchange/patch-sync";
 import { useAddEventListener } from "./custom-hooks";
 import { RootBranchContext } from '../main/vdom-hooks';
 import { identityAt } from '../main/vdom-util';
+import { UiInfoProviderProps, UiType } from 'c4f/sapi/ee/cone/c4ui/c4gen.FrontContextTagsApi';
 
 const DEFAULT_UI_TYPE = 'pointer';
-
-type UiType = 'pointer' | 'touch';
 
 const UiInfoContext = createContext<UiType>(DEFAULT_UI_TYPE);
 UiInfoContext.displayName = 'UiInfoContext';
@@ -39,14 +38,7 @@ const patchSyncTransformers: PatchSyncTransformers<UiType | undefined, UiType | 
 };
 //
 
-interface UiInfoProvider {
-    key: string,
-    identity: object,
-    uiType?: UiType,
-    children: ReactNode
-}
-
-function UiInfoProvider({identity, uiType: state, children}: UiInfoProvider) {
+function UiInfoProvider({identity, uiType: state, children}: UiInfoProviderProps) {
     // UiType functionality
     const {currentState: uiType, sendFinalChange} =
         usePatchSync(receiverIdOf(identity), state, false, patchSyncTransformers);

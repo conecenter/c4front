@@ -10,6 +10,7 @@ import { identityAt } from '../../main/vdom-util';
 import { useFocusControl } from '../focus-control';
 import { usePath } from '../../main/vdom-hooks';
 import clsx from 'clsx';
+import { YamlEditorProps } from 'c4f/sapi/ee/cone/c4ui/c4gen.FrontContextTagsApi';
 
 const receiverIdOf = identityAt('receiver');
 
@@ -19,12 +20,6 @@ const patchSyncTransformers = {
     patchToChange: (patch: Patch): string => patch.value,
     applyChange: (prev: string, ch: string) => ch
 };
-
-interface YamlEditorProps {
-    identity: object,
-    value: string,
-    jsonSchema?: string
-}
 
 function YamlEditor({ identity, value, jsonSchema }: YamlEditorProps) {
     const path = usePath(identity);
@@ -70,5 +65,4 @@ function parseJsonSchema(jsonSchema: string) {
     }
 }
 
-export type { YamlEditorProps }
 export default YamlEditor
