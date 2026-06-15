@@ -21,7 +21,8 @@ interface SyncState<State, StateChange> {
     currentState: State,
     sendTempChange: (change: StateChange) => void,
     sendFinalChange: (change: StateChange) => void,
-    wasChanged: boolean
+    wasChanged: boolean,
+    changing: boolean
 }
 
 interface SendPatchHeaders extends PatchHeaders {
@@ -78,7 +79,14 @@ function usePatchSync<ServerState, State, StateChange>(
         },
         [enqueuePatch, changeToPatch]
     )
-    return {currentState: patchedState, sendTempChange: onChange, sendFinalChange: onBlur, wasChanged: wasChanged.current}
+    const changing = patches.length > 0
+    return {
+        currentState: patchedState,
+        sendTempChange: onChange,
+        sendFinalChange: onBlur,
+        wasChanged: wasChanged.current,
+        changing
+    }
 }
 
 export {usePatchSync}

@@ -58,6 +58,26 @@ import ee.cone.c4vdom._
   @c4val("pointer") def pointer: UiType
   @c4val("touch") def touch: UiType
 
+  @c4el("CheckboxElement") def checkBox(
+    key: String,
+    label: Option[String] = None,
+    value: String,
+    receiver: Receiver[C],
+    children: ViewRes,
+    tooltip: Option[String] = None,
+    classNames: List[CSSClassName] = Nil,
+  ): ToChildPair
+
+  @c4el("RadioButtonElement") def radioButtonElement(
+    key: String,
+    label: Option[String],
+    value: String,
+    receiver: Receiver[C],
+    tooltip: Option[String] = None,
+    classNames: List[CSSClassName] = Nil,
+    children: ViewRes = Nil,
+  ): ToChildPair
+
   @c4el("UiInfoProvider") def uiInfoProvider(
     key: String,
     uiType: Option[UiType],
