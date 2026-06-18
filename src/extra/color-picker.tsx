@@ -5,7 +5,7 @@ import {isInstanceOfNode} from "./dom-utils";
 import {ENTER_KEY} from "../main/keyboard-keys";
 import {identityAt} from "../main/vdom-util";
 import { usePatchSync, Patch } from "./exchange/patch-sync";
-import { ColorPickerProps } from "c4f/sapi/ee/cone/c4ui/c4gen.FrontContextTagsApi";
+import { ColorPickerProps } from "types/c4gen.FrontContextTagsApi";
 
 const receiverIdOf = identityAt('receiver');
 

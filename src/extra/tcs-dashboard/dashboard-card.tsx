@@ -1,6 +1,6 @@
 import React from 'react';
 import { NoCaptionContext } from '../../main/vdom-hooks';
-import { DashboardCardProps } from 'c4f/sapi/ee/cone/c4ui/c4gen.FrontTags';
+import { DashboardCardProps } from 'types/c4gen.FrontTags';
 
 const DashboardCard = ({iconFieldItems, nameFieldItems, innerItems, rightButton}: DashboardCardProps) => (
     <div className='dashboardCard'>

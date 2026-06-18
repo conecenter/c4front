@@ -9,7 +9,7 @@ import { useClickSyncOpt } from "../exchange/click-sync";
 import { LabeledElement } from "../labeled-element";
 import { FilterButtonExpanderContext } from "./filter-button-expander";
 import { identityAt } from "../../main/vdom-util";
-import { MassOpProps } from "c4f/sapi/ee/cone/c4ui/c4gen.ListApi";
+import { MassOpProps } from "types/c4gen.ListApi";
 
 const receiverIdOf = identityAt('receiver');
 

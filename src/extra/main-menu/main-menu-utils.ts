@@ -3,7 +3,7 @@ import { KEY_TO_DIRECTION } from '../../main/keyboard-keys';
 import { Patch, PatchHeaders } from '../exchange/patch-sync';
 import { MenuItem, MenuItemsGroup } from './main-menu-items';
 import { VISIBLE_CHILD_SELECTOR } from '../css-selectors';
-import { MenuItemsGroupProps, MenuItemState } from 'c4f/sapi/ee/cone/c4ui/c4gen.MainMenuApi';
+import { MenuItemsGroupProps, MenuItemState } from 'types/c4gen.MainMenuApi';
 
 // Server sync functionality
 function patchToState(patch: Patch): MenuItemState {

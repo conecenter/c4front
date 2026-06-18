@@ -10,7 +10,7 @@ import { useLatest } from "../custom-hooks";
 import { Patch, usePatchSync } from '../exchange/patch-sync';
 import { LabeledElement } from "../labeled-element";
 import { identityAt } from "../../main/vdom-util";
-import { FilterButtonExpanderProps } from "c4f/sapi/ee/cone/c4ui/c4gen.ListApi";
+import { FilterButtonExpanderProps } from "types/c4gen.ListApi";
 
 const FilterButtonExpanderContext = createContext<MutableRefObject<() => void> | null>(null);
 FilterButtonExpanderContext.displayName = 'FilterButtonExpanderContext';

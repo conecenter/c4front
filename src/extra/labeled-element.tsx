@@ -5,7 +5,7 @@ import { useFocusControl } from './focus-control';
 import { SEL_FOCUS_FRAME } from './css-selectors';
 import { ContextActionsElement } from './context-actions-element';
 import { Tooltip } from './tooltip';
-import { LabeledElementProps } from 'c4f/sapi/ee/cone/c4ui/c4gen.FrontTags';
+import { LabeledElementProps } from 'types/c4gen.FrontTags';
 
 type ClientProps<T extends { identity: object; children?: ReactElement[] }> =
     Omit<T, 'identity' | 'children'> & {

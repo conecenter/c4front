@@ -18,7 +18,7 @@ import { SVGElement } from '../../main/image';
 import { identityAt } from '../../main/vdom-util';
 import { usePatchSync } from '../exchange/patch-sync';
 import { PathContext } from "../focus-announcer";
-import { MenuFolderItemProps, MenuItemState } from 'c4f/sapi/ee/cone/c4ui/c4gen.MainMenuApi';
+import { MenuFolderItemProps, MenuItemState } from 'types/c4gen.MainMenuApi';
 
 const receiverIdOf = identityAt('receiver');
 

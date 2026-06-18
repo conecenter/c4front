@@ -1,4 +1,4 @@
-import { InputTimePickerState, TimePickerState, TimestampTimePickerState } from "c4f/sapi/ee/cone/c4ui/c4gen.LocaleTagsApi";
+import { InputTimePickerState, TimePickerState, TimestampTimePickerState } from "types/c4gen.LocaleTagsApi";
 import { NumberToken, TimeToken, Token, tokenizeString } from "../datepicker/date-utils";
 
 // Time calculations helpers

@@ -3,7 +3,7 @@ import {DATA_ID, PartNames} from "./pivot-const";
 import update, {extend} from "immutability-helper";
 import type {XYCoord} from "react-dnd/dist/types/monitors";
 import {Patch, PatchHeaders} from "../exchange/patch-sync";
-import { PivotSettingsProps, PivotField, PivotFieldsGroup } from "c4f/sapi/ee/cone/c4ui/c4gen.FrontContextTagsApi";
+import { PivotSettingsProps, PivotField, PivotFieldsGroup } from "types/c4gen.FrontContextTagsApi";
 
 type PivotChangeType = "reorder" | "move" | "add" | "remove" | "select" | "noop"
 

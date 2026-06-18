@@ -35,7 +35,7 @@ import {
 	onTimestampChangeAction,
 	getOnInputBoxBlur
 } from "./datepicker-actions";
-import { DatePickerInputElementProps } from "c4f/sapi/ee/cone/c4ui/c4gen.LocaleTagsApi";
+import { DatePickerInputElementProps } from "types/c4gen.LocaleTagsApi";
 
 const receiverIdOf = identityAt('receiver');
 

@@ -14,7 +14,7 @@ import { EventContent } from './event-content';
 import { escapeRegex } from '../utils';
 
 import type { CalendarProps } from '../../sapi/ee/cone/c4ui/c4gen.CalendarApi';
-import type { ColorDef } from 'c4f/sapi/ee/cone/c4ui/c4gen.CommonElementsApi';
+import type { ColorDef } from 'types/c4gen.CommonElementsApi';
 import type { DatesSetArg, EventContentArg, FormatterInput, SlotLabelContentArg, ViewApi } from '@fullcalendar/core';
 
 const TIME_FORMAT: FormatterInput = {

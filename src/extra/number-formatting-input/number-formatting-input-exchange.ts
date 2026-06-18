@@ -1,4 +1,4 @@
-import { NumberInputServerState } from "c4f/sapi/ee/cone/c4ui/c4gen.LocaleTagsApi";
+import { NumberInputServerState } from "types/c4gen.LocaleTagsApi";
 import { Patch } from "../exchange/patch-sync";
 
 

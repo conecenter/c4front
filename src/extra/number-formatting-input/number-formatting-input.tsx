@@ -6,7 +6,7 @@ import { useUserLocale } from "../locale";
 import { escapeRegex } from "../utils";
 import { usePath } from "../../main/vdom-hooks";
 import { identityAt } from "../../main/vdom-util";
-import { InputNumberServerState, NumberFormattingInputProps, NumberNumberServerState } from "c4f/sapi/ee/cone/c4ui/c4gen.LocaleTagsApi";
+import { InputNumberServerState, NumberFormattingInputProps, NumberNumberServerState } from "types/c4gen.LocaleTagsApi";
 
 const receiverIdOf = identityAt('receiver');
 

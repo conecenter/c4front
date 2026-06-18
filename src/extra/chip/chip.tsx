@@ -11,7 +11,7 @@ import { identityAt } from '../../main/vdom-util'
 import { Tooltip } from '../tooltip'
 import { useAddEventListener } from '../custom-hooks'
 
-import type { ChipElementProps } from 'c4f/sapi/ee/cone/c4ui/c4gen.ChipElementApi'
+import type { ChipElementProps } from 'types/c4gen.ChipElementApi'
 
 const receiverIdOf = identityAt('receiver');
 const delActionIdOf = identityAt('delAction');

@@ -3,7 +3,7 @@ import { PopupElement } from "./popup-element";
 import { Patch, usePatchSync } from "../exchange/patch-sync";
 import { PopupStateContext, PopupDrawerContext, PopupStack } from "./popup-contexts";
 import { identityAt } from "../../main/vdom-util";
-import { PopupManagerProps } from "c4f/sapi/ee/cone/c4ui/c4gen.ListApi";
+import { PopupManagerProps } from "types/c4gen.ListApi";
 
 // Server sync functions
 const receiverIdOf = identityAt('receiver');

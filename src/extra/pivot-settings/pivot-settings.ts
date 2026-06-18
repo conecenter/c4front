@@ -16,7 +16,7 @@ import type {XYCoord} from "react-dnd/dist";
 import {usePatchSync} from "../exchange/patch-sync";
 import { identityAt } from "../../main/vdom-util";
 import { DragScroller } from "./drag-scroller";
-import type { PivotSettingsProps, PivotField, PivotFieldsGroup } from "c4f/sapi/ee/cone/c4ui/c4gen.FrontContextTagsApi";
+import type { PivotSettingsProps, PivotField, PivotFieldsGroup } from "types/c4gen.FrontContextTagsApi";
 
 const receiverIdOf = identityAt('receiver');
 

@@ -2,7 +2,7 @@ import { useContext, useLayoutEffect, useMemo } from "react";
 import { PageTitleContext } from "./page-title-provider";
 import { usePath } from "../../main/vdom-hooks";
 import type { LayoutItem } from "../aligned-bars-api";
-import { PageTitleBlockProps } from "c4f/sapi/ee/cone/c4ui/c4gen.FrontTags";
+import { PageTitleBlockProps } from "types/c4gen.FrontTags";
 
 function PageTitleBlock({ identity, area = 'l', priority = 0, children }: PageTitleBlockProps) {
     const id = usePath(identity);

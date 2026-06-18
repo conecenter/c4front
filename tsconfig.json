@@ -21,7 +21,7 @@
     "removeComments": true,
     "noEmit": true,
     "paths": {
-      "c4f/*": ["./src/*"]
+      "types/*": ["./src/sapi/ee/cone/c4ui/*"]
     },
   },
   "include": [

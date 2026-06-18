@@ -1,6 +1,6 @@
 import {createContext, createElement as $, useContext, useEffect, useState, useMemo} from "react"
 import { ChipElement } from "./chip/chip"
-import { UserManualProviderProps } from "c4f/sapi/ee/cone/c4ui/c4gen.FrontTags"
+import { UserManualProviderProps } from "types/c4gen.FrontTags"
 
 interface UserManual {
     has: (umid: string | undefined) => boolean

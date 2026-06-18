@@ -1,7 +1,7 @@
 import React from 'react';
 import { NoCaptionContext } from '../../main/vdom-hooks';
 import { DashboardCard } from './dashboard-card';
-import { DashboardHeaderProps } from 'c4f/sapi/ee/cone/c4ui/c4gen.FrontTags';
+import { DashboardHeaderProps } from 'types/c4gen.FrontTags';
 
 const DashboardHeader = ({ heading, addButton }: DashboardHeaderProps) => (
     <NoCaptionContext.Provider value={true}>

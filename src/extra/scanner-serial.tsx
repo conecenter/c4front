@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useSync } from "../main/vdom-hooks";
 import { identityAt } from "../main/vdom-util";
 import { useLatest } from "./custom-hooks";
-import { ScannerSerialElementProps } from "c4f/sapi/ee/cone/c4ui/c4gen.FrontContextTagsApi";
+import { ScannerSerialElementProps } from "types/c4gen.FrontContextTagsApi";
 
 /*
  * Reference for scanner interface - OPTICON Universal menu book

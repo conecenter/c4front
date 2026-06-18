@@ -1,7 +1,7 @@
 import { Patch, PatchHeaders } from "../exchange/patch-sync";
 import { isInputState } from "./time-utils";
 import type { PatchSyncTransformers } from "../exchange/patch-sync";
-import { InputTimePickerState, TimePickerState, TimestampTimePickerState } from "c4f/sapi/ee/cone/c4ui/c4gen.LocaleTagsApi";
+import { InputTimePickerState, TimePickerState, TimestampTimePickerState } from "types/c4gen.LocaleTagsApi";
 
 function getHeaders(ch: TimePickerState): PatchHeaders {
     const headers: PatchHeaders = isInputState(ch)

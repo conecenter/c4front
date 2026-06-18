@@ -16,7 +16,7 @@ import { BACKSPACE_EVENT, COPY_EVENT, CUT_EVENT, DELETE_EVENT, ENTER_EVENT, PAST
     from "../external-keyboard-controls";
 import { createInputChange, createTimestampChange, parseStringToTime, isInputState, formatTimestamp, getCurrentFMTChar,
     getCurrentTokenValue, getAdjustedTime, isNumber, TIME_TOKENS, TOKEN_DATA } from "./time-utils";
-import { InputTimePickerState, TimePickerProps, TimePickerState } from "c4f/sapi/ee/cone/c4ui/c4gen.LocaleTagsApi";
+import { InputTimePickerState, TimePickerProps, TimePickerState } from "types/c4gen.LocaleTagsApi";
 
 const receiverIdOf = identityAt('receiver');
 

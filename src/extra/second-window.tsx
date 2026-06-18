@@ -2,7 +2,7 @@ import React, { ReactNode, createContext, useContext, useMemo, useState } from "
 import { createPortal } from "react-dom";
 import NewWindow from 'react-new-window'
 import { RootBranchContext } from "../main/vdom-hooks";
-import { SecondWindowComponentProps, SecondWindowOpenerProps } from "c4f/sapi/ee/cone/c4ui/c4gen.FrontTags";
+import { SecondWindowComponentProps, SecondWindowOpenerProps } from "types/c4gen.FrontTags";
 
 const SECOND_WINDOW_NAME = 'second_window';
 

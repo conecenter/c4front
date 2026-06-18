@@ -16,7 +16,7 @@ import { VISIBLE_CHILD_SELECTOR } from '../css-selectors';
 import { PopupDrawerContext } from '../popup-elements/popup-contexts';
 import { useAddEventListener } from '../custom-hooks';
 import { elementsContainTarget } from '../popup-elements/popup-element';
-import { MenuCustomItemProps, MenuExecutableItemProps, MenuItemsGroupProps, MenuUserItemProps } from 'c4f/sapi/ee/cone/c4ui/c4gen.MainMenuApi';
+import { MenuCustomItemProps, MenuExecutableItemProps, MenuItemsGroupProps, MenuUserItemProps } from 'types/c4gen.MainMenuApi';
 
 const receiverIdOf = identityAt('receiver');
 

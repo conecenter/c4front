@@ -1,7 +1,7 @@
 import {createContext, createElement, useContext, useMemo} from "react";
 import {getOrElse, None, Option, toOption} from "../main/option";
 import TrieSearch from "trie-search";
-import { Locale, WeekDay, Month, DateTimeFormat, NumberFormat, UserLocaleProviderProps } from "c4f/sapi/ee/cone/c4ui/c4gen.LocaleTagsApi";
+import { Locale, WeekDay, Month, DateTimeFormat, NumberFormat, UserLocaleProviderProps } from "types/c4gen.LocaleTagsApi";
 
 interface TextFormatToken {
     type: "text"

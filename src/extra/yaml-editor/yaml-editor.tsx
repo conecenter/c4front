@@ -10,7 +10,7 @@ import { identityAt } from '../../main/vdom-util';
 import { useFocusControl } from '../focus-control';
 import { usePath } from '../../main/vdom-hooks';
 import clsx from 'clsx';
-import { YamlEditorProps } from 'c4f/sapi/ee/cone/c4ui/c4gen.FrontContextTagsApi';
+import { YamlEditorProps } from 'types/c4gen.FrontContextTagsApi';
 
 const receiverIdOf = identityAt('receiver');
 

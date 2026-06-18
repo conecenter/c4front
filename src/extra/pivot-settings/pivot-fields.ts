@@ -3,7 +3,7 @@ import {isPivotFieldsGroup, PivotField, PivotFieldsGroup} from "./pivot-settings
 import {createElement as el} from "react";
 import {PivotDragItem, PivotDropAction} from "./pivot-exchange";
 import {ItemTypes, PartNames} from "./pivot-const";
-import type { PivotField as PivotFieldType, PivotFieldsGroup as PivotFieldsGroupType } from "c4f/sapi/ee/cone/c4ui/c4gen.FrontContextTagsApi";
+import type { PivotField as PivotFieldType, PivotFieldsGroup as PivotFieldsGroupType } from "types/c4gen.FrontContextTagsApi";
 
 interface PivotFieldsProps {
   fields: (PivotFieldType | PivotFieldsGroupType)[],

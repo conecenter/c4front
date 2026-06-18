@@ -2,8 +2,8 @@ import React, {createElement as el, HTMLAttributes, ReactElement, ReactNode} fro
 import clsx from "clsx";
 import { NoCaptionContext } from '../../main/vdom-hooks';
 import { FLEXIBLE_CELL_CLASSNAME, FLEXIBLE_COLUMN_CLASSNAME, FLEXIBLE_ROW_CLASSNAME, UNBOUNDED_CLASSNAME } from "./css-classes";
-import { FlexibleCellProps, FlexibleColumnProps, FlexibleRowProps, FlexSize, ScrollableColumnProps, ThinFlexibleRowProps } from "c4f/sapi/ee/cone/c4ui/c4gen.UiElementsApi";
-import { Align } from "c4f/sapi/ee/cone/c4ui/c4gen.CommonElementsApi";
+import { FlexibleCellProps, FlexibleColumnProps, FlexibleRowProps, FlexSize, ScrollableColumnProps, ThinFlexibleRowProps } from "types/c4gen.UiElementsApi";
+import { Align } from "types/c4gen.CommonElementsApi";
 
 const getCssFromSizes = (sizes?: FlexSize) => sizes && {
   ...(typeof sizes.min === 'number') && { minWidth: `${sizes.min}em` },

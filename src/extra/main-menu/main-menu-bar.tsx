@@ -15,7 +15,7 @@ import {identityAt} from "../../main/vdom-util";
 import {usePatchSync} from "../exchange/patch-sync";
 import {PathContext} from "../focus-announcer";
 import {SVGElement} from "../../main/image";
-import {MainMenuBarProps, MenuCustomItemProps, MenuExecutableItemProps, MenuFolderItemProps, MenuItemState, MenuUserItemProps} from "c4f/sapi/ee/cone/c4ui/c4gen.MainMenuApi";
+import {MainMenuBarProps, MenuCustomItemProps, MenuExecutableItemProps, MenuFolderItemProps, MenuItemState, MenuUserItemProps} from "types/c4gen.MainMenuApi";
 
 const MENU_BAR_PATH = 'main-menu-bar';
 const KEY_MODIFICATOR = { ArrowLeft: -1, ArrowRight: 1 };

@@ -9,7 +9,7 @@ import { useFocusControl } from '../focus-control';
 import { VISIBLE_CHILD_SELECTOR } from '../css-selectors';
 import type { Locale } from 'date-fns'
 import type { SendPatch } from '../exchange/patch-sync';
-import { MainMenuClockProps } from 'c4f/sapi/ee/cone/c4ui/c4gen.MainMenuApi';
+import { MainMenuClockProps } from 'types/c4gen.MainMenuApi';
 
 interface IntlLocales {
 	[name: string]: Locale

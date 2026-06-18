@@ -6,7 +6,7 @@ import { PageTitleBlock } from "./page-title-block";
 import { Align, ALIGN_VALS, filterByAlign, sortByPriority } from "../aligned-bars-api";
 import { PAGE_TITLE_CLASS } from "../css-selectors";
 import { PageTitleContext } from "./page-title-provider";
-import { PageTitleProps } from "c4f/sapi/ee/cone/c4ui/c4gen.FrontTags";
+import { PageTitleProps } from "types/c4gen.FrontTags";
 
 function PageTitle({ children }: PageTitleProps) {
     const { items = [] } = useContext(PageTitleContext);

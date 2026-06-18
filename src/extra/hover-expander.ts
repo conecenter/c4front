@@ -1,6 +1,6 @@
 import { MutableRefObject, useMemo, useRef, useState } from "react";
 import { useAddEventListener } from "./custom-hooks";
-import { Align } from "c4f/sapi/ee/cone/c4ui/c4gen.CommonElementsApi";
+import { Align } from "types/c4gen.CommonElementsApi";
 
 export const useHoverExpander = (
     ref: MutableRefObject<HTMLDivElement | null>,

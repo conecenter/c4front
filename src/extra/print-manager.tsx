@@ -2,7 +2,7 @@ import React, { createContext, useEffect, useRef, useState } from "react";
 import { useAddEventListener } from "./custom-hooks";
 import { PatchSyncTransformers, usePatchSync } from "./exchange/patch-sync";
 import { identityAt } from "../main/vdom-util";
-import { PrintManagerProps } from "c4f/sapi/ee/cone/c4ui/c4gen.ListApi";
+import { PrintManagerProps } from "types/c4gen.ListApi";
 
 const PrintContext = createContext(false);
 PrintContext.displayName = 'PrintContext';

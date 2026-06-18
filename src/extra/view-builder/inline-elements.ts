@@ -4,7 +4,7 @@ import {useClickSyncOpt} from "../exchange/click-sync";
 import clsx from "clsx";
 import {CLICKED_CLASSNAME, INLINE_BUTTON_CLASSNAME, INLINE_CHIP_CLASSNAME} from "./css-classes";
 import {identityAt} from "../../main/vdom-util";
-import { InlineButtonProps, InlineChipProps } from "c4f/sapi/ee/cone/c4ui/c4gen.InlineElementsApi";
+import { InlineButtonProps, InlineChipProps } from "types/c4gen.InlineElementsApi";
 
 const receiverIdOf = identityAt('receiver');
 

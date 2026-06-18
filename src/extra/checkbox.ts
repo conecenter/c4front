@@ -6,7 +6,7 @@ import { Tooltip } from './tooltip'
 import {identityAt} from "../main/vdom-util";
 import { PatchSyncTransformers, usePatchSync } from './exchange/patch-sync'
 import { usePath } from 'c4f/main/vdom-hooks'
-import { CheckboxElementProps, RadioButtonElementProps } from 'c4f/sapi/ee/cone/c4ui/c4gen.FrontContextTagsApi'
+import { CheckboxElementProps, RadioButtonElementProps } from 'types/c4gen.FrontContextTagsApi'
 
 const receiverIdOf = identityAt('receiver');
 

@@ -10,7 +10,7 @@ import { PopupWrapperKeyContext } from "./popup-elements/popup-contexts";
 import { usePopupState } from "./popup-elements/popup-manager";
 import { useChange } from "./custom-hooks";
 import { focusAuto } from "./focus-announcer";
-import { MenuListItemProps, MenuListProps } from "c4f/sapi/ee/cone/c4ui/c4gen.MenuList";
+import { MenuListItemProps, MenuListProps } from "types/c4gen.MenuList";
 
 const receiverIdOf = identityAt('receiver');
 

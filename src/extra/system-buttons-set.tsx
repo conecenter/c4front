@@ -1,6 +1,6 @@
 import React, { ReactElement } from 'react';
 import { flexibleComponents } from './view-builder/flexible-elements'
-import { Align } from 'c4f/sapi/ee/cone/c4ui/c4gen.CommonElementsApi';
+import { Align } from 'types/c4gen.CommonElementsApi';
 
 const { ThinFlexibleRow } = flexibleComponents;
 

@@ -3,7 +3,7 @@ import { usePatchSync, Patch, PatchSyncTransformers } from "./exchange/patch-syn
 import { useAddEventListener } from "./custom-hooks";
 import { RootBranchContext } from '../main/vdom-hooks';
 import { identityAt } from '../main/vdom-util';
-import { UiInfoProviderProps, UiType } from 'c4f/sapi/ee/cone/c4ui/c4gen.FrontContextTagsApi';
+import { UiInfoProviderProps, UiType } from 'types/c4gen.FrontContextTagsApi';
 
 const DEFAULT_UI_TYPE = 'pointer';
 
