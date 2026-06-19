@@ -1,7 +1,6 @@
-import React, { cloneElement, ReactElement, useContext, useState } from 'react';
+import React, { ReactElement, useContext, useState } from 'react';
 import { useUserManual } from './user-manual';
 import { UiInfoContext } from './ui-info-provider';
-import { BottomBarElement } from './bottom-bar/bottom-bar-element';
 import { useAddEventListener } from './custom-hooks';
 import { ChipElement } from './chip/chip';
 
@@ -21,24 +20,22 @@ function ContextActionsElement({ umid, goToChip, refLE }: ContextActionsElement)
  
     const isTouch = useContext(UiInfoContext) === 'touch';
 
-    if (!isFocused) return null;
+    if (!isFocused || isTouch) return null;
 
-    const goToElement = isTouch && goToChip
-        ? cloneElement(goToChip[0], { text: goToChip[0].props.tooltip })
-        : goToChip;
-
-    if (!(umButton || goToElement)) return null;
+    // const goToElement = isTouch && goToChip
+    //     ? cloneElement(goToChip[0], { text: goToChip[0].props.tooltip })
+    //     : goToChip;
+    if (!(umButton || goToChip)) return null;
 
     const contextActionsElems = (
         <div className='contextActionsBox' onMouseDown={preventFocusin}>
             {umButton}
-            {goToElement}
+            {goToChip}
         </div>
     );
 
-    return isTouch
-        ? <BottomBarElement id={`umid-${umid ?? ''}`}>{contextActionsElems}</BottomBarElement>
-        : contextActionsElems;
+    // <BottomBarElement id={`umid-${umid ?? ''}`}>{contextActionsElems}</BottomBarElement>
+    return contextActionsElems;
 }
 
 function useIsFocused(refLE: React.RefObject<HTMLDivElement | null>) {
