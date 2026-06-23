@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef} from "react";
 import clsx from 'clsx';
 import {getDateTimeFormat, useUserLocale} from "../locale";
-import {DateSettings, formatDate, getDate, getPopupDate, parseStringToDate} from "./date-utils";
+import {DateSettings, formatDate, getDate, parseStringToDate} from "./date-utils";
 import {getOrElse, mapOption, None, nonEmpty, Option} from "../../main/option";
 import {useSelectionEditableInput} from "./selection-control";
 import {DatepickerCalendar} from "./datepicker-calendar";
@@ -82,10 +82,8 @@ export function DatePickerInputElement({
 	const { isOpened, toggle } = usePopupState(path);
 	const togglePopup = () => toggle(!isOpened);
 
-	useEffect(function calcInitCalendarState() {
-		const dateToShow = isOpened ? getOrElse(currentDateOpt, getDate(Date.now(), dateSettings)) : None;
-		const popupDate = getOrElse(mapOption(dateToShow, getPopupDate), null);
-		sendTempChange(createPopupChange(popupDate));
+	useEffect(function resetCalendarState() {
+		if (!isOpened && currentState.popupDate) sendTempChange(createPopupChange(null));
 	}, [isOpened]);
 
 	// Interaction with FocusModule & VK
@@ -211,7 +209,7 @@ export function DatePickerInputElement({
 
 			<button
 				type='button'
-				className={clsx('btnCalendar', currentState.popupDate && 'rotate180deg')}
+				className={clsx('btnCalendar', isOpened && 'rotate180deg')}
 				onClick={togglePopup} />
 
 			<div className='sideContent'>
@@ -219,7 +217,7 @@ export function DatePickerInputElement({
 			</div>
 
 			{isOpened && <PopupElement popupKey={path}>
-				{currentState.popupDate && <DatepickerCalendar {...{
+				<DatepickerCalendar {...{
 					currentState,
 					currentDateOpt,
 					dateSettings,
@@ -227,7 +225,7 @@ export function DatePickerInputElement({
 					sendTempChange,
 					inputRef,
 					closePopup: () => toggle(false)
-				}} />}
+				}} />
 			</PopupElement>}
 		</div>
 	);

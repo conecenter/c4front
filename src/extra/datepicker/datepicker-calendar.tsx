@@ -1,7 +1,7 @@
 import React, { MouseEvent } from "react";
 import { useUserLocale } from "../locale";
 import { addMonths, getDate as getDayOfMonth, getDaysInMonth, getWeek, isMonday, set, startOfWeek } from "date-fns";
-import { isEmpty, nonEmpty, Option, toOption } from '../../main/option';
+import { getOrElse, isEmpty, nonEmpty, Option, toOption } from '../../main/option';
 import { adjustDate, DateSettings, getDate, getTimestamp, getPopupDate, getTimestampNow } from "./date-utils";
 import { createPopupChange, createTimestampChange, DatepickerChange, DatePickerState, PopupDate } from "./datepicker-exchange";
 import { PopupElement } from "../popup-elements/popup-element";
@@ -34,7 +34,14 @@ export function DatepickerCalendar({
   closePopup
 }: DatepickerCalendarProps) {
 
-  const popupDate = currentState.popupDate as PopupDate;
+  const pageFromSelectedDateOrNow = (): PopupDate => {
+    const now = getOrElse(getDate(Date.now(), dateSettings), new Date());
+    const dateToShow = getOrElse(currentDateOpt, now);
+    return getPopupDate(dateToShow);
+  }
+
+  const popupDate = currentState.popupDate ?? pageFromSelectedDateOrNow();
+
   const { year, month } = popupDate;
 
   const pageDate = new Date(year, month);
