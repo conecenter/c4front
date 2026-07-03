@@ -57,21 +57,19 @@ export function ColorPicker({identity, value, ro}: ColorPickerProps) {
 		<div
 			className={`inputBox${ro ? ' colorPickerRo' : ''}`}
 			onFocus={() => setActive(true)}
-			onBlur={handleBlur} >
-
-			<div className="inputSubBox" >
-				<HexColorInput
-					className={active? undefined : 'colorPickerChip'}
-					style={active? undefined : {background: currentState}}
-					color={currentState}
-					onChange={sendTempChange}
-					onInput={handleInput}
-					onKeyDown={handleKeyDown}
-					onFocus={handleInputFocus}
-					disabled={ro}
-					prefixed />
-			</div>
-
+			onBlur={handleBlur}
+		>
+			<HexColorInput
+				className={active? undefined : 'colorPickerChip'}
+				style={active? undefined : {background: currentState}}
+				color={currentState}
+				onChange={sendTempChange}
+				onInput={handleInput}
+				onKeyDown={handleKeyDown}
+				onFocus={handleInputFocus}
+				disabled={ro}
+				prefixed
+			/>
 			{active &&
 				<div ref={setPopupRef} className='colorPickerPopup' tabIndex={-1} style={popupPos} >
 					<HexColorPicker color={currentState} onChange={sendTempChange} />
