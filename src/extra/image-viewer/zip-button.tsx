@@ -44,11 +44,27 @@ async function fetchImageBlobs(images: Slide[]): Promise<ImageBlobData[]> {
 
 async function generateZipFile(imageBlobs: ImageBlobData[], reserveFilenames: string[]) {
     const zip = new JSZip();
-    imageBlobs.forEach(({filename, blob}, i) => zip.file(filename || reserveFilenames[i], blob));
+    const usedFilenames = new Map<string, number>();
+    imageBlobs.forEach(({filename, blob}, i) => {
+        const originalFilename = filename || reserveFilenames[i];
+        zip.file(uniqueFilename(originalFilename, usedFilenames), blob);
+    });
     return zip.generateAsync({
         type: "blob",
         streamFiles: true
     });
+}
+
+function uniqueFilename(filename: string, usedFilenames: Map<string, number>) {
+    const key = filename.toLowerCase(); // Windows may treat filenames as case-insensitive
+    const usedCount = usedFilenames.get(key) || 0;
+    usedFilenames.set(key, usedCount + 1);
+    if (usedCount === 0) return filename;
+
+    const lastDotIndex = filename.lastIndexOf(".");
+    if (lastDotIndex <= 0) return `${filename} (${usedCount + 1})`;
+
+    return `${filename.slice(0, lastDotIndex)} (${usedCount + 1})${filename.slice(lastDotIndex)}`;
 }
 
 function downloadFile(url: string) {
