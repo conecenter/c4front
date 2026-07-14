@@ -2,10 +2,10 @@ export const eventManager = (()=>{
     let w
     const checkForEvent = (event) => typeof event === "function"
     const getHostNoFailure = (location) => {
-        try{
-                location.host
-                return true
-        } catch (e) {
+        try {
+			void location.host
+			return true
+        } catch {
             return false
         }
     }
