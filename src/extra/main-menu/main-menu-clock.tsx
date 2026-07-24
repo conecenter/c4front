@@ -33,12 +33,12 @@ function MainMenuClock({ identity, serverTime, timestampFormatId, path }: MainMe
 		return `${dateFormat ? dateFormat.pattern : 'dd-MM-yyyy'}|HH:mm:ss`;
 	}, [locale]);
 
-	const formattedDate = isSynced ? formatInTimeZone(
+	const formattedDate = formatInTimeZone(
 		new Date(timestamp),
 		locale.timezoneId,
 		pattern,
 		{ locale: INTL_LOCALES[locale.shortName] }
-	) : '|';
+	);
 
 	const [date, time] = formattedDate.split('|');
 
