@@ -42,6 +42,7 @@ function UiInfoProvider({identity, uiType: state, children}: UiInfoProviderProps
     // UiType functionality
     const {currentState: uiType, sendFinalChange} =
         usePatchSync(receiverIdOf(identity), state, false, patchSyncTransformers);
+    const effectiveUiType = uiType ?? DEFAULT_UI_TYPE;
 
     const { isRoot } = useContext(RootBranchContext);
 
@@ -50,7 +51,7 @@ function UiInfoProvider({identity, uiType: state, children}: UiInfoProviderProps
     const updateUiType = () => {
         if (!isRoot) return;
         const currentUiType: UiType = pointerMql.current.matches ? 'pointer' : 'touch';
-        if (uiType !== currentUiType) sendFinalChange(currentUiType);
+        if (effectiveUiType !== currentUiType) sendFinalChange(currentUiType);
     }
 
     useLayoutEffect(() => updateUiType(), []);
@@ -61,7 +62,7 @@ function UiInfoProvider({identity, uiType: state, children}: UiInfoProviderProps
     const [haveVk, setHaveVk] = useState(false);
     const vkInfo = useMemo(() => ({ haveVk, setHaveVk }), [haveVk]);
 
-    return $(UiInfoContext.Provider, {value: uiType || DEFAULT_UI_TYPE}, 
+    return $(UiInfoContext.Provider, {value: effectiveUiType},
         $(VkInfoContext.Provider, {value: vkInfo}, children));
 }
 
