@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useContext, useEffect, useMemo } from "react";
 import { ReactNode } from "react";
 import { State, SWRConfig } from "swr";
+import { RootBranchContext } from "../main/vdom-hooks";
 
 type SwrCacheMap = Map<string, State<string>>
 
@@ -10,26 +11,46 @@ interface SwrCacheProvider {
 
 const LS_KEY = 'svg-cache';
 
-const SWR_OPTIONS = {
-	provider: cacheProvider,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false
+// Shared data for this browser-page session. This Map is never passed directly to SWR.
+let sessionCache = loadFromLocalStorage();
+
+const isSvgElement: (res: [string, State<string>]) => boolean = (([url]) => url.endsWith(".svg"));
+
+const mergeSvgCache = (newCache: SwrCacheMap) => {
+    sessionCache = new Map([...sessionCache, ...newCache]);
 }
 
-const SwrCacheProvider = ({ children }: SwrCacheProvider) => (
-	<SWRConfig value={SWR_OPTIONS}>
-		{children}
-	</SWRConfig>
-);
+function SwrCacheProvider({ children }: SwrCacheProvider) {
+	const { isRoot } = useContext(RootBranchContext);
 
-let cacheMap: SwrCacheMap | null = null;
+	const cacheMap = useMemo(() => new Map(sessionCache), []);
 
-function cacheProvider() {
-	if (!cacheMap) {
-		cacheMap = loadFromLocalStorage();
-		window.addEventListener('pagehide', saveSvgCacheToStorage);
-	}
-	return cacheMap;
+	const config = useMemo(() => ({
+        provider: () => cacheMap,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false
+    }), [cacheMap]);
+
+	useEffect(() => {
+        if (!isRoot) return;
+
+        const handlePageHide = () => {
+            mergeSvgCache(cacheMap);
+            saveSvgCacheToStorage();
+        };
+        window.addEventListener("pagehide", handlePageHide);
+        return () => {
+			// Make new entries available to the next root provider without writing to localStorage on every navigation
+            mergeSvgCache(cacheMap);
+			window.removeEventListener("pagehide", handlePageHide);
+        };
+    }, [cacheMap, isRoot]);
+
+	return (
+		<SWRConfig value={config}>
+			{children}
+		</SWRConfig>
+	);
 }
 
 function loadFromLocalStorage(): SwrCacheMap {
@@ -42,13 +63,12 @@ function loadFromLocalStorage(): SwrCacheMap {
 	return new Map();
 }
 
-const isSvgElement: (res: [string, State<string>]) => boolean = (([url]) => url.endsWith(".svg"));
-
 function saveSvgCacheToStorage() {
-	if (!cacheMap) return;
 	try {
-		const newCache = JSON.stringify(Array.from(cacheMap.entries()).filter(isSvgElement));
-		localStorage.setItem(LS_KEY, newCache);
+		localStorage.setItem(
+			LS_KEY,
+			JSON.stringify([...sessionCache].filter(isSvgElement))
+		);
 	} catch (err) {
 		console.error("Failed to save SVG cache:", err);
 	}
