@@ -265,6 +265,7 @@ class InputElementBase extends StatefulComponent {
                 $(inputType, {
                     key: "input",
                     ref: ref => this.inp = ref,
+                    ...this.props.inputAttrs,
                     name, content, readOnly, size,
                     style: {
                         ...alignRight && {textAlign: "end"},
