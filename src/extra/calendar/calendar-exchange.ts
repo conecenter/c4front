@@ -7,6 +7,7 @@ import type { Patch, PatchHeaders } from '../exchange/patch-sync';
 import type { CalendarEvent, ViewInfo, ViewType } from "./calendar";
 import type { EventInput } from '@fullcalendar/core';
 import type { EventImpl } from '@fullcalendar/core/internal';
+import type { EventDragStartArg } from "@fullcalendar/interaction/index.js";
 
 const HEADERS = {
     id: 'x-r-event-id',
@@ -15,7 +16,8 @@ const HEADERS = {
     viewType: 'x-r-view-type',
     from: 'x-r-from',
     to: 'x-r-to',
-    resourceIds: 'x-r-resource-ids'
+    resourceIds: 'x-r-resource-ids',
+    drag: 'x-r-drag'
 } as const
 
 const useEventsSync = (identity: object, events: CalendarEvent[]) => {
@@ -25,8 +27,8 @@ const useEventsSync = (identity: object, events: CalendarEvent[]) => {
     return { eventsState: currentState, sendEventsChange: sendFinalChange };
 }
 
-function serverStateToState(transform: (serverState: CalendarEvent[]) => EventInput[]) {
-    return (serverState: CalendarEvent[]) => transform(serverState);
+function serverStateToState(transform: (serverEvent: CalendarEvent) => EventInput) {
+    return (serverState: CalendarEvent[]) => serverState.map(transform);
 }
 
 function changeToPatch(ch: EventImpl): Patch {
@@ -76,6 +78,20 @@ const useEventClickAction = (identity: object) => {
 }
 
 /////
+const dragActionIdOf = identityAt('dragAction');
+
+const useEventDragAction = (identity: object) => {
+    const [_, enqueueDragActionPatch] = useSync(dragActionIdOf(identity))
+    return (draggedEvent: EventDragStartArg, isDragged: boolean) => enqueueDragActionPatch({
+        value: 'dragAction',
+        headers: {
+            [HEADERS.drag]: isDragged ? '1' : '0',
+            [HEADERS.id]: draggedEvent.event.id
+        }
+    });
+}
+
+/////
 function useViewSync(identity: object, serverView: ViewInfo | undefined) {
     const { currentState, sendTempChange } = usePatchSync(
         identity, 'changeView', serverView, false, s => s, viewChangeToPatch, viewPatchToChange, (prev, ch) => ch
@@ -103,4 +119,4 @@ function viewPatchToChange(patch: Patch): ViewInfo {
     }
 }
 
-export { useEventsSync, useEventClickAction, useViewSync }
+export { useEventsSync, useEventClickAction, useEventDragAction, useViewSync }
