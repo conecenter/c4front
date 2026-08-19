@@ -10,7 +10,7 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
 
 @c4tagSwitch("FrontApp") trait ViewInfo extends ToJson
 
-@c4tagSwitch("FrontApp") trait BusinessHours extends ToJson
+@c4tagSwitch("FrontApp") trait PeriodOfTime extends ToJson
 
 @c4tagSwitch("FrontApp") trait TimeRange extends ToJson
 
@@ -21,9 +21,9 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
   @c4el("Calendar") def calendar(
     key: String,
     events: List[CalendarEvent],
+    periodsOfTime: List[PeriodOfTime] = Nil,
     currentView: Option[ViewInfo] = None,
     slotDuration: Option[String] = None,
-    businessHours: Option[BusinessHours] = None,
     allDaySlot: Option[Boolean] = None,
     timeSlotsRange: Option[TimeRange] = None,
     eventsChildren: ViewRes,
@@ -31,12 +31,16 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
     changeView: Receiver[C] = NoReceiver[C],
     changeEvent: Receiver[C] = NoReceiver[C],
     clickAction: Receiver[C] = NoReceiver[C],
+    dragAction: Receiver[C] = NoReceiver[C],
   ): ToChildPair
 
   @c4el("CalendarEvent") def calendarEvent(
     id: String,
     start: Option[String] = None,
     end: Option[String] = None,
+    daysOfWeek: List[Int] = Nil,
+    startTime: Option[String] = None,
+    endTime: Option[String] = None,
     title: Option[String] = None,
     allDay: Option[Boolean] = None,
     color: Option[ColorDef] = None,
@@ -56,11 +60,16 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
     to: String,
   ): ViewInfo
 
-  @c4val def businessHours(
-    daysOfWeek: List[Int], // 0 - sunday
-    startTime: String,
-    endTime: String,
-  ): BusinessHours
+  @c4val def periodOfTime(
+    id: String,
+    allowDrop: Boolean,
+    start: Option[String] = None,
+    end: Option[String] = None,
+    daysOfWeek: List[Int] = Nil, // 0 - sunday
+    startTime: Option[String] = None,
+    endTime: Option[String] = None,
+    color: Option[ColorDef] = None,
+  ): PeriodOfTime
 
   @c4val def timeRange(
     from: String,
