@@ -225,6 +225,7 @@ const useScrollbarWidth = (outerWidth,fixedCellsSize) => {
     const calcScrollbarWidth = elem => {
         const {fontSize} = getComputedStyle(elem)
         const {defaultView: win, documentElement} = elem.ownerDocument
+        if (!win) return 0;
         return (win.innerWidth - documentElement.clientWidth) / parseFloat(fontSize)
     }
     const ref = useCallback(gridElement=>{
