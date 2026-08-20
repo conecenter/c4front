@@ -68,7 +68,6 @@ import ee.cone.c4vdom.{Receiver, ToChildPair, ToJson, c4el, c4tagSwitch, c4tags,
     daysOfWeek: List[Int] = Nil, // 0 - sunday
     startTime: Option[String] = None,
     endTime: Option[String] = None,
-    color: Option[ColorDef] = None,
   ): PeriodOfTime
 
   @c4val def timeRange(

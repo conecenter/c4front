@@ -11,7 +11,7 @@ import { useUserLocale } from '../locale';
 import { useEventClickAction, useEventDragAction, useEventsSync, useViewSync } from './calendar-exchange';
 import { LoadingIndicator } from '../loading-indicator';
 import { ColorDef } from '../view-builder/common-api';
-import { transformColor, transformDateFormatProps } from './calendar-utils';
+import { transformDateFormatProps } from './calendar-utils';
 import { EventContent } from './event-content';
 import { escapeRegex } from '../utils';
 import { useTimeOffsetKey } from './useTimeOffsetKey';
@@ -40,11 +40,11 @@ interface Calendar<DateFormat = number> {
 }
 
 type BaseEvent<DateFormat = number> = EventDuration<DateFormat> & {
-    id: string,
-    color?: ColorDef
+    id: string
 }
 
 type CalendarEvent<DateFormat = number> = BaseEvent<DateFormat> & {
+    color?: ColorDef,
     title?: string,
     allDay?: boolean,
     editable?: boolean,
@@ -208,7 +208,8 @@ function fixMidnightPresentation(info: SlotLabelContentArg) {
 
 function periodOfTimeToBgEvent({ allowDrop, ...periodOfTime }: PeriodOfTime<number>): EventInput {
     return {
-        ...transformColor(periodOfTime),
+        ...periodOfTime,
+        ...!allowDrop && { classNames: ['calendar-period-blocked'] },
         ...allowDrop && { groupId: ALLOW_DROP_GROUP_ID },
         display: 'background'
     };

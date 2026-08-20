@@ -51,16 +51,14 @@ function App() {
             allowDrop: true,
             daysOfWeek: [1, 2, 3, 4, 5],
             // startTime: '28800000',
-            // endTime: '64800000',
-            color: { tp: 'r' as const, bgColor: 'green', textColor: 'white' }
+            // endTime: '64800000'
         },
         {
             id: 'period_1',
             allowDrop: false,
             daysOfWeek: [0],
             startTime: '28800000',
-            endTime: '64800000',
-            color: { tp: 'r' as const, bgColor: 'blue', textColor: 'white' }
+            endTime: '64800000'
         }
     ];
 

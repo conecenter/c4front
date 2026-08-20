@@ -1304,6 +1304,7 @@ div.grid {
   --fc-page-bg-color: var(--color-body);
   --fc-border-color: var(--color-dark-headerColor);
   --fc-non-business-color: var(--color-headerColor);
+  --fc-bg-event-color: transparent;
   --fc-event-bg-color: var(--color-light-primaryColor);
   --fc-event-border-color: transparent;
   --fc-event-text-color: var(--textColor-primaryColor);
@@ -1358,6 +1359,10 @@ div.grid {
 
   .fc-non-business {
     opacity: 0.3;
+  }
+
+  .fc-bg-event.calendar-period-blocked {
+    --fc-bg-event-color: var(--color-grayColor);
   }
 
   .fc-event {
