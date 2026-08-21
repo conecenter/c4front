@@ -17,4 +17,9 @@ module.exports = {
 	testEnvironmentOptions: {
 		customExportConditions: ['require', 'default'],
 	},
+	collectCoverageFrom: [
+		'<rootDir>/src/**/*.{js,jsx,ts,tsx}',
+		'!<rootDir>/src/test/**',
+		'!<rootDir>/src/**/*.d.ts',
+	]
 }

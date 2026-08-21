@@ -3,6 +3,7 @@
     "dev": "vite",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "build": "tsc && vite build",
     "postinstall": "patch-package"
   },

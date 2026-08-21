@@ -8,3 +8,4 @@ c4gen-*
 node_modules
 CLAUDE.md
 .claudeignore
+/coverage/
