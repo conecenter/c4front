@@ -28,7 +28,7 @@ trait TimePickerProps extends ToChildPair
 @c4tagSwitch("FrontApp") trait TimestampTimePickerState extends TimePickerState
 
 @c4tags("FrontApp") trait LocaleInputTags[C] {
-  @c4elPath("DatePickerInputElement") def datePicker(
+  @c4el("DatePickerInputElement") def datePicker(
     key: String,
     state: DatePickerServerState,
     timestampFormatId: Int,

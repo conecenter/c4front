@@ -36,6 +36,7 @@ import {
 	getOnInputBoxBlur
 } from "./datepicker-actions";
 import { DatePickerInputElementProps } from "types/c4gen.LocaleTagsApi";
+import { usePath } from "../../main/vdom-hooks";
 
 const receiverIdOf = identityAt('receiver');
 
@@ -46,7 +47,6 @@ export function DatePickerInputElement({
 		userTimezoneId,
 		deferredSend,
 		placeHolder,
-		path,
 		children
 }: DatePickerInputElementProps) {
 	const locale = useUserLocale()
@@ -55,6 +55,8 @@ export function DatePickerInputElement({
 	const dateSettings: DateSettings = {timestampFormat, locale, timezoneId}
 
 	const dateChanged = useRef(false);
+
+	const path = usePath(identity);
 
 	const { currentState, sendTempChange: onTempChange, sendFinalChange: onFinalChange } = usePatchSync(
         receiverIdOf(identity),
