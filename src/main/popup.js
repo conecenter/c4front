@@ -47,7 +47,7 @@ const prepCheckUpdPopupPos = (element,lrMode,baseElement) => {
     const pos = lrMode ? fit2D(xData, yData) : fit2D(yData, xData)
     return was => {
         const isSame =
-            Math.abs(was.left-pos.left) < 0.5 && Math.abs(was.top-pos.top) < 0.5
+            was.visibility !== "hidden" && Math.abs(was.left-pos.left) < 0.5 && Math.abs(was.top-pos.top) < 0.5
         return isSame ? was : { ...pos, position: "fixed", width: "fit-content", minWidth: parentWidth }
     }
 }
