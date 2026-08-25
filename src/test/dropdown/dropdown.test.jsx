@@ -16,6 +16,20 @@ function renderDropdown({ drawerEl = null, ...props } = {}) {
     );
 }
 
+let requestAnimationFrameSpy;
+
+beforeEach(() => {
+    // Initial popup positioning runs in useLayoutEffect. These behavior tests do
+    // not need the continuous animation-frame polling used to track layout changes.
+    requestAnimationFrameSpy = jest
+        .spyOn(window, 'requestAnimationFrame')
+        .mockImplementation(() => 0);
+});
+
+afterEach(() => {
+    requestAnimationFrameSpy.mockRestore();
+});
+
 describe('basic functions', () => {
     it("renders a text input and toggle button", () => {
         renderDropdown({ onChange: jest.fn(), onBlur: jest.fn() });
