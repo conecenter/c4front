@@ -8,7 +8,7 @@ jest.mock('../../main/image', () => ({ SVGElement: () => null }));
 it('copies element content', async () => {
     const user = userEvent.setup();
     let selectionAtCopy: Selection | null = null;
-    jest.mocked(document.execCommand).mockImplementation((cmd) => {
+    jest.mocked(document.execCommand).mockImplementationOnce((cmd) => {
         if (cmd === 'copy') selectionAtCopy = window.getSelection();
         return false;
     });
