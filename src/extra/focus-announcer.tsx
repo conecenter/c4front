@@ -4,6 +4,7 @@ import { useAddEventListener, useIsMounted } from './custom-hooks';
 import { SEL_FOCUS_FRAME, VISIBLE_CHILD_SELECTOR, FOCUS_BLOCKER_CLASS } from './css-selectors';
 import { identityAt } from '../main/vdom-util';
 import { FocusAnnouncerElementProps } from '../sapi/ee/cone/c4ui/c4gen.FocusAnnouncerApi';
+import { usePath } from '../main/vdom-hooks';
 
 /*
     Focus change cases:
@@ -50,7 +51,7 @@ const patchSyncTransformers: PatchSyncTransformers<string, string, string> = {
     applyChange: (_prev, ch) => ch
 };
 
-function FocusAnnouncerElement({ identity, path: thisPath, value: serverValue, children }: FocusAnnouncerElementProps) {
+function FocusAnnouncerElement({ identity, value: serverValue, children }: FocusAnnouncerElementProps) {
     const [doc, setDoc] = useState<Document | undefined>(undefined);
     const setupDoc = useCallback((elem: HTMLDivElement) => setDoc(elem?.ownerDocument), []);
 
@@ -74,6 +75,7 @@ function FocusAnnouncerElement({ identity, path: thisPath, value: serverValue, c
         else setLocalFocus('');
     }, [doc, setLocalFocus]);
 
+    const thisPath = usePath(identity);
     useReportPathOnFocus(doc, thisPath, sendChange, localFocusRef);
 
     const registerFocusCandidate = usePreventFocusLoss(doc, value, focusBackupElement);
