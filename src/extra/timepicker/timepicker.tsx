@@ -117,7 +117,7 @@ function TimePicker({identity, state, offset, timestampFormatId, deferredSend = 
 		inputRef.current?.focus();
 	}
 	function clearAndFocusInput() {
-		sendTempChange(createInputChange(''));
+        inputRef.current?.select();
 		inputRef.current?.focus();
 	}
 	function handleClipboardWrite(e: CustomEvent) {
