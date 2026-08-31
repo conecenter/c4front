@@ -207,12 +207,20 @@ function fixMidnightPresentation(info: SlotLabelContentArg) {
 }
 
 function periodOfTimeToBgEvent({ allowDrop, ...periodOfTime }: PeriodOfTime<number>): EventInput {
+    const isAllDay = isRecurringDuration(periodOfTime) && periodOfTime.startTime === 0 && periodOfTime.endTime === 86400000;
     return {
+        ...isAllDay && { allDay: true },
         ...periodOfTime,
         ...!allowDrop && { classNames: ['calendar-period-blocked'] },
         ...allowDrop && { groupId: ALLOW_DROP_GROUP_ID },
         display: 'background'
     };
+}
+
+function isRecurringDuration<DateFormat>(
+    duration: SingleDuration<DateFormat> | RecurringDuration<DateFormat>
+): duration is RecurringDuration<DateFormat> {
+    return (duration as RecurringDuration<DateFormat>).daysOfWeek !== undefined;
 }
 
 export type { CalendarEvent, EventDuration, ViewInfo, ViewType, TimeRange }
