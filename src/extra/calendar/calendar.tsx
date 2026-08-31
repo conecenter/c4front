@@ -167,7 +167,7 @@ function Calendar(props: Calendar<string>) {
                 now={() => Date.now() + (next ?? 0)}
                 longPressDelay={500}
                 locales={allLocales}
-                locale={locale.lang}
+                locale={locale.shortName === 'ruen' ? 'en-gb' : locale.lang}
                 headerToolbar={{
                     left: 'prev today next',
                     center: 'title',
