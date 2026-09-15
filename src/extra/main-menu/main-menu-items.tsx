@@ -1,7 +1,5 @@
-import React, { ReactElement, useCallback, useContext, useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
+import React from 'react';
 import clsx from 'clsx';
-import { usePopupPos } from '../../main/popup';
 import { useClickSync } from '../exchange/click-sync';
 import { useFocusControl } from '../focus-control';
 import { MenuItem } from './main-menu-bar';
@@ -9,13 +7,8 @@ import { ENTER_KEY } from '../../main/keyboard-keys';
 import { MenuFolderItem } from './menu-folder-item';
 import { BindingElement } from '../binds/binds-elements';
 import { useBinds } from '../binds/key-binding';
-import { focusFirstMenuItem } from './main-menu-utils';
 import { SVGElement } from '../../main/image';
 import { identityAt } from '../../main/vdom-util';
-import { VISIBLE_CHILD_SELECTOR } from '../css-selectors';
-import { PopupDrawerContext } from '../popup-elements/popup-contexts';
-import { useAddEventListener } from '../custom-hooks';
-import { elementsContainTarget } from '../popup-elements/popup-element';
 import { MenuCustomItemProps, MenuExecutableItemProps, MenuItemsGroupProps, MenuUserItemProps } from 'types/c4gen.MainMenuApi';
 
 const receiverIdOf = identityAt('receiver');
@@ -63,67 +56,6 @@ function MenuCustomItem({path, children}: MenuCustomItemProps) {
 }
 
 
-interface MenuPopupElement {
-    popupLrMode: boolean,
-    keyboardOperation: React.MutableRefObject<boolean>,
-    closePopup: () => void,
-    children?: ReactElement<MenuItem | MenuItemsGroupProps>[]
-}
-
-function MenuPopupElement({popupLrMode, keyboardOperation, closePopup, children}: MenuPopupElement) {
-    const [popupElement,setPopupElement] = useState<HTMLDivElement | null>(null);
-    const popupDrawer = useContext(PopupDrawerContext);
-
-    const [parent, setParent] = useState<HTMLElement | null>(null);
-    const setPopupParent = useCallback((elem: HTMLElement | null) => setParent(elem && elem.parentElement), []);
-
-    const [popupPos] = usePopupPos(popupElement, popupLrMode, parent);
-
-    const isVisible = parent?.matches(VISIBLE_CHILD_SELECTOR);
-
-    const hasIcon = children ? children.some(hasIconProp) : false;
-
-    useEffect(() => {
-        if (popupPos.visibility !== 'hidden' && keyboardOperation.current) {
-            focusFirstMenuItem(popupElement, children);
-            keyboardOperation.current = false;
-        }
-        return () => {
-            if (popupPos.visibility !== 'hidden') keyboardOperation.current = false;
-        }
-    }, [popupPos.visibility]);
-
-    function closeOnBlur(e: FocusEvent) {
-        if (!e.relatedTarget || elementsContainTarget([popupElement, parent], e.relatedTarget)) return;
-        closePopup();
-	}
-    useAddEventListener(popupElement?.ownerDocument, 'focusout', closeOnBlur);
-
-    const popup = (
-        <div ref={setPopupElement}
-            className={clsx('menuPopupBox popupEl', hasIcon && 'hasIcons')}
-            style={popupPos}
-            onClick={(e) => e.stopPropagation()} >
-            {children}
-        </div>
-    );
-
-    return (
-        <PopupDrawerContext.Provider value={popupElement} >
-            {isVisible && popupDrawer && createPortal(popup, popupDrawer)}
-            <span ref={setPopupParent} style={{display: 'none'}}></span>
-        </PopupDrawerContext.Provider>
-    );
-}
-
-function hasIconProp(child: JSX.Element): string | undefined {
-    if (child.type === MenuItemsGroup) {
-        return child.props.children.some(hasIconProp);
-    }
-    return child.props.icon;
-}
-
-
 function MenuItemsGroup({children}: Omit<MenuItemsGroupProps, 'identity'>) {
     return (
         <>
@@ -138,5 +70,5 @@ const MenuUserItem = (props: MenuUserItemProps) => (
 );
 
 
-export { MenuExecutableItem, MenuCustomItem, MenuItemsGroup, MenuPopupElement, MenuUserItem };
+export { MenuExecutableItem, MenuCustomItem, MenuItemsGroup, MenuUserItem };
 export type { MenuItem };

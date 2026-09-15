@@ -1,22 +1,9 @@
 import { ReactElement } from 'react';
 import { KEY_TO_DIRECTION } from '../../main/keyboard-keys';
-import { Patch, PatchHeaders } from '../exchange/patch-sync';
 import { MenuItem, MenuItemsGroup } from './main-menu-items';
 import { VISIBLE_CHILD_SELECTOR } from '../css-selectors';
-import { MenuItemsGroupProps, MenuItemState } from 'types/c4gen.MainMenuApi';
+import { MenuItemsGroupProps } from 'types/c4gen.MainMenuApi';
 
-// Server sync functionality
-function patchToState(patch: Patch): MenuItemState {
-    const headers = patch.headers as PatchHeaders;
-	return { opened: !!headers['x-r-opened'] };
-}
-
-function stateToPatch({ opened }: MenuItemState): Patch {
-	const headers = { 'x-r-opened': opened ? '1' : '' };
-	return { value: '', headers };
-}
-
-// Helper functions
 function handleArrowUpDown(
     event: React.KeyboardEvent, 
     elem: HTMLElement, 
@@ -53,11 +40,12 @@ function focusFirstMenuItem(
     elem: HTMLElement | null, 
     children?: ReactElement<MenuItem | MenuItemsGroupProps>[]
 ) {
-    if (!elem) return;
+    const doc = elem?.ownerDocument;
+    if (!doc) return;
     const flatChildren = flattenMenuChildren(children);
     const pathToFocus = flatChildren[0]?.props.path;
     if (pathToFocus) {
-        const itemToFocus: HTMLElement | null = elem?.querySelector(`[data-path='${pathToFocus}']`);
+        const itemToFocus: HTMLElement | null = doc.querySelector(`[data-path='${pathToFocus}']${VISIBLE_CHILD_SELECTOR}`);
         itemToFocus?.focus();
     }
 }
@@ -78,4 +66,4 @@ function flattenMenuChildren(children?: ReactElement<MenuItem | MenuItemsGroupPr
     }, [])
 }
 
-export { patchToState, stateToPatch, getNextArrayIndex, handleArrowUpDown, focusFirstMenuItem };
+export { getNextArrayIndex, handleArrowUpDown, focusFirstMenuItem };

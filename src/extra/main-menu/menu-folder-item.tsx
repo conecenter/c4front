@@ -2,8 +2,8 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { useFocusControl } from '../focus-control';
 import { MenuControlsContext } from './main-menu-bar';
-import { MenuPopupElement } from './main-menu-items';
-import { handleArrowUpDown, patchToState, stateToPatch } from './main-menu-utils';
+import { MenuItemsGroup } from './main-menu-items';
+import { focusFirstMenuItem, handleArrowUpDown } from './main-menu-utils';
 import {
     ARROW_DOWN_KEY,
     ARROW_LEFT_KEY,
@@ -15,19 +15,10 @@ import {
 import { BindGroupElement } from '../binds/binds-elements';
 import { useBinds } from '../binds/key-binding';
 import { SVGElement } from '../../main/image';
-import { identityAt } from '../../main/vdom-util';
-import { usePatchSync } from '../exchange/patch-sync';
 import { PathContext } from "../focus-announcer";
-import { MenuFolderItemProps, MenuItemState } from 'types/c4gen.MainMenuApi';
-
-const receiverIdOf = identityAt('receiver');
-
-const patchSyncTransformers = {
-    serverToState: (s: MenuItemState) => s,
-    changeToPatch: stateToPatch,
-    patchToChange: patchToState,
-    applyChange: (prev: MenuItemState, ch: MenuItemState) => prev
-}
+import { usePopupState } from '../popup-elements/popup-manager';
+import { PopupElement } from '../popup-elements/popup-element';
+import type { MenuFolderItemProps } from 'types/c4gen.MainMenuApi';
 
 const ARROW_DOWN_ICON = (
     <svg xmlns="http://www.w3.org/2000/svg" className='menuFolderIcon' fill="currentColor" viewBox="0 0 18000 18000" width="18000" height="18000">
@@ -36,15 +27,13 @@ const ARROW_DOWN_ICON = (
 );
 
 function MenuFolderItem(props: MenuFolderItemProps & { shortName?: string }) {
-    const {identity, name, shortName, current, state, icon, path, bindSrcId, groupId, children} = props;
+    const {name, shortName, current, popupKey, icon, path, bindSrcId, groupId, children} = props;
 
-    const {
-        currentState: { opened },
-        sendFinalChange: setFinalState
-    } = usePatchSync(receiverIdOf(identity), state, false, patchSyncTransformers);
+    const { isOpened: isPopupAdded, toggle } = usePopupState(popupKey);
+    const openPopup = () => toggle(true);
+    const closePopup = () => toggle(false);
 
-    const openPopup = () => setFinalState({ opened: true });
-    const closePopup = () => setFinalState({ opened: false });
+    const isOpened = Boolean(isPopupAdded && children);
 
     const menuFolderRef = useRef<HTMLDivElement>(null);
     const menuFolder = menuFolderRef.current;
@@ -58,10 +47,18 @@ function MenuFolderItem(props: MenuFolderItemProps & { shortName?: string }) {
     const currentPath = useContext(PathContext);
 
     // Keyboard controls logic
-    const {onArrowLeftRight, setReadyArrowLeftRight} = useContext(MenuControlsContext);
-    useEffect(() => { if (opened) setReadyArrowLeftRight?.() }, [opened]);
-
     const keyboardOperation = useRef(false);
+
+    const {onArrowLeftRight, setReadyArrowLeftRight} = useContext(MenuControlsContext);
+    useEffect(() => {
+        if (isOpened) {
+            setReadyArrowLeftRight?.();
+            if (keyboardOperation.current) {
+                setTimeout(() => focusFirstMenuItem(menuFolder, children));
+                keyboardOperation.current = false;
+            }
+        }
+    }, [isOpened, setReadyArrowLeftRight]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (keyboardOperation.current) {
@@ -72,12 +69,12 @@ function MenuFolderItem(props: MenuFolderItemProps & { shortName?: string }) {
             case ARROW_RIGHT_KEY:
                 if (!popupLrMode) {
                     e.stopPropagation();
-                    if (onArrowLeftRight && menuFolder) onArrowLeftRight(path, menuFolder, e.key, opened);
+                    if (onArrowLeftRight && menuFolder) onArrowLeftRight(path, menuFolder, e.key, isOpened);
                     break;
                 }
                 // fall through
             case ENTER_KEY:
-                if (!opened && menuFolder) {
+                if (!isOpened && menuFolder) {
                     keyboardOperation.current = true;
                     e.stopPropagation();
                     openPopup();
@@ -86,13 +83,12 @@ function MenuFolderItem(props: MenuFolderItemProps & { shortName?: string }) {
             case ARROW_LEFT_KEY:
                 if (!popupLrMode) {
                     e.stopPropagation();
-                    if (onArrowLeftRight && menuFolder) onArrowLeftRight(path, menuFolder, e.key, opened);
+                    if (onArrowLeftRight && menuFolder) onArrowLeftRight(path, menuFolder, e.key, isOpened);
                     break;
                 }
                 // fall through
             case ESCAPE_KEY:
-                if (opened) {
-                    keyboardOperation.current = true;
+                if (isOpened) {
                     e.stopPropagation();
                     e.currentTarget.focus();
                     closePopup();
@@ -100,7 +96,7 @@ function MenuFolderItem(props: MenuFolderItemProps & { shortName?: string }) {
                 break;
             case ARROW_DOWN_KEY:
             case ARROW_UP_KEY:
-                if (!opened || !menuFolder) break;
+                if (!isOpened || !menuFolder) break;
                 handleArrowUpDown(e, menuFolder, currentPath, children);
         }
     };
@@ -110,22 +106,23 @@ function MenuFolderItem(props: MenuFolderItemProps & { shortName?: string }) {
     useEffect(() => {
         if (!isBindMode || !menuFolder) return;
         const isActiveFolder = menuFolder.querySelector(`[groupid="${activeBindGroup}"]`);
-        if (isActiveFolder && !opened) {
+        if (isActiveFolder && !isOpened) {
             menuFolder.focus();
             openPopup();
-        } else if (!isActiveFolder && opened) {
+        } else if (!isActiveFolder && isOpened) {
             menuFolder.focus();
             closePopup();
         }
     }, [activeBindGroup]);
 
+    const hasIcon = children ? children.some(hasIconProp) : false;
+
     return (
         <div ref={menuFolderRef}
-            className={clsx('menuItem', opened && 'menuFolderOpened', current && 'isCurrent', focusClass)}
+            className={clsx('menuItem', isOpened && 'menuFolderOpened', current && 'isCurrent', focusClass)}
             {...focusHtml}
-            onClick={() => !isBindMode && setFinalState({ opened: !opened })}
+            onClick={() => !isBindMode && toggle(!isOpened)}
             onKeyDown={handleKeyDown} >
-
             <BindGroupElement bindSrcId={bindSrcId} groupId={groupId} showBtn={true} >
 
                 {icon && <SVGElement url={icon} className='menuItemIcon' />}
@@ -134,10 +131,14 @@ function MenuFolderItem(props: MenuFolderItemProps & { shortName?: string }) {
                     <span className='shortName'>{shortName}</span>}
                 {ARROW_DOWN_ICON}
 
-                {opened &&
-                    <MenuPopupElement popupLrMode={popupLrMode} keyboardOperation={keyboardOperation} closePopup={closePopup} >
-                        {children}
-                    </MenuPopupElement>}
+                {isOpened && children &&
+                    <PopupElement
+                        popupKey={popupKey}
+                        lrMode={popupLrMode}
+                        className={clsx('menuPopupBox', hasIcon && 'hasIcons')}
+                        keyboardOverride={true}
+                        children={children}
+                    />}
             </BindGroupElement>
         </div>
     );
@@ -146,6 +147,13 @@ function MenuFolderItem(props: MenuFolderItemProps & { shortName?: string }) {
 function isPopupChild(element: HTMLElement | null) {
     const parent = element && element.parentElement;
     return parent && parent.classList.contains('popupEl');
+}
+
+function hasIconProp(child: JSX.Element): string | undefined {
+    if (child.type === MenuItemsGroup) {
+        return child.props.children.some(hasIconProp);
+    }
+    return child.props.icon;
 }
 
 export { MenuFolderItem };
