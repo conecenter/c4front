@@ -32,21 +32,21 @@ trait MainMenuClock extends MenuItem
   @c4elPath("MenuFolderItem") def menuFolderItem(
     key: String,
     name: String,
-    current: Boolean,
+    current: Boolean = false,
     popupKey: String,
     icon: Option[String] = None,
     children: ElList[MenuInnerItem],
-    bindSrcId: String,
-    groupId: String,
+    bindSrcId: String = "",
+    groupId: String = "",
   ): MenuFolderItem
 
   @c4elPath("MenuExecutableItem") def menuExecutableItem(
     key: String,
     name: String,
-    current: Boolean,
+    current: Boolean = false,
     icon: Option[String] = None,
     receiver: Receiver[C],
-    bindSrcId: String,
+    bindSrcId: String = "",
   ): MenuExecutableItem
 
   @c4elPath("MenuCustomItem") def menuCustomItem(
@@ -63,12 +63,12 @@ trait MainMenuClock extends MenuItem
     key: String,
     shortName: String,
     longName: String,
-    current: Boolean,
+    current: Boolean = false,
     popupKey: String,
     icon: Option[String] = None,
     children: ElList[MenuInnerItem],
-    bindSrcId: String,
-    groupId: String,
+    bindSrcId: String = "",
+    groupId: String = "",
   ): MenuUserItem
 
   @c4elPath("MainMenuClock") def mainMenuClock(
