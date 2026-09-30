@@ -68,7 +68,7 @@ function FocusAnnouncerElement({ identity, path: thisPath, value: serverValue, c
     const value = localFocusRef.current ?? currentState;
 
     const sendChange = (path: string) => {
-        if (path !== value) {
+        if (path !== (autoFocusFlag ? value : currentState)) {
             const setFocus = autoFocusFlag ? setLocalFocus : sendFinalChange;
             setFocus(path);
         }
@@ -183,7 +183,7 @@ function useReportPathOnFocus(
 ) {
     function onFocus(e: FocusEvent) {
         const newPath = getFocusFramePath(e.target as Element) || thisPath;
-        localFocusRef.current = null;
+        if (!autoFocusFlag) localFocusRef.current = null;
         if (newPath) sendChange(newPath);
     }
     useAddEventListener(doc, 'focusin', onFocus, true);
