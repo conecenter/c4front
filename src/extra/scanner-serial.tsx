@@ -3,13 +3,37 @@ import { useSync } from "../main/vdom-hooks";
 import { identityAt } from "../main/vdom-util";
 import { useLatest } from "./custom-hooks";
 import { ScannerSerialElementProps } from "types/c4gen.FrontContextTagsApi";
+import { LabeledElement } from "./labeled-element";
 
 /*
  * Reference for scanner interface - OPTICON Universal menu book
  * Scanner reads bar codes of type Interleaved 2of5
 */
 
-const initialSetupCodes = ['8C','TT','TZ','WA','WD','BAK','A0A','A0U','S1','S7','B0','R8','P'];
+type ScannerConfig = {
+    initialSetupCodes?: string[],
+    startReading: string[],
+    stopReading: string[],
+}
+
+const SCANNER_CONFIGS = {
+    'NLV-1001': {
+        initialSetupCodes: ['8C','TT','TZ','WA','WD','BAK','A0A','A0U','S1','S7','B0','R8','P'],
+        startReading: ['Q'],
+        stopReading: ['P']
+    },
+    'NLV-5201': {
+        startReading: ['Z'],
+        stopReading: ['Y']
+    }
+} satisfies Record<string, ScannerConfig>
+
+type ScannerModel = keyof typeof SCANNER_CONFIGS
+
+function isScannerModel(s: string): s is ScannerModel {
+    return s in SCANNER_CONFIGS
+}
+
 const BAUDRATE = 9600;
 const CR_CHAR = '\r';
 const ESC_CHAR = '\x1b';
@@ -21,7 +45,7 @@ interface ReadingParams {
     readableStreamClosed: Promise<void>
 }
 
-function ScannerSerialElement({ identity, barcodeReader, children=[] }: ScannerSerialElementProps) {
+function ScannerSerialElement({ identity, scannerModel = 'NLV-1001', barcodeReader, children=[] }: ScannerSerialElementProps) {
     const [port, setPort] = useState<SerialPort | null>(null);
     const readingParamsRef = useRef<ReadingParams | null>(null);
 
@@ -39,11 +63,11 @@ function ScannerSerialElement({ identity, barcodeReader, children=[] }: ScannerS
     }, []);
 
     async function initializePort(options?: {auto: boolean}) {
-        if (!isSerialSupported()) return;
+        if (!isSerialSupported() || !isScannerModel(scannerModel)) return;
         if (port) await closePort();
         const openedPort = await openSerialPort(options);
         if (openedPort) {
-            await initPortSettings(openedPort);
+            await initPortSettings(openedPort, scannerModel);
             setupDataReading(openedPort);
             setPort(openedPort);
         }
@@ -83,8 +107,8 @@ function ScannerSerialElement({ identity, barcodeReader, children=[] }: ScannerS
 
     // Close serial port
     async function closePort() {
-        if (!port) return;
-        await disableScanner(port);
+        if (!port || !isScannerModel(scannerModel)) return;
+        await disableScanner(port, scannerModel);
         try {
             if (readingParamsRef.current) {
                 const { reader, readableStreamClosed } = readingParamsRef.current;
@@ -105,20 +129,22 @@ function ScannerSerialElement({ identity, barcodeReader, children=[] }: ScannerS
 
     // Enable/disable scanner's laser
     useEffect(() => {
-        if (!port) return;
-        barcodeReader ? enableScanner(port) : disableScanner(port);
-    }, [port, barcodeReader]);
-    
+        if (!port || !isScannerModel(scannerModel)) return;
+        barcodeReader ? enableScanner(port, scannerModel) : disableScanner(port, scannerModel);
+    }, [port, barcodeReader, scannerModel]);
+
     return (
         <>
-            <button 
-                title='Connect to device'
-                className='btnConnectScanner'
-                style={{ opacity: port ? 0 : 0.2 }}
-                onClick={() => initializePort()}
-            >
-                <img src='/mod/main/ee/cone/core/ui/c4view/connection.svg' />
-            </button>
+            {!port &&
+                <LabeledElement key="scan-le" identity={identity} label="">
+                    <button
+                        title='Connect to device'
+                        className="grayColorCss"
+                        onClick={() => initializePort()}
+                    >
+                        <img className='insideButtonSize' src='/mod/main/ee/cone/core/ui/c4view/connection.svg' />
+                    </button>
+                </LabeledElement>}
             {children}
         </>
     );
@@ -147,16 +173,17 @@ async function openSerialPort(options?: {auto: boolean}) {
     }
 }
 
-async function initPortSettings(port: SerialPort) {
-    await executeCommands(port, initialSetupCodes);
+async function initPortSettings(port: SerialPort, model: ScannerModel) {
+    const setupCodes = (SCANNER_CONFIGS[model] as ScannerConfig).initialSetupCodes;
+    if (setupCodes) await executeCommands(port, setupCodes);
 }
 
-async function enableScanner(port: SerialPort) {
-    await executeCommands(port, ['Q']);
+async function enableScanner(port: SerialPort, model: ScannerModel) {
+    await executeCommands(port, SCANNER_CONFIGS[model].startReading);
 }
 
-async function disableScanner(port: SerialPort) {
-    await executeCommands(port, ['P']);
+async function disableScanner(port: SerialPort, model: ScannerModel) {
+    await executeCommands(port, SCANNER_CONFIGS[model].stopReading);
 }
 
 async function executeCommands(port: SerialPort, commands: string[]) {
@@ -172,7 +199,7 @@ async function executeCommands(port: SerialPort, commands: string[]) {
             await writer.write(command);
             console.log('command:' + str);
         }
-    } catch (err) { 
+    } catch (err) {
         console.log('Serial port writing error:', err);
     }
     finally {

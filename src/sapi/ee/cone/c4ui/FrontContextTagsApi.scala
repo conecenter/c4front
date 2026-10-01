@@ -1,5 +1,6 @@
 package ee.cone.c4ui
 
+import ee.cone.c4di.{c4, provide}
 import ee.cone.c4vdom.Types._
 import ee.cone.c4vdom._
 
@@ -10,6 +11,15 @@ import ee.cone.c4vdom._
 @c4tagSwitch("FrontApp") trait PivotFieldsGroup extends PivotGeneralElement
 
 @c4tagSwitch("FrontApp") trait UiType extends ToJson
+
+sealed abstract class ScannerModel(val value: String)
+object ScannerModelNLV1001 extends ScannerModel("NLV-1001")
+object ScannerModelNLV5201 extends ScannerModel("NLV-5201")
+
+@c4("FrontApp") final class ScannerModelAdapterProvider(util: TagJsonUtils) {
+  @provide def adapter: Seq[JsonValueAdapter[ScannerModel]] =
+    List(util.jsonValueAdapter((v, builder) => builder.just.append(v.value)))
+}
 
 @c4tags("FrontApp") trait FrontContextTags[C] {
   @c4el("ColorPicker") def colorPicker(
@@ -89,7 +99,8 @@ import ee.cone.c4vdom._
     key: String,
     barcodeReader: Boolean,
     children: ViewRes,
-    barcodeAction: Receiver[C] = NoReceiver[C]
+    barcodeAction: Receiver[C] = NoReceiver[C],
+    scannerModel: Option[ScannerModel] = None
   ): ToChildPair
 
   @c4el("YamlEditor") def yamlEditor(
