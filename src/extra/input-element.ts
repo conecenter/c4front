@@ -23,6 +23,7 @@ interface InputElementBaseProps {
     value?: string
     type?: string
     inputType?: "input" | "textarea"
+    inputAttrs?: React.InputHTMLAttributes<HTMLInputElement> | React.TextareaHTMLAttributes<HTMLTextAreaElement>
     typeKey?: string
     placeholder?: string
     style?: React.CSSProperties
@@ -42,7 +43,7 @@ interface InputElementBaseProps {
 }
 
 function InputElementBase({
-    value, type, inputType, typeKey: name, placeholder, style, rows, uctext, dataType, changing, inputRegex, skipInvalidSymbols,
+    value, type, inputType, inputAttrs, typeKey: name, placeholder, style, rows, uctext, dataType, changing, inputRegex, skipInvalidSymbols,
     onChange, onBlur, onFocus, onKeyDown, mButtonEnter, lockedFocus, _ref = null
 }: InputElementBaseProps): React.ReactElement {
     const inputSize = useContext(InputsSizeContext);
@@ -240,6 +241,7 @@ function InputElementBase({
     useAddEventListener(inputRef, 'ccut', onCut);
 
     return $((inputType || 'input'), {
+        ...inputAttrs,
         value, name, readOnly, placeholder,
         ref: mergeRefs(inputRef, _ref),
         size: inputSize,

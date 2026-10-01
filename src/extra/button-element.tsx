@@ -7,7 +7,7 @@ import { useAddEventListener } from './custom-hooks';
 import { Tooltip } from './tooltip';
 
 interface ButtonElement {
-    value: boolean | '1' | '',
+    value?: boolean | '1' | '',
     onClick?: (e: React.MouseEvent) => void,
     onChange?: (e: { target: Patch }) => void,
     path?: string,

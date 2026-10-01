@@ -68,11 +68,9 @@ function FocusAnnouncerElement({ identity, path: thisPath, value: serverValue, c
     const value = localFocusRef.current ?? currentState;
 
     const sendChange = (path: string) => {
-        if (path !== currentState) {    // sendChange captures stale value of value
-            const setFocus = autoFocusFlag ? setLocalFocus : sendFinalChange;
-            setFocus(path);
-        }
-    }
+        if (autoFocusFlag) setLocalFocus(path);
+        else if (path !== currentState) sendFinalChange(path);
+    };
 
     const focusBackupElement = useCallback(() => {
         const backupElement = findAutofocusCandidate(doc);
@@ -183,7 +181,7 @@ function useReportPathOnFocus(
 ) {
     function onFocus(e: FocusEvent) {
         const newPath = getFocusFramePath(e.target as Element) || thisPath;
-        localFocusRef.current = null;
+        if (!autoFocusFlag) localFocusRef.current = null;
         if (newPath) sendChange(newPath);
     }
     useAddEventListener(doc, 'focusin', onFocus, true);
