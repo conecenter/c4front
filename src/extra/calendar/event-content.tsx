@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { EventContentArg } from '@fullcalendar/core';
 import { useFocusControl } from '../focus-control';
@@ -8,32 +8,55 @@ import { Tooltip } from '../tooltip';
 
 interface EventContent {
     eventInfo: EventContentArg,
-    customContent?: ReactElement,
-    onEventClick: (clickedEventId: string) => void
+    customContent?: ReactElement
 }
 
-function EventContent({ eventInfo, customContent, onEventClick }: EventContent) {
+function EventContent({ eventInfo, customContent }: EventContent) {
     const { focusClass, focusHtml } = useFocusControl(eventInfo.event.id);
+
+    const [showCustomContent, setShowCustomContent] = useState(eventInfo.isStart);
+    const wrapperRef = useRef<HTMLDivElement | null>(null);
+
+    const formattedViewStart = useMemo(
+        () => eventInfo.view.calendar.formatIso(eventInfo.view.activeStart, true),
+        [eventInfo.view.activeStart, eventInfo.view.calendar]
+    );
+    useLayoutEffect(() => {
+        if (eventInfo.isStart) {
+            setShowCustomContent(true);
+            return;
+        }
+        const segmentDateStr = wrapperRef.current?.closest<HTMLElement>('[data-date]')?.getAttribute('data-date');
+        setShowCustomContent(Boolean(segmentDateStr && segmentDateStr === formattedViewStart));
+    }, [eventInfo.isStart, formattedViewStart]);
 
     const eventParts = eventInfo.event.extendedProps.eventParts as EventPart[] | undefined;
     const hasEventParts = eventParts && eventParts.length > 0;
 
     return (
-        <Tooltip key={eventInfo.event.id} content={eventInfo.event.extendedProps.hint}>
-            <div
-                onClick={() => onEventClick(eventInfo.event.id)}
-                className={clsx("fc-event-main-frame", focusClass, hasEventParts && 'fc-event-parts')}
-                {...focusHtml}
+        <div
+            ref={wrapperRef}
+            className={clsx('fcEventWrapper', focusClass, hasEventParts && 'fc-event-parts')}
+            {...focusHtml}
+        >
+            <Tooltip
+                side='top'
+                key={eventInfo.event.id}
+                content={eventInfo.event.extendedProps.hint}
             >
-                <div className="fc-event-time">{eventInfo.timeText}</div>
-                <div className="fc-event-title-container">
-                    <div className="fc-event-title fc-sticky">{eventInfo.event.title}</div>
-                    {eventInfo.isStart && customContent}
+                <div className='fc-event-main-frame' style={{ height: 'auto' }}>
+                    <div className="fc-event-time">{eventInfo.timeText}</div>
+                    <div className="fc-event-title-container">
+                        <div className="fc-event-title fc-sticky">{eventInfo.event.title}</div>
+                    </div>
                 </div>
-                {hasEventParts &&
-                    <EventProgressBar eventParts={eventParts} eventInfo={eventInfo} />}
-            </div>
-        </Tooltip>
+            </Tooltip>
+
+            {(eventInfo.isStart || showCustomContent) && customContent}
+
+            {hasEventParts &&
+                <EventProgressBar eventParts={eventParts} eventInfo={eventInfo} />}
+        </div>
     );
 }
 

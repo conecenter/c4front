@@ -1,4 +1,5 @@
 import React, { MouseEvent } from "react";
+import { suppressHoverIntents } from "./popup-element";
 
 interface PopupOverlay {
     closePopup: () => void,
@@ -16,6 +17,7 @@ function PopupOverlay({ closePopup, isModalMode, transparent }: PopupOverlay) {
 
     return isModalMode || transparent
         ? <div
+            onPointerMove={suppressHoverIntents}
             onMouseDown={preventFocus}
             onClick={onClick}
             className='popupOverlay'

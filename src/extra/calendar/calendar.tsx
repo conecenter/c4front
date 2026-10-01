@@ -18,6 +18,7 @@ import { EventContent } from './event-content';
 import { escapeRegex } from '../utils';
 import { useLatest } from '../custom-hooks';
 import { useScrollCorrection } from './useScrollCorrection';
+import { useTimeOffsetKey } from './useTimeOffsetKey';
 
 import type { DatesSetArg, EventContentArg, FormatterInput, SlotLabelContentArg, ViewApi } from '@fullcalendar/core';
 
@@ -136,17 +137,20 @@ function Calendar(props: Calendar<string>) {
         // TODO: refactor, key can have ":" added in the beginning of string, keys API can change
         const regExp = new RegExp(`^:?${escapeRegex(eventInfo.event.id)}$`);
         const customContent = eventsChildren?.find(child => regExp.test(child.key as string));
-        return <EventContent eventInfo={eventInfo} customContent={customContent} onEventClick={onEventClick} />;
+        return <EventContent eventInfo={eventInfo} customContent={customContent} />;
     }, [eventsChildren]);
 
     const onViewWillUnmount = useScrollCorrection(viewRoot, viewType, timeSlotsRange);
 
+    const next = useTimeOffsetKey();
+
     return (
         <>
             <FullCalendar
+                key={next}
                 ref={calendarRef}
                 plugins={[dayGridPlugin, timeGridPlugin, luxon3Plugin, interactionPlugin, resourceTimeGridPlugin]}
-                initialView={isResourceView ? "resourceTimeGridDay" : "dayGridMonth"}
+                initialView={viewType || (isResourceView ? "resourceTimeGridDay" : "dayGridMonth")}
                 resources={orderedResourses}
                 resourceOrder={'index'}
                 resourceLabelContent={renderResourceLabelContent}
@@ -162,6 +166,7 @@ function Calendar(props: Calendar<string>) {
                 eventConstraint='businessHours'
                 navLinks={true}
                 nowIndicator={true}
+                now={() => Date.now() + (next ?? 0)}
                 longPressDelay={500}
                 locales={allLocales}
                 locale={locale.lang}
@@ -173,6 +178,7 @@ function Calendar(props: Calendar<string>) {
                 events={eventsState}
                 eventTimeFormat={TIME_FORMAT}
                 eventContent={renderEventContent}
+                eventClick={(e) => onEventClick(e.event.id)}
                 eventOverlap={isResourceView ? false : true}
                 eventChange={(changedEvent) => sendEventsChange(changedEvent.event)}
                 datesSet={onDatesSet}

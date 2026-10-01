@@ -109,6 +109,7 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
                 className={clsx('popupEl', focusClass, className)}
                 style={popupStyle}
                 onClick={(e) => e.stopPropagation()}
+                onPointerMove={suppressHoverIntents}
                 onKeyDown={closeOnEsc}
                 {...focusHtml}
                 tabIndex={-1}
@@ -158,4 +159,11 @@ function findFocusableAncestor(elem?: HTMLElement | null) {
     return elem?.closest<HTMLElement>(SEL_FOCUS_FRAME) || null;
 }
 
-export { PopupElement, elementsContainTarget }
+// Prevents parent hover affordances (e.g. tooltips) while popup is active
+function suppressHoverIntents(e: React.PointerEvent) {
+    if (e.pointerType === "mouse" && e.buttons === 0) {
+        e.preventDefault();
+    }
+}
+
+export { PopupElement, suppressHoverIntents, elementsContainTarget }
