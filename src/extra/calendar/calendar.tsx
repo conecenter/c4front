@@ -12,7 +12,9 @@ import { ResourceLabelContentArg } from '@fullcalendar/resource/index.js';
 import { useUserLocale } from '../locale';
 import { useEventClickAction, useEventDragAction, useEventsSync, useViewSync } from './calendar-exchange';
 import { LoadingIndicator } from '../loading-indicator';
-import { ColorDef, colorToProps } from '../view-builder/common-api';
+import { colorToProps } from '../view-builder/common-api';
+import type { CalendarProps } from 'types/c4gen.CalendarApi';
+import type { ColorDef } from 'types/c4gen.CommonElementsApi';
 import { transformDateFormatProps } from './calendar-utils';
 import { EventContent } from './event-content';
 import { escapeRegex } from '../utils';
@@ -31,14 +33,14 @@ const TIME_FORMAT: FormatterInput = {
 
 const ALLOW_DROP_GROUP_ID = 'allowDrop';
 
-interface Calendar<DateFormat = number> {
+interface CalendarInternal {
     identity: object,
-    events: CalendarEvent<DateFormat>[],
-    periodsOfTime?: PeriodOfTime<DateFormat>[],
-    currentView?: ViewInfo<DateFormat>,
-    slotDuration?: DateFormat,
+    events: CalendarEvent[],
+    periodsOfTime?: PeriodOfTime<number>[],
+    currentView?: ViewInfo,
+    slotDuration?: number,
     allDaySlot?: boolean,
-    timeSlotsRange?: TimeRange<DateFormat>,
+    timeSlotsRange?: TimeRange,
     eventsChildren?: ReactElement[],
     resources?: Resource[]
 }
@@ -99,7 +101,7 @@ interface EventPart<DateFormat = number> {
     hint?: string
 }
 
-function Calendar(props: Calendar<string>) {
+function Calendar(props: CalendarProps) {
     const { identity, events, periodsOfTime = [], currentView: serverView, slotDuration, allDaySlot, timeSlotsRange, eventsChildren, resources } =
         useMemo(() => transformDateFormatProps(props), [props]);
 
@@ -255,5 +257,6 @@ function isRecurringDuration<DateFormat>(
     return (duration as RecurringDuration<DateFormat>).daysOfWeek !== undefined;
 }
 
-export type { CalendarEvent, EventDuration, ViewInfo, ViewType, EventPart, TimeRange }
+export type { CalendarInternal, CalendarEvent, EventDuration, ViewInfo, ViewType, EventPart, TimeRange }
 export { Calendar }
+export default Calendar

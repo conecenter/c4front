@@ -1,7 +1,7 @@
-import React, {ReactNode, useContext, useEffect, useRef} from "react";
+import React, {useContext, useEffect, useRef} from "react";
 import clsx from 'clsx';
 import {getDateTimeFormat, useUserLocale} from "../locale";
-import {DateSettings, formatDate, getDate, getPopupDate, parseStringToDate} from "./date-utils";
+import {DateSettings, formatDate, getDate, parseStringToDate} from "./date-utils";
 import {getOrElse, mapOption, None, nonEmpty, Option} from "../../main/option";
 import {useSelectionEditableInput} from "./selection-control";
 import {DatepickerCalendar} from "./datepicker-calendar";
@@ -19,7 +19,7 @@ import {
 	ENTER_EVENT,
 	PASTE_EVENT,
 	useExternalKeyboardControls
-} from '../focus-module-interface';
+} from '../external-keyboard-controls';
 import {
 	patchSyncTransformers,
 	createInputChange,
@@ -35,36 +35,8 @@ import {
 	onTimestampChangeAction,
 	getOnInputBoxBlur
 } from "./datepicker-actions";
-
-
-type DatePickerServerState = TimestampServerState | InputServerState
-
-interface InputServerState extends PopupServerState {
-	tp: 'input-state',
-	inputValue: string,
-	tempTimestamp?: string
-}
-
-interface TimestampServerState extends PopupServerState {
-	tp: 'timestamp-state',
-	timestamp: string
-}
-
-interface PopupServerState {
-	popupDate?: string
-}
-
-interface DatePickerProps {
-	key: string
-	identity: object
-	state: DatePickerServerState
-	timestampFormatId: number
-	userTimezoneId?: string
-	deferredSend?: boolean,
-	placeHolder?: string,
-	path: string,
-	children?: ReactNode[]
-}
+import { DatePickerInputElementProps } from "types/c4gen.LocaleTagsApi";
+import { usePath } from "../../main/vdom-hooks";
 
 const receiverIdOf = identityAt('receiver');
 
@@ -75,15 +47,16 @@ export function DatePickerInputElement({
 		userTimezoneId,
 		deferredSend,
 		placeHolder,
-		path,
 		children
-}: DatePickerProps) {
+}: DatePickerInputElementProps) {
 	const locale = useUserLocale()
 	const timezoneId = userTimezoneId ? userTimezoneId : locale.timezoneId
 	const timestampFormat = getDateTimeFormat(timestampFormatId, locale)
 	const dateSettings: DateSettings = {timestampFormat, locale, timezoneId}
 
 	const dateChanged = useRef(false);
+
+	const path = usePath(identity);
 
 	const { currentState, sendTempChange: onTempChange, sendFinalChange: onFinalChange } = usePatchSync(
         receiverIdOf(identity),
@@ -111,10 +84,8 @@ export function DatePickerInputElement({
 	const { isOpened, toggle } = usePopupState(path);
 	const togglePopup = () => toggle(!isOpened);
 
-	useEffect(function calcInitCalendarState() {
-		const dateToShow = isOpened ? getOrElse(currentDateOpt, getDate(Date.now(), dateSettings)) : None;
-		const popupDate = getOrElse(mapOption(dateToShow, getPopupDate), null);
-		sendTempChange(createPopupChange(popupDate));
+	useEffect(function resetCalendarState() {
+		if (!isOpened && currentState.popupDate) sendTempChange(createPopupChange(null));
 	}, [isOpened]);
 
 	// Interaction with FocusModule & VK
@@ -240,7 +211,7 @@ export function DatePickerInputElement({
 
 			<button
 				type='button'
-				className={clsx('btnCalendar', currentState.popupDate && 'rotate180deg')}
+				className={clsx('btnCalendar', isOpened && 'rotate180deg')}
 				onClick={togglePopup} />
 
 			<div className='sideContent'>
@@ -248,7 +219,7 @@ export function DatePickerInputElement({
 			</div>
 
 			{isOpened && <PopupElement popupKey={path}>
-				{currentState.popupDate && <DatepickerCalendar {...{
+				<DatepickerCalendar {...{
 					currentState,
 					currentDateOpt,
 					dateSettings,
@@ -256,7 +227,7 @@ export function DatePickerInputElement({
 					sendTempChange,
 					inputRef,
 					closePopup: () => toggle(false)
-				}} />}
+				}} />
 			</PopupElement>}
 		</div>
 	);
@@ -297,4 +268,3 @@ function isVkEvent(e: CustomEvent<{key: string, vk: boolean}>) {
 }
 
 export const components = {DatePickerInputElement}
-export type {DatePickerServerState}

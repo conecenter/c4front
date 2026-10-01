@@ -58,7 +58,7 @@ function DropDownElement({ open, onClick, onClickValue, path, className, ...prop
     const inputBase = $(InputElementBase, { ...props, lockedFocus: open, onKeyDown });
 
     return $("div", {
-        className: clsx("inputBox", focusClass, className),
+        className: clsx("inputBox", focusClass, className, isMultiDropdown && open && 'mddOpen'),
         style: readOnly ? { borderColor: 'transparent' } : undefined,
         ...focusHtml
     },

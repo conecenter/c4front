@@ -15,7 +15,7 @@ import {
 	PASTE_EVENT, 
 	TAB_EVENT, 
 	useExternalKeyboardControls 
-} from './focus-module-interface';
+} from './external-keyboard-controls';
 
 interface DropdownProps {
 	key: string,

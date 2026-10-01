@@ -1,8 +1,9 @@
-import React, { useRef, ReactNode, useEffect, useState, useCallback, createContext, useReducer, useMemo } from 'react';
+import React, { useRef, useEffect, useState, useCallback, createContext, useReducer, useMemo } from 'react';
 import { PatchSyncTransformers, usePatchSync } from './exchange/patch-sync';
 import { useAddEventListener, useIsMounted } from './custom-hooks';
 import { SEL_FOCUS_FRAME, VISIBLE_CHILD_SELECTOR, FOCUS_BLOCKER_CLASS } from './css-selectors';
 import { identityAt } from '../main/vdom-util';
+import { FocusAnnouncerElementProps } from '../sapi/ee/cone/c4ui/c4gen.FocusAnnouncerApi';
 
 /*
     Focus change cases:
@@ -49,14 +50,7 @@ const patchSyncTransformers: PatchSyncTransformers<string, string, string> = {
     applyChange: (_prev, ch) => ch
 };
 
-interface FocusAnnouncerElement {
-    identity: object,
-    path: string,
-    value: string,
-    children: ReactNode
-}
-
-function FocusAnnouncerElement({ identity, path: thisPath, value: serverValue, children }: FocusAnnouncerElement) {
+function FocusAnnouncerElement({ identity, path: thisPath, value: serverValue, children }: FocusAnnouncerElementProps) {
     const [doc, setDoc] = useState<Document | undefined>(undefined);
     const setupDoc = useCallback((elem: HTMLDivElement) => setDoc(elem?.ownerDocument), []);
 

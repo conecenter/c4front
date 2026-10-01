@@ -12,5 +12,14 @@ module.exports = {
 		'\\.svg$': '<rootDir>/src/test/config/svg-mock.js'
 	},
 	setupFilesAfterEnv: ["<rootDir>/src/test/config/setup-jest.ts"],
-	extensionsToTreatAsEsm: [".ts", ".tsx"]
+	extensionsToTreatAsEsm: [".ts", ".tsx"],
+	resetMocks: true,
+	testEnvironmentOptions: {
+		customExportConditions: ['require', 'default'],
+	},
+	collectCoverageFrom: [
+		'<rootDir>/src/**/*.{js,jsx,ts,tsx}',
+		'!<rootDir>/src/test/**',
+		'!<rootDir>/src/**/*.d.ts',
+	]
 }

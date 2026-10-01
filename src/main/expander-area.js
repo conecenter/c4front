@@ -116,8 +116,9 @@ export function ExpanderArea({expandTo,maxLineCount,props}){
 }
 
 /**
- * @param {{ children: ReactNode | ReactNode[], area?: string, expandOrder?: number, className?: string, expandTo?: ReactNode | ReactNode[] }} props
- * @returns { ReactNode | ReactNode[] } children
+ * @param {Omit<import('../sapi/ee/cone/c4ui/c4gen.ExpanderApi.js'.ExpanderProps), identity' | 'children'>
+ *  & { className?: string, children?: import('react').ReactNode }} props
+ * @returns { ReactNode }
  */
 export function Expander({children}){ return children }
 

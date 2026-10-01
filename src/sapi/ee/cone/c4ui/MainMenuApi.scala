@@ -1,14 +1,9 @@
 package ee.cone.c4ui
 
-import ee.cone.c4di._
 import ee.cone.c4vdom.Types._
 import ee.cone.c4vdom._
 
 trait MenuBar extends ToChildPair
-
-@c4tagSwitch("FrontApp") trait MenuItemState extends ToJson {
-  def opened: Boolean
-}
 
 sealed trait MenuInnerItem extends ToChildPair
 
@@ -29,37 +24,29 @@ trait MainMenuClock extends MenuItem
 @c4tags("FrontApp") trait MainMenuTags[C] {
   @c4el("MainMenuBar") def menuBar(
     key: String,
-    state: MenuItemState,
     icon: Option[String] = None,
     leftChildren: ElList[MenuItem],
     rightChildren: ElList[MenuItem],
-    receiver: Receiver[C],
   ): MenuBar
-
-  @c4val def menuItemState(
-    opened: Boolean
-  ): MenuItemState
 
   @c4elPath("MenuFolderItem") def menuFolderItem(
     key: String,
     name: String,
-    current: Boolean,
-    state: MenuItemState,
+    current: Boolean = false,
+    popupKey: String,
     icon: Option[String] = None,
     children: ElList[MenuInnerItem],
-    receiver: Receiver[C],
-    bindSrcId: String,
-    groupId: String,
+    bindSrcId: String = "",
+    groupId: String = "",
   ): MenuFolderItem
 
   @c4elPath("MenuExecutableItem") def menuExecutableItem(
     key: String,
     name: String,
-    current: Boolean,
-//    state: MenuItemState,
+    current: Boolean = false,
     icon: Option[String] = None,
     receiver: Receiver[C],
-    bindSrcId: String,
+    bindSrcId: String = "",
   ): MenuExecutableItem
 
   @c4elPath("MenuCustomItem") def menuCustomItem(
@@ -76,13 +63,12 @@ trait MainMenuClock extends MenuItem
     key: String,
     shortName: String,
     longName: String,
-    current: Boolean,
-    state: MenuItemState,
+    current: Boolean = false,
+    popupKey: String,
     icon: Option[String] = None,
     children: ElList[MenuInnerItem],
-    receiver: Receiver[C],
-    bindSrcId: String,
-    groupId: String,
+    bindSrcId: String = "",
+    groupId: String = "",
   ): MenuUserItem
 
   @c4elPath("MainMenuClock") def mainMenuClock(

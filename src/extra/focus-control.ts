@@ -1,4 +1,3 @@
-import React from 'react';
 import { SEL_FOCUS_FRAME, VISIBLE_CHILD_SELECTOR } from './css-selectors';
 
 // .focusWrapper - ability to have focus frame
@@ -16,16 +15,6 @@ function useFocusControl(path: string | undefined): FocusControlObj {
     };
 }
 
-interface FocusableProps {
-    path?: string,
-    children: (obj: FocusControlObj) => React.ReactNode
-}
-
-const Focusable = ({path, children}: FocusableProps) => {
-    const focusProps = useFocusControl(path);
-    return children(focusProps);
-}
-
 function getFocusableNodes(root: Element | Document | null | undefined) {
     if (!root) return [];
     const focusWrappers = root.querySelectorAll<HTMLElement>(`${SEL_FOCUS_FRAME}${VISIBLE_CHILD_SELECTOR}`);
@@ -36,4 +25,4 @@ function getActiveFocusWrapper(doc: Document | null) {
     return doc?.activeElement?.closest<HTMLElement>(SEL_FOCUS_FRAME);
 }
 
-export { useFocusControl, Focusable, getFocusableNodes, getActiveFocusWrapper };
+export { useFocusControl, getFocusableNodes, getActiveFocusWrapper };

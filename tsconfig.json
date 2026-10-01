@@ -19,7 +19,10 @@
     "jsx": "react",
     "noImplicitAny": true,
     "removeComments": true,
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "types/*": ["./src/sapi/ee/cone/c4ui/*"]
+    },
   },
   "include": [
     "./src"

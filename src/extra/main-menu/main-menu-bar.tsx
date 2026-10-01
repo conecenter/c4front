@@ -1,32 +1,25 @@
 import React, {createContext, ReactElement, useCallback, useContext, useEffect, useRef, useState} from "react";
 import clsx from 'clsx';
 import {Expander, ExpanderArea} from '../../main/expander-area';
-import {handleArrowUpDown, patchToState, stateToPatch} from './main-menu-utils';
+import {focusFirstMenuItem, handleArrowUpDown} from './main-menu-utils';
 import {MainMenuClock} from './main-menu-clock';
 import {useFocusControl} from "../focus-control";
 import {ARROW_DOWN_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY, ENTER_KEY, ESCAPE_KEY, M_KEY} from "../../main/keyboard-keys";
-import {MenuCustomItem, MenuExecutableItem, MenuItemsGroup, MenuPopupElement, MenuUserItem} from './main-menu-items';
+import {MenuCustomItem, MenuExecutableItem, MenuItemsGroup, MenuUserItem} from './main-menu-items';
 import {MenuFolderItem} from "./menu-folder-item";
 import {BindGroupElement} from "../binds/binds-elements";
 import {NoCaptionContext, usePath} from "../../main/vdom-hooks";
 import {isInstanceOfNode} from "../dom-utils";
 import {VISIBLE_CHILD_SELECTOR} from "../css-selectors";
-import {identityAt} from "../../main/vdom-util";
-import {usePatchSync} from "../exchange/patch-sync";
 import {PathContext} from "../focus-announcer";
-import { SVGElement } from "../../main/image";
+import {SVGElement} from "../../main/image";
+import {MainMenuBarProps, MenuCustomItemProps, MenuExecutableItemProps, MenuFolderItemProps, MenuUserItemProps} from "types/c4gen.MainMenuApi";
+import { usePopupState } from "../popup-elements/popup-manager";
+import { PopupElement } from "../popup-elements/popup-element";
 
 const MENU_BAR_PATH = 'main-menu-bar';
+const BURGER_POPUP_KEY = 'burger-menu';
 const KEY_MODIFICATOR = { ArrowLeft: -1, ArrowRight: 1 };
-
-const receiverIdOf = identityAt('receiver');
-
-const patchSyncTransformers = {
-  serverToState: (s: MenuItemState) => s,
-  changeToPatch: stateToPatch,
-  patchToChange: patchToState,
-  applyChange: (prev: MenuItemState, ch: MenuItemState) => ch
-}
 
 type OnArrowLeftRight = (path: string, elem: HTMLElement, key: 'ArrowLeft' | 'ArrowRight', isOpened: boolean) => void;
 
@@ -41,26 +34,10 @@ const isMenuFolderType = (item: ReactElement) => item.type === MenuFolderItem ||
 const isMenuOpenCombo = (e: KeyboardEvent) => (e.ctrlKey || e.altKey) && e.key === M_KEY;
 
 
-interface MainMenuBar {
-  key: string,
-  identity: object,
-  state: MenuItemState,
-  icon?: string
-  leftChildren: ReactElement<MenuItem>[],
-  rightChildren?: ReactElement<MenuItem | MainMenuClock>[]
-}
+type MenuItem = MenuFolderItemProps | MenuExecutableItemProps | MenuCustomItemProps | MenuUserItemProps;
 
-type MenuItem = MenuFolderItem | MenuExecutableItem | MenuCustomItem | MenuUserItem;
-
-interface MenuItemState {
-  opened: boolean
-}
-
-function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainMenuBar) {
-  const {
-    currentState: {opened},
-    sendFinalChange: setFinalState
-  } = usePatchSync(receiverIdOf(identity), state, false, patchSyncTransformers);
+function MainMenuBar({identity, icon, leftChildren, rightChildren}: MainMenuBarProps) {
+  const { toggle } = usePopupState(BURGER_POPUP_KEY);
 
   const domRef = useRef<HTMLDivElement>(null);
 
@@ -78,7 +55,7 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
   );
 
   const leftMenuWithIcons = (
-    <Expander key='left-menu-with-icons' className='leftMenuBox' area="lt" expandTo={leftMenuWithLogo}>
+    <Expander key='left-menu-with-icons' className='leftMenuBox' area="lt" expandTo={leftMenuWithLogo ? [leftMenuWithLogo] : undefined}>
       {leftChildren}
     </Expander>
   );
@@ -88,7 +65,7 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
               className='leftMenuBox hiddenIcons'
               area="lt"
               expandOrder={3}
-              expandTo={leftMenuWithIcons}>
+              expandTo={[leftMenuWithIcons]}>
       {leftChildren}
     </Expander>
   );
@@ -98,9 +75,9 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
 
   const rightMenuExpanded = (
     <Expander key='right-menu-reduced' className='rightMenuBox rightMenuCompressed' expandOrder={2} area='rt' expandTo={
-      <Expander key='right-menu-expanded' className='rightMenuBox' area='rt'>
+      [<Expander key='right-menu-expanded' className='rightMenuBox' area='rt'>
         {rightChildren}
-      </Expander>
+      </Expander>]
     }>
       {rightChildren}
     </Expander>
@@ -115,17 +92,15 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
       if (isMenuOpenCombo(e)) {
         prevFocusedPath.current = currentPath;
         const isBurgerMenu = domRef.current?.matches(VISIBLE_CHILD_SELECTOR);
-        if (isBurgerMenu) setFinalState({ opened: true });
+        if (isBurgerMenu) toggle(true);
         window!.scrollTo({top: 0});
-        const firstFocusablePath = leftChildren[0].props.path;
+        const firstFocusablePath = leftChildren?.[0].props.path;
         const pathSelector = `[data-path='${firstFocusablePath}']`;
-        const firstFocusableItem: HTMLElement | null = isBurgerMenu 
-            ? domRef.current!.querySelector(pathSelector)
-            : doc!.querySelector(`${pathSelector}${VISIBLE_CHILD_SELECTOR}`);
         setTimeout(() => {
+          const firstFocusableItem = doc!.querySelector<HTMLElement>(`${pathSelector}${VISIBLE_CHILD_SELECTOR}`);
           firstFocusableItem?.focus();
           if (!isBurgerMenu) firstFocusableItem?.click();
-        }, 10); // timeout until menu bar appears on screen
+        });
       }
     }
     if (window) {
@@ -157,7 +132,7 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
   const onArrowLeftRight: OnArrowLeftRight = useCallback((path, elem, key, isOpened) => {
     if (!ready.current) return;
     ready.current = false;
-    const menuItems = [...leftChildren, ...(rightChildren || [])];
+    const menuItems = [...(leftChildren || []), ...(rightChildren || [])];
     const doc =  elem.ownerDocument;
     const openedMenuFolderIndex = menuItems.findIndex(child => child.props.path === path);
     if (openedMenuFolderIndex === -1 || !doc) return;
@@ -170,7 +145,9 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
     const selector = `[data-path='${nextFocusablePath}']${VISIBLE_CHILD_SELECTOR}`;
     const nextFocusableItem: HTMLElement | null = doc.querySelector(selector);
     nextFocusableItem?.focus();
-    if (isOpened && isMenuFolderType(menuItems[nextMenuItemIndex])) nextFocusableItem?.click();
+    if (isOpened && isMenuFolderType(menuItems[nextMenuItemIndex])) {
+      queueMicrotask(() => nextFocusableItem?.click());  // pause to let popup closing finish
+    }
     else ready.current = true;
   }, []);
 
@@ -188,9 +165,9 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
                           onBlur: handleMenuBarBlur
                         }}
                         expandTo={[
-            <Expander key='left-menu-compressed' area="lt" expandOrder={1} expandTo={leftMenuExpanded}>
-              <BurgerMenu identity={identity} opened={opened} setFinalState={setFinalState} domRef={domRef}>
-                {leftChildren}
+            <Expander key='left-menu-compressed' area="lt" expandOrder={1} expandTo={[leftMenuExpanded]}>
+              <BurgerMenu identity={identity} domRef={domRef}>
+                {leftChildren || []}
               </BurgerMenu>
             </Expander>,
 
@@ -198,7 +175,7 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
                       className='rightMenuBox rightMenuCompressed'
                       area="rt"
                       expandOrder={0}
-                      expandTo={rightMenuExpanded}>
+                      expandTo={[rightMenuExpanded]}>
               {rightMenuCompressed}
             </Expander>
           ]}/>
@@ -209,7 +186,7 @@ function MainMenuBar({identity, state, icon, leftChildren, rightChildren}: MainM
 }
 
 function getRightMenuCompressed(rightChildren: ReactElement<MenuItem>[]) {
-  const menuUserItem = rightChildren.find(child => child.type === MenuUserItem) as ReactElement<MenuUserItem> | undefined;
+  const menuUserItem = rightChildren.find(child => child.type === MenuUserItem) as ReactElement<MenuUserItemProps> | undefined;
   if (!menuUserItem) return null;
 
   const rightChildrenFiltered = rightChildren
@@ -221,29 +198,28 @@ function getRightMenuCompressed(rightChildren: ReactElement<MenuItem>[]) {
   );
 
   const menuUserChildren = React.Children.toArray(menuUserItem.props.children);
+  const showChildren = menuUserChildren.length > 0;
   const logOutIndex = menuUserChildren.findIndex(child => (child as React.ReactElement).props.name === 'Log out');
   const insertIndex = logOutIndex < 0 ? menuUserChildren.length : logOutIndex;
   menuUserChildren.splice(insertIndex, 0, rightChildrenGroup)
 
-  return React.cloneElement(menuUserItem, {}, menuUserChildren);
+  return React.cloneElement(menuUserItem, {}, showChildren ? menuUserChildren : null);
 }
 
 
 interface BurgerMenu {
   identity: object,
-  opened: boolean,
   domRef: React.RefObject<HTMLDivElement>,
-  setFinalState: (s: MenuItemState) => void,
   children: ReactElement<MenuItem>[]
 }
 
-function BurgerMenu({ identity, opened, domRef, setFinalState, children}: BurgerMenu) {
+function BurgerMenu({ identity, domRef, children}: BurgerMenu) {
+  const { isOpened, toggle } = usePopupState(BURGER_POPUP_KEY);
+
   const path = usePath(identity);
   const { focusClass, focusHtml } = useFocusControl(path);
 
   const currentPath = useContext(PathContext);
-
-  const closePopup = () => setFinalState({ opened: false });
 
   // Keyboard controls logic
   const keyboardOperation = useRef(false);
@@ -251,22 +227,22 @@ function BurgerMenu({ identity, opened, domRef, setFinalState, children}: Burger
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     switch(e.key) {
       case ENTER_KEY:
-        if (!opened && domRef.current) {
+        if (!isOpened && domRef.current) {
           e.stopPropagation();
           keyboardOperation.current = true;
-          setFinalState({ opened: true });
+          toggle(true);
         }
         break;
       case ESCAPE_KEY:
-        if (opened) {
+        if (isOpened) {
           keyboardOperation.current = true;
           e.stopPropagation();
           e.currentTarget.focus();
-          setFinalState({ opened: false });
+          toggle(false);
         } 
         break;
       case ARROW_RIGHT_KEY:
-        if (opened) e.stopPropagation();
+        if (isOpened) e.stopPropagation();
         break;
       case ARROW_DOWN_KEY:
       case ARROW_UP_KEY:
@@ -274,10 +250,17 @@ function BurgerMenu({ identity, opened, domRef, setFinalState, children}: Burger
           e.stopPropagation();
           break;
         }
-        if (!opened || !domRef.current) break;
+        if (!isOpened || !domRef.current) break;
         handleArrowUpDown(e, domRef.current, currentPath, children);
     }
   };
+
+  useEffect(() => {
+    if (isOpened && keyboardOperation.current) {
+      setTimeout(() => focusFirstMenuItem(domRef.current, children));
+      keyboardOperation.current = false;
+    }
+  }, [isOpened]);
 
   return (
     <div className={clsx(focusClass, 'menuBurgerBox')}
@@ -286,26 +269,31 @@ function BurgerMenu({ identity, opened, domRef, setFinalState, children}: Burger
          ref={domRef} >
       <button key='left-menu'
               className='btnBurger'
-              onClick={() => setFinalState({opened: !opened})} >
+              onClick={() => toggle(!isOpened)}
+      >
         <svg xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" version="1.1"
              viewBox="0 0 32 32">
           <line strokeLinecap="round" x1="2" x2="30" strokeWidth="4"
-                y1={opened ? '16' : '9'}
-                y2={opened ? '16' : '9'}
-                style={opened ? {transform: "rotate(-45deg)"} : {}}/>
+                y1={isOpened ? '16' : '9'}
+                y2={isOpened ? '16' : '9'}
+                style={isOpened ? {transform: "rotate(-45deg)"} : {}}/>
           <line strokeLinecap="round" x1="2" y1="17" x2="30" y2="17" strokeWidth="4"
-                style={opened ? {opacity: "0"} : {}}/>
+                style={isOpened ? {opacity: "0"} : {}}/>
           <line strokeLinecap="round" x1="2" x2="30" strokeWidth="4"
-                y1={opened ? '16' : '25'}
-                y2={opened ? '16' : '25'}
-                style={opened ? {transform: "rotate(45deg)"} : {}}/>
+                y1={isOpened ? '16' : '25'}
+                y2={isOpened ? '16' : '25'}
+                style={isOpened ? {transform: "rotate(45deg)"} : {}}/>
         </svg>
       </button>
 
-      {opened &&
-        <MenuPopupElement popupLrMode={false} keyboardOperation={keyboardOperation} closePopup={closePopup} >
-          {children}
-        </MenuPopupElement>}
+      {isOpened &&
+        <PopupElement
+          popupKey={BURGER_POPUP_KEY}
+          className='menuPopupBox'
+          lrMode={false}
+          keyboardOverride={true}
+          children={children}
+        />}
     </div>
   )
 }
@@ -321,4 +309,4 @@ export const mainMenuComponents = {
 };
 
 export { MenuControlsContext };
-export type { MenuItemState, MenuItem };
+export type { MenuItem };

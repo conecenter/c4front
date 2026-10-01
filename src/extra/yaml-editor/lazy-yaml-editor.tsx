@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
-import type { YamlEditorProps } from './yaml-editor';
 import { LoadingIndicator } from '../loading-indicator';
+import { YamlEditorProps } from 'types/c4gen.FrontContextTagsApi';
 
 const YamlEditor = lazy(() => import(/* webpackChunkName: "yaml-editor" */ './yaml-editor'));
 

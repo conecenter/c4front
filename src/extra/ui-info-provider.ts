@@ -1,12 +1,11 @@
-import { createElement as $, ReactNode, createContext, useContext, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createElement as $, createContext, useContext, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { usePatchSync, Patch, PatchSyncTransformers } from "./exchange/patch-sync";
 import { useAddEventListener } from "./custom-hooks";
 import { RootBranchContext } from '../main/vdom-hooks';
 import { identityAt } from '../main/vdom-util';
+import { UiInfoProviderProps, UiType } from 'types/c4gen.FrontContextTagsApi';
 
 const DEFAULT_UI_TYPE = 'pointer';
-
-type UiType = 'pointer' | 'touch';
 
 const UiInfoContext = createContext<UiType>(DEFAULT_UI_TYPE);
 UiInfoContext.displayName = 'UiInfoContext';
@@ -39,17 +38,11 @@ const patchSyncTransformers: PatchSyncTransformers<UiType | undefined, UiType | 
 };
 //
 
-interface UiInfoProvider {
-    key: string,
-    identity: object,
-    uiType?: UiType,
-    children: ReactNode
-}
-
-function UiInfoProvider({identity, uiType: state, children}: UiInfoProvider) {
+function UiInfoProvider({identity, uiType: state, children}: UiInfoProviderProps) {
     // UiType functionality
     const {currentState: uiType, sendFinalChange} =
         usePatchSync(receiverIdOf(identity), state, false, patchSyncTransformers);
+    const effectiveUiType = uiType ?? DEFAULT_UI_TYPE;
 
     const { isRoot } = useContext(RootBranchContext);
 
@@ -58,7 +51,7 @@ function UiInfoProvider({identity, uiType: state, children}: UiInfoProvider) {
     const updateUiType = () => {
         if (!isRoot) return;
         const currentUiType: UiType = pointerMql.current.matches ? 'pointer' : 'touch';
-        if (uiType !== currentUiType) sendFinalChange(currentUiType);
+        if (effectiveUiType !== currentUiType) sendFinalChange(currentUiType);
     }
 
     useLayoutEffect(() => updateUiType(), []);
@@ -69,7 +62,7 @@ function UiInfoProvider({identity, uiType: state, children}: UiInfoProvider) {
     const [haveVk, setHaveVk] = useState(false);
     const vkInfo = useMemo(() => ({ haveVk, setHaveVk }), [haveVk]);
 
-    return $(UiInfoContext.Provider, {value: uiType || DEFAULT_UI_TYPE}, 
+    return $(UiInfoContext.Provider, {value: effectiveUiType},
         $(VkInfoContext.Provider, {value: vkInfo}, children));
 }
 

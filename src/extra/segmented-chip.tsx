@@ -1,6 +1,6 @@
 import React, { ReactElement, useContext, useRef } from 'react';
 import clsx from 'clsx';
-import { COPY_EVENT, CUT_EVENT, DELETE_EVENT, PASTE_EVENT, useExternalKeyboardControls } from './focus-module-interface';
+import { COPY_EVENT, CUT_EVENT, DELETE_EVENT, PASTE_EVENT, useExternalKeyboardControls } from './external-keyboard-controls';
 import { copyToClipboard } from './utils';
 import { usePath, useSync } from '../main/vdom-hooks';
 import { identityAt } from '../main/vdom-util';

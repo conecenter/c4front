@@ -13,13 +13,7 @@ import { Thumbnail, thumbnailsProps } from "./image-viewer-thumbnails";
 import { ZipButton } from "./zip-button";
 import { LazyImageSlide } from "./lazy-image-slide";
 import { identityAt } from "../../main/vdom-util";
-
-interface Slide {
-    srcId: string,
-    src: string,
-    title?: string,
-    thumbnail?: string
-}
+import { ImageViewerProps } from "../../sapi/ee/cone/c4ui/c4gen.ImageViewerApi";
 
 interface LoadedSlidesInfo {
     [src: string]: {
@@ -34,14 +28,6 @@ interface CustomSlide extends SlideImage {
     isLoaded?: boolean
 }
 
-interface ImageViewer {
-    identity: object,
-    current?: string,
-    slides?: Slide[],
-    position?: 'fullscreen' | 'inline',
-    initialZoom?: number
-}
-
 // Server exchange
 const slideChangeIdOf = identityAt('slideChange');
 const serverToState = (s: string) => s;
@@ -50,7 +36,7 @@ const patchToChange = (p: Patch) => p.value;
 const applyChange = (prev: string, ch: string) => ch || prev;
 const patchSyncTransformers = { serverToState, changeToPatch, patchToChange, applyChange };
 
-function ImageViewer({identity, current: state = '', slides = [], position, initialZoom }: ImageViewer) {
+function ImageViewer({identity, current: state = '', slides = [], position, initialZoom }: ImageViewerProps) {
     const {currentState: currentSrcId, sendTempChange, sendFinalChange} =
         usePatchSync(slideChangeIdOf(identity), state, false, patchSyncTransformers);
 
@@ -149,5 +135,5 @@ function useInitialZoom(customSlides: CustomSlide[], currentIndex: number, initi
     return zoomRef;
 }
 
-export type { Slide, CustomSlide }
+export type { CustomSlide }
 export { ImageViewer }

@@ -15,18 +15,17 @@ import { useAreaOverlay } from './use-area-overlay';
 import { useFocusTrap } from '../hooks/use-focus-trap';
 import { useArrowNavigation } from '../hooks/use-arrow-navigation';
 import { focusAuto, FocusRestoreCandidateCtx } from '../focus-announcer';
+import { PopupElementProps } from 'types/c4gen.PopupApi';
 
-interface PopupElement {
+interface PopupElement extends Omit<PopupElementProps, 'identity' | 'children'> {
     identity?: object,
-    popupKey: string,
     className?: string,
-    forceOverlay?: boolean,
     lrMode?: boolean,
-    closeReceiver?: boolean,
+    keyboardOverride?: boolean,
     children?: ReactNode
 }
 
-function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, closeReceiver, children }: PopupElement) {
+function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, closeReceiver, keyboardOverride, children }: PopupElement) {
     const { openedPopups, sendFinalChange } = useContext(PopupStateContext);
     const popupAncestorKey = useContext(PopupWrapperKeyContext);
     const popupDrawer = useContext(PopupDrawerContext);
@@ -101,7 +100,7 @@ function PopupElement({ identity, popupKey, className, forceOverlay, lrMode, clo
     useFocusRestoration(popupElement, parent);
 
     useFocusTrap(popupElement);
-    useArrowNavigation(popupElement, !isModalMode);
+    useArrowNavigation(keyboardOverride ? null : popupElement, !isModalMode);
 
     const popup = (
         <>

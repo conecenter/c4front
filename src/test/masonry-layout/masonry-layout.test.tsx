@@ -1,5 +1,4 @@
-import { PropsWithChildren, createElement as $ } from "react";
-import { createSyncProviders } from "../../main/vdom-hooks";
+import { createElement as $ } from "react";
 import { getAlignedLayout } from "../../extra/masonry-layout/masonry-layout";
 
 const BREAKPOINTS = { lg: 1880, sm: 768 };

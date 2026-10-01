@@ -7,6 +7,7 @@ import { GridItemWrapper } from "./grid-item";
 import { identityAt } from "../../main/vdom-util";
 import { BreakpointPreview } from "./breakpoint-preview";
 import { MasonryColGuides } from "./masonry-col-guides";
+import { Breakpoint, MasonryLayoutProps } from "../../sapi/ee/cone/c4ui/c4gen.MasonryLayout";
 
 type JSONString = string
 
@@ -24,16 +25,7 @@ const patchSyncTransformers = { serverToState, changeToPatch, patchToChange, app
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
-interface MasonryLayout {
-    identity: object,
-    layout: JSONString,
-    breakpoints: { [P: string]: number },
-    cols: { [P: string]: number },
-    edit: boolean,
-    children?: ReactElement[]
-}
-
-function MasonryLayout({ identity, layout, breakpoints, cols, edit, children }: MasonryLayout) {
+function MasonryLayout({ identity, layout, breakpoints, cols, edit, children }: MasonryLayoutProps) {
     const { currentState: layoutServerState, sendFinalChange } =
         usePatchSync(receiverIdOf(identity), layout, false, patchSyncTransformers);
     
@@ -135,15 +127,15 @@ function MasonryLayout({ identity, layout, breakpoints, cols, edit, children }: 
     );
 }
 
-function useBreakpoint(breakpoints: { [P: string]: number }) {
-    const [breakpoint, setBreakpoint] = useState<string | null>(null);
+function useBreakpoint(breakpoints: Breakpoint) {
+    const [breakpoint, setBreakpoint] = useState<keyof Breakpoint | null>(null);
     const onWidthChange = (containerWidth: number) => setBreakpoint((prev) => {
         if (prev) return prev;
-        const sortedBreakpoints = Object.entries(breakpoints).sort((a, b) => b[1] - a[1]);
+        const sortedBreakpoints = Object.entries(breakpoints).sort((a, b) => b[1] - a[1]) as [keyof Breakpoint, number][];
         const newBreakpoint = sortedBreakpoints.find(([_, width]) => containerWidth > width)?.[0];
         return newBreakpoint || null;
     });
-    const onBreakpointChange = (newBreakpoint: string) => setBreakpoint(newBreakpoint);
+    const onBreakpointChange = (newBreakpoint: keyof Breakpoint) => setBreakpoint(newBreakpoint);
     return { breakpoint, onBreakpointChange, onWidthChange };
 }
 

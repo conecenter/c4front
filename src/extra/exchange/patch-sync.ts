@@ -21,14 +21,12 @@ interface SyncState<State, StateChange> {
     currentState: State,
     sendTempChange: (change: StateChange) => void,
     sendFinalChange: (change: StateChange) => void,
-    wasChanged: boolean
-}
-
-interface SendPatchHeaders extends PatchHeaders {
+    wasChanged: boolean,
+    changing: boolean
 }
 
 interface SendPatch {
-    headers?: SendPatchHeaders
+    headers?: PatchHeaders
     value: string
     skipByPath?: boolean
     retry?: boolean
@@ -36,8 +34,8 @@ interface SendPatch {
 }
 
 function stateToSendPatch(patch: Patch, changing: boolean, deferredSend: boolean): SendPatch {
-    const changingHeaders: SendPatchHeaders = changing ? {"x-r-changing": "1"} : {}
-    const headers: SendPatchHeaders = {
+    const changingHeaders: PatchHeaders = changing ? {"x-r-changing": "1"} : {}
+    const headers: PatchHeaders = {
         ...changingHeaders,
         ...patch.headers,
     }
@@ -78,7 +76,14 @@ function usePatchSync<ServerState, State, StateChange>(
         },
         [enqueuePatch, changeToPatch]
     )
-    return {currentState: patchedState, sendTempChange: onChange, sendFinalChange: onBlur, wasChanged: wasChanged.current}
+    const changing = patches.length > 0
+    return {
+        currentState: patchedState,
+        sendTempChange: onChange,
+        sendFinalChange: onBlur,
+        wasChanged: wasChanged.current,
+        changing
+    }
 }
 
 export {usePatchSync}

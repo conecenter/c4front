@@ -16,39 +16,11 @@ import type {XYCoord} from "react-dnd/dist";
 import {usePatchSync} from "../exchange/patch-sync";
 import { identityAt } from "../../main/vdom-util";
 import { DragScroller } from "./drag-scroller";
+import type { PivotSettingsProps, PivotField, PivotFieldsGroup } from "types/c4gen.FrontContextTagsApi";
 
 const receiverIdOf = identityAt('receiver');
 
-export interface PivotField {
-    id: string,
-    name: string,
-    selected: boolean,
-    fieldType?: string,
-    invalid?: boolean,
-    prefix?: string,
-}
-
-export interface PivotFieldsGroup {
-    groupName: string,
-    fields: PivotField[]
-}
-
-export interface PivotSettingsState {
-    fields: (PivotField | PivotFieldsGroup)[],
-    pivotFilters: PivotField[]
-    pivotBreaks: PivotField[]
-    pivotRows: PivotField[]
-    pivotColumns: PivotField[]
-    pivotData: PivotField[]
-    pivotCells: PivotField[]
-}
-
 export type PivotSettingsPartClass = 'pivotFilters' | 'pivotBreaks' | 'pivotRows' | 'pivotColumns' | 'pivotData' | 'pivotCells';
-
-export interface PivotSettingsProps extends PivotSettingsState {
-    // @ts-ignore
-    identity: object
-}
 
 export function PivotSettings(props: PivotSettingsProps) {
     return el(DndProvider, {backend: HTML5Backend},
@@ -130,6 +102,8 @@ function PivotSettingsInner(props: PivotSettingsProps) {
         })
     )
 }
+
+export type PivotSettingsState = Omit<PivotSettingsProps, 'identity' | 'receiver'>
 
 interface PivotSettingsPartProps {
     className: PivotSettingsPartClass
