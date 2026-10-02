@@ -16,6 +16,7 @@ const FOCUS_ANNOUNCER_IDENTITY = { key: "focus-announcer" };
 const FOLDER_IDENTITY = { key: "folder" };
 const FIRST_ITEM_IDENTITY = { key: "first-item" };
 const SECOND_ITEM_IDENTITY = { key: "second-item" };
+const FOLDER_POPUP_KEY = "tools-menu";
 
 const FIRST_PATH = "/menu/first";
 const SECOND_PATH = "/menu/second";
@@ -41,7 +42,7 @@ const executableItem = (
     />
 );
 
-function withProviders(children: ReactElement) {
+function withProviders(children: ReactElement, openedPopups: string[] = []) {
     return (
         <SyncProviders sender={sender} ack={null} isRoot={true} branchKey="">
             <FocusAnnouncerElement
@@ -50,7 +51,7 @@ function withProviders(children: ReactElement) {
                 receiver={true}
             >
                 {[
-                    <PopupManager key="popup-manager" identity={POPUP_MANAGER_IDENTITY} openedPopups={[]}>
+                    <PopupManager key="popup-manager" identity={POPUP_MANAGER_IDENTITY} openedPopups={openedPopups}>
                         {[children]}
                     </PopupManager>
                 ]}
@@ -59,7 +60,7 @@ function withProviders(children: ReactElement) {
     );
 }
 
-function folder(opened: boolean, children: ReactElement[]) {
+function folder(children: ReactElement[]) {
     return (
         <MenuFolderItem
             key="folder"
@@ -67,8 +68,7 @@ function folder(opened: boolean, children: ReactElement[]) {
             path="/menu/tools"
             name="Tools"
             current={false}
-            state={{ opened }}
-            receiver={true}
+            popupKey={FOLDER_POPUP_KEY}
             bindSrcId="tools-bind"
             groupId="tools-group"
         >
@@ -88,7 +88,8 @@ describe("main menu critical paths", () => {
 
     it("executes a nested item without toggling its ancestor folder", async () => {
         render(withProviders(
-            folder(true, [executableItem(FIRST_ITEM_IDENTITY, FIRST_PATH, "Run report")])
+            folder([executableItem(FIRST_ITEM_IDENTITY, FIRST_PATH, "Run report")]),
+            [FOLDER_POPUP_KEY]
         ));
 
         await screen.findByText("Run report");
@@ -102,9 +103,11 @@ describe("main menu critical paths", () => {
             })
         );
         expect(enqueue).not.toHaveBeenCalledWith(
-            expect.objectContaining({ parent: FOLDER_IDENTITY, key: "receiver" }),
+            expect.objectContaining({ parent: POPUP_MANAGER_IDENTITY, key: "receiver" }),
             expect.anything()
         );
+        expect(menuItem("Tools")).toHaveClass("menuFolderOpened");
+        expect(screen.getByText("Run report")).toBeInTheDocument();
     });
 
     it("opens, navigates grouped items with wrapping, and closes by keyboard", async () => {
@@ -115,17 +118,16 @@ describe("main menu critical paths", () => {
             </MenuItemsGroup>,
             executableItem(SECOND_ITEM_IDENTITY, SECOND_PATH, "Second action")
         ];
-        const app = (opened: boolean) => withProviders(folder(opened, children));
-        const { rerender } = render(app(false));
+        render(withProviders(folder(children)));
         const folderItem = menuItem("Tools");
+        expect(screen.queryByText("First action")).not.toBeInTheDocument();
         act(() => folderItem.focus());
         await act(() => user.keyboard("{Enter}"));
         expect(enqueue).toHaveBeenCalledWith(
-            expect.objectContaining({ parent: FOLDER_IDENTITY, key: "receiver" }),
-            expect.objectContaining({ headers: expect.objectContaining({ "x-r-opened": "1" }) })
+            expect.objectContaining({ parent: POPUP_MANAGER_IDENTITY, key: "receiver" }),
+            expect.objectContaining({ value: FOLDER_POPUP_KEY })
         );
 
-        rerender(app(true));
         await waitFor(() => expect(menuItem("First action")).toHaveFocus());
 
         await act(() => user.keyboard("{ArrowDown}"));
@@ -137,9 +139,12 @@ describe("main menu critical paths", () => {
         await act(() => user.keyboard("{Escape}"));
         expect(folderItem).toHaveFocus();
         expect(enqueue).toHaveBeenCalledWith(
-            expect.objectContaining({ parent: FOLDER_IDENTITY, key: "receiver" }),
-            expect.objectContaining({ headers: expect.objectContaining({ "x-r-opened": "" }) })
+            expect.objectContaining({ parent: POPUP_MANAGER_IDENTITY, key: "receiver" }),
+            expect.objectContaining({ value: "" })
         );
+        expect(folderItem).not.toHaveClass("menuFolderOpened");
+        expect(screen.queryByText("First action")).not.toBeInTheDocument();
+        expect(screen.queryByText("Second action")).not.toBeInTheDocument();
     });
 
     it("shows server time in the user's timezone and keeps ticking", () => {
