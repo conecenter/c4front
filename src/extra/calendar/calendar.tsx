@@ -67,7 +67,7 @@ type PeriodOfTime<DateFormat> = BaseEvent<DateFormat> & {
 type EventDuration<DateFormat> = SingleDuration<DateFormat> | RecurringDuration<DateFormat>
 
 interface SingleDuration<DateFormat> {
-    start: DateFormat,
+    start?: DateFormat,
     end?: DateFormat
 }
 
