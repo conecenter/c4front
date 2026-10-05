@@ -1,6 +1,5 @@
 package ee.cone.c4ui
 
-import ee.cone.c4di.{c4, provide}
 import ee.cone.c4vdom.Types._
 import ee.cone.c4vdom._
 
@@ -12,14 +11,7 @@ import ee.cone.c4vdom._
 
 @c4tagSwitch("FrontApp") trait UiType extends ToJson
 
-sealed abstract class ScannerModel(val value: String)
-object ScannerModelNLV1001 extends ScannerModel("NLV-1001")
-object ScannerModelNLV5201 extends ScannerModel("NLV-5201")
-
-@c4("FrontApp") final class ScannerModelAdapterProvider(util: TagJsonUtils) {
-  @provide def adapter: Seq[JsonValueAdapter[ScannerModel]] =
-    List(util.jsonValueAdapter((v, builder) => builder.just.append(v.value)))
-}
+@c4tagSwitch("FrontApp") trait ScannerModel extends ToJson
 
 @c4tags("FrontApp") trait FrontContextTags[C] {
   @c4el("ColorPicker") def colorPicker(
@@ -94,6 +86,9 @@ object ScannerModelNLV5201 extends ScannerModel("NLV-5201")
     children: ViewRes,
     receiver: Receiver[C],
   ): ToChildPair
+
+  @c4val("NLV-1001") def scannerModelNLV1001: ScannerModel
+  @c4val("NLV-5201") def scannerModelNLV5201: ScannerModel
 
   @c4el("ScannerSerialElement") def scannerSerialElement(
     key: String,
