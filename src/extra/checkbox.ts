@@ -8,6 +8,11 @@ import { PatchSyncTransformers, usePatchSync } from './exchange/patch-sync'
 import { usePath } from 'c4f/main/vdom-hooks'
 import { CheckboxElementProps, RadioButtonElementProps } from 'types/c4gen.FrontContextTagsApi'
 
+interface CheckboxElementClientProps extends CheckboxElementProps {
+    isRadioButton?: boolean,
+    onChange?: (e: { target: { value: '' | 'checked' } }) => void
+}
+
 const receiverIdOf = identityAt('receiver');
 
 const patchSyncTransformers: PatchSyncTransformers<string, string, string> = {
@@ -18,14 +23,20 @@ const patchSyncTransformers: PatchSyncTransformers<string, string, string> = {
 };
 
 const CheckboxElement = ({
-    identity, value, receiver, children, tooltip, classNames, label, isRadioButton
-}: CheckboxElementProps & { isRadioButton: boolean }) => {
-    const readOnly = !receiver;
+    identity, value, receiver, children, tooltip, classNames, label, isRadioButton, onChange
+}: CheckboxElementClientProps) => {
+    const readOnly = !receiver && !onChange;
 
-    const { currentState, sendFinalChange, changing } =
+    const { currentState: syncedState, sendFinalChange, changing } =
         usePatchSync(receiverIdOf(identity), value, false, patchSyncTransformers);
+    const currentState = onChange ? value : syncedState;
 
-    const sendChange = () => !readOnly && sendFinalChange(currentState ? "" : "checked");
+    const sendChange = () => {
+        if (readOnly) return;
+        const value = currentState ? "" : "checked";
+        if (onChange) onChange({ target: { value } });
+        else sendFinalChange(value);
+    };
 
     const onClick = (e: React.MouseEvent) => {
         sendChange();
